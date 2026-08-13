@@ -1,0 +1,101 @@
+# =============================================================
+# Local-only reference material
+# These stay in the working folder but are NOT pushed to GitHub.
+# =============================================================
+
+# Third-party papers (copyrighted — do not redistribute)
+papers/
+
+# Reference implementation cloned from MLOpenSourceOpenScience/disease_modeling_MLOS2
+# Read-only cross-check material; belongs to its original authors.
+reference_repo/
+
+# Course handout (not ours to publish)
+CS3631 - Project - 2026.pdf
+
+# Raw multi-source dump (3.5 MB, superseded by the processed .npy we track).
+# See docs/DATA.md for how to obtain it.
+datasets/
+
+# Byte-identical duplicate of "Literature Review - GNN for Dengue Forecasting.md".
+# Kept locally; only the "Literature Review - ..." copy is tracked.
+GNN for Dengue Forecasting.md
+
+# Session/scratch transcripts
+*chathistory*.txt
+scratch/
+scratchpad/
+
+# =============================================================
+# Data & model artifacts
+# =============================================================
+data/raw/
+data/interim/
+*.csv.gz
+*.parquet
+*.h5
+*.hdf5
+
+# Trained weights / checkpoints
+checkpoints/
+models/*.pt
+*.pt
+*.pth
+*.ckpt
+
+# Experiment tracking
+wandb/
+mlruns/
+lightning_logs/
+runs/
+
+# =============================================================
+# Python
+# =============================================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+build/
+dist/
+.eggs/
+.venv/
+venv/
+env/
+.python-version
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Jupyter
+.ipynb_checkpoints/
+*-checkpoint.ipynb
+.virtual_documents/
+
+# =============================================================
+# Secrets & local config
+# =============================================================
+.env
+.env.*
+*.key
+kaggle.json
+service_account*.json
+
+# =============================================================
+# OS / editor / Google Drive
+# =============================================================
+desktop.ini
+Thumbs.db
+ehthumbs.db
+.DS_Store
+*.tmp
+*~
+.vscode/
+.idea/
+*.code-workspace
+
+# Google Drive conflict copies
+*conflicted copy*
+*(1).ipynb

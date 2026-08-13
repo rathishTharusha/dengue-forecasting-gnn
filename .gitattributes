@@ -1,0 +1,22 @@
+# Normalize text files to LF in the repo, checkout native on Windows.
+* text=auto
+
+# Notebooks: keep as-is, and give diffs a fighting chance.
+*.ipynb text eol=lf diff=jupyternotebook
+*.ipynb merge=union linguist-documentation
+
+# Explicit binaries — never touch line endings.
+*.npy binary
+*.npz binary
+*.pdf binary
+*.png binary
+*.jpg binary
+*.pt binary
+*.pth binary
+*.xlsx binary
+
+# Shell scripts must stay LF even on Windows checkouts.
+*.sh text eol=lf
+
+# Keep notebooks out of the language stats so GitHub reports this as Python.
+notebooks/** linguist-vendored=false

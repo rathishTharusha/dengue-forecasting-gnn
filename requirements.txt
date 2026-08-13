@@ -1,0 +1,32 @@
+# Dengue Forecasting GNN — Python dependencies
+#
+# torch and torch-geometric are intentionally NOT pinned here: the correct wheel
+# depends on your CUDA version (and Colab ships its own torch). Install those
+# first, following docs/SETUP.md, then `pip install -r requirements.txt`.
+
+# --- core scientific stack ---
+numpy>=1.24,<2.1
+pandas>=2.0
+scipy>=1.10
+scikit-learn>=1.3
+matplotlib>=3.7
+
+# --- classical / statistical baselines (notebook 01) ---
+statsmodels>=0.14
+xgboost>=2.0
+
+# --- utilities ---
+tqdm>=4.65
+requests>=2.31
+
+# --- notebooks ---
+jupyter>=1.0
+nbformat>=5.9
+
+# --- dev / CI ---
+pytest>=7.4
+ruff>=0.5
+
+# --- installed separately (see docs/SETUP.md) ---
+# torch>=2.1
+# torch-geometric>=2.5

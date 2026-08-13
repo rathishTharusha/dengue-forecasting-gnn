@@ -1,0 +1,73 @@
+{
+    "Ampara": [
+        "Batticaloa",
+        "Moneragala",
+        "Hambantota",
+        "Polonnaruwa",
+        "Badulla",
+        "Matale"
+    ],
+    "Anuradhapura": [
+        "Vavuniya",
+        "Mannar",
+        "Trincomalee",
+        "Puttalam",
+        "Kurunegala",
+        "Matale",
+        "Polonnaruwa"
+    ],
+    "Badulla": ["Moneragala", "Ratnapura", "NuwaraEliya", "Kandy", "Matale", "Ampara"],
+    "Batticaloa": ["Polonnaruwa", "Trincomalee", "Ampara"],
+    "Colombo": ["Gampaha", "Kegalle", "Ratnapura", "Kalutara"],
+    "Galle": ["Kalutara", "Ratnapura", "Matara"],
+    "Gampaha": ["Kegalle", "Colombo", "Kurunegala", "Puttalam"],
+    "Hambantota": ["Matara", "Ratnapura", "Moneragala", "Ampara"],
+    "Jaffna": ["Kilinochchi"],
+    "Kalutara": ["Colombo", "Ratnapura", "Galle"],
+    "Kandy": ["Matale", "Kurunegala", "Kegalle", "NuwaraEliya", "Badulla", "Ampara"],
+    "Kegalle": [
+        "Kurunegala",
+        "NuwaraEliya",
+        "Kandy",
+        "Ratnapura",
+        "Kalutara",
+        "Colombo",
+        "Gampaha"
+    ],
+    "Kilinochchi": ["Jaffna", "Mullaitivu", "Mannar"],
+    "Kurunegala": ["Kandy", "Matale", "Kegalle", "Gampaha", "Puttalam", "Anuradhapura"],
+    "Mannar": ["Kilinochchi", "Mullaitivu", "Vavuniya", "Anuradhapura", "Puttalam"],
+    "Matale": [
+        "Polonnaruwa",
+        "Ampara",
+        "Badulla",
+        "Kandy",
+        "Kurunegala",
+        "Anuradhapura"
+    ],
+    "Matara": ["Galle", "Ratnapura", "Hambantota"],
+    "Moneragala": ["Hambantota", "Ratnapura", "Badulla", "Ampara"],
+    "Mullaitivu": ["Kilinochchi", "Mannar", "Vavuniya", "Trincomalee"],
+    "NuwaraEliya": ["Badulla", "Kandy", "Kegalle", "Ratnapura"],
+    "Polonnaruwa": ["Batticaloa", "Trincomalee", "Anuradhapura", "Matale", "Ampara"],
+    "Puttalam": ["Mannar", "Anuradhapura", "Kurunegala", "Gampaha"],
+    "Ratnapura": [
+        "NuwaraEliya",
+        "Badulla",
+        "Moneragala",
+        "Hambantota",
+        "Matara",
+        "Galle",
+        "Kalutara",
+        "Colombo",
+        "Kegalle"
+    ],
+    "Trincomalee": [
+        "Batticaloa",
+        "Polonnaruwa",
+        "Anuradhapura",
+        "Vavuniya",
+        "Mullaitivu"
+    ],
+    "Vavuniya": ["Anuradhapura", "Mullaitivu", "Trincomalee", "Mannar"]
+}

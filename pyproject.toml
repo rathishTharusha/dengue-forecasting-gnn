@@ -42,6 +42,7 @@ select = ["E", "F", "W", "I", "UP", "B", "SIM", "NPY", "RUF"]
 ignore = [
     "E501",   # line length is handled by the formatter
     "B905",   # zip(strict=) not available on the Colab Python we target
+    "RUF002", # docstrings carry real maths: sigma, minus, times are intended
 ]
 
 [tool.ruff.lint.per-file-ignores]

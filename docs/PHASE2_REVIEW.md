@@ -66,38 +66,47 @@ only, and by definition nothing reportable comes out of it.
 
 ---
 
-### F2 — The headline claim inverts against the team's own data
+### F2 — Table 1 mixes Phase-1 and Phase-2 measurements of the same baselines
 
-The paper reports the persistence floor at RMSE **44.80** and PIAG-Net at
-**44.78**, and claims the win. Recomputing persistence from
-`results/baseline_rolling_origin.csv` — committed in the same changeset — gives
-**44.41**.
+> **Correction.** The first draft of this review claimed the paper's persistence
+> figure was wrong, giving 44.41 as the true value. **That was my error, not the
+> team's.** 44.41 is the mean of per-horizon RMSEs; the paper uses within-fold
+> pooled RMSE, which is a defensible aggregation and reconciles exactly:
+>
+> ```
+> team's CSV, pooled within fold then averaged : 44.795
+> independent re-run, pooled persistence       : 44.80
+> paper Table 1                                : 44.80
+> ```
+>
+> The persistence row is correct. The finding below is what survives after
+> checking properly.
 
-| Model | Paper | Recomputed from committed CSV |
-|---|---|---|
-| Persistence | 44.80 | **44.41** |
-| GCN baseline | 45.32 | 46.26 |
-| GAT baseline | 45.50 | 46.79 |
+The persistence row is sound. The **GCN and GAT rows are not from the Phase-2
+data at all**:
 
-Per fold, PIAG-Net beats persistence once out of three, by 0.20 RMSE — and loses
-on Fold 2, the outbreak fold the paper names as its core strength:
-
-| Fold | Persistence | GCN | PIAG-Net |
+| Model | Paper Table 1 | Phase-2 CSV, pooled | Phase-2 CSV, mean-of-horizons |
 |---|---|---|---|
-| 1 | **26.54** | 26.96 | 27.27 |
-| 2 | **38.08** | 42.71 | 38.65 |
-| 3 | 68.62 | 69.12 | **68.42** |
+| Persistence | 44.80 | **44.80** ✓ | 44.41 |
+| GCN baseline | 45.32 | 46.63 | 46.26 |
+| GAT baseline | 45.50 | 47.20 | 46.79 |
 
-The Phase-2 success criterion in `docs/ROADMAP.md` was "RMSE below the
-persistence floor". It was not met.
+45.32 and 45.50 are the **Phase-1 EXP-002 numbers**, carried forward. Neither
+aggregation of the committed Phase-2 baseline CSV produces them. So Table 1 holds
+two different measurements of the same quantity, from two different runs, in
+adjacent rows.
 
-**Root cause:** the paper's baseline rows were carried over from the Phase-1
-experiment log rather than read from the Phase-2 baseline CSV, so two different
-measurements of the same quantity coexisted and the more favourable one was used.
+Note this works *against* the team: their own Phase-2 baseline puts the GCN at
+46.63, which would make the adaptive graph's improvement look larger, not smaller.
 
-**Fixed:** claims restated. The defensible version is that the adaptive graph
-*closes the gap* to persistence rather than crossing it — which is both true and
-still interesting.
+**What is genuinely unsupportable** is the claim of beating the floor. 44.78 vs
+44.80 is a 0.02 margin against a fold-to-fold SD of ±21, and under the corrected
+re-run no configuration wins more than 4 of 9 paired runs against persistence.
+The Phase-2 success criterion in `docs/ROADMAP.md` — "RMSE below the persistence
+floor" — is not met, but for reasons of noise (F7), not arithmetic.
+
+**Fixed:** every row of every table now comes from one run of one script over one
+CSV. See "Corrected results" below.
 
 ---
 
@@ -233,19 +242,28 @@ Its fold values (`27.2700361423254`, `38.64569828887795`, `68.41828000978104`)
 are digit-for-digit identical to the λ=0.1 row of the EXP-004 sweep. It is a
 relabelling of one sweep row, logged as a separate run with its own verdict.
 
-### F9 — Baselines and proposed model used different aggregations
-Baseline RMSE was the mean of per-horizon RMSEs; the proposed model reported
-pooled RMSE. These are different quantities. Measured on Fold 2:
+### F9 — The experiment log's comparison columns use different aggregations
 
-```
-mean of per-horizon RMSEs : 38.08     <- what the baseline CSV stores
-pooled RMSE               : 38.89     <- what the proposed-model CSVs store
-difference                :  0.81
-```
+> **Correction.** The first draft placed this in the paper's Table 1. It is not
+> there — Table 1 is internally consistent (see F2). The mismatch is in
+> `EXPERIMENT_LOG.md`.
 
-**The aggregation artefact (0.81) is larger than the entire claimed improvement
-(0.6).** Fixed by emitting per-horizon rows plus an explicit pooled row
-(`horizon=0`), so which one a table uses is never ambiguous.
+EXP-003 and EXP-005 print a "Baseline GCN RMSE" column beside the proposed
+model's. The baseline column is mean-of-horizons; the proposed column is pooled:
+
+| Fold | Log's baseline column | CSV mean-of-horizons | CSV pooled |
+|---|---|---|---|
+| 1 | 27.1 | 26.96 | 27.32 |
+| 2 | 42.7 | **42.71** | 43.44 |
+| 3 | 66.4 | 69.12 | 69.13 |
+
+Fold 2 identifies the aggregation exactly. Fold 3 matches neither and remains
+unexplained — a 2.7 RMSE gap in the number the log's headline "−4.1 vs GCN"
+improvement is measured against.
+
+Pooled and mean-of-horizons differ by ~0.8 RMSE on this data, which is larger
+than the effect being claimed. Fixed by emitting per-horizon rows plus an
+explicit pooled row (`horizon=0`), so which one a table uses is never ambiguous.
 
 ### F10 — `results_logger.py` failed silently into the results
 Every metric falls back to `0.0` when its column is missing, and
@@ -266,6 +284,62 @@ no PR, no CI run — the workflow `CONTRIBUTING.md` exists to enforce. All 14 ru
 errors in the changeset were in `results_logger.py` and would have been caught by
 CI on first push. `sections/00_abstract.tex` still contains `TODO(Sat)`
 placeholders.
+
+---
+
+## Corrected results
+
+Produced by `scripts/run_phase2.py` (45 training runs, 30 min CPU) into
+`results/phase2_runs.csv`, tabulated by `scripts/make_tables.py`. Pooled across
+horizons, mean ± SD over 3 origins × 3 seeds. `vs floor` is a paired sign test
+against persistence on matched `(fold, seed)` runs.
+
+| Model | RMSE | MAE | SMAPE | vs floor |
+|---|---|---|---|---|
+| Persistence floor | **44.80 ± 21.49** | 15.72 | 62.8% | — |
+| Dense GCN, fixed graph | 45.47 ± 16.91 | 15.87 | 69.6% | 4/9 — not significant |
+| + adaptive graph | 45.00 ± 16.18 | 15.79 | 69.0% | 3/9 — not significant |
+| + spatial reg. (λ=0.01) | 45.92 ± 15.98 | 15.98 | 68.9% | 3/9 — not significant |
+| + spatial reg. (λ=0.1) | 45.79 ± 14.08 | 16.08 | 71.9% | 3/9 — not significant |
+| + spatial reg. (λ=1.0) | 67.72 ± 15.44 | 25.11 | 85.8% | 2/9 — not significant |
+
+Three things change relative to the paper.
+
+**The adaptive graph survives, and now has its control.** Against the dense
+fixed-graph model on the identical propagation path — the comparison F6 said was
+missing — it improves RMSE 45.47 → 45.00. Smaller than the paper's headline, but
+for the first time it isolates the learned adjacency from the change of operator.
+It is still inside the noise band.
+
+**The spatial regulariser does not help at any weight.** 45.92, 45.79 and 67.72
+against 45.00 unregularised. The paper's claim that λ=0.10 is optimal does not
+reproduce; with the constraint applied in a space where λ actually functions as a
+weight, every non-zero setting is worse, and λ=1.0 is catastrophic. This is a
+clean negative result and should be reported as one.
+
+**Nothing beats persistence.** The best configuration wins 4 of 9 paired runs.
+With a fold-to-fold SD of ±21 against effects of ±0.5, this dataset cannot
+resolve differences of that size at n=9 — which is itself the most useful finding
+here, and an argument for more origins in Phase 3.
+
+### Peak timing, now that it measures something
+
+| Model | h=1 | h=2 | h=3 |
+|---|---|---|---|
+| Persistence floor | **0.99** | **1.90** | **3.44** |
+| Dense GCN, fixed graph | 1.98 | 4.59 | 5.47 |
+| + adaptive graph | 2.92 | 4.70 | 6.56 |
+
+Persistence lands within a week of the true peak at h=1 and degrades by roughly
+one week per horizon step — exactly what a shifted-by-`h` forecast must do, which
+confirms the metric is working.
+
+**The GNNs are markedly worse at peak timing than persistence at every horizon**,
+and the adaptive graph is worse than the fixed one. This is a genuine weakness
+that the broken metric completely concealed, and it matters more than RMSE for an
+early-warning system. It is also the most promising direction for Phase 3: peak
+timing is where there is real headroom, and where a mechanistic loss would be
+expected to help.
 
 ---
 

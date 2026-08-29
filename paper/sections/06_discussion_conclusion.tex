@@ -1,0 +1,20 @@
+%=============================================================================
+% DISCUSSION & CONCLUSION — Summary, Limitations, Future Work
+%=============================================================================
+\section{Discussion and Conclusion}
+\label{sec:conclusion}
+
+\subsection{Discussion}
+This work introduces PIAG-Net, a physics-informed adaptive graph neural network for multi-horizon dengue forecasting. By integrating self-adaptive graph learning with physics-informed spatial smoothness and non-negativity loss constraints, PIAG-Net addresses a key vulnerability of spatio-temporal GNNs: false outbreak spike hallucinations during non-epidemic periods \cite{weng2024graph}. Under a rigorous, leak-free rolling-origin evaluation protocol, PIAG-Net achieves superior performance across epidemic outbreak regimes, reducing outbreak fold RMSE by $3.28$ points over standard GCN baselines.
+
+\subsection{Limitations}
+Our study has three principal limitations:
+\textbf{(1) Graph Scale:} Evaluation is conducted across $N=25$ administrative districts in Sri Lanka. Scalability to higher-resolution sub-district or multi-country datasets remains to be verified.
+\textbf{(2) Fixed Constants:} Epidemiological constants in loss functions are derived from established literature rather than estimated online.
+\textbf{(3) Deterministic Outputs:} Current model outputs are point predictions rather than full predictive probability distributions.
+
+\subsection{Future Work}
+Future research directions include:
+\textbf{(1) GAN Data Augmentation:} Integrating conditional temporal Generative Adversarial Networks (TimeGAN / T-CGAN) to generate synthetic extreme outbreak scenarios for sparse epidemic tails \cite{yoon2019timegan}.
+\textbf{(2) Probabilistic Forecasting:} Extending PIAG-Net to produce calibrated prediction intervals evaluated via Continuous Ranked Probability Score (CRPS).
+\textbf{(3) Multi-Country Validation:} Expanding evaluation to public benchmark datasets across Southeast Asia and Latin America (e.g., OpenDengue \cite{clarke2024opendengue}).

@@ -1,0 +1,119 @@
+%=============================================================================
+%  CS3631 Phase 2 — Short Paper
+%  Physics-Informed Adaptive Graph Neural Networks for Dengue Forecasting
+%  Group 05, Department of Computer Science and Engineering, University of Moratuwa
+%
+%  PAGE LIMIT: 4 pages EXCLUDING references.
+%
+%  BUILD:
+%    make              -> main.pdf            (clean version, for submission)
+%    make highlighted  -> main-highlighted.pdf (colour-coded contributions, for grading)
+%
+%  Both versions come from THIS FILE. Never fork the text.
+%=============================================================================
+\documentclass[sigconf,nonacm]{acmart}
+
+%--- Contribution highlighting -----------------------------------------------
+% Toggled by the build. Do not edit by hand; `make highlighted` sets it.
+\newif\ifhighlight
+\ifdefined\HIGHLIGHTON\highlighttrue\else\highlightfalse\fi
+
+\usepackage{xcolor}
+\usepackage{soul}
+% todonotes needs margin room; acmart gives it almost none by default.
+\setlength{\marginparwidth}{2cm}
+\usepackage[textsize=tiny]{todonotes}
+
+% One colour per member. EDIT THESE NAMES at the Day 0 standup.
+\definecolor{colTharusha}{RGB}{255,236,153}   % yellow
+\definecolor{colPraveenD}{RGB}{183,225,205}   % green
+\definecolor{colJanith}  {RGB}{255,204,204}   % pink
+\definecolor{colBimsara} {RGB}{204,224,255}   % blue
+\definecolor{colMaleesha}{RGB}{229,204,255}   % purple
+\definecolor{colPraveenN}{RGB}{255,224,178}   % orange
+
+% \cA{...} .. \cF{...} wrap text belonging to a member.
+% In the clean build they are invisible no-ops.
+\ifhighlight
+  \newcommand{\cA}[1]{{\sethlcolor{colTharusha}\hl{#1}}}
+  \newcommand{\cB}[1]{{\sethlcolor{colPraveenD}\hl{#1}}}
+  \newcommand{\cC}[1]{{\sethlcolor{colJanith}\hl{#1}}}
+  \newcommand{\cD}[1]{{\sethlcolor{colBimsara}\hl{#1}}}
+  \newcommand{\cE}[1]{{\sethlcolor{colMaleesha}\hl{#1}}}
+  \newcommand{\cF}[1]{{\sethlcolor{colPraveenN}\hl{#1}}}
+  % Margin note for "X implemented it, Y wrote it up" cases. REQUIRED by the brief.
+  \newcommand{\credit}[1]{\todo[size=\tiny,color=gray!20]{#1}}
+\else
+  \newcommand{\cA}[1]{#1}\newcommand{\cB}[1]{#1}\newcommand{\cC}[1]{#1}
+  \newcommand{\cD}[1]{#1}\newcommand{\cE}[1]{#1}\newcommand{\cF}[1]{#1}
+  \newcommand{\credit}[1]{}
+\fi
+
+%--- Packages ----------------------------------------------------------------
+\usepackage{booktabs}
+\usepackage{amsmath}
+\let\Bbbk\undefined
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{balance}
+
+% Notation shorthands — keep the maths consistent across sections.
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\Aadp}{\mathbf{A}_{\mathrm{adp}}}
+\newcommand{\Afix}{\hat{\mathbf{A}}_{\mathrm{fix}}}
+\newcommand{\Ldata}{\mathcal{L}_{\mathrm{data}}}
+\newcommand{\Lphys}{\mathcal{L}_{\mathrm{phys}}}
+\newcommand{\Lcons}{\mathcal{L}_{\mathrm{cons}}}
+\newcommand{\Lsmooth}{\mathcal{L}_{\mathrm{smooth}}}
+
+% NOTE: do NOT add authorsperrow here. With six authors sharing ONE \affiliation,
+% acmart keeps them in a single box, so authorsperrow only narrows that box --- it
+% squeezes the affiliation and pushes the shared email line past the right margin.
+% Tried and reverted. The stacked author block is correct for this configuration.
+\settopmatter{printacmref=false}
+\setcopyright{none}
+\renewcommand\footnotetextcopyrightpermission[1]{}
+\pagestyle{plain}
+
+%=============================================================================
+\begin{document}
+
+% TITLE — see docs/PHASE2_PLAN.md §1.3. "GAN-augmented" is deliberately NOT here:
+% we do not evaluate a GAN in this paper.
+\title{Physics-Informed Adaptive Graph Neural Networks for\\Multi-Horizon Dengue Forecasting}
+
+% AUTHORS — Phase 2 order. Phase 3 requires TAs then Prof.\ Dulani and Dr.\ Sandareka
+% appended as final co-authors; not needed for the short paper.
+\author{Tharusha Perera}
+\author{Praveen De Silva}
+\author{Janith Mahanama}
+\author{Bimsara Udurawana}
+\author{Maleesha Kumarasinghe}
+\author{Praveen Nawarathna}
+\affiliation{%
+  \institution{Department of Computer Science and Engineering, University of Moratuwa}
+  \city{Moratuwa}
+  \country{Sri Lanka}
+}
+\email{{tharushap.23,praveend.23,janithm.23,bimsarau.23,kumarasinghemp.23,praveenn.23}@cse.mrt.ac.lk}
+
+\input{sections/00_abstract}
+
+\keywords{dengue forecasting, graph neural networks, physics-informed learning,
+spatio-temporal modeling, epidemic early warning}
+
+\maketitle
+
+\input{sections/01_introduction}
+\input{sections/02_related_work}
+\input{sections/03_framework}
+\input{sections/04_experimental_setup}
+\input{sections/05_results}
+\input{sections/06_discussion_conclusion}
+
+\balance
+\bibliographystyle{ACM-Reference-Format}
+\bibliography{refs}
+
+\end{document}

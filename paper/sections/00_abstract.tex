@@ -1,0 +1,30 @@
+%=============================================================================
+% ABSTRACT — BUDGET: 150 words. WRITE THIS LAST (Saturday).
+% (Sits in the title block; not counted against the 1,500-word body budget.)
+%
+% Structure (from the lecture slides' anatomy of the Vaswani et al. abstract):
+%   1. PROBLEM        — 2 sentences. What is hard and why.
+%   2. PROPOSED       — 2 sentences. What we built.
+%   3. SIGNIFICANCE   — 2-3 sentences. WITH NUMBERS.
+% No citations, no equations, no formulas. Include search terms.
+%=============================================================================
+\begin{abstract}
+% --- PROBLEM ---------------------------------------------------------------
+% Dengue burden in Sri Lanka; multi-week district forecasts are actionable.
+% Spatio-temporal GNNs are the natural model, but unconstrained spatial message
+% passing propagates outbreaks that never occurred (Weng et al. name this flaw
+% on this exact dataset), and the data are scarce: 25 districts, ~459 weeks.
+TODO(Sat): problem, 2 sentences.
+
+% --- PROPOSED --------------------------------------------------------------
+% We propose PIAG-Net: a spatio-temporal GNN whose adjacency is learned from
+% data rather than fixed by geography, trained under a soft SEIR-SEI
+% host-vector constraint that penalises epidemiologically implausible forecasts.
+TODO(Sat): proposed solution, 2 sentences.
+
+% --- SIGNIFICANCE ----------------------------------------------------------
+% NUMBERS GO HERE. Under rolling-origin CV the baseline GNN only MATCHES a
+% persistence floor (RMSE 45.3 vs 44.8) -- state this, it is a finding. Then
+% our result vs that floor, and the peak-timing improvement.
+TODO(Sat): significance WITH NUMBERS, 2-3 sentences.
+\end{abstract}

@@ -1,0 +1,182 @@
+%=============================================================================
+%  References for CS3631 Phase 2 short paper.
+%  Carried over from Group05_Proposal.pdf, plus DengueGNN (added Phase 2 --
+%  see docs/PHASE2_PLAN.md §1.2; it is the nearest neighbour in the literature
+%  and MUST be cited and distinguished).
+%
+%  RULE from the lecture slides: read what you cite. Do not laundry-list.
+%  Several entries below are recent -- re-verify each before final submission.
+%=============================================================================
+
+% Primary source for the 2017 epidemic figures. Cited directly in the
+% Introduction rather than second-hand through Weng et al.
+@article{tissera2020severe,
+  title   = {Severe Dengue Epidemic, Sri Lanka, 2017},
+  author  = {Tissera, Hasitha A. and Jayamanne, Bernard D. W. and Raut, Rajendra
+             and Janaki, S. M. D. and Tozan, Yesim and Samaraweera, Preshila C.
+             and Liyanage, Prasad and Ghouse, Azhar and Rodrigo, Chaturaka
+             and de Silva, Aravinda M. and Fernando, Sumadhya D.},
+  journal = {Emerging Infectious Diseases},
+  volume  = {26},
+  number  = {4},
+  pages   = {682--691},
+  year    = {2020}
+}
+
+@inproceedings{weng2024graph,
+  title     = {Graph Representation Learning for Dengue Forecasting},
+  author    = {Weng, Jiaqi and Qiu, David and Cruz, Ethan and Magdon-Ismail, Malik
+               and Munasinghe, Thilanka and Wei, Jennifer C. and Pathirana, Ashan},
+  booktitle = {IEEE International Conference on Big Data (BigData)},
+  year      = {2024}
+}
+
+% Nearest neighbour in the literature. Dynamic adjacency from an ASSUMED
+% gravity-mobility law; no mechanistic constraint. Distinguish us explicitly.
+@article{gulmohamed2026denguegnn,
+  title   = {DengueGNN: Graph-based deep learning for modeling disease spread
+             dynamics and prediction},
+  author  = {GulMohamed, Rasitha Banu and Hetany, Wafa and Almaimani, Hanan Abdullah
+             and Khiery, Faiza Abdalla Saeed},
+  journal = {Scientific Reports},
+  volume  = {16},
+  pages   = {10584},
+  year    = {2026},
+  doi     = {10.1038/s41598-026-43073-y}
+}
+
+@article{clarke2024opendengue,
+  title   = {A global dataset of publicly available dengue case count data},
+  author  = {Clarke, Joseph and others},
+  journal = {Scientific Data},
+  volume  = {11},
+  number  = {1},
+  pages   = {296},
+  year    = {2024}
+}
+
+@inproceedings{kipf2017gcn,
+  title     = {Semi-Supervised Classification with Graph Convolutional Networks},
+  author    = {Kipf, Thomas N. and Welling, Max},
+  booktitle = {International Conference on Learning Representations (ICLR)},
+  year      = {2017}
+}
+
+@inproceedings{velickovic2018gat,
+  title     = {Graph Attention Networks},
+  author    = {Veli{\v{c}}kovi{\'c}, Petar and Cucurull, Guillem and Casanova, Arantxa
+               and Romero, Adriana and Li{\`o}, Pietro and Bengio, Yoshua},
+  booktitle = {International Conference on Learning Representations (ICLR)},
+  year      = {2018}
+}
+
+% Source of the adaptive adjacency formulation A = softmax(ReLU(E1 E2^T)).
+@inproceedings{wu2019graphwavenet,
+  title     = {Graph WaveNet for Deep Spatial-Temporal Graph Modeling},
+  author    = {Wu, Zonghan and Pan, Shirui and Long, Guodong and Jiang, Jing
+               and Zhang, Chengqi},
+  booktitle = {International Joint Conference on Artificial Intelligence (IJCAI)},
+  year      = {2019}
+}
+
+@inproceedings{li2018dcrnn,
+  title     = {Diffusion Convolutional Recurrent Neural Network: Data-Driven
+               Traffic Forecasting},
+  author    = {Li, Yaguang and Yu, Rose and Shahabi, Cyrus and Liu, Yan},
+  booktitle = {International Conference on Learning Representations (ICLR)},
+  year      = {2018}
+}
+
+@inproceedings{xie2022epignn,
+  title     = {EpiGNN: Exploring Spatial Transmission with Graph Neural Network
+               for Regional Epidemic Forecasting},
+  author    = {Xie, Feng and Zhang, Zhong and Li, Liang and Zhou, Bin and Tan, Yusong},
+  booktitle = {ECML-PKDD},
+  year      = {2022}
+}
+
+@inproceedings{deng2020colagnn,
+  title     = {Cola-GNN: Cross-location Attention based Graph Neural Networks
+               for Long-term ILI Prediction},
+  author    = {Deng, Songgaojun and Wang, Shusen and Rangwala, Huzefa
+               and Wang, Lijing and Ning, Yue},
+  booktitle = {CIKM},
+  year      = {2020}
+}
+
+@inproceedings{rodriguez2023einns,
+  title     = {EINNs: Epidemiologically-Informed Neural Networks},
+  author    = {Rodr{\'i}guez, Alexander and Cui, Jiaming and Ramakrishnan, Naren
+               and Adhikari, Bijaya and Prakash, B. Aditya},
+  booktitle = {AAAI Conference on Artificial Intelligence},
+  year      = {2023}
+}
+
+@inproceedings{wang2022causalgnn,
+  title     = {CausalGNN: Causal-Based Graph Neural Networks for Spatio-Temporal
+               Epidemic Forecasting},
+  author    = {Wang, Lijing and Adiga, Aniruddha and Chen, Jiangzhuo
+               and Sadilek, Adam and Venkatramanan, Srinivasan and Marathe, Madhav},
+  booktitle = {AAAI Conference on Artificial Intelligence},
+  year      = {2022}
+}
+
+@article{raissi2019pinn,
+  title   = {Physics-Informed Neural Networks},
+  author  = {Raissi, Maziar and Perdikaris, Paris and Karniadakis, George Em},
+  journal = {Journal of Computational Physics},
+  volume  = {378},
+  pages   = {686--707},
+  year    = {2019}
+}
+
+% Source of the SEIR-SEI compartmental structure and constants.
+% TODO: complete author list before submission.
+@article{seirsei2022,
+  title   = {Analysis of Vector-host SEIR--SEI Dengue Epidemiological Model},
+  journal = {International Journal of Analysis and Applications},
+  year    = {2022}
+}
+
+% --- Phase 3 / future-work citations. Keep -- cited in Section 6. ----------
+@inproceedings{yoon2019timegan,
+  title     = {Time-series Generative Adversarial Networks},
+  author    = {Yoon, Jinsung and Jarrett, Daniel and van der Schaar, Mihaela},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  year      = {2019}
+}
+
+@article{esteban2017rcgan,
+  title   = {Real-valued (Medical) Time Series Generation with Recurrent
+             Conditional GANs},
+  author  = {Esteban, Crist{\'o}bal and Hyland, Stephanie L. and R{\"a}tsch, Gunnar},
+  journal = {arXiv preprint arXiv:1706.02633},
+  year    = {2017}
+}
+
+@inproceedings{daw2021pidgan,
+  title     = {PID-GAN: A GAN Framework based on a Physics-informed Discriminator
+               for Uncertainty Quantification with Physics},
+  author    = {Daw, Arka and Maruf, M. and Karpatne, Anuj},
+  booktitle = {KDD},
+  year      = {2021}
+}
+
+@article{bracher2021evaluating,
+  title   = {Evaluating epidemic forecasts in an interval format},
+  author  = {Bracher, Johannes and Ray, Evan L. and Gneiting, Tilmann
+             and Reich, Nicholas G.},
+  journal = {PLOS Computational Biology},
+  volume  = {17},
+  number  = {2},
+  pages   = {e1008618},
+  year    = {2021}
+}
+
+@book{hyndman2021forecasting,
+  title     = {Forecasting: Principles and Practice},
+  author    = {Hyndman, Rob J. and Athanasopoulos, George},
+  edition   = {3rd},
+  publisher = {OTexts},
+  year      = {2021}
+}

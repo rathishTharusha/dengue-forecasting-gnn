@@ -1,0 +1,67 @@
+%=============================================================================
+% INTRODUCTION — BUDGET: 370 words  (MEASURED. See docs/PHASE2_PLAN.md §5.)
+% The ENTIRE body of this paper is ~1,500 words. Write tight from sentence one.
+%
+% DRAFT v1 — 372 words. Within budget.
+%
+% Structure follows the lecture slides: by the end the reader must know what the
+% problem is, why it matters, why it is hard, what is wrong with prior work, what
+% we do, and what we contribute.
+%
+% TODO(writer): wrap your own paragraphs in \cA{..}..\cF{..} for the highlighted
+% build, and add \credit{} where the implementer differs from the writer.
+%=============================================================================
+\section{Introduction}
+\label{sec:intro}
+
+% --- (a)+(b) Problem and why it matters -- 75 words ------------------------
+Dengue is the fastest-spreading mosquito-borne viral disease in the world, and Sri
+Lanka carries a heavy and growing burden: the 2017 epidemic alone produced more
+than 186{,}000 reported cases and 440 deaths~\cite{tissera2020severe}. Because
+roughly three weeks separate infection from diagnosis, district-level forecasts
+issued several weeks ahead are directly actionable. They give the National Dengue
+Control Unit and regional health teams time to pre-position resources, intensify
+larval-source reduction, and issue warnings before an outbreak peaks.
+
+% --- (c) Why it is hard -- 80 words ---------------------------------------
+Three difficulties make this forecasting task hard. Transmission is spatially
+coupled: incidence in one district depends both on its own climatic and
+epidemiological history and on infection spilling in from neighbours through human
+movement, which non-spatial models cannot represent. The data are scarce --- 25
+districts of weekly counts over roughly a decade, against the 207 nodes of a
+standard traffic benchmark --- so deep models overfit readily. Finally, the target
+is heavy-tailed, with a median of 13 weekly cases against a maximum of 2{,}631.
+
+% --- (d) What is wrong with prior work -- 85 words. THE KEY PARAGRAPH. -----
+% This paragraph is the paper's motivation and it comes from the predecessor's own
+% admission. See docs/PHASE2_PLAN.md §1.1. Paraphrased, not quoted -- the lecture
+% slides note that scientific writing rarely uses direct quotation.
+Graph neural networks address the first difficulty, and Weng et
+al.~\cite{weng2024graph} show that they outperform traditional early-warning
+systems on this exact dataset. The same work, however, reports that its forecasts
+in one district are driven by neighbouring districts even where no transmission
+occurred, producing spurious spikes that the authors attribute to an inherent
+limitation of graph models. Nothing in a purely data-driven objective prevents
+this: the network is never told that its forecasts must correspond to a
+physically realisable epidemic.
+
+% --- (e) Our approach in brief -- 62 words --------------------------------
+We propose PIAG-Net, which addresses the problem from both ends. Connectivity is
+learned from the series themselves rather than fixed by inter-district distance,
+removing a proxy that no mobility data supports. Training then adds a soft
+SEIR--SEI host--vector constraint that penalises forecasts no plausible epidemic
+could produce. We evaluate under leakage-free rolling-origin
+cross-validation~\cite{hyndman2021forecasting} against both our own GCN/GAT
+baseline and naive persistence.
+
+% --- (f) Contributions -- 70 words. One line each. -------------------------
+\noindent\textbf{Contributions.}
+\begin{itemize}
+  \item We show that a tuned spatio-temporal GNN only \emph{matches} a naive
+        persistence forecast on this dataset (RMSE 45.3 vs.\ 44.8) --- a
+        comparison absent from prior work on it.
+  \item We learn district connectivity end-to-end, without assuming a mobility law.
+  \item We constrain a spatio-temporal GNN toward host--vector dynamics through a
+        soft SEIR--SEI training objective.
+  \item We isolate each component in an ablation under one frozen protocol.
+\end{itemize}

@@ -1,0 +1,23 @@
+%=============================================================================
+% EXPERIMENTAL SETUP — Dataset, Protocol, Metrics, Baselines
+%=============================================================================
+\section{Experimental Setup}
+\label{sec:setup}
+
+\subsection{Dataset}
+We evaluate our framework on Sri Lanka's official national dengue surveillance dataset, spanning $N=25$ administrative districts over $T=459$ consecutive weeks (2013--2022). The dataset comprises weekly epidemiological reports from the Ministry of Health Epidemiology Unit alongside 10 environmental covariates (precipitation, air/land-surface temperature, humidity, NDVI, soil moisture, canopy cover) retrieved from NASA EarthData. Environmental covariates are pre-processed with empirically optimal lag shifts (precipitation $\sim$12 weeks, NDVI $\sim$17 weeks) to mirror biological vector breeding cycles. Target case distributions are heavily right-skewed (median $13$, maximum $2,631$, $9.7\%$ zero-case weeks).
+
+\subsection{Evaluation Protocol}
+Models are evaluated under a leak-free rolling-origin (expanding window) cross-validation protocol across $3$ chronological origins ($a \in \{0.55, 0.70, 0.85\}$) and $3$ random seeds ($\{0, 1, 2\}$), yielding $9$ evaluation runs per model. For each origin, models process $W=3$ historical weeks to predict $H=3$ future weeks ($1, 2, 3$ weeks ahead). Standardisation statistics (mean, std) are computed strictly from training-fold data. 
+
+A rolling-origin protocol is methodologically essential: single 70/10/20 chronological splits exhibited strong anti-correlation ($r = -0.74$) between validation and test RMSE due to shifting epidemic regimes between calm non-epidemic windows and severe outbreak waves.
+
+\subsection{Metrics}
+Model performance is measured using Root Mean Squared Error (RMSE), Mean Absolute Error (MAE), Symmetric Mean Absolute Percentage Error (SMAPE), and Peak Timing Error (PTE, measured in weeks). Metric averages are reported across all $3$ evaluation folds and seeds.
+
+\subsection{Baselines}
+We compare our proposed PIAG-Net architecture against three primary baselines:
+\textbf{(1) Persistence Floor:} Naive baseline predicting last observed weekly cases ($\hat{y}_{t+h} = y_t$).
+\textbf{(2) Baseline GCN:} Spatio-temporal GCN utilizing fixed geographic adjacency $\mathbf{A}_{\text{fixed}}$ with residual-over-persistence forecasting \cite{kipf2017gcn}.
+\textbf{(3) Baseline GAT:} Graph Attention Network utilizing dynamic multi-head spatial attention over $\mathbf{A}_{\text{fixed}}$ \cite{velickovic2018gat}.
+Direct numerical comparison with Weng et al. \cite{weng2024graph} is uninformative due to differences in split protocols (static 70/30 vs. leak-free rolling-origin) and target normalization.

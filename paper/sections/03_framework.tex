@@ -1,0 +1,53 @@
+%=============================================================================
+% PROPOSED FRAMEWORK — PIAG-Net Architecture & Objective
+%=============================================================================
+\section{Proposed Framework}
+\label{sec:framework}
+
+\subsection{Problem Formulation}
+We model Sri Lanka's administrative districts as nodes in a graph $\mathcal{G} = (\mathcal{V}, \mathcal{E}, \mathbf{A}_{\text{fixed}})$, where $|\mathcal{V}| = N = 25$ districts and $\mathbf{A}_{\text{fixed}} \in \mathbb{R}^{N \times N}$ represents spatial adjacency derived from shared geographical boundaries. Let $\mathbf{X} \in \mathbb{R}^{T \times N \times F}$ denote the spatio-temporal feature tensor across $T = 459$ weeks (2013--2022) with $F = 11$ features ($1$ target weekly dengue case count + $10$ climate and vegetation covariates). Given an observation window of $W = 3$ historical weeks $\mathbf{X}_{t-W+1:t} \in \mathbb{R}^{W \times N \times F}$, our task is to forecast dengue incidence across a multi-horizon window of $H = 3$ future weeks $\mathbf{Y}_{t+1:t+H} \in \mathbb{R}^{N \times H}$.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{figures/fig_architecture.pdf}
+  \caption{Overview of PIAG-Net architecture. Input features are processed through a two-layer Graph Convolutional Network using a gated blend of fixed geographic and learned adaptive graph structures ($\mathbf{A}_{\text{blend}}$). The model is optimized jointly using empirical data loss and physics-informed spatial smoothness ($\mathcal{L}_{\text{smooth}}$) and non-negativity ($\mathcal{L}_{\text{cons}}$) loss constraints.}
+  \label{fig:architecture}
+\end{figure}
+
+\subsection{Learned Adaptive Adjacency}
+Geographic adjacency $\mathbf{A}_{\text{fixed}}$ serves as an imperfect proxy for disease transmission, failing to capture unobserved human mobility patterns, economic corridors, and microclimate variations across districts. Following Graph WaveNet \cite{wu2019graphwavenet}, we introduce node embedding matrices $\mathbf{E}_1, \mathbf{E}_2 \in \mathbb{R}^{N \times d}$ with embedding dimension $d = 10$, learning a self-adaptive graph structure $\mathbf{A}_{\text{adp}}$ directly from data:
+\begin{equation}
+  \mathbf{A}_{\text{adp}} = \mathrm{softmax}\!\left(\mathrm{ReLU}\!\left(\mathbf{E}_1\mathbf{E}_2^{\top}\right)\right),
+  \label{eq:adaptive}
+\end{equation}
+where $\mathrm{softmax}$ normalizes row weights. To prevent structural drift and over-fitting on small graphs ($N=25$), we implement a gated residual blend mechanism:
+\begin{equation}
+  \mathbf{A}_{\text{blend}} = \sigma(g)\,\mathbf{A}_{\text{fixed}} + \bigl(1-\sigma(g)\bigr)\,\mathbf{A}_{\text{adp}},
+  \label{eq:gate}
+\end{equation}
+where $g \in \mathbb{R}$ is a learnable scalar gate parameter and $\sigma(\cdot)$ is the sigmoid function. At initialization ($g \approx 1.5$, $\sigma(g) \approx 0.82$), the model relies heavily on geographic topology, smoothly transitioning as node embeddings adapt during training. 
+
+Spatial message passing is performed using dense matrix multiplication across 3D batch tensors:
+\begin{equation}
+  \mathbf{H}^{(1)} = \mathrm{ReLU}\!\left(\mathbf{A}_{\text{blend}} \mathbf{X} \mathbf{W}_1\right), \quad \mathbf{H}^{(2)} = \mathrm{ReLU}\!\left(\mathbf{A}_{\text{blend}} \mathbf{H}^{(1)} \mathbf{W}_2\right),
+\end{equation}
+followed by a linear prediction head $\hat{\mathbf{Y}} = \mathrm{Linear}(\mathrm{Dropout}(\mathbf{H}^{(2)}))$.
+
+\subsection{Physics-Informed Objective}
+Standard GNN loss functions suffer from unconstrained message passing, causing false outbreak spikes in non-epidemic districts \cite{weng2024graph}. To mitigate spatial hallucination, we design a physics-informed objective:
+\begin{equation}
+  \mathcal{L}_{\text{total}} = \mathcal{L}_{\text{data}} + \lambda_{\text{phys}} \left(\mathcal{L}_{\text{smooth}} + 10.0 \cdot \mathcal{L}_{\text{cons}}\right),
+  \label{eq:loss}
+\end{equation}
+where $\mathcal{L}_{\text{data}}$ is the Mean Squared Error (MSE) computed in log-transformed residual-over-persistence space. The spatial smoothness penalty penalizes unphysical variance between adjacent nodes:
+\begin{equation}
+  \mathcal{L}_{\text{smooth}} = \frac{1}{B \cdot H \cdot \|\mathbf{A}_{\text{blend}}\|_1} \sum_{b=1}^{B} \sum_{h=1}^{H} \sum_{i,j} \mathbf{A}_{\text{blend}, ij} \left(\hat{y}_{i,b,h} - \hat{y}_{j,b,h}\right)^2,
+\end{equation}
+while the non-negativity constraint strictly penalizes negative case predictions:
+\begin{equation}
+  \mathcal{L}_{\text{cons}} = \frac{1}{B \cdot N \cdot H} \sum_{b=1}^{B} \sum_{i=1}^{N} \sum_{h=1}^{H} \left(\mathrm{ReLU}(-\hat{y}_{i,b,h})\right)^2.
+\end{equation}
+The hyperparameter $\lambda_{\text{phys}}$ controls the regularizing strength of the physics-informed loss terms.
+
+\subsection{Controlled Comparison}
+To ensure rigorous empirical evaluation, all architectural components outside the adaptive graph and physics loss are kept byte-identical to the baseline GCN: residual-over-persistence forecasting, $\log(1+x)$ target transformation, Adam optimizer ($\text{lr}=10^{-3}$, weight decay $5 \times 10^{-4}$), and early stopping based on validation set RMSE.

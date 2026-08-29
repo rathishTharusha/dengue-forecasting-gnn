@@ -10,7 +10,7 @@ import math
 import numpy as np
 import pytest
 
-from dengue_gnn.metrics import metrics, score
+from dengue_gnn.metrics import metrics, score, smape, peak_timing_error
 
 
 def test_perfect_forecast_scores_zero():
@@ -20,6 +20,25 @@ def test_perfect_forecast_scores_zero():
     assert out["MAE"] == pytest.approx(0.0)
     assert out["SMAPE"] == pytest.approx(0.0)
     assert out["MAPE"] == pytest.approx(0.0)
+    assert out["PeakTimingErr"] == pytest.approx(0.0)
+
+
+def test_peak_timing_error_1d_and_nd():
+    # True peak at idx 3 (val 50), Pred peak at idx 1 (val 40) -> error = |1 - 3| = 2
+    y = np.array([10.0, 20.0, 30.0, 50.0, 5.0])
+    p = np.array([10.0, 40.0, 30.0, 20.0, 5.0])
+    assert peak_timing_error(p, y) == pytest.approx(2.0)
+
+    # 2D array test along last axis (time/horizon)
+    y_2d = np.array([[10, 50, 5], [5, 10, 100]]) # peaks at index 1, 2
+    p_2d = np.array([[10, 50, 5], [100, 10, 5]])  # peaks at index 1, 0 -> errors 0, 2 -> mean = 1.0
+    assert peak_timing_error(p_2d, y_2d) == pytest.approx(1.0)
+
+
+def test_standalone_smape():
+    pred = np.array([2.0, 4.0])
+    truth = np.array([4.0, 4.0])
+    assert smape(pred, truth) == pytest.approx(100 * (2 * 2 / 6) / 2, rel=1e-4)
 
 
 def test_known_values():

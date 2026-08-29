@@ -1,0 +1,49 @@
+%=============================================================================
+% RELATED WORK — BUDGET: 200 words  (MEASURED. ~65 words per thread.)
+%
+% DRAFT v1 — 198 words. Within budget.
+%
+% Slides: give credit, focus on seminal + recent, EMPHASISE THE MISSING PIECES
+% that justify our work. Avoid "laundry list" citations. Read what you cite.
+% Each paragraph ENDS on the gap, not on a summary.
+%
+% This section is the FIRST place to cut when trimming. If you must lose 40
+% words, thread 2 compresses most safely -- but do NOT drop the DengueGNN
+% sentence, it is the nearest neighbour in the literature (PHASE2_PLAN.md §1.2).
+%=============================================================================
+\section{Related Work}
+\label{sec:related}
+
+% --- Thread 1: dengue forecasting on this dataset -- 65 words --------------
+\noindent\textbf{Spatio-temporal GNNs for dengue.}
+Weng et al.~\cite{weng2024graph} assembled the Sri Lanka district dataset and
+showed that spatio-temporal graph models --- among them DCRNN~\cite{li2018dcrnn}
+--- outperform ARIMA, Random Forest, XGBoost and LSTM on it. Their evaluation
+uses a single chronological split and reports no naive baseline, and they
+identify neighbour-driven spurious spikes as an unresolved limitation. We adopt
+their dataset and address both gaps.
+
+% --- Thread 2: adaptive / dynamic graph structure -- 65 words --------------
+\noindent\textbf{Learned graph structure.}
+Graph WaveNet~\cite{wu2019graphwavenet} learns a self-adaptive adjacency from
+node embeddings for traffic forecasting, and EpiGNN~\cite{xie2022epignn} and
+Cola-GNN~\cite{deng2020colagnn} learn location attention for influenza. Closest
+to our setting, DengueGNN~\cite{gulmohamed2026denguegnn} builds a dynamic
+adjacency by blending geographic proximity with a gravity-model mobility prior.
+Sri Lanka has no reliable inter-district mobility data, so we infer connectivity
+from the series themselves rather than assuming its generating process.
+
+% --- Thread 3: physics-informed epidemic models -- 68 words ----------------
+% The positioning sentence is folded into this paragraph's last line, saving the
+% ~15 words a separate closing sentence would have cost.
+% "Mechanistically-constrained forecasting." as a run-in heading overflows the
+% column by 10pt. Shortened. Keep run-in headings under ~25 characters.
+\noindent\textbf{Mechanistic constraints.}
+Physics-informed neural networks~\cite{raissi2019pinn} embed governing equations
+in the training loss; EINNs~\cite{rodriguez2023einns} and
+CausalGNN~\cite{wang2022causalgnn} carry this idea into epidemic forecasting for
+influenza and COVID-19, where compartment trajectories are comparatively well
+observed. Dengue's exposed-human and infected-mosquito compartments are
+not~\cite{seirsei2022}, and no prior work constrains a district-level dengue GNN
+toward SEIR--SEI dynamics. We contribute that combination: learned graph
+structure trained under a mechanistic constraint.

@@ -38,12 +38,14 @@ from the series themselves rather than assuming its generating process.
 % ~15 words a separate closing sentence would have cost.
 % "Mechanistically-constrained forecasting." as a run-in heading overflows the
 % column by 10pt. Shortened. Keep run-in headings under ~25 characters.
-\noindent\textbf{Mechanistic constraints.}
+\noindent\textbf{Constrained objectives.}
 Physics-informed neural networks~\cite{raissi2019pinn} embed governing equations
 in the training loss; EINNs~\cite{rodriguez2023einns} and
 CausalGNN~\cite{wang2022causalgnn} carry this idea into epidemic forecasting for
 influenza and COVID-19, where compartment trajectories are comparatively well
 observed. Dengue's exposed-human and infected-mosquito compartments are
 not~\cite{seirsei2022}, and no prior work constrains a district-level dengue GNN
-toward SEIR--SEI dynamics. We contribute that combination: learned graph
-structure trained under a mechanistic constraint.
+toward SEIR--SEI dynamics. We do not close that gap here. We test the weaker
+constraint first --- spatial smoothness over the graph, which requires no
+unobserved compartments --- and report that it does not help, which bears on
+whether the stronger one is worth the modelling cost.

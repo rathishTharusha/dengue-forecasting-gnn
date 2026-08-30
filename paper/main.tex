@@ -1,6 +1,6 @@
 %=============================================================================
 %  CS3631 Phase 2 — Short Paper
-%  Physics-Informed Adaptive Graph Neural Networks for Dengue Forecasting
+%  Gated Adaptive Graph Neural Networks for Dengue Forecasting
 %  Group 05, Department of Computer Science and Engineering, University of Moratuwa
 %
 %  PAGE LIMIT: 4 pages EXCLUDING references.
@@ -62,10 +62,19 @@
 \newcommand{\R}{\mathbb{R}}
 \newcommand{\Aadp}{\mathbf{A}_{\mathrm{adp}}}
 \newcommand{\Afix}{\hat{\mathbf{A}}_{\mathrm{fix}}}
+\newcommand{\Ablend}{\mathbf{A}_{\mathrm{blend}}}
 \newcommand{\Ldata}{\mathcal{L}_{\mathrm{data}}}
-\newcommand{\Lphys}{\mathcal{L}_{\mathrm{phys}}}
+\newcommand{\Lreg}{\mathcal{L}_{\mathrm{reg}}}
 \newcommand{\Lcons}{\mathcal{L}_{\mathrm{cons}}}
 \newcommand{\Lsmooth}{\mathcal{L}_{\mathrm{smooth}}}
+
+% MODEL NAME — single point of change.
+% Renamed from PIAG-Net during the Phase-2 review. "Physics-Informed" did not
+% survive scrutiny: the objective contains a graph-Laplacian smoothness penalty
+% and a non-negativity term, not a mechanistic SEIR--SEI residual, and the
+% regularised variants are the ones that do NOT work. The name now describes the
+% component that does. See docs/PHASE2_REVIEW.md F5.
+\newcommand{\modelname}{GAG-Net}
 
 % NOTE: do NOT add authorsperrow here. With six authors sharing ONE \affiliation,
 % acmart keeps them in a single box, so authorsperrow only narrows that box --- it
@@ -80,8 +89,10 @@
 \begin{document}
 
 % TITLE — see docs/PHASE2_PLAN.md §1.3. "GAN-augmented" is deliberately NOT here:
-% we do not evaluate a GAN in this paper.
-\title{Physics-Informed Adaptive Graph Neural Networks for\\Multi-Horizon Dengue Forecasting}
+% we do not evaluate a GAN in this paper. "Physics-Informed" was removed during
+% the Phase-2 review for the same reason: this paper does not evaluate a
+% mechanistic loss, and the regularised variants are negative results.
+\title{Gated Adaptive Graph Neural Networks for\\Multi-Horizon Dengue Forecasting}
 
 % AUTHORS — Phase 2 order. Phase 3 requires TAs then Prof.\ Dulani and Dr.\ Sandareka
 % appended as final co-authors; not needed for the short paper.
@@ -100,8 +111,8 @@
 
 \input{sections/00_abstract}
 
-\keywords{dengue forecasting, graph neural networks, physics-informed learning,
-spatio-temporal modeling, epidemic early warning}
+\keywords{dengue forecasting, graph neural networks, adaptive graph learning,
+spatio-temporal modeling, epidemic early warning, peak timing}
 
 \maketitle
 

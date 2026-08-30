@@ -45,23 +45,28 @@ limitation of graph models. Nothing in a purely data-driven objective prevents
 this: the network is never told that its forecasts must correspond to a
 physically realisable epidemic.
 
-% --- (e) Our approach in brief -- 62 words --------------------------------
-We propose PIAG-Net, which addresses the problem from both ends. Connectivity is
+% --- (e) Our approach in brief -- 66 words --------------------------------
+We present \modelname, which attacks the first of these directly. Connectivity is
 learned from the series themselves rather than fixed by inter-district distance,
-removing a proxy that no mobility data supports. Training then adds a soft
-SEIR--SEI host--vector constraint that penalises forecasts no plausible epidemic
-could produce. We evaluate under leakage-free rolling-origin
-cross-validation~\cite{hyndman2021forecasting} against both our own GCN/GAT
-baseline and naive persistence.
+then blended with the geographic graph under a learned gate so the model can fall
+back on geography where the data does not support departing from it. We evaluate
+under leakage-free rolling-origin cross-validation~\cite{hyndman2021forecasting}
+against a matched fixed-graph control and against naive persistence. We also test
+whether spatial smoothness regularisation curbs the spurious-spike failure mode.
 
-% --- (f) Contributions -- 70 words. One line each. -------------------------
+% --- (f) Contributions -- 78 words. One line each. -------------------------
+% Two of these are negative results. That is deliberate: the lecture slides note
+% that a paper's contribution is what it establishes, not what it hoped for.
 \noindent\textbf{Contributions.}
 \begin{itemize}
-  \item We show that a tuned spatio-temporal GNN only \emph{matches} a naive
-        persistence forecast on this dataset (RMSE 45.3 vs.\ 44.8) --- a
-        comparison absent from prior work on it.
-  \item We learn district connectivity end-to-end, without assuming a mobility law.
-  \item We constrain a spatio-temporal GNN toward host--vector dynamics through a
-        soft SEIR--SEI training objective.
-  \item We isolate each component in an ablation under one frozen protocol.
+  \item We benchmark against a naive persistence forecast --- a comparison absent
+        from prior work on this dataset --- and find that no graph configuration
+        we tested clears it.
+  \item We learn district connectivity end-to-end without assuming a mobility law,
+        and isolate its effect against a control sharing the same propagation
+        operator.
+  \item We report that spatial smoothness regularisation degrades accuracy at
+        every weight tested, and that its non-negativity term cannot bind at all.
+  \item We show that peak-timing displacement, not error magnitude, is where these
+        models fall furthest short of a naive baseline.
 \end{itemize}

@@ -1,30 +1,29 @@
 %=============================================================================
-% ABSTRACT — BUDGET: 150 words. WRITE THIS LAST (Saturday).
-% (Sits in the title block; not counted against the 1,500-word body budget.)
+% ABSTRACT — 148 words.
 %
 % Structure (from the lecture slides' anatomy of the Vaswani et al. abstract):
-%   1. PROBLEM        — 2 sentences. What is hard and why.
-%   2. PROPOSED       — 2 sentences. What we built.
-%   3. SIGNIFICANCE   — 2-3 sentences. WITH NUMBERS.
-% No citations, no equations, no formulas. Include search terms.
+%   1. PROBLEM        — what is hard and why.
+%   2. PROPOSED       — what we built.
+%   3. SIGNIFICANCE   — WITH NUMBERS.
+% No citations, no equations, no formulas. Includes search terms.
+%
+% Rewritten after the Phase-2 review. The significance sentences report what the
+% corrected re-run measured, including the two negative results: the regulariser
+% does not help, and no configuration clears the persistence floor. See
+% docs/PHASE2_REVIEW.md.
 %=============================================================================
 \begin{abstract}
-% --- PROBLEM ---------------------------------------------------------------
-% Dengue burden in Sri Lanka; multi-week district forecasts are actionable.
-% Spatio-temporal GNNs are the natural model, but unconstrained spatial message
-% passing propagates outbreaks that never occurred (Weng et al. name this flaw
-% on this exact dataset), and the data are scarce: 25 districts, ~459 weeks.
-TODO(Sat): problem, 2 sentences.
-
-% --- PROPOSED --------------------------------------------------------------
-% We propose PIAG-Net: a spatio-temporal GNN whose adjacency is learned from
-% data rather than fixed by geography, trained under a soft SEIR-SEI
-% host-vector constraint that penalises epidemiologically implausible forecasts.
-TODO(Sat): proposed solution, 2 sentences.
-
-% --- SIGNIFICANCE ----------------------------------------------------------
-% NUMBERS GO HERE. Under rolling-origin CV the baseline GNN only MATCHES a
-% persistence floor (RMSE 45.3 vs 44.8) -- state this, it is a finding. Then
-% our result vs that floor, and the peak-timing improvement.
-TODO(Sat): significance WITH NUMBERS, 2-3 sentences.
+Dengue forecasting at district resolution is spatially coupled, data-scarce and
+heavy-tailed, and spatio-temporal graph neural networks applied to it are known to
+propagate outbreaks into districts where none occurred. Their adjacency is
+typically fixed by geography, a proxy no mobility data supports. We present
+\modelname, which learns district connectivity end-to-end and blends it with the
+geographic graph under a learned gate, and we evaluate it against a matched
+fixed-graph control under leakage-free rolling-origin cross-validation. The
+learned graph improves RMSE from 45.47 to 45.00, but neither model clears a naive
+persistence forecast at 44.80, which wins four of nine paired runs against the
+best configuration. Adding spatial smoothness regularisation degrades accuracy at
+every weight tested. Measuring outbreak peak displacement rather than error
+magnitude exposes the more consequential gap: both graph models call the peak two
+to three weeks later than persistence does.
 \end{abstract}

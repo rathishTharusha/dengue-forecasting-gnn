@@ -1,23 +1,67 @@
 %=============================================================================
 % EXPERIMENTAL SETUP — Dataset, Protocol, Metrics, Baselines
+%
+% Rewritten after the Phase-2 review:
+%   - peak timing error redefined (the previous metric never looked along time)
+%   - the dense fixed-graph control added to the baseline list
+%   - reporting now states the aggregation explicitly and reports dispersion
+% See docs/PHASE2_REVIEW.md F4, F6, F7, F9.
 %=============================================================================
 \section{Experimental Setup}
 \label{sec:setup}
 
 \subsection{Dataset}
-We evaluate our framework on Sri Lanka's official national dengue surveillance dataset, spanning $N=25$ administrative districts over $T=459$ consecutive weeks (2013--2022). The dataset comprises weekly epidemiological reports from the Ministry of Health Epidemiology Unit alongside 10 environmental covariates (precipitation, air/land-surface temperature, humidity, NDVI, soil moisture, canopy cover) retrieved from NASA EarthData. Environmental covariates are pre-processed with empirically optimal lag shifts (precipitation $\sim$12 weeks, NDVI $\sim$17 weeks) to mirror biological vector breeding cycles. Target case distributions are heavily right-skewed (median $13$, maximum $2,631$, $9.7\%$ zero-case weeks).
+We evaluate on Sri Lanka's national dengue surveillance record, $N=25$
+administrative districts over $T=459$ consecutive weeks (2013--2022). Weekly case
+counts come from the Ministry of Health Epidemiology Unit; ten environmental
+covariates (precipitation, air and land-surface temperature, humidity, NDVI, soil
+moisture, canopy cover) are drawn from NASA EarthData. Covariates are pre-shifted
+by their empirically optimal lags --- precipitation $\sim$12 weeks, NDVI
+$\sim$17 weeks --- reflecting vector breeding and infection-to-diagnosis
+intervals. The target is strongly right-skewed: median 13 weekly cases, maximum
+2{,}631, and $9.7\%$ of district-weeks zero.
 
 \subsection{Evaluation Protocol}
-Models are evaluated under a leak-free rolling-origin (expanding window) cross-validation protocol across $3$ chronological origins ($a \in \{0.55, 0.70, 0.85\}$) and $3$ random seeds ($\{0, 1, 2\}$), yielding $9$ evaluation runs per model. For each origin, models process $W=3$ historical weeks to predict $H=3$ future weeks ($1, 2, 3$ weeks ahead). Standardisation statistics (mean, std) are computed strictly from training-fold data. 
+Models are evaluated under leakage-free rolling-origin (expanding window)
+cross-validation across three chronological origins
+($a \in \{0.55, 0.70, 0.85\}$) and three seeds, giving nine runs per
+configuration. Each origin uses the following $15\%$ of the series as test data
+and the final 30 weeks before the origin as validation. Standardisation
+statistics are computed strictly from training weeks. Each run makes one
+optimiser step per training window.
 
-A rolling-origin protocol is methodologically essential: single 70/10/20 chronological splits exhibited strong anti-correlation ($r = -0.74$) between validation and test RMSE due to shifting epidemic regimes between calm non-epidemic windows and severe outbreak waves.
+A rolling-origin protocol is necessary rather than stylistic. Under a single
+$70/10/20$ chronological split we measured validation and test RMSE to be
+anti-correlated ($r = -0.74$): the two periods fall in different epidemic
+regimes, so selecting on one actively mis-selects for the other.
+
+Results are reported as mean $\pm$ standard deviation over the nine runs. RMSE is
+pooled across horizons within a fold, then averaged across folds; we state this
+because pooling and averaging per-horizon RMSE differ by roughly $0.8$ here,
+larger than several of the effects below. Comparisons against persistence use a
+paired sign test over matched $(\text{fold}, \text{seed})$ runs rather than a
+comparison of means.
 
 \subsection{Metrics}
-Model performance is measured using Root Mean Squared Error (RMSE), Mean Absolute Error (MAE), Symmetric Mean Absolute Percentage Error (SMAPE), and Peak Timing Error (PTE, measured in weeks). Metric averages are reported across all $3$ evaluation folds and seeds.
+Point accuracy is measured by RMSE, MAE and SMAPE on the original case scale;
+SMAPE is the primary percentage metric because frequent zero-case weeks make
+plain MAPE unusable.
+
+We additionally report \emph{peak week error}: per district, the absolute
+difference in weeks between the observed and forecast week of maximum incidence,
+averaged over districts whose observed maximum reaches ten cases. Below that
+threshold there is no outbreak to time and the argmax is noise. This is what an
+early-warning system is judged on, and it is not recoverable from RMSE. As a
+check, a persistence forecast at horizon $h$ is shifted $h$ weeks late by
+construction and must score approximately $h$; it does
+(Table~\ref{tab:horizon}).
 
 \subsection{Baselines}
-We compare our proposed PIAG-Net architecture against three primary baselines:
-\textbf{(1) Persistence Floor:} Naive baseline predicting last observed weekly cases ($\hat{y}_{t+h} = y_t$).
-\textbf{(2) Baseline GCN:} Spatio-temporal GCN utilizing fixed geographic adjacency $\mathbf{A}_{\text{fixed}}$ with residual-over-persistence forecasting \cite{kipf2017gcn}.
-\textbf{(3) Baseline GAT:} Graph Attention Network utilizing dynamic multi-head spatial attention over $\mathbf{A}_{\text{fixed}}$ \cite{velickovic2018gat}.
-Direct numerical comparison with Weng et al. \cite{weng2024graph} is uninformative due to differences in split protocols (static 70/30 vs. leak-free rolling-origin) and target normalization.
+\textbf{(1) Persistence floor:} $\hat{y}_{t+h} = y_t$, deterministic, one run per
+fold.
+\textbf{(2) Dense GCN, fixed graph:} the matched control of
+Section~\ref{sec:framework}, sharing the propagation path so any difference is
+attributable to the learned adjacency alone.
+We do not compare numerically against Weng et al.~\cite{weng2024graph}: their
+static $70/30$ split and different target normalisation make the numbers
+incommensurable.

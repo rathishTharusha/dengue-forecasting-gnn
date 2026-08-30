@@ -1,62 +1,110 @@
 %=============================================================================
-% RESULTS — Main Deliverable Table, Sensitivity Sweep, Forecast Overlay
+% RESULTS — BUDGET: ~520 words.
+%
+% Every number here comes from results/phase2_runs.csv via scripts/make_tables.py.
+% Table 1 is \input from paper/tables_generated.tex -- do not retype values.
+% Hand-entry caused the discrepancies in docs/PHASE2_REVIEW.md F3.
 %=============================================================================
 \section{Results}
 \label{sec:results}
 
+\input{tables_generated}
+
+\subsection{The Persistence Floor Is Not Cleared}
+Table~\ref{tab:main} reports rolling-origin test performance, and its first row
+frames everything else: naive persistence achieves RMSE $44.80$, and no graph
+configuration we tested beats it. The fixed-graph model reaches $45.47$, the
+adaptive-graph model $45.00$.
+
+The margins are small against the spread. Fold RMSE ranges from roughly 27 to 68
+with the epidemic regime of the test window, a standard deviation of $\pm16$ to
+$\pm21$ against differences of half a point. A paired sign test over matched
+$(\text{fold}, \text{seed})$ runs avoids relying on that comparison and says the
+same: the fixed-graph model beats persistence on four of nine runs, the adaptive
+model on three. Neither is distinguishable from chance at this sample size.
+
+This is a finding, not a shortfall. Persistence is strong here for a structural
+reason --- lag-1 autocorrelation of the target is $0.68$ --- and prior work on
+this dataset never tests against it. A spatio-temporal GNN that merely matches a
+naive forecast is a materially different conclusion from one that beats
+traditional early-warning systems, and both can hold of the same model.
+
+\subsection{The Learned Graph Helps; the Regulariser Does Not}
+Against its matched control the learned adjacency improves RMSE from $45.47$ to
+$45.00$ and SMAPE from $69.6\%$ to $69.0\%$. Control and treatment share the
+propagation operator, head, optimiser and target handling, differing only in
+whether $\Ablend$ is gated, so the difference is attributable to the graph. The
+gate itself settles at $\sigma(g) = 0.62$ from an initialisation of $0.82$:
+the model moves toward the learned structure while retaining substantial weight
+on geography, which is what the gate was introduced to permit.
+
+Spatial regularisation does not help at any weight (Table~\ref{tab:lambda}).
+Every non-zero $\lambda$ is worse than none and $\lambda = 1.0$ more than doubles
+MAE. The gate rises toward geography as $\lambda$ grows, reaching $0.95$ at
+$\lambda = 0.1$: a smoothness penalty is minimised by a more uniform graph, so it
+pulls against the structure the adaptive component is learning. The two
+contributions are not merely independent but mildly antagonistic.
+
 \begin{table}[t]
   \centering
-  \caption{Rolling-origin test performance across 3 chronological origins $\times$ 3 seeds ($W=3 \rightarrow H=3$). Peak timing error is measured in weeks.}
-  \label{tab:main}
-  \footnotesize
-  \begin{tabular}{@{}llcccc@{}}
-    \toprule
-    \# & Model & RMSE & MAE & SMAPE & Peak (wks) \\
-    \midrule
-    0 & Persistence Floor        & 44.80 & 15.69 & 68.5\% & 0.88 \\
-    1 & GCN Baseline \cite{kipf2017gcn}  & 45.32 & 15.90 & 69.2\% & 0.90 \\
-    2 & GAT Baseline \cite{velickovic2018gat}  & 45.50 & 15.90 & 69.5\% & 0.91 \\
-    \midrule
-    3 & \quad + Adaptive Graph (EXP-003) & 44.85 & 15.69 & 68.5\% & 0.87 \\
-    4 & \quad + Physics Loss ($\lambda=0.01$) & 44.80 & 15.69 & 68.7\% & 0.87 \\
-    5 & \textbf{PIAG-Net (Combined)} & \textbf{44.78} & \textbf{15.75} & \textbf{69.9\%} & \textbf{0.88} \\
-    \bottomrule
-  \end{tabular}
-\end{table}
-
-\subsection{Comparison with the Baseline}
-As shown in Table \ref{tab:main}, baseline spatio-temporal GCN (Row 1, RMSE 45.32) and GAT (Row 2, RMSE 45.50) underperform naive persistence (Row 0, RMSE 44.80) under a strict leak-free rolling-origin protocol. This empirical finding confirms that standard spatial message passing over fixed geographic graphs struggles to outperform simple temporal persistence on small regional time series ($N=25$). 
-
-Incorporating the learned adaptive graph (Row 3, RMSE 44.85) recovers baseline performance loss by learning non-local spatial dependencies. When combined with physics-informed loss regularization, our proposed PIAG-Net (Row 5) achieves the overall lowest mean RMSE ($44.78$).
-
-\subsection{Ablation \& Regime Analysis}
-The primary strength of PIAG-Net manifests during epidemic outbreak periods (Fold 2 test weeks, origin $a=0.70$). During severe outbreak surges, standard GCN baseline degrades significantly (Fold 2 RMSE $41.93$). In contrast, PIAG-Net achieves a Fold 2 RMSE of \textbf{38.65}---a \textbf{3.28-point reduction} over baseline GCN.
-
-Table \ref{tab:secondary} presents the hyperparameter sensitivity sweep for physics loss weight $\lambda_{\text{phys}}$. Setting $\lambda_{\text{phys}} = 0.10$ provides optimal regularization, enforcing spatial smoothness without over-constraining model capacity. Higher weights ($\lambda_{\text{phys}} = 1.0$) cause over-regularization, increasing RMSE to $46.12$.
-
-\begin{table}[t]
-  \centering
-  \caption{Physics loss regularization weight ($\lambda_{\text{phys}}$) sensitivity sweep.}
-  \label{tab:secondary}
+  \caption{Spatial regularisation sweep. $\lambda=0$ is the adaptive graph
+  without regularisation. Applied to $\log(1+\hat{y})$; on raw counts the penalty
+  exceeds the data loss by four orders of magnitude.}
+  \label{tab:lambda}
   \small
   \begin{tabular}{@{}lccc@{}}
     \toprule
-    $\lambda_{\text{phys}}$ Weight & RMSE & MAE & Peak Err. (wks) \\
+    $\lambda$ & RMSE & MAE & Gate $\sigma(g)$ \\
     \midrule
-    0.00 (No Physics) & 44.85 & 15.69 & 0.87 \\
-    0.01              & 44.80 & 15.69 & 0.87 \\
-    \textbf{0.10 (Optimal)} & \textbf{44.78} & \textbf{15.75} & \textbf{0.88} \\
-    1.00 (Over-constrained) & 46.12 & 16.20 & 0.94 \\
+    0.00 & $\mathbf{45.00 \pm 16.18}$ & \textbf{15.79} & 0.62 \\
+    0.01 & $45.92 \pm 15.98$ & 15.98 & 0.87 \\
+    0.10 & $45.79 \pm 14.08$ & 16.08 & 0.95 \\
+    1.00 & $67.72 \pm 15.44$ & 25.11 & 0.86 \\
     \bottomrule
   \end{tabular}
 \end{table}
+
+\subsection{Peak Timing Is the Larger Gap}
+Squared error is not what an early-warning system is judged on. Measuring instead
+where each model places the outbreak peak (Table~\ref{tab:horizon}) separates the
+models far more sharply.
+
+\begin{table}[t]
+  \centering
+  \caption{Peak week error: mean absolute displacement, in weeks, between
+  observed and forecast outbreak peak. Lower is better.}
+  \label{tab:horizon}
+  \small
+  \begin{tabular}{@{}lccc@{}}
+    \toprule
+    Model & $h{=}1$ & $h{=}2$ & $h{=}3$ \\
+    \midrule
+    Persistence floor      & \textbf{0.99} & \textbf{1.90} & \textbf{3.44} \\
+    Dense GCN, fixed graph & 1.98 & 4.59 & 5.47 \\
+    \quad + adaptive graph & 2.92 & 4.70 & 6.56 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+Persistence places the peak within a week at $h{=}1$ and degrades by roughly a
+week per horizon step --- exactly what a forecast shifted $h$ weeks late must do,
+which confirms the measurement is sound. Both graph models are two to three weeks
+worse at every horizon, and the adaptive graph is worse than the fixed one
+despite its lower RMSE. A model whose squared error is competitive but which
+calls the peak three weeks late cannot support pre-positioning, and the two
+properties are evidently not interchangeable. Reporting aggregate error alone
+would have concealed this.
+
+Figure~\ref{fig:forecast} shows the same behaviour for Colombo: the broad
+epidemic shape is tracked, but onset is answered late. We make no claim that
+regularisation suppresses spurious spikes --- the regularised runs are less
+accurate overall, and we have no measurement isolating spike suppression from
+that general degradation.
 
 \begin{figure}[t]
   \centering
   \includegraphics[width=\columnwidth]{figures/fig_forecast_overlay.pdf}
-  \caption{Observed vs. forecast dengue cases for Colombo District across Fold 2 test weeks. PIAG-Net (solid blue) suppresses false spatial outbreak spikes produced by baseline GCN (dashed red).}
+  \caption{Observed and forecast weekly cases, Colombo district, Fold-2 test
+  window. Both graph models respond late to outbreak onset.}
   \label{fig:forecast}
 \end{figure}
-
-\subsection{Forecast Behavior \& Spike Suppression}
-Figure \ref{fig:forecast} illustrates weekly case predictions for Colombo district across Fold 2 test weeks. As identified by Weng et al. \cite{weng2024graph}, unconstrained spatial GNN message passing frequently generates abnormal false outbreak spikes in neighboring non-epidemic districts. As demonstrated in Figure \ref{fig:forecast}, PIAG-Net effectively eliminates false spatial spikes while accurately tracking true epidemic peaks.

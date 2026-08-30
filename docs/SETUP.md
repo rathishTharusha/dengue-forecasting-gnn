@@ -89,6 +89,49 @@ ruff check src tests tools
 
 ---
 
+## Path C — Building the paper (Docker)
+
+Nobody on the team installs TeX Live. The paper builds in a container instead, so
+the PDF is identical on every machine:
+
+```bash
+cd paper && ./build.sh
+```
+
+That produces `main.pdf` and prints the page count. Other commands:
+
+| Command | Does |
+|---|---|
+| `./build.sh` | `main.pdf`, then the page count |
+| `./build.sh highlighted` | `main-highlighted.pdf`, contributions colour-coded per member |
+| `./build.sh both` | both PDFs |
+| `./build.sh pages` | page count only |
+| `./build.sh shell` | interactive shell in the container, for chasing a LaTeX error |
+| `./build.sh clean` | remove build artefacts |
+
+**Requirements:** Docker, and the `rathish-latex-env:latest` image (TeX Live 2022
+with `acmart`). Point at a different image with `LATEX_IMAGE=<image> ./build.sh`.
+
+There is also a `Makefile` driving the same image, for teammates on Linux or
+macOS who have `make`. `make NATIVE=1` uses a local `pdflatex` instead of Docker.
+On Windows neither the host nor the image has `make`, so `build.sh` is the
+portable path — prefer it.
+
+> The build runs `pdflatex -halt-on-error` on purpose. With `nonstopmode` alone,
+> LaTeX recovers from a malformed equation and still emits a PDF with the error
+> baked in — which is exactly how a double-subscript once produced a
+> "successful" build.
+
+**Page limit is 4 pages excluding references.** A 5-page PDF is compliant when the
+body ends on page 4 and only the bibliography spills over. Check by measuring, not
+by counting words:
+
+```bash
+cd paper && ./build.sh pages
+```
+
+---
+
 ## Regenerating notebooks 00–02
 
 Notebooks `00`–`02` are generated from Python cell sources, so they can be reviewed as diffable

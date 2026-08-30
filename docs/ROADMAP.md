@@ -1,95 +1,164 @@
 # Roadmap
 
-Derived from `Group05_Proposal.pdf` §4–5 and `PROJECT_PROPOSAL_GUIDE.md`. Each stage has a
-**falsifiable success criterion** — if a stage misses it, we report that honestly and fall back
-rather than quietly moving the goalposts.
+Derived from `Group05_Proposal.pdf` §4–5 and `PROJECT_PROPOSAL_GUIDE.md`, revised
+2026-08-30 after `docs/PHASE2_REVIEW.md`. Each stage has a **falsifiable success
+criterion** — if a stage misses it, we report that honestly and fall back rather
+than quietly moving the goalposts.
+
+---
+
+## Two vocabularies — do not mix them
+
+This project counts in two directions, and the collision has already caused
+confusion. From here:
+
+| Term | Means | Numbered by |
+|---|---|---|
+| **Phase** | a course deliverable with a deadline and marks | the module handout |
+| **Stage** | a technical increment in the model | this document |
+
+"Phase 3" is the complete research paper. "Stage 3" is the mechanistic loss. They
+are unrelated, and a Stage can span Phases.
+
+### Course phases
+
+| Phase | Deliverable | Due | Marks |
+|---|---|---|---|
+| 1 | Project proposal (2 pp) | 2 Aug 2026 | 25% |
+| 2 | Short paper (4 pp) | 23 Aug 2026 | 25% |
+| 3 | Complete paper + LaTeX zip + code | ⚠️ handout says 26 Apr 2026; cadence implies **≈ 20 Sep 2026** | 34% |
+| — | Conference submission proof | 15 Nov 2026 | gates the ceiling |
+
+Phase-3 marks are capped by publication outcome: accepted 95–100%, **rejected but
+submitted 84%, never submitted 50%**. Submitting is the largest single lever in
+the project. See [`PHASE3_PLAN.md`](PHASE3_PLAN.md) §1 and §2.3 — including why
+the handout's date is not trustworthy.
 
 ---
 
 ## Done
 
-### ✅ Phase 0 — Literature review & proposal
-Three pillars (spatio-temporal GNN, physics-informed loss, GAN augmentation) plus the gap:
-no published work combines all three for dengue. Hedged as "to the best of our knowledge" —
-it is absence-of-evidence from a targeted search, not proof.
+### ✅ Stage 0 — Literature review & proposal
+Three pillars (spatio-temporal GNN, physics-informed loss, GAN augmentation) plus
+the gap: no published work combines all three for dengue. Hedged as "to the best of
+our knowledge" — absence-of-evidence from a targeted search, not proof.
 
-### ✅ Phase 1 — Baseline
-GCN/GAT on PyTorch Geometric, 3-week window → 3-week horizon, rolling-origin CV over 3
-chronological origins × 3 seeds. Result: **RMSE ≈ 45.3 (GCN) / 45.5 (GAT) vs persistence 44.8**
-— matches the floor, does not beat it.
-
-Two refinements were what made it competitive at all (ablation in the notebook §9):
-residual-over-persistence (RMSE 66 → 45) and log1p target space. See
+### ✅ Stage 1 — Baseline
+GCN/GAT on PyTorch Geometric, `W=3 → H=3`, rolling-origin CV over 3 origins × 3
+seeds. Residual-over-persistence (RMSE 66 → 45) and `log1p` targets are what made
+it competitive; see
 [`decisions/0001-baseline-training-refinements.md`](decisions/0001-baseline-training-refinements.md).
+
+### ✅ Stage 2 — Adaptive graph (Contribution c) — *partially succeeded*
+Graph WaveNet-style learned adjacency `A_adp = softmax(ReLU(E₁E₂ᵀ))`, blended with
+geography under a learnable gate.
+
+**Result:** improves RMSE 45.47 → 45.00 against a matched fixed-graph control on
+the same propagation path. Real, but inside the noise band, and it does **not**
+clear the persistence floor at 44.80. Success criterion *not* met.
+
+### ✅ Stage 2b — Spatial regularisation — *failed, and reported as such*
+Graph-Laplacian smoothness plus a non-negativity term. Worse at every weight
+(45.92 / 45.79 / 67.72 against 45.00 unregularised). The non-negativity term is
+provably inert. Not a mechanistic loss, and no longer described as one.
+
+**Why it failed, which matters for Stage 3:** a smoothness penalty is minimised by
+a *more uniform graph*, so it fights the adaptive component — the gate rose from
+σ(g) 0.62 to 0.95 as λ increased. The two contributions are mildly antagonistic.
+
+### Where things actually stand
+
+| Model | RMSE | Peak err h1/h2/h3 (wks) |
+|---|---|---|
+| **Persistence floor** | **44.80 ± 21.49** | **0.99 / 1.90 / 3.44** |
+| Dense GCN, fixed graph | 45.47 ± 16.91 | 1.98 / 4.59 / 5.47 |
+| + adaptive graph | 45.00 ± 16.18 | 2.92 / 4.70 / 6.56 |
+| + spatial reg. (λ=0.01 / 0.1 / 1.0) | 45.92 / 45.79 / 67.72 | — |
+
+Nothing clears the floor; the best configuration wins 4 of 9 paired runs.
+**The graph models call the outbreak peak two to three weeks later than
+persistence.** That gap is large, was invisible until the peak-timing metric was
+fixed, and matters more for early warning than RMSE does. It is the target for
+Stage 3.
 
 ---
 
 ## Next
 
-### ☐ Phase 2 — Adaptive graph (Contribution c) — *do this first, it's the cheapest*
-Replace the fixed distance-based adjacency with learned node embeddings,
-`A_adaptive = softmax(ReLU(E₁E₂ᵀ))` (Graph WaveNet-style), optionally with a gravity-mobility
-prior. Lowest-risk of the three, defensible as a novelty increment on its own, and it de-risks
-the pipeline before the harder pieces land.
+### ☐ Stage 3 — Mechanistic SEIR–SEI loss (Contribution a)
+`L = L_data + λ·L_residual` against an SEIR–SEI host–vector compartmental update.
+Constants fixed from the reference, never learned — ρ is unidentifiable against the
+unobserved `E_h`.
 
-**Success criterion:** RMSE below the persistence floor (< 44.8) on the identical rolling-origin
-protocol, or a clear win on peak-week timing.
+**Success criterion — changed from the original roadmap:** improves **peak week
+error** against Stage 2. RMSE is reported for completeness, but ±0.5 RMSE is
+unresolvable at this sample size and chasing it wasted Stage 2. Timing has a 2–3
+week gap and a mechanistic argument for why a dynamics constraint should close it.
 
-### ☐ Phase 3 — Physics-informed loss (Contribution a)
-`L = L_data + λ_p·L_phys + λ_c·L_cons + λ_s·L_smooth`, grounded in the SEIR–SEI host–vector
-compartmental model. `L_cons` = population conservation; `L_smooth` = neighbour smoothness
-across the district graph.
+**Why this need not repeat Stage 2b:** a dynamics residual constrains the
+trajectory, not the spatial structure, so it does not fight the learned graph.
 
-**Success criterion:** improves 3-step-ahead RMSE *and* peak-season (out-of-distribution)
-accuracy vs. Phase 2.
-**Fallback if it over-constrains:** dengue's exposed-human and infected-mosquito compartments
-are unobserved, so a hard ODE residual may over-penalize. Fall back to EINN-style latent
-dynamics transfer instead of a hard residual. Decide by λ sweep, not by vibes.
+**Before any sweep:** measure the residual's magnitude against `L_data`. A term
+orders of magnitude larger makes λ a switch, not a weight.
 
-### ☐ Phase 4 — GAN augmentation (Contribution b)
-Conditional time-series GAN (TimeGAN or RCGAN-style, conditioned on meteorological covariates
-and outbreak labels) synthesizing extra `(window → horizon)` sequences. Use WGAN-GP /
-gradient penalty — GANs mode-collapse readily on ~460-timestep series.
+**Fallback:** EINN-style latent-dynamics transfer if the hard residual
+over-constrains the unobserved compartments.
 
-**Success criterion:** measurable downstream RMSE/CRPS improvement on held-out rolling origins
-— *not* distributional similarity to real data.
-**Mandatory comparator:** a cheap jittering / window-warping augmentation baseline. The GAN has
-to beat it to justify its complexity.
+### ☐ Stage 4 — Comparative and computational analysis
+Required by the handout's paper structure, and absent today. Port the notebook-02
+GNN baselines (STGAT, A3TGCN, ASTGCN, DCRNN, AAGCN) and the notebook-01 classical
+baselines onto our protocol, and add parameter counts, training time and inference
+latency. Detail in [`PHASE3_PLAN.md`](PHASE3_PLAN.md) §5.1–5.2.
+
+### ☐ Stage 5 — GAN augmentation (Contribution b) — optional
+Conditional time-series GAN with WGAN-GP, judged on **downstream** accuracy against
+a jittering / window-warping comparator, never on distributional similarity.
+Highest risk, lowest marginal marks. If it is not started two weeks before the
+Phase-3 deadline, it stays as future work.
 
 ### ☐ Stretch — PID-GAN-style coupling
-Physics residual feeds the GAN discriminator directly, so generated series are
-epidemiologically consistent. Maximum novelty, maximum risk. Stretch goal only — the project
-must not depend on it.
-
-### ☐ Phase 5 — Full ablation & write-up
-**This table is the deliverable that proves the novelty claim.** Every row under the identical
-protocol:
-
-| # | Configuration | RMSE | MAE | SMAPE | CRPS | PICP/MPIW | Moran's I |
-|---|---|---|---|---|---|---|---|
-| 0 | Persistence | 44.8 | 15.7 | | — | — | |
-| 1 | GCN baseline (residual + log) | 45.3 | 15.9 | | — | — | |
-| 2 | + adaptive graph | | | | | | |
-| 3 | + physics loss | | | | | | |
-| 4 | + GAN augmentation | | | | | | |
-| 5 | all three | | | | | | |
-
-Plus the external comparators from the proposal: ARIMA/SARIMA, Random Forest, XGBoost, LSTM,
-GRU, ConvLSTM, DCRNN, STGCN, EpiGNN, ColaGNN.
+Physics residual informs the GAN discriminator. Maximum novelty, maximum risk. The
+project must not depend on it.
 
 ---
 
-## Evaluation protocol (frozen)
+## Evaluation protocol
 
-Changing any of this invalidates cross-row comparison. If it must change, re-run **every** row.
+Frozen since Stage 1, with **one sanctioned change in Phase 3**: origins move from
+3 to 6–8, and every ablation row is re-run against the new folds. After that it is
+frozen again. Nothing else moves.
 
-- Rolling-origin (expanding-window) CV, 3 chronological origins, averaged over 3 seeds.
-- Window `W = 3` weeks → horizon `H = 3` weeks; metrics reported **per horizon** and overall.
+- Rolling-origin (expanding-window) CV, 3 seeds, averaged over matched runs.
+- Window `W = 3` weeks → horizon `H = 3`; metrics reported **per horizon** and
+  pooled. A table always states which aggregation it used — they differ by ~0.8
+  RMSE here.
 - Point: RMSE, MAE, SMAPE, masked MAPE(≥1).
-- Probabilistic (from Phase 3 on): CRPS, PICP, MPIW.
-- Spatial: Moran's I on residuals — confirms the graph captures genuine spatial structure
-  rather than spurious spillover.
-- Normalization from **training-fold statistics only**. No shuffling, ever.
+- **Peak week error**, in weeks, over districts reaching `PEAK_FLOOR` cases.
+  Sanity check: persistence at horizon *h* must score ≈ *h*.
+- Probabilistic (Stage 3 on): CRPS, PICP, MPIW.
+- Spatial: Moran's I on residuals — promised in the proposal, still absent.
+- Normalisation from **training-fold statistics only**. No shuffling, ever.
+- Rows recorded per `(fold, seed, horizon)`; aggregation happens at reporting time.
+- Every comparison is against **persistence**, not only against the previous model.
+
+---
+
+## The ablation table
+
+The deliverable that carries the novelty claim. Every row under one protocol.
+
+| # | Configuration | RMSE | Peak err | Status |
+|---|---|---|---|---|
+| 0 | Persistence floor | 44.80 | 0.99/1.90/3.44 | ✅ |
+| 1 | Dense GCN, fixed graph (control) | 45.47 | 1.98/4.59/5.47 | ✅ |
+| 2 | + adaptive graph | 45.00 | 2.92/4.70/6.56 | ✅ |
+| 3 | + spatial regularisation | 45.79 | — | ✅ negative |
+| 4 | + SEIR–SEI residual | | | ☐ Stage 3 |
+| 5 | + GAN augmentation | | | ☐ optional |
+| — | Classical baselines (ARIMA, RF, XGBoost, LSTM) | | | ☐ Stage 4 |
+| — | Published GNNs (STGAT, A3TGCN, ASTGCN, DCRNN, AAGCN) | | | ☐ Stage 4 |
+
+Regenerate with `python scripts/make_tables.py`. Never type these values.
 
 ---
 
@@ -97,28 +166,33 @@ Changing any of this invalidates cross-row comparison. If it must change, re-run
 
 | Risk | Likelihood | Mitigation |
 |---|---|---|
-| GAN instability / mode collapse on a 459×25 dataset | High | WGAN-GP; fall back to jittering + window-warping and report that honestly |
-| Physics loss over-constrains unobserved compartments | Medium | λ sweep; fall back to EINN-style latent-dynamics transfer |
-| Contributions fail to beat the persistence floor | Medium | The floor-matching baseline is already the honest framing; report negative results with the ablation intact — a well-run negative result is a valid deliverable |
-| Several cited works are 2026-dated preprints | Medium | Re-verify each before final submission; a preprint may be revised or withdrawn |
-| Notebook merge conflicts across 6 people | High | One owner per notebook at a time (see CONTRIBUTING.md); stabilized code moves to `src/` |
-| Compute exceeds free Colab/Kaggle tier | Low | Graph is 25 nodes / 141 edges; only the GAN is heavier. Keep `QUICK_TEST` for iteration |
-| Google Drive corrupts `.git` | Medium | Clone to a local non-Drive path (docs/SETUP.md) |
+| Phase-3 deadline is not ≈20 Sep | High | Confirm with the lecturer before planning — `PHASE3_PLAN.md` §1 |
+| No conference deadline clears 15 Nov | Medium | Choose the venue in week 1; a workshop or regional venue is appropriate for a strong-protocol negative result |
+| Contributions never beat the persistence floor | **Realised** | Already the paper's framing. A well-run negative result with the ablation intact is a valid deliverable |
+| Results produced by code that is not committed | **Realised in Phase 2** | Never `scratch/`; see `PHASE2_REVIEW.md` F1 and rule D3 |
+| Effects smaller than fold-to-fold variance | **Realised** | Move to 6–8 origins; report paired tests, not means |
+| SEIR–SEI residual over-constrains unobserved compartments | High | Measure magnitudes first; λ sweep; EINN-style latent transfer as fallback |
+| GAN instability on a 459×25 dataset | High | WGAN-GP; fall back to jittering/window-warping and report it |
+| `torch-geometric-temporal` fragility blocks the comparative analysis | Medium | Port architectures onto our dense path; if not feasible, state the operator difference explicitly |
+| Notebook merge conflicts across six people | High | One owner per notebook at a time; stabilised code moves to `src/` |
+| Google Drive corrupts `.git` | **Realised** | 81 stray `desktop.ini` files broke `fetch`. Work from a non-Drive clone — `docs/SETUP.md` |
+| Several cited works are 2026 preprints | Medium | Re-verify each before submission |
 
 ---
 
-## Suggested ownership split
+## Ownership
 
-From `PROJECT_PROPOSAL_GUIDE.md` §4, adapted for six people — fill in names as the team agrees:
+Fill in names — `_TBD_` here on the day work starts is itself a risk.
 
 | Area | Owner |
 |---|---|
-| Data pipeline + notebooks 00/01 (classical baselines) | _TBD_ |
-| Notebook 02 (GNN reproduction, heavier compute) | _TBD_ |
-| Phase 2 — adaptive graph | _TBD_ |
-| Phase 3 — physics loss | _TBD_ |
-| Phase 4 — GAN augmentation | _TBD_ |
-| Evaluation harness, ablation table, write-up | _TBD_ |
+| Conference selection + submission logistics | _TBD_ |
+| Stage 3 — SEIR–SEI residual | _TBD_ |
+| Stage 4 — comparative analysis (GNN baselines) | _TBD_ |
+| Stage 4 — computational analysis | _TBD_ |
+| Protocol re-run at 6–8 origins | _TBD_ |
+| Paper assembly, tables, contribution highlighting | _TBD_ |
+| Stage 5 — GAN augmentation (optional) | _TBD_ |
 
-> Don't let baseline reproduction become the whole project. It's one section of the report,
-> not the deliverable.
+Author order on the paper is **by contribution** and is prescribed by the handout,
+not by preference. Agree it at the start of the phase, not the night before.

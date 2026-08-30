@@ -26,6 +26,11 @@ GNN for Dengue Forecasting.md
 scratch/
 scratchpad/
 
+# Generated Overleaf bundle — rebuild with scripts/make_overleaf.py.
+# Committing it would create a second copy of the paper that drifts from paper/.
+overleaf/
+overleaf.zip
+
 # =============================================================
 # Data & model artifacts
 # =============================================================

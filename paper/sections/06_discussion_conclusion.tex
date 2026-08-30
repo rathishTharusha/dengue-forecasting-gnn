@@ -1,20 +1,51 @@
 %=============================================================================
-% DISCUSSION & CONCLUSION — Summary, Limitations, Future Work
+% DISCUSSION & CONCLUSION — BUDGET: ~290 words.
+%
+% Rewritten after the Phase-2 review. The previous version claimed a 3.28-point
+% outbreak-fold improvement and spike suppression; neither survives the
+% corrected re-run. See docs/PHASE2_REVIEW.md.
 %=============================================================================
 \section{Discussion and Conclusion}
 \label{sec:conclusion}
 
 \subsection{Discussion}
-This work introduces PIAG-Net, a physics-informed adaptive graph neural network for multi-horizon dengue forecasting. By integrating self-adaptive graph learning with physics-informed spatial smoothness and non-negativity loss constraints, PIAG-Net addresses a key vulnerability of spatio-temporal GNNs: false outbreak spike hallucinations during non-epidemic periods \cite{weng2024graph}. Under a rigorous, leak-free rolling-origin evaluation protocol, PIAG-Net achieves superior performance across epidemic outbreak regimes, reducing outbreak fold RMSE by $3.28$ points over standard GCN baselines.
+We set out to improve dengue forecasting by learning district connectivity and
+constraining forecasts spatially. One worked, narrowly; the other did not; and
+neither closed the gap to a naive baseline.
+
+The learned adjacency is worth keeping: against a control sharing its propagation
+path it improves RMSE, and the gate settles part-way between geography and the
+learned graph rather than collapsing to either, indicating both carry signal. But
+the improvement is small against a fold-to-fold spread an order of magnitude
+larger, and nine paired runs cannot resolve it.
+
+The regulariser's failure is instructive. A smoothness penalty is minimised by a
+more uniform graph, so it pulls the gate back toward geography and works against
+the adaptive component. Whatever suppresses spurious spatial spikes here, an
+undirected smoothness prior over the same adjacency the model is learning is
+not it.
+
+The peak-timing result is what we would carry forward. Both graph models call the
+peak two to three weeks later than persistence, and the better model by RMSE is
+the worse by timing. For a system meant to give warning before a peak, that
+trade-off runs the wrong way, and it is invisible in aggregate error.
 
 \subsection{Limitations}
-Our study has three principal limitations:
-\textbf{(1) Graph Scale:} Evaluation is conducted across $N=25$ administrative districts in Sri Lanka. Scalability to higher-resolution sub-district or multi-country datasets remains to be verified.
-\textbf{(2) Fixed Constants:} Epidemiological constants in loss functions are derived from established literature rather than estimated online.
-\textbf{(3) Deterministic Outputs:} Current model outputs are point predictions rather than full predictive probability distributions.
+\textbf{(1) Power.} Nine paired runs reject a large effect but not a half-point
+one; more origins is the cheapest remedy.
+\textbf{(2) Scale.} $N=25$ districts; whether a learned graph behaves differently
+at sub-district resolution is untested.
+\textbf{(3) Point forecasts only}, so calibration is unassessed.
+\textbf{(4) Superseded figures.} Results here come from a rebuilt implementation;
+earlier numbers produced by code that was not retained should not be cited.
 
 \subsection{Future Work}
-Future research directions include:
-\textbf{(1) GAN Data Augmentation:} Integrating conditional temporal Generative Adversarial Networks (TimeGAN / T-CGAN) to generate synthetic extreme outbreak scenarios for sparse epidemic tails \cite{yoon2019timegan}.
-\textbf{(2) Probabilistic Forecasting:} Extending PIAG-Net to produce calibrated prediction intervals evaluated via Continuous Ranked Probability Score (CRPS).
-\textbf{(3) Multi-Country Validation:} Expanding evaluation to public benchmark datasets across Southeast Asia and Latin America (e.g., OpenDengue \cite{clarke2024opendengue}).
+A soft SEIR--SEI residual remains untested and is the natural successor to the
+smoothness penalty that failed here, constraining dynamics rather than spatial
+uniformity so that it does not fight the learned graph. Given that timing and
+magnitude diverge, a loss weighting outbreak onset directly is more promising
+than further RMSE reduction. Beyond that: conditional time-series generative
+models~\cite{yoon2019timegan} for outbreak tails, judged on downstream accuracy
+rather than distributional similarity; probabilistic forecasts with CRPS and
+interval coverage~\cite{bracher2021evaluating}; and multi-country validation on
+OpenDengue~\cite{clarke2024opendengue}.

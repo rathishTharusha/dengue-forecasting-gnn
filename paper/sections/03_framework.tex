@@ -1,53 +1,115 @@
 %=============================================================================
-% PROPOSED FRAMEWORK — PIAG-Net Architecture & Objective
+% PROPOSED FRAMEWORK — GAG-Net architecture and objective
+%
+% Rewritten after the Phase-2 review. Three substantive corrections:
+%   - the objective is spatial regularisation, not a mechanistic SEIR-SEI loss
+%   - the "byte-identical to the baseline" claim was false: the propagation
+%     operator differed from the PyG GCNConv baseline, so a matched dense
+%     fixed-graph control was added
+%   - the non-negativity term cannot bind and is reported as such
+% See docs/PHASE2_REVIEW.md F5, F6.
 %=============================================================================
 \section{Proposed Framework}
 \label{sec:framework}
 
 \subsection{Problem Formulation}
-We model Sri Lanka's administrative districts as nodes in a graph $\mathcal{G} = (\mathcal{V}, \mathcal{E}, \mathbf{A}_{\text{fixed}})$, where $|\mathcal{V}| = N = 25$ districts and $\mathbf{A}_{\text{fixed}} \in \mathbb{R}^{N \times N}$ represents spatial adjacency derived from shared geographical boundaries. Let $\mathbf{X} \in \mathbb{R}^{T \times N \times F}$ denote the spatio-temporal feature tensor across $T = 459$ weeks (2013--2022) with $F = 11$ features ($1$ target weekly dengue case count + $10$ climate and vegetation covariates). Given an observation window of $W = 3$ historical weeks $\mathbf{X}_{t-W+1:t} \in \mathbb{R}^{W \times N \times F}$, our task is to forecast dengue incidence across a multi-horizon window of $H = 3$ future weeks $\mathbf{Y}_{t+1:t+H} \in \mathbb{R}^{N \times H}$.
+We model Sri Lanka's administrative districts as nodes in a graph
+$\mathcal{G} = (\mathcal{V}, \mathcal{E}, \Afix)$, where $|\mathcal{V}| = N = 25$
+and $\Afix \in \R^{N \times N}$ encodes shared district boundaries. Let
+$\mathbf{X} \in \R^{T \times N \times F}$ denote the spatio-temporal feature
+tensor over $T = 459$ weeks (2013--2022) with $F = 11$ features: the weekly case
+count plus ten climate and vegetation covariates. Given a window of $W = 3$
+historical weeks, the task is to forecast incidence over the next $H = 3$ weeks
+for every district.
 
 \begin{figure}[t]
   \centering
   \includegraphics[width=\columnwidth]{figures/fig_architecture.pdf}
-  \caption{Overview of PIAG-Net architecture. Input features are processed through a two-layer Graph Convolutional Network using a gated blend of fixed geographic and learned adaptive graph structures ($\mathbf{A}_{\text{blend}}$). The model is optimized jointly using empirical data loss and physics-informed spatial smoothness ($\mathcal{L}_{\text{smooth}}$) and non-negativity ($\mathcal{L}_{\text{cons}}$) loss constraints.}
+  \caption{\modelname. Two dense graph-convolution layers propagate over
+  $\Ablend$, a gated mixture of the fixed geographic adjacency and a learned
+  adaptive one. The fixed-graph control shares this entire path and differs only
+  in that $\Ablend = \Afix$.}
   \label{fig:architecture}
 \end{figure}
 
 \subsection{Learned Adaptive Adjacency}
-Geographic adjacency $\mathbf{A}_{\text{fixed}}$ serves as an imperfect proxy for disease transmission, failing to capture unobserved human mobility patterns, economic corridors, and microclimate variations across districts. Following Graph WaveNet \cite{wu2019graphwavenet}, we introduce node embedding matrices $\mathbf{E}_1, \mathbf{E}_2 \in \mathbb{R}^{N \times d}$ with embedding dimension $d = 10$, learning a self-adaptive graph structure $\mathbf{A}_{\text{adp}}$ directly from data:
+Geographic adjacency is an imperfect proxy for transmission --- it cannot express
+movement along economic corridors --- and no district-level mobility data exists
+for Sri Lanka to replace it. Following Graph WaveNet~\cite{wu2019graphwavenet} we
+introduce node embeddings $\mathbf{E}_1, \mathbf{E}_2 \in \R^{N \times d}$ with
+$d = 10$ and learn the graph directly:
 \begin{equation}
-  \mathbf{A}_{\text{adp}} = \mathrm{softmax}\!\left(\mathrm{ReLU}\!\left(\mathbf{E}_1\mathbf{E}_2^{\top}\right)\right),
+  \Aadp = \mathrm{softmax}\!\left(\mathrm{ReLU}\!\left(\mathbf{E}_1\mathbf{E}_2^{\top}\right)\right),
   \label{eq:adaptive}
 \end{equation}
-where $\mathrm{softmax}$ normalizes row weights. To prevent structural drift and over-fitting on small graphs ($N=25$), we implement a gated residual blend mechanism:
+where $\mathrm{ReLU}$ zeroes negative affinities so the graph is sparse rather
+than complete, and the row softmax makes each district's incoming weights sum
+to one.
+
+Learning $2Nd = 500$ graph parameters from 25 nodes invites overfitting, so the
+learned graph is mixed with geography under a single learnable scalar $g$:
 \begin{equation}
-  \mathbf{A}_{\text{blend}} = \sigma(g)\,\mathbf{A}_{\text{fixed}} + \bigl(1-\sigma(g)\bigr)\,\mathbf{A}_{\text{adp}},
+  \Ablend = \sigma(g)\,\Afix + \bigl(1-\sigma(g)\bigr)\,\Aadp .
   \label{eq:gate}
 \end{equation}
-where $g \in \mathbb{R}$ is a learnable scalar gate parameter and $\sigma(\cdot)$ is the sigmoid function. At initialization ($g \approx 1.5$, $\sigma(g) \approx 0.82$), the model relies heavily on geographic topology, smoothly transitioning as node embeddings adapt during training. 
+At initialisation $g = 1.5$, so $\sigma(g) \approx 0.82$: training begins leaning
+on geography and moves toward the learned structure only as the embeddings earn
+it. Both components are row-stochastic, so $\Ablend$ is too.
 
-Spatial message passing is performed using dense matrix multiplication across 3D batch tensors:
+Message passing follows the standard graph-convolution
+form~\cite{kipf2017gcn}, applied densely over the batch:
 \begin{equation}
-  \mathbf{H}^{(1)} = \mathrm{ReLU}\!\left(\mathbf{A}_{\text{blend}} \mathbf{X} \mathbf{W}_1\right), \quad \mathbf{H}^{(2)} = \mathrm{ReLU}\!\left(\mathbf{A}_{\text{blend}} \mathbf{H}^{(1)} \mathbf{W}_2\right),
+  \mathbf{H}^{(1)} = \mathrm{ReLU}\!\left(\Ablend \mathbf{X} \mathbf{W}_1\right),
+  \quad
+  \mathbf{H}^{(2)} = \mathrm{ReLU}\!\left(\Ablend \mathbf{H}^{(1)} \mathbf{W}_2\right),
 \end{equation}
-followed by a linear prediction head $\hat{\mathbf{Y}} = \mathrm{Linear}(\mathrm{Dropout}(\mathbf{H}^{(2)}))$.
+followed by $\hat{\mathbf{Y}} = \mathrm{Linear}(\mathrm{Dropout}(\mathbf{H}^{(2)}))$.
+$\Afix$ is row-normalised with self-loops, matching the normalisation the softmax
+imposes on $\Aadp$ so that the two are blended on a common scale.
 
-\subsection{Physics-Informed Objective}
-Standard GNN loss functions suffer from unconstrained message passing, causing false outbreak spikes in non-epidemic districts \cite{weng2024graph}. To mitigate spatial hallucination, we design a physics-informed objective:
+\subsection{Spatial Regularisation}
+Weng et al.~\cite{weng2024graph} report that unconstrained message passing
+propagates outbreaks into districts where none occurred. We test whether a soft
+spatial constraint suppresses this:
 \begin{equation}
-  \mathcal{L}_{\text{total}} = \mathcal{L}_{\text{data}} + \lambda_{\text{phys}} \left(\mathcal{L}_{\text{smooth}} + 10.0 \cdot \mathcal{L}_{\text{cons}}\right),
+  \mathcal{L} = \Ldata + \lambda \left(\Lsmooth + 10\,\Lcons\right),
   \label{eq:loss}
 \end{equation}
-where $\mathcal{L}_{\text{data}}$ is the Mean Squared Error (MSE) computed in log-transformed residual-over-persistence space. The spatial smoothness penalty penalizes unphysical variance between adjacent nodes:
+where $\Ldata$ is mean squared error in log-transformed
+residual-over-persistence space, $\Lsmooth$ is a graph-Laplacian penalty on
+disagreement between connected districts,
 \begin{equation}
-  \mathcal{L}_{\text{smooth}} = \frac{1}{B \cdot H \cdot \|\mathbf{A}_{\text{blend}}\|_1} \sum_{b=1}^{B} \sum_{h=1}^{H} \sum_{i,j} \mathbf{A}_{\text{blend}, ij} \left(\hat{y}_{i,b,h} - \hat{y}_{j,b,h}\right)^2,
+  \Lsmooth = \frac{1}{B H \|\Ablend\|_1} \sum_{b,h} \sum_{i,j}
+             \mathbf{A}_{\mathrm{blend},ij}
+             \left(\hat{y}_{i,b,h} - \hat{y}_{j,b,h}\right)^2 ,
 \end{equation}
-while the non-negativity constraint strictly penalizes negative case predictions:
-\begin{equation}
-  \mathcal{L}_{\text{cons}} = \frac{1}{B \cdot N \cdot H} \sum_{b=1}^{B} \sum_{i=1}^{N} \sum_{h=1}^{H} \left(\mathrm{ReLU}(-\hat{y}_{i,b,h})\right)^2.
-\end{equation}
-The hyperparameter $\lambda_{\text{phys}}$ controls the regularizing strength of the physics-informed loss terms.
+and $\Lcons = \mathrm{mean}\bigl(\mathrm{ReLU}(-\hat{y})^2\bigr)$ penalises
+negative case counts.
+
+Two properties of this objective bear on how Section~\ref{sec:results} should be
+read. First, the penalty applies to inverse-transformed case counts: the network
+predicts a residual in log space, where a negative value means \emph{fewer cases
+than last week} rather than a negative count, so constraining it there would
+penalise any forecast of a decline. We apply it to $\log(1+\hat{y})$, since on
+raw counts $\Lsmooth$ exceeds $\Ldata$ by four orders of magnitude and any usable
+$\lambda$ would switch the data term off rather than weight against it. Second,
+$\Lcons$ cannot bind: the inverse transform clamps at zero before
+exponentiating, so counts are non-negative by construction and the
+$10\,\Lcons$ term contributes nothing to the gradient under any $\lambda$. We
+retain it for completeness and report $\lambda$ as controlling $\Lsmooth$ alone.
+
+This is spatial regularisation --- no compartments, no transmission dynamics, no
+mechanistic residual --- and we do not describe it as physics-informed. A soft
+SEIR--SEI constraint remains future work.
 
 \subsection{Controlled Comparison}
-To ensure rigorous empirical evaluation, all architectural components outside the adaptive graph and physics loss are kept byte-identical to the baseline GCN: residual-over-persistence forecasting, $\log(1+x)$ target transformation, Adam optimizer ($\text{lr}=10^{-3}$, weight decay $5 \times 10^{-4}$), and early stopping based on validation set RMSE.
+The fixed-graph control is this same model with $\Ablend = \Afix$: identical
+propagation path, head, optimiser and target handling, rather than a separately
+implemented baseline. The distinction matters. A PyTorch Geometric
+\texttt{GCNConv} baseline applies symmetric normalisation
+$\mathbf{D}^{-1/2}(\mathbf{A}{+}\mathbf{I})\mathbf{D}^{-1/2}$ rather than the row
+normalisation used here, so comparing against one would confound the learned
+adjacency with a change of operator. All models share residual-over-persistence
+forecasting, $\log(1+x)$ targets, Adam ($\text{lr}=10^{-3}$, weight decay
+$5\times10^{-4}$), gradient clipping at 5.0, and early stopping on validation
+RMSE.

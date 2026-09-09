@@ -1,0 +1,3 @@
+district,segment,model,mae,rmse
+Ampara,1.0,ARNN,,
+Anuradhapura,1.0,ARNN,,

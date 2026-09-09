@@ -1,0 +1,45 @@
+{
+  "mode": "raw",
+  "csv_path": "c:\\Users\\ASUS\\Desktop\\dengue-forecasting\\notebooks\\Data\\processed\\sri_lanka_disease_only.csv",
+  "npy_path": "c:\\Users\\ASUS\\Desktop\\dengue-forecasting\\notebooks\\Data\\processed\\sri_lanka_disease_only.npy",
+  "adj_path": "c:\\Users\\ASUS\\Desktop\\dengue-forecasting\\notebooks\\Data\\processed\\sri_lanka_adj_list.json",
+  "n_districts": 25,
+  "districts": [
+    "Ampara",
+    "Anuradhapura",
+    "Badulla",
+    "Batticaloa",
+    "Colombo",
+    "Galle",
+    "Gampaha",
+    "Hambantota",
+    "Jaffna",
+    "Kalutara",
+    "Kandy",
+    "Kegalle",
+    "Kilinochchi",
+    "Kurunegala",
+    "Mannar",
+    "Matale",
+    "Matara",
+    "Moneragala",
+    "Mullaitivu",
+    "NuwaraEliya",
+    "Polonnaruwa",
+    "Puttalam",
+    "Ratnapura",
+    "Trincomalee",
+    "Vavuniya"
+  ],
+  "npy_shape": [
+    551,
+    25,
+    1
+  ],
+  "n_features": 1,
+  "disease_feature_index": 0,
+  "date_range": [
+    "2013-05-15",
+    "2024-02-24"
+  ]
+}

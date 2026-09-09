@@ -197,3 +197,110 @@ def test_rejects_mismatched_adjacency():
             n_nodes=N_NODES,
             adj_fixed=torch.eye(N_NODES + 1),
         )
+
+
+# --------------------------------------------------------------------------
+# gated temporal convolution (Graph WaveNet's temporal operator)
+# --------------------------------------------------------------------------
+
+
+def test_gtcn_output_shape():
+    from dengue_gnn.models import GatedTCN
+
+    tcn = GatedTCN(n_feat=4, hidden=16)
+    assert tcn(torch.randn(6, 4, 3)).shape == (6, 16)
+
+
+def test_gtcn_is_causal():
+    """The last output must not depend on any future week -- there is none -- but
+    it MUST depend on the most recent one. A non-causal conv would also change
+    when an earlier week is perturbed in a way a causal one does not."""
+    from dengue_gnn.models import GatedTCN
+
+    torch.manual_seed(0)
+    tcn = GatedTCN(n_feat=2, hidden=8, kernel=2).eval()
+    x = torch.zeros(1, 2, 4)
+    base = tcn(x)
+
+    x_last = x.clone()
+    x_last[..., -1] = 1.0  # perturb the most recent week
+    assert not torch.allclose(tcn(x_last), base)
+
+    x_old = x.clone()
+    x_old[..., 0] = 1.0  # perturb the oldest week, outside a kernel-2 receptive field
+    assert torch.allclose(tcn(x_old), base, atol=1e-6)
+
+
+def test_temporal_encoder_changes_parameter_count(adj):
+    plain = make_model(adj, temporal="none")
+    gtcn = make_model(adj, temporal="gtcn", n_feat=2, window=3)
+    assert sum(p.numel() for p in gtcn.parameters()) > sum(p.numel() for p in plain.parameters())
+    assert gtcn(torch.randn(4, N_NODES, IN_DIM)).shape == (4, N_NODES, HORIZON)
+
+
+def test_temporal_encoder_validates_dimensions(adj):
+    with pytest.raises(ValueError, match="must equal in_dim"):
+        make_model(adj, temporal="gtcn", n_feat=5, window=3)
+    with pytest.raises(ValueError, match="requires n_feat and window"):
+        make_model(adj, temporal="gtcn")
+    # "lstm" became a valid temporal encoder when STGAT was added; use a value
+    # that is still genuinely unsupported.
+    with pytest.raises(ValueError, match="temporal must be"):
+        make_model(adj, temporal="transformer")
+    with pytest.raises(ValueError, match="spatial must be"):
+        make_model(adj, spatial="sage")
+
+
+# --------------------------------------------------------------------------
+# published architectures (GAT / STGAT / A3TGCN), on our shared propagation path
+# --------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "spatial,temporal",
+    [
+        ("gcn", "none"),  # our baseline
+        ("gcn", "gtcn"),  # Graph WaveNet-style temporal
+        ("gat", "none"),  # GAT
+        ("gat", "lstm"),  # STGAT-style
+        ("gcn", "gru_attn"),  # A3TGCN-style
+    ],
+)
+def test_published_architectures_run(adj, spatial, temporal):
+    need = temporal != "none"
+    m = make_model(
+        adj,
+        spatial=spatial,
+        temporal=temporal,
+        n_feat=2 if need else None,
+        window=3 if need else None,
+    )
+    out = m(torch.randn(4, N_NODES, IN_DIM))
+    assert out.shape == (4, N_NODES, HORIZON)
+    assert torch.isfinite(out).all()
+
+
+def test_gat_attention_respects_the_graph_mask():
+    """GAT must attend only to neighbours. If the mask leaked, a node would be
+    influenced by districts it shares no edge with, and the 'graph' would be a
+    fully-connected layer wearing an adjacency."""
+    from dengue_gnn.models import GraphAttention
+
+    torch.manual_seed(0)
+    chain = torch.tensor([[1.0, 1.0, 0.0], [1.0, 1.0, 1.0], [0.0, 1.0, 1.0]])
+    gat = GraphAttention(in_dim=4, out_dim=5, heads=2, dropout=0.0).eval()
+    x = torch.randn(2, 3, 4)
+    far = x.clone()
+    far[:, 2] += 100.0  # node 2 is NOT adjacent to node 0
+
+    with torch.no_grad():
+        base, moved = gat(x, chain), gat(far, chain)
+    assert torch.allclose(base[:, 0], moved[:, 0], atol=1e-4)  # unaffected
+    assert not torch.allclose(base[:, 1], moved[:, 1], atol=1e-4)  # adjacent, affected
+
+
+def test_recurrent_temporal_rejects_unknown_cell():
+    from dengue_gnn.models import RecurrentTemporal
+
+    with pytest.raises(ValueError, match="kind must be"):
+        RecurrentTemporal(4, 8, kind="rnn")

@@ -30,6 +30,14 @@ export MSYS_NO_PATHCONV=1
 run() { docker run --rm -v "${HOST_DIR}":/work -w /work "$IMAGE" "$@"; }
 
 require_image() {
+  # Distinguish "daemon down" from "image missing" -- both make `image inspect`
+  # fail, and telling someone to rebuild an image they already have wastes time.
+  if ! docker info >/dev/null 2>&1; then
+    echo "ERROR: the Docker daemon is not reachable." >&2
+    echo "  Start Docker Desktop and try again." >&2
+    echo "  (Your image is probably still there; the daemon just is not running.)" >&2
+    exit 1
+  fi
   if ! docker image inspect "$IMAGE" >/dev/null 2>&1; then
     echo "ERROR: Docker image '$IMAGE' not found." >&2
     echo "  Build it, pull it, or point at another with LATEX_IMAGE=<image>." >&2

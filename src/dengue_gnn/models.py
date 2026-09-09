@@ -35,6 +35,9 @@ import torch.nn.functional as F
 __all__ = [
     "AdaptiveAdjacency",
     "AdaptiveGCN",
+    "GatedTCN",
+    "GraphAttention",
+    "RecurrentTemporal",
     "build_fixed_adjacency",
     "row_normalize",
 ]
@@ -127,6 +130,154 @@ class AdaptiveAdjacency(nn.Module):
         return F.softmax(F.relu(self.e1 @ self.e2.t()), dim=1)
 
 
+class GatedTCN(nn.Module):
+    r"""Gated dilated causal convolution over the input window.
+
+    This is the temporal operator Graph WaveNet~\cite{wu2019graphwavenet} places
+    before every graph-convolution layer, and which the first version of this model
+    omitted entirely: it flattened ``(window, features)`` into one vector and applied
+    a linear layer, so the "spatio-temporal" model had no temporal component at all.
+    That omission is the most likely reason a plain LSTM outperformed it.
+
+    Two parallel convolutions form an LSTM-style gate,
+
+        h = tanh(W_f * x) . sigmoid(W_g * x)
+
+    where the filter branch proposes an update and the gate branch decides how much
+    of it passes. Left-padding by ``(kernel - 1) * dilation`` keeps the convolution
+    **causal**: the output at week *t* never sees week *t+1*.
+
+    Args:
+        n_feat: Input channels, i.e. features per week.
+        hidden: Output channels.
+        kernel: Convolution width in weeks.
+        dilation: Spacing between taps. With ``W=3`` there is little room to
+            dilate, so the default is 1; the parameter exists so the receptive
+            field can grow if the window is widened.
+    """
+
+    def __init__(self, n_feat: int, hidden: int, kernel: int = 2, dilation: int = 1) -> None:
+        super().__init__()
+        self.pad = (kernel - 1) * dilation
+        self.filt = nn.Conv1d(n_feat, hidden, kernel, dilation=dilation)
+        self.gate = nn.Conv1d(n_feat, hidden, kernel, dilation=dilation)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Args: ``(batch, n_feat, window)``. Returns ``(batch, hidden)``.
+
+        Only the final timestep is returned: it is the one whose receptive field
+        covers the whole window, and the prediction head consumes a single vector
+        per node.
+        """
+        x = F.pad(x, (self.pad, 0))
+        out = torch.tanh(self.filt(x)) * torch.sigmoid(self.gate(x))
+        return out[..., -1]
+
+
+class GraphAttention(nn.Module):
+    r"""Multi-head graph attention, after Velickovic et al.~\cite{velickovic2018gat}.
+
+    Attention coefficients are computed from node features and **masked by the
+    fixed adjacency**, as in the original: a node attends only to its graph
+    neighbours (plus itself, since ``adj_fixed`` carries self-loops). The result
+    is a data-dependent, per-forward-pass adjacency, in contrast to
+    :class:`AdaptiveAdjacency`, whose learned graph is a free parameter shared
+    across all inputs.
+
+    That distinction is the point of running both: GAT re-weights a *given*
+    topology per input, while the adaptive graph *invents* a topology that is
+    fixed once trained. They are different hypotheses about what geography gets
+    wrong.
+
+    Args:
+        in_dim: Input features per node.
+        out_dim: Output features per node, per head.
+        heads: Number of attention heads; outputs are averaged, not concatenated,
+            so ``out_dim`` is the final width.
+        dropout: Applied to the attention coefficients.
+        negative_slope: LeakyReLU slope in the attention logits, 0.2 in the paper.
+    """
+
+    def __init__(
+        self,
+        in_dim: int,
+        out_dim: int,
+        heads: int = 8,
+        dropout: float = 0.1,
+        negative_slope: float = 0.2,
+    ) -> None:
+        super().__init__()
+        self.heads, self.out_dim = heads, out_dim
+        self.dropout, self.negative_slope = dropout, negative_slope
+        self.proj = nn.Linear(in_dim, heads * out_dim, bias=False)
+        # a = [a_src ; a_dst] in the paper's notation, split for efficiency.
+        self.att_src = nn.Parameter(torch.empty(1, heads, out_dim))
+        self.att_dst = nn.Parameter(torch.empty(1, heads, out_dim))
+        nn.init.xavier_uniform_(self.proj.weight)
+        nn.init.xavier_uniform_(self.att_src)
+        nn.init.xavier_uniform_(self.att_dst)
+
+    def forward(self, x: torch.Tensor, adj_mask: torch.Tensor) -> torch.Tensor:
+        """Args: ``x`` is ``(batch, n_nodes, in_dim)``, ``adj_mask`` ``(N, N)``.
+
+        Returns ``(batch, n_nodes, out_dim)``, averaged over heads.
+        """
+        b, n, _ = x.shape
+        h = self.proj(x).view(b, n, self.heads, self.out_dim)
+
+        # e_ij = LeakyReLU(a_src . h_i + a_dst . h_j)
+        src = (h * self.att_src).sum(-1)  # (b, n, heads)
+        dst = (h * self.att_dst).sum(-1)
+        logits = F.leaky_relu(src.unsqueeze(2) + dst.unsqueeze(1), self.negative_slope)
+
+        # Mask to graph neighbours before softmax, as GAT prescribes.
+        mask = (adj_mask > 0).unsqueeze(0).unsqueeze(-1)
+        logits = logits.masked_fill(~mask, float("-inf"))
+        alpha = F.softmax(logits, dim=2)
+        alpha = torch.nan_to_num(alpha)  # an isolated node has an all -inf row
+        alpha = F.dropout(alpha, self.dropout, training=self.training)
+
+        # alpha (b, i, j, heads) x h (b, j, heads, f) -> (b, i, heads, f)
+        out = torch.einsum("bijk,bjkf->bikf", alpha, h)
+        return out.mean(dim=2)  # average heads; concatenating would change width
+
+
+class RecurrentTemporal(nn.Module):
+    """GRU or LSTM over the input window, with optional attention over timesteps.
+
+    The recurrent temporal encoder used by A3TGCN and STGAT. Where
+    :class:`GatedTCN` is convolutional, this is recurrent; both give the model the
+    temporal operator the original design lacked.
+
+    ``attention=True`` reproduces A3TGCN's temporal attention: instead of taking
+    the final hidden state, a learned score over all timesteps produces a weighted
+    sum, letting the model emphasise whichever weeks matter for the horizon.
+
+    Args:
+        n_feat: Input channels per week.
+        hidden: Hidden width.
+        kind: ``"gru"`` or ``"lstm"``.
+        attention: Attention-weighted pooling over timesteps rather than last state.
+    """
+
+    def __init__(self, n_feat: int, hidden: int, kind: str = "gru", attention: bool = False):
+        super().__init__()
+        if kind not in ("gru", "lstm"):
+            raise ValueError(f"kind must be 'gru' or 'lstm', got {kind!r}")
+        cell = nn.GRU if kind == "gru" else nn.LSTM
+        self.rnn = cell(n_feat, hidden, batch_first=True)
+        self.attention = attention
+        self.score = nn.Linear(hidden, 1) if attention else None
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Args: ``(batch, n_feat, window)``. Returns ``(batch, hidden)``."""
+        out, _ = self.rnn(x.transpose(1, 2))  # (batch, window, hidden)
+        if not self.attention:
+            return out[:, -1]
+        w = F.softmax(self.score(out), dim=1)  # (batch, window, 1)
+        return (w * out).sum(dim=1)
+
+
 class AdaptiveGCN(nn.Module):
     """Two-layer dense GCN with an optional learned, gated adjacency.
 
@@ -157,6 +308,11 @@ class AdaptiveGCN(nn.Module):
         dropout: float = 0.1,
         use_adaptive: bool = True,
         gate_init: float = 1.5,
+        temporal: str = "none",
+        spatial: str = "gcn",
+        n_feat: int | None = None,
+        window: int | None = None,
+        gat_heads: int = 8,
     ) -> None:
         super().__init__()
         if adj_fixed.shape != (n_nodes, n_nodes):
@@ -178,8 +334,43 @@ class AdaptiveGCN(nn.Module):
             self.adaptive = None
             self.gate = None
 
-        self.w1 = nn.Linear(in_dim, hidden)
-        self.w2 = nn.Linear(hidden, hidden)
+        valid_temporal = ("none", "gtcn", "gru", "lstm", "gru_attn")
+        if temporal not in valid_temporal:
+            raise ValueError(f"temporal must be one of {valid_temporal}, got {temporal!r}")
+        if spatial not in ("gcn", "gat"):
+            raise ValueError(f"spatial must be 'gcn' or 'gat', got {spatial!r}")
+        self.temporal, self.spatial = temporal, spatial
+
+        if temporal != "none":
+            if n_feat is None or window is None:
+                raise ValueError(f"temporal={temporal!r} requires n_feat and window")
+            if n_feat * window != in_dim:
+                raise ValueError(f"n_feat*window ({n_feat}*{window}) must equal in_dim ({in_dim})")
+            self.n_feat, self.window = n_feat, window
+            if temporal == "gtcn":
+                self.tcn = GatedTCN(n_feat, hidden)
+            else:
+                self.tcn = RecurrentTemporal(
+                    n_feat,
+                    hidden,
+                    kind="lstm" if temporal == "lstm" else "gru",
+                    attention=(temporal == "gru_attn"),
+                )
+            spatial_in = hidden
+        else:
+            self.tcn = None
+            spatial_in = in_dim
+
+        if spatial == "gat":
+            # GAT computes attention over the masked topology, so the first
+            # linear map is folded into the attention layer.
+            self.gat1 = GraphAttention(spatial_in, hidden, heads=gat_heads, dropout=dropout)
+            self.gat2 = GraphAttention(hidden, hidden, heads=gat_heads, dropout=dropout)
+            self.w1 = self.w2 = None
+        else:
+            self.gat1 = self.gat2 = None
+            self.w1 = nn.Linear(spatial_in, hidden)
+            self.w2 = nn.Linear(hidden, hidden)
         self.head = nn.Sequential(nn.Dropout(dropout), nn.Linear(hidden, horizon))
 
     def blended_adjacency(self) -> torch.Tensor:
@@ -214,9 +405,24 @@ class AdaptiveGCN(nn.Module):
             raise ValueError(f"expected (batch, {self.n_nodes}, in_dim), got {tuple(x.shape)}")
 
         adj = self.blended_adjacency()
-        # einsum keeps the batch axis untouched while mixing across nodes:
-        # (N,N) x (B,N,F) -> (B,N,F)
-        h = F.relu(torch.einsum("ij,bjf->bif", adj, self.w1(x)))
-        h = F.dropout(h, self.dropout, training=self.training)
-        h = F.relu(torch.einsum("ij,bjf->bif", adj, self.w2(h)))
+
+        if self.tcn is not None:
+            # (B, N, n_feat*window) -> (B*N, n_feat, window). The reshape matches
+            # _build_fold's feature-major layout, transpose((1, 2, 0)).
+            b, n, _ = x.shape
+            seq = x.reshape(b * n, self.n_feat, self.window)
+            x = self.tcn(seq).reshape(b, n, -1)
+
+        if self.spatial == "gat":
+            # GAT attends over the topology; the blended adjacency supplies the
+            # mask so the learned and attention-based graphs stay comparable.
+            h = F.relu(self.gat1(x, adj))
+            h = F.dropout(h, self.dropout, training=self.training)
+            h = F.relu(self.gat2(h, adj))
+        else:
+            # einsum keeps the batch axis untouched while mixing across nodes:
+            # (N,N) x (B,N,F) -> (B,N,F)
+            h = F.relu(torch.einsum("ij,bjf->bif", adj, self.w1(x)))
+            h = F.dropout(h, self.dropout, training=self.training)
+            h = F.relu(torch.einsum("ij,bjf->bif", adj, self.w2(h)))
         return self.head(h)

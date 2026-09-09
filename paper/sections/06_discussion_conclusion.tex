@@ -1,51 +1,72 @@
 %=============================================================================
-% DISCUSSION & CONCLUSION — BUDGET: ~290 words.
-%
-% Rewritten after the Phase-2 review. The previous version claimed a 3.28-point
-% outbreak-fold improvement and spike suppression; neither survives the
-% corrected re-run. See docs/PHASE2_REVIEW.md.
+% DISCUSSION & CONCLUSION
+% Rewritten for Phase 3 against results/phase3_final.csv and stage3_search.csv.
 %=============================================================================
 \section{Discussion and Conclusion}
 \label{sec:conclusion}
 
 \subsection{Discussion}
-We set out to improve dengue forecasting by learning district connectivity and
-constraining forecasts spatially. One worked, narrowly; the other did not; and
-neither closed the gap to a naive baseline.
+We set out to improve district-level dengue forecasting with a learned graph, a
+mechanistic constraint and generative augmentation. One of the three survives
+scrutiny, one does not replicate, and one is actively harmful --- and the largest
+improvement we measured came from none of them.
 
-The learned adjacency is worth keeping: against a control sharing its propagation
-path it improves RMSE, and the gate settles part-way between geography and the
-learned graph rather than collapsing to either, indicating both carry signal. But
-the improvement is small against a fold-to-fold spread an order of magnitude
-larger, and nine paired runs cannot resolve it.
+\paragraph{Sample size decided more than architecture did.}
+The learned adjacency won $17/24$ paired runs at three seeds and $35/64$ at eight.
+Nothing about the model changed; only the number of runs did. A paired power
+analysis on the three-seed results had already indicated $n \approx 54$ was needed,
+which is why the replication was run at all. We think this is the most transferable
+lesson here: on a 25-node graph with fold-to-fold RMSE spanning 27 to 68, a search
+over configurations at small $n$ will return apparently promising effects at a rate
+that has little to do with which of them are real. Two of our four were not.
 
-The regulariser's failure is instructive. A smoothness penalty is minimised by a
-more uniform graph, so it pulls the gate back toward geography and works against
-the adaptive component. Whatever suppresses spurious spatial spikes here, an
-undirected smoothness prior over the same adjacency the model is learning is
-not it.
+\paragraph{The missing component was temporal, not spatial.}
+Our strongest result is the correction of our own omission. The model contained no
+temporal operator --- it flattened the input window and applied a linear map ---
+while every method it was compared against carries one. Restoring a gated causal
+convolution improved RMSE by 5.0 points, more than any graph or loss modification
+we tried, and produced the only model statistically indistinguishable from
+persistence. A graph-free LSTM outperforming graph models was the symptom; this was
+the cause.
 
-The peak-timing result is what we would carry forward. Both graph models call the
-peak two to three weeks later than persistence, and the better model by RMSE is
-the worse by timing. For a system meant to give warning before a peak, that
-trade-off runs the wrong way, and it is invisible in aggregate error.
+\paragraph{Constraints must be measured before they are weighted.}
+The spatial penalty exceeded the data loss by four orders of magnitude, one
+constraint term was provably inert --- five runs were bit-identical to the
+unconstrained control --- and the usable weight range sat two orders of magnitude
+from any value a grid search would naturally cover. The constraint that did work
+was found by measuring its gradient magnitude first. We would not have found it by
+searching harder.
+
+\paragraph{Naive baselines are not a formality.}
+Persistence ($55.12$), a random forest ($56.31$) and a graph-free LSTM ($57.95$)
+all outperform the graph models, and the random forest is not significantly worse
+than persistence. Prior work on this dataset reports none of these comparisons. We do not conclude
+that graph methods cannot help here, but we do conclude that on this benchmark
+their advantage has not been demonstrated, and that reporting it requires
+comparators that were absent.
 
 \subsection{Limitations}
-\textbf{(1) Power.} Nine paired runs reject a large effect but not a half-point
-one; more origins is the cheapest remedy.
-\textbf{(2) Scale.} $N=25$ districts; whether a learned graph behaves differently
-at sub-district resolution is untested.
-\textbf{(3) Point forecasts only}, so calibration is unassessed.
-\textbf{(4) Superseded figures.} Results here come from a rebuilt implementation;
-earlier numbers produced by code that was not retained should not be cited.
+\textbf{(1) One dataset, one disease.} All findings are for 25 districts of Sri
+Lankan dengue; whether they transfer to larger graphs where message passing has
+more structure to exploit is untested.
+\textbf{(2) Under-ascertainment.} Every model treats reported cases as incidence.
+Reporting rates vary by district and season, and no observation model corrects for
+it.
+\textbf{(3) Point forecasts only.} Calibration is unassessed; CRPS and interval
+coverage are not reported.
+\textbf{(4) A negative result is not a proof.} We show that these methods do not
+help under this protocol, not that no such method could.
 
 \subsection{Future Work}
-A soft SEIR--SEI residual remains untested and is the natural successor to the
-smoothness penalty that failed here, constraining dynamics rather than spatial
-uniformity so that it does not fight the learned graph. Given that timing and
-magnitude diverge, a loss weighting outbreak onset directly is more promising
-than further RMSE reduction. Beyond that: conditional time-series generative
-models~\cite{yoon2019timegan} for outbreak tails, judged on downstream accuracy
-rather than distributional similarity; probabilistic forecasts with CRPS and
-interval coverage~\cite{bracher2021evaluating}; and multi-country validation on
-OpenDengue~\cite{clarke2024opendengue}.
+The mechanistic direction remains open but needs a different formulation. The
+SEIR--SEI model has seven compartments of which one is observed, so a hard residual
+is under-determined on this data; the constraint that worked here avoided latent
+compartments entirely, and extending that family is more promising than
+instantiating the full system. Adaptive loss weighting from gradient
+statistics~\cite{wang2021gradient} is the natural successor to the fixed weights
+and curricula tested here, given how narrow the usable range proved. Beyond that:
+probabilistic forecasts evaluated with CRPS and interval
+coverage~\cite{bracher2021evaluating}, sparsified graph learning for small
+node counts~\cite{wu2020mtgnn}, and validation on
+OpenDengue~\cite{clarke2024opendengue} to test whether these conclusions are
+specific to this benchmark.

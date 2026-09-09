@@ -1,11 +1,10 @@
 %=============================================================================
 % EXPERIMENTAL SETUP — Dataset, Protocol, Metrics, Baselines
 %
-% Rewritten after the Phase-2 review:
-%   - peak timing error redefined (the previous metric never looked along time)
-%   - the dense fixed-graph control added to the baseline list
-%   - reporting now states the aggregation explicitly and reports dispersion
-% See docs/PHASE2_REVIEW.md F4, F6, F7, F9.
+% Updated for Phase 3: the protocol widened from 3 origins to 8 disjoint ones,
+% and the baseline set now covers non-graph competitors run under our own
+% protocol rather than cited from an incommensurable split.
+% See docs/PHASE2_REVIEW.md F4/F6/F7/F9 and docs/STAGE3_EXPERIMENTS.md.
 %=============================================================================
 \section{Experimental Setup}
 \label{sec:setup}
@@ -23,24 +22,37 @@ intervals. The target is strongly right-skewed: median 13 weekly cases, maximum
 
 \subsection{Evaluation Protocol}
 Models are evaluated under leakage-free rolling-origin (expanding window)
-cross-validation across three chronological origins
-($a \in \{0.55, 0.70, 0.85\}$) and three seeds, giving nine runs per
-configuration. Each origin uses the following $15\%$ of the series as test data
-and the final 30 weeks before the origin as validation. Standardisation
-statistics are computed strictly from training weeks. Each run makes one
-optimiser step per training window.
+cross-validation across \textbf{eight} chronological origins
+($a \in \{0.400, 0.475, \ldots, 0.925\}$, spaced $0.075$) and three or eight
+seeds. Each origin's test window is the following $7.5\%$ of the series, so
+consecutive test windows are \emph{disjoint} rather than overlapping.
+
+That choice is deliberate. Overlapping windows inflate the apparent sample size:
+eight folds sharing more than half their test data are not eight independent
+observations, and a paired test over them is anti-conservative. We trade a
+shorter test window ($\sim$34 weeks) for folds a paired test can legitimately
+treat as independent. Standardisation statistics are computed strictly from
+training-fold data, and each run makes one optimiser step per training window.
 
 A rolling-origin protocol is necessary rather than stylistic. Under a single
 $70/10/20$ chronological split we measured validation and test RMSE to be
 anti-correlated ($r = -0.74$): the two periods fall in different epidemic
 regimes, so selecting on one actively mis-selects for the other.
 
-Results are reported as mean $\pm$ standard deviation over the nine runs. RMSE is
-pooled across horizons within a fold, then averaged across folds; we state this
+\paragraph{Reporting and statistical power.}
+Results are mean $\pm$ standard deviation over matched runs. RMSE is pooled
+across horizons within a fold and then averaged across folds; we state this
 because pooling and averaging per-horizon RMSE differ by roughly $0.8$ here,
-larger than several of the effects below. Comparisons against persistence use a
-paired sign test over matched $(\text{fold}, \text{seed})$ runs rather than a
-comparison of means.
+larger than several of the effects discussed. Comparisons use a two-sided paired
+sign test over matched $(\text{fold}, \text{seed})$ runs rather than a comparison
+of means.
+
+Power is the binding constraint on this dataset and we report it explicitly. The
+paired standard deviation of the adaptive-graph effect is $12.0$ RMSE against a
+mean effect of $-4.6$, which requires $n \approx 54$ for $80\%$ power; the
+mechanistic-constraint effect ($-2.1$, SD $4.8$) requires $n \approx 44$. Results
+at smaller $n$ are reported with their $p$-values and described as
+under-powered rather than as null.
 
 \subsection{Metrics}
 Point accuracy is measured by RMSE, MAE and SMAPE on the original case scale;
@@ -52,16 +64,32 @@ difference in weeks between the observed and forecast week of maximum incidence,
 averaged over districts whose observed maximum reaches ten cases. Below that
 threshold there is no outbreak to time and the argmax is noise. This is what an
 early-warning system is judged on, and it is not recoverable from RMSE. As a
-check, a persistence forecast at horizon $h$ is shifted $h$ weeks late by
-construction and must score approximately $h$; it does
-(Table~\ref{tab:horizon}).
+check that the metric measures what it claims, a persistence forecast at horizon
+$h$ is shifted $h$ weeks late by construction and must score approximately $h$;
+it does (Table~\ref{tab:horizon}).
+
+Following the requirement to characterise cost as well as accuracy, we record
+trainable parameter count, training wall-clock per fold and inference latency per
+25-district forward pass for every configuration, measured during the run rather
+than estimated afterwards.
 
 \subsection{Baselines}
-\textbf{(1) Persistence floor:} $\hat{y}_{t+h} = y_t$, deterministic, one run per
-fold.
-\textbf{(2) Dense GCN, fixed graph:} the matched control of
-Section~\ref{sec:framework}, sharing the propagation path so any difference is
-attributable to the learned adjacency alone.
-We do not compare numerically against Weng et al.~\cite{weng2024graph}: their
-static $70/30$ split and different target normalisation make the numbers
-incommensurable.
+Rather than cite numbers from an incommensurable protocol, we re-run every
+competitor under our own.
+
+\textbf{Naive.} Persistence ($\hat{y}_{t+h} = y_t$) and seasonal naive
+($\hat{y}_{t+h} = y_{t+h-52}$), both deterministic.
+\textbf{Statistical and tabular.} Ridge regression, random forest and
+XGBoost~\cite{chen2016xgboost} over pooled district-weeks.
+\textbf{Deep, without a graph.} An LSTM over the same window. This is the control
+that isolates what the \emph{graph} contributes as distinct from what a deep
+model contributes.
+\textbf{Graph.} The dense fixed-adjacency GCN of Section~\ref{sec:framework},
+which shares \modelname's propagation path and differs only in whether the
+adjacency is learned.
+
+Every baseline consumes the identical windows, target transformation and inverse
+transform as the graph models, so differences are attributable to the method and
+not to preprocessing. We do not compare numerically against Weng et
+al.~\cite{weng2024graph}: their static $70/30$ split and different target
+normalisation make the numbers incommensurable.

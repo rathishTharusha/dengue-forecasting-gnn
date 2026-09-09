@@ -1,110 +1,212 @@
 %=============================================================================
-% RESULTS — BUDGET: ~520 words.
+% RESULTS
 %
-% Every number here comes from results/phase2_runs.csv via scripts/make_tables.py.
-% Table 1 is \input from paper/tables_generated.tex -- do not retype values.
-% Hand-entry caused the discrepancies in docs/PHASE2_REVIEW.md F3.
+% Every number here comes from results/phase3_final.csv and
+% results/stage3_search.csv via scripts/make_tables.py. Do not retype values --
+% hand-entry caused the discrepancies documented in docs/PHASE2_REVIEW.md F3.
 %=============================================================================
 \section{Results}
 \label{sec:results}
 
 \input{tables_generated}
 
-\subsection{The Persistence Floor Is Not Cleared}
-Table~\ref{tab:main} reports rolling-origin test performance, and its first row
-frames everything else: naive persistence achieves RMSE $44.80$, and no graph
-configuration we tested beats it. The fixed-graph model reaches $45.47$, the
-adaptive-graph model $45.00$.
+\subsection{No Configuration Clears the Persistence Floor}
+Table~\ref{tab:main} reports rolling-origin test performance. A naive persistence
+forecast achieves RMSE $55.12$, and every graph configuration \emph{we} tested is
+worse. We are explicit about that scope: these runs evaluate the architectures of
+Section~\ref{sec:framework}, not the published spatio-temporal models. Those are
+addressed in Section~\ref{sec:reconcile} using their authors' own numbers and
+protocol. The gap is not a rounding artefact: against the adaptive-graph model a paired sign
+test over 64 matched runs favours persistence at $p = 0.008$, and against the best
+regularised variant at $p = 0.033$.
 
-The margins are small against the spread. Fold RMSE ranges from roughly 27 to 68
-with the epidemic regime of the test window, a standard deviation of $\pm16$ to
-$\pm21$ against differences of half a point. A paired sign test over matched
-$(\text{fold}, \text{seed})$ runs avoids relying on that comparison and says the
-same: the fixed-graph model beats persistence on four of nine runs, the adaptive
-model on three. Neither is distinguishable from chance at this sample size.
+One model is the exception to the significance, though not to the ordering. With a
+gated temporal convolution the model reaches $56.78$ and is the only configuration
+whose difference from persistence is \emph{not} statistically detectable
+($26/64$, $p = 0.169$). It does not beat the floor; it is the first model that
+cannot be shown to be worse than it.
 
-This is a finding, not a shortfall. Persistence is strong here for a structural
-reason --- lag-1 autocorrelation of the target is $0.68$ --- and prior work on
-this dataset never tests against it. A spatio-temporal GNN that merely matches a
-naive forecast is a materially different conclusion from one that beats
-traditional early-warning systems, and both can hold of the same model.
+We report this as the paper's central finding. Persistence is a strong competitor
+here for a structural reason --- the lag-1 autocorrelation of the target is $0.68$
+--- and prior work on this dataset does not test against it. A spatio-temporal GNN
+that loses to a naive forecast is a materially different conclusion from one that
+beats traditional early-warning systems, and both can be true of the same model
+under different protocols.
 
-\subsection{The Learned Graph Helps; the Regulariser Does Not}
-Against its matched control the learned adjacency improves RMSE from $45.47$ to
-$45.00$ and SMAPE from $69.6\%$ to $69.0\%$. Control and treatment share the
-propagation operator, head, optimiser and target handling, differing only in
-whether $\Ablend$ is gated, so the difference is attributable to the graph. The
-gate itself settles at $\sigma(g) = 0.62$ from an initialisation of $0.82$:
-the model moves toward the learned structure while retaining substantial weight
-on geography, which is what the gate was introduced to permit.
+\subsection{Comparison with Non-Graph Methods}
+Table~\ref{tab:main} also reports every competitor re-run under our protocol
+rather than cited from an incommensurable one. The ordering is uncomfortable for
+the premise of this work.
 
-Spatial regularisation does not help at any weight (Table~\ref{tab:lambda}).
-Every non-zero $\lambda$ is worse than none and $\lambda = 1.0$ more than doubles
-MAE. The gate rises toward geography as $\lambda$ grows, reaching $0.95$ at
-$\lambda = 0.1$: a smoothness penalty is minimised by a more uniform graph, so it
-pulls against the structure the adaptive component is learning. The two
-contributions are not merely independent but mildly antagonistic.
+A random forest over pooled district-weeks achieves $56.31$ --- better than every
+graph configuration we tested, including the best --- and is not significantly
+worse than persistence ($9/24$, $p = 0.31$). XGBoost reaches $57.41$ and a
+graph-free LSTM $57.95$, both also ahead of the adaptive graph at $61.81$.
 
+The LSTM comparison is the informative one, because it differs from the graph
+models in essentially one respect: it has no adjacency. That it outperforms them
+indicates the graph structure is not contributing on this benchmark. Two naive
+methods bracket the range: seasonal naive is far worse than persistence
+($153.17$; $0/8$, $p = 0.008$), so dengue's year-over-year amplitude varies too
+much for a 52-week lag, and ridge regression is unstable rather than merely poor
+--- a single fold reaches RMSE $1959$ because linear extrapolation in
+log-residual space passes through an exponential inverse transform. Its mean is
+not a meaningful summary and we report it only to document the failure mode.
+
+\subsection{The Temporal Operator, Not the Graph}
+The largest single effect we measured is architectural. Adding the gated dilated
+causal convolution of Graph WaveNet~\cite{wu2019graphwavenet} improves RMSE from
+$61.81$ to $56.78$: $46/64$ paired wins, $p = 0.0006$.
+
+This corrects an omission in our own earlier design rather than introducing a new
+component. The model previously flattened the $W \times F$ input window into a
+single vector and applied a linear map, so despite being described as
+spatio-temporal it contained no temporal operator at all --- while every method it
+was benchmarked against (DCRNN~\cite{li2018dcrnn}, EpiGNN~\cite{xie2022epignn},
+Cola-GNN~\cite{deng2020colagnn}) carries one. The measured consequence is that a
+graph-free LSTM outperformed the graph models. No amount of hyper-parameter search
+addresses a missing component.
+
+\subsection{The Learned Adjacency Does Not Replicate}
+At three seeds the learned adjacency beat its matched fixed-graph control on
+$17/24$ paired runs ($p = 0.064$), which we initially read as a promising
+under-powered effect. A paired power analysis on those same runs indicated
+$n \approx 54$ was required. At eight seeds ($n = 64$) the comparison is
+$35/64$, $p = 0.53$ --- indistinguishable from chance.
+
+The mean still improves by $2.78$ RMSE, but only a minority of runs improve, so
+the mean is carried by a few large gains. We therefore do not claim the adaptive
+graph as a contribution. We report it as an effect that appeared at small $n$ and
+disappeared under replication, which is the outcome the replication was run to
+detect.
+
+\subsection{A Generation-Interval Constraint Replicates}
+By contrast, constraining the second difference of predicted $\log(1+y)$ ---
+derived from dengue's $\sim$3-week generation interval, and computable without any
+latent compartment --- improves on the unconstrained model at $46/64$,
+$p = 0.0006$. It is the only mechanistic component we tested that survives
+replication.
+
+Two failures around it are worth reporting. A curriculum that ramps the constraint
+weight, following Krishnapriyan et al.~\cite{krishnapriyan2021failure}, made
+results \emph{worse} at eight seeds ($+2.54$ RMSE) despite appearing to help at
+three. And a spatial-smoothness penalty, which is minimised by a more uniform
+graph, works against the learned adjacency and degrades accuracy at every weight
+tested.
+
+\subsection{Shrinkage Toward the Naive Forecast}
+Because the network predicts a residual over persistence, scaling that residual by
+$\gamma \in [0,1]$ interpolates between the naive forecast and the model.
+Selecting $\gamma$ on the validation fold improves RMSE overall ($p = 0.028$).
+
+The selected values are themselves informative. For the weak adaptive model
+validation chooses $\bar{\gamma} = 0.56$, discarding nearly half the predicted
+correction; for the stronger temporal model it chooses $\bar{\gamma} = 0.82$. The
+procedure asks for less shrinkage precisely when the model carries more signal,
+and consequently shrinkage \emph{harms} the temporal model ($56.78 \to 57.74$).
+
+\subsection{Augmentation Does Not Help, and the GAN Hurts}
 \begin{table}[t]
   \centering
-  \caption{Spatial regularisation sweep. $\lambda=0$ is the adaptive graph
-  without regularisation. Applied to $\log(1+\hat{y})$; on raw counts the penalty
-  exceeds the data loss by four orders of magnitude.}
-  \label{tab:lambda}
+  \caption{Augmentation, all unshrunk so that the two interventions are not
+  confounded. The unaugmented model scores $61.81$.}
+  \label{tab:augment}
   \small
-  \begin{tabular}{@{}lccc@{}}
+  \begin{tabular}{@{}lcc@{}}
     \toprule
-    $\lambda$ & RMSE & MAE & Gate $\sigma(g)$ \\
+    Augmentation & RMSE & vs.\ window warp \\
     \midrule
-    0.00 & $\mathbf{45.00 \pm 16.18}$ & \textbf{15.79} & 0.62 \\
-    0.01 & $45.92 \pm 15.98$ & 15.98 & 0.87 \\
-    0.10 & $45.79 \pm 14.08$ & 16.08 & 0.95 \\
-    1.00 & $67.72 \pm 15.44$ & 25.11 & 0.86 \\
+    None                      & $\mathbf{61.81}$ & --- \\
+    Window warping            & $66.60$ & --- \\
+    Jittering                 & $68.57$ & --- \\
+    Conditional WGAN-GP       & $93.81$ & $4/24$, $p = 0.0015$ \\
     \bottomrule
   \end{tabular}
 \end{table}
 
-\subsection{Peak Timing Is the Larger Gap}
-Squared error is not what an early-warning system is judged on. Measuring instead
-where each model places the outbreak peak (Table~\ref{tab:horizon}) separates the
-models far more sharply.
+Table~\ref{tab:augment} reports the third proposed contribution. A conditional
+WGAN-GP over $(\text{window} \rightarrow \text{horizon})$ pairs is significantly
+worse than window warping ($p = 0.0015$) and than jittering ($p = 0.023$).
+
+The stronger finding is that \emph{no} augmentation helps: every augmented arm is
+worse than training on the real data alone. We evaluated the generator on
+downstream forecast accuracy rather than on distributional similarity to real
+series, which is the criterion under which a generator can appear successful while
+contributing nothing.
+
+\subsection{Reconciliation with Reported Results on This Dataset}
+\label{sec:reconcile}
+Weng et al.~\cite{weng2024graph} report spatio-temporal GNNs outperforming their
+baselines on this dataset, which appears to contradict the results above. It does
+not. The two sets of figures are computed with different aggregations.
+
+We reimplemented their protocol --- rolling cross-validation over five nested
+segments at 60--100\% of the series, each split $70/30$ --- and computed a
+persistence forecast on it three ways.
 
 \begin{table}[t]
   \centering
-  \caption{Peak week error: mean absolute displacement, in weeks, between
-  observed and forecast outbreak peak. Lower is better.}
+  \caption{Persistence RMSE on the protocol of Weng et al., under three
+  aggregations of the same predictions.}
+  \label{tab:aggregation}
+  \small
+  \begin{tabular}{@{}lc@{}}
+    \toprule
+    Aggregation & Persistence RMSE \\
+    \midrule
+    Pooled over all district-weeks & 58.79 \\
+    Mean of per-district RMSEs     & 44.59 \\
+    Mean of per-window RMSEs       & \textbf{38.46} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+Table~\ref{tab:aggregation} spans a factor of $1.53$ from a reporting choice
+alone. On a target with median 13 and maximum 2{,}631 a handful of outbreak
+windows dominate a pooled RMSE, whereas averaging per-window RMSEs weights every
+window equally regardless of magnitude; since the square root is concave, the
+latter is systematically smaller.
+
+Their released implementation resolves which applies. It evaluates with
+\texttt{batch\_size = 1} and accumulates the RMSE of each batch before dividing by
+the batch count, so the published values are means of per-window RMSEs. The
+corresponding persistence figure is $38.46$, and on that footing every model in
+their Table~I --- from STGAT at $44.78$ to ARIMA at $189.22$ --- is worse than a
+naive forecast. Persistence is not among the baselines they report.
+
+Two conclusions follow. Our finding is not in tension with the published result;
+it is the same phenomenon, visible once a naive baseline is included. And absolute
+RMSE is not portable between papers that aggregate differently, so we state our
+own aggregation --- pooled within fold, averaged across folds --- wherever a
+number appears.
+
+\subsection{Peak Timing}
+\begin{table}[t]
+  \centering
+  \caption{Peak week error: mean absolute displacement, in weeks, between observed
+  and forecast outbreak peak.}
   \label{tab:horizon}
   \small
   \begin{tabular}{@{}lccc@{}}
     \toprule
     Model & $h{=}1$ & $h{=}2$ & $h{=}3$ \\
     \midrule
-    Persistence floor      & \textbf{0.99} & \textbf{1.90} & \textbf{3.44} \\
-    Dense GCN, fixed graph & 1.98 & 4.59 & 5.47 \\
-    \quad + adaptive graph & 2.92 & 4.70 & 6.56 \\
+    Persistence floor            & $\mathbf{1.70}$ & $\mathbf{2.73}$ & $\mathbf{4.02}$ \\
+    + growth constraint, shrunk  & 2.08 & 3.26 & 4.63 \\
+    + gated temporal conv.       & 2.20 & 3.37 & 4.64 \\
+    adaptive graph (no temporal) & 2.54 & 3.74 & 4.85 \\
     \bottomrule
   \end{tabular}
 \end{table}
 
-Persistence places the peak within a week at $h{=}1$ and degrades by roughly a
-week per horizon step --- exactly what a forecast shifted $h$ weeks late must do,
-which confirms the measurement is sound. Both graph models are two to three weeks
-worse at every horizon, and the adaptive graph is worse than the fixed one
-despite its lower RMSE. A model whose squared error is competitive but which
-calls the peak three weeks late cannot support pre-positioning, and the two
-properties are evidently not interchangeable. Reporting aggregate error alone
-would have concealed this.
+Squared error is not what an early-warning system is judged on. Measuring instead
+where each model places the outbreak peak (Table~\ref{tab:horizon}) separates the
+configurations in the same order but exposes a gap that RMSE understates: every
+model calls the peak later than persistence does, by roughly half a week at
+$h{=}1$ and by a similar margin throughout.
 
-Figure~\ref{fig:forecast} shows the same behaviour for Colombo: the broad
-epidemic shape is tracked, but onset is answered late. We make no claim that
-regularisation suppresses spurious spikes --- the regularised runs are less
-accurate overall, and we have no measurement isolating spike suppression from
-that general degradation.
-
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=\columnwidth]{figures/fig_forecast_overlay.pdf}
-  \caption{Observed and forecast weekly cases, Colombo district, Fold-2 test
-  window. Both graph models respond late to outbreak onset.}
-  \label{fig:forecast}
-\end{figure}
+Persistence places the peak within one week at $h{=}1$ and degrades by about a
+week per horizon step, which is exactly what a forecast shifted $h$ weeks late must
+do and confirms the measurement is sound. A model whose squared error approaches
+persistence but which calls the peak later cannot support pre-positioning, and
+reporting aggregate error alone would conceal this.

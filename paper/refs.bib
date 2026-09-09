@@ -133,9 +133,40 @@
 % Source of the SEIR-SEI compartmental structure and constants.
 % TODO: complete author list before submission.
 @article{seirsei2022,
-  title   = {Analysis of Vector-host SEIR--SEI Dengue Epidemiological Model},
+  author  = {Hasan, M. R. and Hobiny, A. and Alshehri, A.},
+  title   = {Analysis of Vector-host {SEIR--SEI} Dengue Epidemiological Model},
   journal = {International Journal of Analysis and Applications},
+  volume  = {20},
+  pages   = {57},
   year    = {2022}
+}
+
+% --- constrained-optimisation literature, added Stage 3 -------------------
+% These are cited for *findings we acted on*, not as background:
+% Krishnapriyan motivates the curriculum in dengue_gnn.mechanistic; Wang
+% motivates the magnitude check in scripts/measure_loss_scale.py.
+@inproceedings{krishnapriyan2021failure,
+  author    = {Krishnapriyan, Aditi S. and Gholami, Amir and Zhe, Shandian and
+               Kirby, Robert M. and Mahoney, Michael W.},
+  title     = {Characterizing Possible Failure Modes in Physics-Informed Neural Networks},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  year      = {2021}
+}
+
+@article{wang2022ntk,
+  author  = {Wang, Sifan and Yu, Xinling and Perdikaris, Paris},
+  title   = {When and Why {PINNs} Fail to Train: A Neural Tangent Kernel Perspective},
+  journal = {Journal of Computational Physics},
+  volume  = {449},
+  pages   = {110768},
+  year    = {2022}
+}
+
+@article{rusch2023oversmoothing,
+  author  = {Rusch, T. Konstantin and Bronstein, Michael M. and Mishra, Siddhartha},
+  title   = {A Survey on Oversmoothing in Graph Neural Networks},
+  journal = {arXiv preprint arXiv:2303.10993},
+  year    = {2023}
 }
 
 % --- Phase 3 / future-work citations. Keep -- cited in Section 6. ----------
@@ -179,4 +210,63 @@
   edition   = {3rd},
   publisher = {OTexts},
   year      = {2021}
+}
+
+@inproceedings{chen2016xgboost,
+  author    = {Chen, Tianqi and Guestrin, Carlos},
+  title     = {{XGBoost}: A Scalable Tree Boosting System},
+  booktitle = {Proceedings of the 22nd ACM SIGKDD International Conference on
+               Knowledge Discovery and Data Mining},
+  pages     = {785--794},
+  year      = {2016}
+}
+
+@article{wang2021gradient,
+  author  = {Wang, Sifan and Teng, Yujun and Perdikaris, Paris},
+  title   = {Understanding and Mitigating Gradient Flow Pathologies in
+             Physics-Informed Neural Networks},
+  journal = {SIAM Journal on Scientific Computing},
+  volume  = {43},
+  number  = {5},
+  pages   = {A3055--A3081},
+  year    = {2021}
+}
+
+@inproceedings{wu2020mtgnn,
+  author    = {Wu, Zonghan and Pan, Shirui and Long, Guodong and Jiang, Jing and
+               Chang, Xiaojun and Zhang, Chengqi},
+  title     = {Connecting the Dots: Multivariate Time Series Forecasting with
+               Graph Neural Networks},
+  booktitle = {Proceedings of the 26th ACM SIGKDD International Conference on
+               Knowledge Discovery and Data Mining},
+  pages     = {753--763},
+  year      = {2020}
+}
+
+% Source of the linearised growth-rate bound used for the mechanistic constraint.
+% Its Table 1 sensitivity indices reproduce exactly at the section-4 simulation
+% values (verified in scripts/verify_seir_paper.py); the "Baseline Values" column
+% printed beside them does not reproduce them, so cite section 4 for parameters.
+@article{phaijoo2018sensitivity,
+  author  = {Phaijoo, Ganga Ram and Gurung, Dil Bahadur},
+  title   = {Sensitivity Analysis of {SEIR--SEI} Model of Dengue Disease},
+  journal = {GAMS Journal of Mathematics and Mathematical Biosciences},
+  volume  = {6},
+  number  = {a},
+  pages   = {41--49},
+  year    = {2018},
+}
+
+% The generation-interval result that invalidates ln(R0)/GI for this system:
+% for a fixed R0 the growth rate depends on the shape of the generation-interval
+% distribution, not only its mean.
+@article{wallinga2007generation,
+  author  = {Wallinga, Jacco and Lipsitch, Marc},
+  title   = {How Generation Intervals Shape the Relationship Between Growth
+             Rates and Reproductive Numbers},
+  journal = {Proceedings of the Royal Society B},
+  volume  = {274},
+  number  = {1609},
+  pages   = {599--604},
+  year    = {2007},
 }

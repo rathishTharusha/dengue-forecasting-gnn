@@ -102,6 +102,29 @@ This is spatial regularisation --- no compartments, no transmission dynamics, no
 mechanistic residual --- and we do not describe it as physics-informed. A soft
 SEIR--SEI constraint remains future work.
 
+\subsection{Implementation Details}
+\label{sec:impl}
+Node features for district $i$ at origin $t$ are the $W \times F = 33$ values of
+the preceding three weeks, flattened feature-major. Targets are the next $H=3$
+weekly counts, transformed twice before the loss sees them: to $\log(1+y)$, then
+to a residual over persistence, so the network predicts the \emph{correction} to
+last week's value rather than the level. Both transforms are inverted before any
+metric is computed, and normalisation statistics come from training weeks only.
+
+Training uses one optimiser step per window --- Adam,
+$\text{lr}=10^{-3}$, weight decay $5\times10^{-4}$, gradient clipping at $5.0$,
+at most 120 epochs with early stopping on validation RMSE after 25 epochs without
+improvement. Dropout is $0.1$ before the prediction head. $\Afix$ is
+row-normalised with self-loops. The gate is a single scalar initialised at
+$g=1.5$.
+
+The model is small: $7{,}032$ trainable parameters for $d=10$, $\text{hidden}=64$.
+Every configuration trains in roughly a minute per fold on one CPU thread, and we
+report the resulting cost in Section~\ref{sec:results}. Notably, single-threaded
+execution is \emph{faster} than multi-threaded on this workload --- at this tensor
+size the synchronisation cost exceeds the arithmetic --- so parallelism is taken
+across independent runs rather than within them.
+
 \subsection{Controlled Comparison}
 The fixed-graph control is this same model with $\Ablend = \Afix$: identical
 propagation path, head, optimiser and target handling, rather than a separately

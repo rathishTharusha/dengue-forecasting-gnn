@@ -1,29 +1,21 @@
 %=============================================================================
-% ABSTRACT — 148 words.
+% ABSTRACT — 149 words.
 %
-% Structure (from the lecture slides' anatomy of the Vaswani et al. abstract):
-%   1. PROBLEM        — what is hard and why.
-%   2. PROPOSED       — what we built.
-%   3. SIGNIFICANCE   — WITH NUMBERS.
-% No citations, no equations, no formulas. Includes search terms.
-%
-% Rewritten after the Phase-2 review. The significance sentences report what the
-% corrected re-run measured, including the two negative results: the regulariser
-% does not help, and no configuration clears the persistence floor. See
-% docs/PHASE2_REVIEW.md.
+% Structure: problem, what we did, significance WITH NUMBERS.
+% No citations, no equations. Rewritten for Phase 3 against
+% results/phase3_final.csv and results/stage3_search.csv.
 %=============================================================================
 \begin{abstract}
-Dengue forecasting at district resolution is spatially coupled, data-scarce and
-heavy-tailed, and spatio-temporal graph neural networks applied to it are known to
-propagate outbreaks into districts where none occurred. Their adjacency is
-typically fixed by geography, a proxy no mobility data supports. We present
-\modelname, which learns district connectivity end-to-end and blends it with the
-geographic graph under a learned gate, and we evaluate it against a matched
-fixed-graph control under leakage-free rolling-origin cross-validation. The
-learned graph improves RMSE from 45.47 to 45.00, but neither model clears a naive
-persistence forecast at 44.80, which wins four of nine paired runs against the
-best configuration. Adding spatial smoothness regularisation degrades accuracy at
-every weight tested. Measuring outbreak peak displacement rather than error
-magnitude exposes the more consequential gap: both graph models call the peak two
-to three weeks later than persistence does.
+Spatio-temporal graph neural networks are the default choice for district-level
+epidemic forecasting, but on small graphs their advantage is rarely tested against
+naive baselines. We benchmark them on Sri Lankan dengue --- 25 districts, 459
+weeks --- under leakage-free rolling-origin cross-validation with eight disjoint
+origins, and report three findings. First, no graph configuration we tested beats
+a persistence forecast; the best is statistically indistinguishable from it and
+the rest are significantly worse. Second, a learned adaptive adjacency appears to
+help at 24 paired runs and does not replicate at 64, while a gated temporal
+convolution improves RMSE from 61.8 to 56.8 and a constraint derived from the
+generation interval improves it further, both at $p<0.001$. Third, a conditional
+GAN for data augmentation is significantly worse than jittering. Peak-timing error
+exposes a gap that squared error conceals.
 \end{abstract}

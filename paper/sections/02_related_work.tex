@@ -45,7 +45,18 @@ CausalGNN~\cite{wang2022causalgnn} carry this idea into epidemic forecasting for
 influenza and COVID-19, where compartment trajectories are comparatively well
 observed. Dengue's exposed-human and infected-mosquito compartments are
 not~\cite{seirsei2022}, and no prior work constrains a district-level dengue GNN
-toward SEIR--SEI dynamics. We do not close that gap here. We test the weaker
+toward SEIR--SEI dynamics. We do not close that gap here.
+
+How such constraints fail is as relevant to us as how they work.
+Krishnapriyan et al.~\cite{krishnapriyan2021failure} show that soft-constraint
+failures are typically optimisation failures rather than capacity limits, and
+that raising the constraint weight gradually recovers much of the loss; Wang et
+al.~\cite{wang2022ntk} attribute the same pathology to divergent convergence
+rates between loss components. Both findings shaped our experiments directly,
+and Section~\ref{sec:results} reports a case where the second explains a result
+we had previously attributed to the constraint itself.
+
+We test the weaker
 constraint first --- spatial smoothness over the graph, which requires no
 unobserved compartments --- and report that it does not help, which bears on
 whether the stronger one is worth the modelling cost.

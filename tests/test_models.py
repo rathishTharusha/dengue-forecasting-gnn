@@ -84,6 +84,24 @@ def test_build_fixed_adjacency_rejects_unknown_district():
         build_fixed_adjacency({"A": ["Z"]}, ["A"])
 
 
+def test_build_fixed_adjacency_rejects_one_directional_edge():
+    """A shared border cannot be directional; a lone entry is an authoring bug.
+
+    Found on the project's own data: sri_lanka_adj_list.json had Kandy -> Ampara
+    with no reciprocal entry, which silently made message passing one-way
+    between them.
+    """
+    adj_list = {"A": ["B"], "B": []}
+    with pytest.raises(ValueError, match="one-directional"):
+        build_fixed_adjacency(adj_list, ["A", "B"])
+
+
+def test_build_fixed_adjacency_symmetric_check_can_be_disabled():
+    adj_list = {"A": ["B"], "B": []}
+    m = build_fixed_adjacency(adj_list, ["A", "B"], require_symmetric=False, normalize=False)
+    assert m[0, 1] == 1.0 and m[1, 0] == 0.0
+
+
 # --------------------------------------------------------------------------
 # adaptive adjacency
 # --------------------------------------------------------------------------

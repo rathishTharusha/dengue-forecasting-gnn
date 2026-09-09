@@ -42,10 +42,20 @@ See [`decisions/0001-baseline-training-refinements.md`](decisions/0001-baseline-
 
 ### Graph
 
-Districts are nodes. Edges encode inter-district adjacency built from district-to-district
-distances (reliable human-mobility data is unavailable for Sri Lanka at this resolution).
-With self-loops: **141 directed edges**. Replacing this hand-built adjacency with a learned
-adaptive one is Contribution (c).
+Districts are nodes. Edges encode **shared physical borders** between districts (not
+distance or mobility data -- reliable human-mobility data is unavailable for Sri Lanka at this
+resolution). With self-loops: **139 directed edges**. Replacing this hand-built adjacency with
+a learned adaptive one is Contribution (c).
+
+The original hand-built file had two one-directional entries that could not be real shared
+borders (`Kandy -> Ampara`, `Kegalle -> Kalutara`, no reciprocal either way) -- caught during
+Phase-2 review, 2026-09-09. Both were removed rather than symmetrised: verified against actual
+district polygon geometry from [GADM 4.1](https://gadm.org) (level-1 administrative
+boundaries, `buffer(50m).intersects()` between every pair), and neither pair shares a border.
+That check confirms the corrected file matches GADM **exactly** -- all 139 edges, none missing,
+none extra. See `docs/PHASE2_REVIEW.md` and `src/dengue_gnn/models.py`'s
+`build_fixed_adjacency(require_symmetric=True)`, which now rejects a one-directional entry
+outright so this class of error cannot silently return.
 
 ---
 

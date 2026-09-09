@@ -61,6 +61,7 @@ def build_fixed_adjacency(
     node_order: list[str],
     self_loops: bool = True,
     normalize: bool = True,
+    require_symmetric: bool = True,
 ) -> torch.Tensor:
     """Build the geographic adjacency matrix from a district adjacency list.
 
@@ -72,12 +73,23 @@ def build_fixed_adjacency(
             from ``adj_list`` key order.
         self_loops: Add the identity, so a district's own history informs it.
         normalize: Apply :func:`row_normalize`.
+        require_symmetric: Shared physical borders are symmetric by definition --
+            if A lists B as a neighbour, B must list A. A one-directional entry
+            is an authoring error in the source file, not a real edge, and it
+            silently makes message passing directional between that pair (only
+            one district's signal reaches the other). Found on this project's
+            own data: ``sri_lanka_adj_list.json`` had ``Kandy -> Ampara`` and
+            ``Kegalle -> Kalutara`` with no reciprocal entry, discovered only
+            because the model comparison stayed unexplained until the graph
+            itself was checked. Set ``False`` only to load data known to be
+            asymmetric on purpose (e.g. directional mobility, not geography).
 
     Returns:
         Float tensor of shape ``(N, N)``.
 
     Raises:
-        ValueError: If a name in ``adj_list`` is absent from ``node_order``.
+        ValueError: If a name in ``adj_list`` is absent from ``node_order``, or
+            (when ``require_symmetric``) if any edge lacks its reciprocal.
     """
     index = {name: i for i, name in enumerate(node_order)}
     n = len(node_order)
@@ -91,6 +103,21 @@ def build_fixed_adjacency(
             if neighbour not in index:
                 raise ValueError(f"neighbour {neighbour!r} missing from node_order")
             adj[i, index[neighbour]] = 1.0
+
+    if require_symmetric:
+        asymmetric = [
+            (d, n)
+            for d, neighbours in adj_list.items()
+            for n in neighbours
+            if d not in adj_list.get(n, [])
+        ]
+        if asymmetric:
+            pairs = ", ".join(f"{d} -> {n}" for d, n in asymmetric)
+            raise ValueError(
+                f"adj_list has {len(asymmetric)} one-directional edge(s) with no "
+                f"reciprocal, which cannot be a real shared border: {pairs}. Fix the "
+                f"source file, or pass require_symmetric=False if this is intentional."
+            )
 
     if self_loops:
         adj = adj + torch.eye(n)

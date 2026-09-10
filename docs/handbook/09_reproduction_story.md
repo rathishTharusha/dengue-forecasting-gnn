@@ -428,7 +428,132 @@ generated notebook an error.
 
 ---
 
-## 9.12 What the reproduction established
+## 9.12 The physics arc (EXP-021 – EXP-025)
+
+The reproduction settled what the literature's numbers meant. The next question
+was whether the project's own promised contribution — a physics-informed loss from
+the SEIR–SEI model — could beat them. It cannot, and the reason is worth more than
+the attempt.
+
+### Where the error actually lives (EXP-021)
+
+Before designing a constraint, measure the failure it is supposed to fix.
+
+| | A3TGCN | STGAT |
+|---|---|---|
+| predicted \|weekly log growth\|, max | 0.336 | 0.242 |
+| **observed** max | **3.638** | **3.638** |
+| outbreak windows | 12.6% of data | — |
+| …carrying | **61.7% of squared error** | 60.7% |
+| bias on outbreak windows | **−12.92** | −7.32 |
+
+Outbreak weeks are an eighth of the data and nearly two-thirds of the error, and
+the models under-forecast them every time. Forecasting them as well as quiet weeks
+would take RMSE from ~29 to ~20 — about 30% below the persistence floor. That is
+the headroom, and it is much larger than the ablation table suggests.
+
+### Why the obvious fix fails
+
+An asymmetric loss charging under-prediction 3× more *does* remove the bias
+(−10.58 → +1.21 for A3TGCN) and *loses* accuracy (28.98 → 31.82). The model cannot
+tell which windows are outbreaks, so it inflates everywhere. **The problem is
+outbreak detection, not loss asymmetry.**
+
+### The renewal equation, and why it was the right physics to try (EXP-023)
+
+EXP-014 had already retired a growth *ceiling*: an upper bound is slack against a
+model that under-reacts, so it contributed exactly zero gradient. The renewal
+equation is the mechanistic identity on the observable itself,
+
+```
+cases_t = R_t · Σ_s w_s · cases_{t−s}
+```
+
+with `w` the generation-interval distribution implied by Phaijoo & Gurung's stage
+durations — mean **3.30 weeks**, and validated in `dengue_gnn.seir`. It describes
+this data well *in hindsight*: a 3-week replay with oracle `R_t` scores RMSE
+**13.44** where persistence scores 55.03.
+
+It still lost, both as a soft penalty and as a decoder that reconstructs cases
+through the mechanism. The decoder did exactly what it was built to do on the
+growth axis — max log-growth **4.14** against the baseline's 0.07, so the flatness
+was gone — and was 6 RMSE worse anyway.
+
+### The number that explains all of it (EXP-024)
+
+Every causally available physics anchor is worse than persistence, artifact-free:
+
+| anchor | mean RMSE |
+|---|---|
+| persistence | **29.52** |
+| `force` (R = 1) | 35.45 |
+| `R̂ · force` | 50.01 |
+| ratio form, damped | 33.05 |
+
+Because the predictive content is entirely in `R_t`, and `R_t` is only **26%
+predictable** out of sample — from its own past, and from nothing else:
+
+| predictor of `log R_t` | out-of-sample r² |
+|---|---|
+| `log R_{t−1}` | **0.263** |
+| climate, linear | −0.025 |
+| climate + the hump-shaped thermal response R₀'s sensitivity indices imply | −0.028 |
+| susceptible depletion (8 / 26 / 52-week) | −0.011 / −0.029 / −0.021 |
+| own past + depletion | 0.263 |
+
+`sd(log R) = 0.749`, so 26% predictability leaves a **1.90× multiplicative error
+per step**, compounding over three weeks. Persistence carries no such factor —
+cases at *t−1* explain r² = 0.85 directly. **Reconstructing a forecast through R
+re-injects a factor-of-two error where persistence had none.** That single fact
+explains the anchor table, the decoder, and retrospectively EXP-004, EXP-005,
+EXP-008 and EXP-014.
+
+Two mechanisms were tested properly and are inert for reasons worth stating:
+
+- **Susceptible depletion** (`R_eff = R₀·s`) is real but ~500× too slow. Even at
+  1-in-20 under-ascertainment it drifts ≈ 0.0013 per week against `sd(log R)` of
+  0.749. Sri Lankan dengue is endemic in a population of 21.9M that never runs out
+  of susceptibles on a 3-week horizon.
+- **Climate driving R₀** through the sensitivity structure — `b` +1.000,
+  `mu_v` −0.818, `m` +0.500, `nu_v` +0.318 — predicts a hump-shaped thermal
+  response that a linear fit must miss. Allowing the curvature changes r² from
+  −0.025 to −0.028.
+
+No entomological temperature-response curves were invented to rescue this. Neither
+source paper supplies them, and guessing one is precisely the EXP-014 error.
+
+### And the direction that survived (EXP-025)
+
+`R̂` is **backward**-looking: it correlates **+0.722** with the past three weeks of
+growth and **−0.319** with the next three. Pushing a forecast toward `R̂·force`
+pushes it the wrong way, which is the monotonic damage EXP-023 measured.
+
+But a backward-looking state estimate is exactly what *detection* needs. Outbreaks
+are rankable three weeks out even though the same models cannot count them:
+
+| model | AUC | ΔAUC |
+|---|---|---|
+| current level ÷ threshold | 0.807 | — |
+| level + growth | 0.811 | +0.004 |
+| **level + `R̂`** | **0.826** | **+0.019** |
+| level + neighbours | 0.813 | +0.006 |
+| everything incl. climate | 0.820 | +0.013 |
+
+`R̂` is the largest single addition — the first time in this project that the
+mechanistic quantity measurably added anything. Around onset, mean `R̂` runs
+1.13–1.24 for six weeks before the first week above threshold, against a global
+median of 0.911: sustained `R > 1` is the textbook signature of a growing epidemic,
+and it is visible before the outbreak is.
+
+**The conclusion the project now carries:** the SEIR–SEI mechanism is useful for
+outbreak *state estimation* and as a generative constraint, and demonstrably not
+useful for point forecasting on endemic dengue — with six independent measurements
+behind the negative. That is a stronger claim than a physics term that helps by
+0.3 RMSE, and much stronger than one that does not help at all.
+
+---
+
+## 9.13 What the reproduction established
 
 1. The published numbers **are real** — the code produces them.
 2. The reported column is **training-inclusive**; the column names are effectively
@@ -444,6 +569,9 @@ generated notebook an error.
    evidence.
 8. Accuracy is capped by **the data**: autocorrelation dominance, a +0.07 graph,
    corrupted covariates, and one week of bad reporting.
+9. The **physics cannot close that cap**, because `R_t` is 26% predictable and
+   routing a forecast through it costs more than it gains (§9.12). It can,
+   however, rank outbreaks.
 
 Point 6 is the one that changed the project. It converted "why can't we beat the
 literature?" into "what does the literature's number actually mean?" — and that

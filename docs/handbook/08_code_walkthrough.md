@@ -11,13 +11,14 @@ written the way it is. Use this as a reference alongside Chapter 10.
 
 ```
 dengue-forecasting-gnn/
-├── src/dengue_gnn/          # the project's own library (Phases 1–3)
+├── src/dengue_gnn/          # torch-free shared library: metrics, seir, data
 ├── crosscheck/              # independent re-implementation; shares NO code with src/
 ├── reproduction/            # runs the ORIGINAL authors' code on Kaggle
-├── analysis/                # EDA + the improved baseline
+├── analysis/                # EDA, the verified baseline, the physics, the sweeps
 ├── notebooks/               # Phase-1 deliverable + generated reproduction notebooks
 ├── docs/                    # decisions, experiment log, this handbook
-├── results/                 # one CSV row per (fold, seed, horizon)
+├── results/                 # index + the SEIR validation table
+├── scripts/                 # verify_seir_paper.py
 └── tools/                   # repo hygiene checks
 ```
 
@@ -80,6 +81,15 @@ The contract:
 denominator or the MAPE mask shifts every reported number in the project without
 breaking anything visibly.
 
+### `data.py` — the minimal loader
+
+Three lines of real work, and it exists for one reason: CI installs numpy, pytest
+and ruff only, so anything importing torch cannot be covered there.
+`tests/test_seir.py` and `scripts/verify_seir_paper.py` both need the case series
+to check the derived growth ceiling against what the record actually contains, and
+neither needs torch. The richer loader that builds the graph and the folds lives in
+`analysis/lib/adaptive.py` and does pull in torch.
+
 ### `seir.py` — the compartmental model
 
 Implements Phaijoo & Gurung (2018). Not fitted to data; used to **derive
@@ -126,57 +136,29 @@ exactly 0.5, because this module holds $m = N_v/N_h$ fixed while the paper holds
 $\pi_v$ fixed. Neither is wrong. The docstring says so, which is why nobody has
 "fixed" it.
 
-### `losses.py` — spatial regularisation
+### `losses.py` — removed, and what it taught
 
-Two terms, both operating on **raw counts**:
+The Phase-2 objective added a graph-Laplacian smoothness term and a non-negativity
+term on raw counts. Both are gone (tag `phase23-archive`), but two lessons from
+them survive and are worth more than the code was.
 
-```python
-def smoothness_loss(pred_counts, adj):
-    """L_smooth = Σ_ij A_ij (ŷ_i − ŷ_j)² / (B · H · ‖A‖₁)"""
-    diff = pred_counts.unsqueeze(2) - pred_counts.unsqueeze(1)   # (B,N,N,H)
-    weighted = adj.unsqueeze(0).unsqueeze(-1) * diff.pow(2)
-    denom = batch * horizon * adj.abs().sum().clamp_min(1e-8)
-    return weighted.sum() / denom
+**A constraint has to act in the right space.** `nonnegativity_loss` penalised
+negative *predicted case counts*, which is correct only on raw counts. Applied to
+the network's residual output, "negative" does not mean "negative cases" — it means
+"fewer cases than last week", which is a correct and frequent forecast. Penalising
+it would have biased the model against ever predicting a decline, on a seasonal
+disease. The API forced the right space precisely because the wrong one is so easy
+to reach.
 
+**The smoothness term was penalising geography.** It charged squared differences in
+predicted counts between neighbouring districts — but counts differ by orders of
+magnitude between Colombo and rural districts, so the term was mostly a tax on
+population. The scale-free quantity is `R`, and EXP-025 measured whether a
+Laplacian belonged there instead: **Moran's I for `log R` is 0.005**, against 0.274
+for `log1p(cases)`. `R` has no local spatial structure, so the term has no correct
+version on this data. Measuring before rebuilding saved a second wrong implementation.
 
-def nonnegativity_loss(pred_counts):
-    """L_cons = mean( ReLU(−ŷ)² )"""
-    return torch.relu(-pred_counts).pow(2).mean()
-```
-
-Three things here are worth studying.
-
-**1. The unsqueeze trick.** `pred.unsqueeze(2) - pred.unsqueeze(1)` broadcasts
-`(B,N,1,H)` against `(B,1,N,H)` to give all $N^2$ pairwise differences. Standard
-idiom, and much faster than a loop.
-
-**2. Normalising by `‖A‖₁`** keeps the term comparable across adjacency matrices
-with different total edge mass — necessary because the blended adjacency changes
-during training.
-
-**3. The API forces the correct space — and this is the important one.**
-
-> `L_cons` penalises negative predictions on the grounds that a district cannot
-> have negative cases. Applied to the raw network output, a negative value does
-> not mean "negative cases" — it means "fewer cases than last week", which is a
-> correct and frequent forecast. Penalising it would systematically bias the model
-> against ever predicting a decline.
-
-The parameter is named `pred_counts` rather than `pred` precisely so a caller
-cannot pass residual-space output without noticing. **When a function is only
-correct in one coordinate space, put the space in the parameter name.**
-
-There is also an honesty note in the docstring:
-
-> The project proposal committed to a physics-informed loss derived from the
-> SEIR–SEI model. What is implemented here […] is a graph-Laplacian smoothness
-> penalty plus a non-negativity constraint. That is spatial regularisation, not
-> mechanistic epidemiology: there are no compartments, no transmission dynamics,
-> no ODE residual. The module and its functions are named accordingly.
-
-The module is named for what it *is*, not for what was promised.
-
-And one performance detail with an experimental purpose:
+One implementation detail is worth stealing verbatim:
 
 ```python
 if lambda_phys == 0.0:
@@ -185,21 +167,28 @@ if lambda_phys == 0.0:
 
 The `λ=0` ablation row is then **exactly** the unregularised model rather than an
 approximation of it — and `* 0.0` rather than a bare `0.0` keeps the tensor in the
-autograd graph, so gradients still flow correctly.
+autograd graph, so gradients still flow correctly. The same trick is in
+`analysis/lib/physics.py` today.
 
-### The remaining modules
+### The modules that were removed, and what they taught
 
-| module | purpose |
-|---|---|
-| `models.py` | Phase-2 GNNs, reconstructed from `paper/sections/03_framework.tex` after the originals were lost in a git-ignored `scratch/`. Deviations marked `REVIEW:`. |
-| `experiment.py` | The rolling-origin harness, ported from the Phase-1 notebook so results can be regenerated rather than trusted. |
-| `mechanistic.py` | Constraints using only *observed* quantities — the workaround for unobserved compartments (Chapter 2 §2.6). Explicitly labelled an exploratory prototype. |
-| `augment.py` | Contribution (b), GAN augmentation. |
-| `baselines.py` | Non-graph competitors re-run **under our protocol**. |
-| `provenance.py` | Captures config + commit SHA + seeds at run time. |
-| `results_logger.py` | Appends result CSVs, loudly. |
+The Phase-2/3 implementation was deleted once the work moved to architectures
+verified against the published papers — keeping two generations side by side was a
+standing invitation to confuse them. All of it is at tag `phase23-archive`, and
+EXP-001 – EXP-014 keep their configs and unrounded numbers inline in the experiment
+log, so those runs stay citable.
 
-Two of these encode lessons worth repeating.
+| module | purpose | why it went |
+|---|---|---|
+| `models.py` | Phase-2 GNNs, reconstructed from the framework section after the originals were lost in a git-ignored `scratch/` | superseded by `analysis/lib/reproduced.py`, whose architectures reproduce published numbers |
+| `experiment.py` | rolling-origin harness ported from the Phase-1 notebook | superseded by `analysis/lib/adaptive.py`; its one surviving function is now `dengue_gnn/data.py` |
+| `mechanistic.py` | constraints on observed quantities only | EXP-014: the corrected ceiling was inert, contributing zero gradient on all 96 rows. Its two derived constants moved into `seir.py` |
+| `augment.py` | contribution (b), GAN augmentation | never reached a result; the design lesson below survives |
+| `baselines.py` | non-graph competitors under our protocol | superseded by `reproduction/`, which runs the authors' own code |
+| `provenance.py` | config + commit SHA + seeds at run time | folded into per-job JSON records |
+| `results_logger.py` | appended result CSVs, loudly | ditto |
+
+Three of these encode lessons worth repeating.
 
 **`augment.py`:**
 
@@ -219,6 +208,17 @@ has produced nothing.
 
 That is the right response to incommensurable numbers, and it is what
 `reproduction/` exists to make possible.
+
+**`mechanistic.py`** is the cautionary one:
+
+> `MAX_WEEKLY_LOG_GROWTH` was 0.70, guessed from `ln(8)/3`. The SEIR–SEI model
+> actually implies **2.3884**. The old value declared **20.9% of the observed
+> record physically impossible** and penalised forecasts for tracking real
+> outbreaks.
+
+**A guessed physics constant is not physics.** Derive it, then check what fraction
+of your real data it forbids — 1.07% is the right order for a genuine ceiling;
+20.9% means you have built a bug with a Greek letter on it.
 
 **`results_logger.py`** was rewritten after a review finding:
 
@@ -398,6 +398,57 @@ examples until the second term vanishes. The clamp bounds that escape.
 **Why it matters:** *"Optimising this is what makes the Eq. (14) intervals
 calibrated rather than decorative."* Intervals from a model trained on MSE are
 arbitrary; intervals from a model trained on NLL are meaningful.
+
+---
+
+### `renewal.py` — the physics that did not work, kept because the negative is a result
+
+The renewal equation `cases_t = R_t · Σ_s w_s · cases_{t−s}`, with `w` the
+generation-interval distribution derived from the SEIR–SEI stage durations
+(mean 3.30 weeks). Two entry points: `renewal_penalty` as a soft loss term and
+`RenewalDecoder`, which reinterprets a backbone's output as `log R_t` and
+reconstructs cases through the mechanism.
+
+Both lost, and Chapter 9 §9.12 has the numbers. The module stays because the
+negative is one of this project's real findings and an unreproducible negative is
+not a finding at all. It is pinned by **12 tests**, including two that state the
+design intent precisely:
+
+- the penalty is exactly **zero** on a renewal-consistent forecast — a constraint
+  must not charge for obeying it;
+- its gradient points **upward** when `R > 1` — the measured failure mode was
+  under-reaction, and a ceiling could only ever push down, which is why EXP-014
+  found the old one inert.
+
+One bound is worth reading as a lesson learned from EXP-014:
+
+```python
+LOG_R_BOUNDS = (-3.0, 2.5)   # R in [0.05, 12.2]
+```
+
+The observed p99 of back-solved `R` is 5.36, so the upper bound sits well above
+anything real and cannot forbid a genuine outbreak. That is the opposite of the
+0.70 ceiling that ruled out a fifth of the record.
+
+### `physics.py` — three arms, one backbone
+
+`base`, `penalty` and `decoder` share the backbone, the folds, the normalisation,
+the loss scale and the protocol, so a difference between them is attributable to
+the physics and nothing else. It also owns the conversion between raw counts and
+normalised log1p space, because the decoder produces counts while the loss is taken
+in `z` — and putting that conversion inside the module keeps the training loop
+identical across arms.
+
+`window_history` carries a comment worth generalising:
+
+> Windows near the start of the record have less than `weeks` of history … They are
+> **edge-padded** with the first available week rather than zero-padded: zeros would
+> understate infectious pressure and make the physics term push the forecast down
+> exactly where the record is thinnest.
+
+**Padding is a modelling choice, not a formatting one.** Six windows in the whole
+dataset are affected, and zero-padding them would have biased the term in a
+direction nobody would have noticed.
 
 ---
 

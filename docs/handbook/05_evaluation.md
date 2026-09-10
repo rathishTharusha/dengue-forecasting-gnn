@@ -257,7 +257,7 @@ than a model difference. That failure is undetectable after the fact.
 
 ---
 
-## 5.4 The five ways a results table misleads you
+## 5.4 The six ways a results table misleads you
 
 All five were found in one published paper by running its code. None is visible
 from reading it.
@@ -402,6 +402,79 @@ week of bad data.
 
 And the baseline must be split the same way — **"the floor has to be split the
 same way the models are, or the comparison is between two different test sets."**
+
+
+---
+
+### Trap 6 — the model that *is* the baseline
+
+The nastiest one, because it produces the **best-looking row in the table**.
+
+When a model predicts a residual over persistence, outputting zero *is*
+persistence — and it inherits persistence's score. On a target where the previous
+week explains r² = 0.85, that is a safe, competitive local minimum. A model that
+settles there will have a low RMSE, possibly the lowest in your table, and will be
+forecasting nothing at all.
+
+It was first caught in the architecture study, where STGAT came top:
+
+| arm | RMSE mean | vs persistence |
+|---|---|---|
+| persistence | 55.12 | — |
+| **STGAT** | **54.95** | 15/24, p = 0.307 |
+| A3TGCN | 56.19 | 11/24, p = 0.839 |
+| GCN + gated TCN | 56.39 | 12/24, p = 1.000 |
+| GAT | 59.99 | 10/24, p = 0.541 |
+| GCN (control) | 60.08 | 9/24, p = 0.307 |
+
+The lowest mean, and the only arm under persistence. It looks like the headline.
+
+**The tell was not in the mean — it was in the spread of the paired differences:**
+
+| arm | mean paired difference vs persistence | SD |
+|---|---|---|
+| GCN | +4.96 | 11.97 |
+| GCN + gated TCN | +1.27 | 9.50 |
+| GAT | +4.87 | 16.97 |
+| **STGAT** | **−0.16** | **0.70** |
+| A3TGCN | +1.08 | 9.57 |
+
+Every other arm deviates from persistence with an SD of 9.5–17. STGAT deviates by
+**0.70** — it tracks persistence to within one RMSE point on *every single fold*.
+That is not a model that agrees with persistence on average. It is persistence.
+
+**How to test for it.** Measure what the model adds against what it would need to
+add:
+
+```
+move   = mean |prediction − persistence|      what the model actually contributes
+needed = mean |truth      − persistence|      what it would have to contribute
+ratio  = move / needed
+```
+
+A ratio near zero means collapse, whatever the RMSE says.
+
+**The sharper version of the same test** (EXP-025) regresses the model's predicted
+log-growth on the true log-growth and reads off the slope:
+
+| | A3TGCN, current protocol |
+|---|---|
+| slope of predicted log-growth on **true** log-growth | **0.002** |
+| slope of predicted log-growth on `log R̂` | −0.007 |
+
+A slope of 1.0 would be an undamped response; 0.0 is a flat forecast. At 0.002 the
+model's growth predictions carry **no information about growth**. The verified
+architectures in this project are sophisticated persistence, and the collapse is
+not a bug in any one of them.
+
+**And here is the part that matters for anyone trying to fix it:** under squared
+error, collapse is *correct*. The residual is nearly unpredictable, and the
+conditional mean of an unpredictable quantity is zero. Flatness is what MSE is
+asking for. That is why an asymmetric loss, a physics penalty and a mechanistic
+decoder each bought responsiveness and paid for it in RMSE, in the same direction,
+in three separate experiments (EXP-021, EXP-023). A model that reacts is MSE-worse
+by construction — so if you want reaction, you have to change the objective, not
+add a term to it.
 
 ---
 

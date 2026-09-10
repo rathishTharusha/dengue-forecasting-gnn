@@ -11,6 +11,12 @@ The goal is that after reading it you could **delete this repository and rebuild
 it from scratch**, using only official documentation for NumPy, PyTorch and
 PyTorch Geometric — no tutorials, no AI assistance, no guessing.
 
+> **Status.** Current as of EXP-025. This handbook supersedes the earlier
+> single-file `docs/COMPLETE_GUIDE.md`, which covered the same ground and was
+> removed in the Phase-2/3 cleanup — its one unique section, the residual
+> collapse, is now Chapter 5 §5.4 Trap 6. The Phase-2/3 implementation the older
+> chapters described is at tag `phase23-archive`.
+
 ---
 
 ## What this project actually is

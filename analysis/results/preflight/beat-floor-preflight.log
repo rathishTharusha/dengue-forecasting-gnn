@@ -1,0 +1,50 @@
+[{"stream_name":"stderr","time":9.144364857,"data":"0.00s - Debugger warning: It seems that frozen modules are being used, which may\n"}
+,{"stream_name":"stderr","time":9.144532187,"data":"0.00s - make the debugger miss breakpoints. Please pass -Xfrozen_modules=off\n"}
+,{"stream_name":"stderr","time":9.144545457,"data":"0.00s - to python to disable frozen modules.\n"}
+,{"stream_name":"stderr","time":9.144549587,"data":"0.00s - Note: Debugging will proceed. Set PYDEVD_DISABLE_FILE_VALIDATION=1 to disable this validation.\n"}
+,{"stream_name":"stderr","time":9.924617604,"data":"0.00s - Debugger warning: It seems that frozen modules are being used, which may\n"}
+,{"stream_name":"stderr","time":9.924690494,"data":"0.00s - make the debugger miss breakpoints. Please pass -Xfrozen_modules=off\n"}
+,{"stream_name":"stderr","time":9.924695154,"data":"0.00s - to python to disable frozen modules.\n"}
+,{"stream_name":"stderr","time":9.924698794,"data":"0.00s - Note: Debugging will proceed. Set PYDEVD_DISABLE_FILE_VALIDATION=1 to disable this validation.\n"}
+,{"stream_name":"stdout","time":11.188337867,"data":"kernel python: 3.12.13\n"}
+,{"stream_name":"stdout","time":11.388959029,"data":"$ /usr/bin/python3 -m pip install -q uv\n"}
+,{"stream_name":"stdout","time":17.698533673,"data":"   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 20.0/20.0 MB 67.2 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":17.698576263,"data":"\n"}
+,{"stream_name":"stdout","time":17.698581123,"data":"$ /usr/bin/python3 -m uv python install 3.11\n"}
+,{"stream_name":"stdout","time":19.83490348,"data":"$ /usr/bin/python3 -m uv venv --python 3.11 /tmp/repro/venv311\n"}
+,{"stream_name":"stdout","time":20.193399623,"data":"$ /usr/bin/python3 -m uv pip install -q --python /tmp/repro/venv311/bin/python torch==2.1.2 --index-url https://download.pytorch.org/whl/cpu\n"}
+,{"stream_name":"stdout","time":23.455294896,"data":"$ /usr/bin/python3 -m uv pip install -q --python /tmp/repro/venv311/bin/python torch_scatter torch_sparse -f https://data.pyg.org/whl/torch-2.1.2+cpu.html\n"}
+,{"stream_name":"stdout","time":24.470784082,"data":"$ /usr/bin/python3 -m uv pip install -q --python /tmp/repro/venv311/bin/python torch_geometric==2.4.0 numpy~=1.26.2 pandas~=2.2.0 scikit_learn==1.4.0 statsmodels==0.14.1 decorator==4.4.2 cython matplotlib tqdm\n"}
+,{"stream_name":"stdout","time":25.635764765,"data":"$ /usr/bin/python3 -m uv pip install -q --python /tmp/repro/venv311/bin/python --no-deps torch_geometric_temporal==0.54.0\n"}
+,{"stream_name":"stdout","time":37.067091288,"data":"{\n"}
+,{"stream_name":"stdout","time":37.067174648,"data":"  \"python\": \"3.11.16\",\n"}
+,{"stream_name":"stdout","time":37.067181448,"data":"  \"torch\": \"2.1.2+cpu\",\n"}
+,{"stream_name":"stdout","time":37.067186268,"data":"  \"torch_geometric\": \"2.4.0\",\n"}
+,{"stream_name":"stdout","time":37.067190848,"data":"  \"pandas\": \"2.2.3\",\n"}
+,{"stream_name":"stdout","time":37.067194897,"data":"  \"numpy\": \"1.26.4\"\n"}
+,{"stream_name":"stdout","time":37.067199088,"data":"}\n"}
+,{"stream_name":"stdout","time":37.067203577,"data":"all five architectures import OK under Python 3.11\n"}
+,{"stream_name":"stdout","time":37.26780538,"data":"$ git clone --depth 1 --branch main https://github.com/rathishTharusha/dengue-forecasting-gnn.git /tmp/repro/project\n"}
+,{"stream_name":"stdout","time":39.053185579,"data":"Cloned branch: main\n"}
+,{"stream_name":"stdout","time":56.674537381,"data":"PASS  A3TGCN/det/cases               17.6s  \n"}
+,{"stream_name":"stdout","time":74.290019127,"data":"PASS  A3TGCN/gauss/cases             17.6s  \n"}
+,{"stream_name":"stdout","time":92.021268933,"data":"PASS  A3TGCN/nb/cases                17.7s  \n"}
+,{"stream_name":"stdout","time":194.127562284,"data":"PASS  A3TGCN/det/causal             102.1s  \n"}
+,{"stream_name":"stdout","time":406.501814242,"data":"PASS  A3TGCN/det/climate            212.4s  \n"}
+,{"stream_name":"stdout","time":430.756311285,"data":"PASS  STGAT/det/climate              24.3s  \n"}
+,{"stream_name":"stdout","time":448.042020127,"data":"PASS  STGAT/nb/causal                17.3s  \n"}
+,{"stream_name":"stdout","time":1047.531402625,"data":"PASS  ASTGCN/det/climate            599.5s  \n"}
+,{"stream_name":"stdout","time":1062.206393453,"data":"PASS  AAGCN/det/causal               14.7s  \n"}
+,{"stream_name":"stdout","time":1214.635905032,"data":"PASS  DCRNN/det/cases               152.4s  \n"}
+,{"stream_name":"stdout","time":1214.637464222,"data":"\n"}
+,{"stream_name":"stdout","time":1214.637532582,"data":"10/10 configurations run.\n"}
+,{"stream_name":"stdout","time":1214.637540722,"data":"All configurations run. Safe to launch the full kernels.\n"}
+,{"stream_name":"stderr","time":1218.170411343,"data":"/usr/local/lib/python3.12/dist-packages/mistune.py:435: SyntaxWarning: invalid escape sequence '\\|'\n"}
+,{"stream_name":"stderr","time":1218.170475753,"data":"  cells[i][c] = re.sub('\\\\\\\\\\|', '|', cell)\n"}
+,{"stream_name":"stderr","time":1218.383506762,"data":"/usr/local/lib/python3.12/dist-packages/nbconvert/filters/filter_links.py:36: SyntaxWarning: invalid escape sequence '\\_'\n"}
+,{"stream_name":"stderr","time":1218.383547292,"data":"  text = re.sub(r'_', '\\_', text) # Escape underscores in display text\n"}
+,{"stream_name":"stderr","time":1219.077667533,"data":"[NbConvertApp] Converting notebook __notebook__.ipynb to notebook\n"}
+,{"stream_name":"stderr","time":1219.455346026,"data":"[NbConvertApp] Writing 15718 bytes to __notebook__.ipynb\n"}
+,{"stream_name":"stderr","time":1222.883575847,"data":"[NbConvertApp] Converting notebook __notebook__.ipynb to html\n"}
+,{"stream_name":"stderr","time":1223.985699678,"data":"[NbConvertApp] Writing 307333 bytes to __results__.html\n"}
+]

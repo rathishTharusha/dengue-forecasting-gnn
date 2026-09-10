@@ -68,13 +68,10 @@
 \newcommand{\Lcons}{\mathcal{L}_{\mathrm{cons}}}
 \newcommand{\Lsmooth}{\mathcal{L}_{\mathrm{smooth}}}
 
-% MODEL NAME — single point of change.
-% Renamed from PIAG-Net during the Phase-2 review. "Physics-Informed" did not
-% survive scrutiny: the objective contains a graph-Laplacian smoothness penalty
-% and a non-negativity term, not a mechanistic SEIR--SEI residual, and the
-% regularised variants are the ones that do NOT work. The name now describes the
-% component that does. See docs/PHASE2_REVIEW.md F5.
-\newcommand{\modelname}{GAG-Net}
+% No model name. Earlier drafts carried one (PIAG-Net, then GAG-Net); the paper
+% no longer proposes an architecture, so naming one would misdescribe it. What is
+% proposed is an evaluation protocol and a set of measurements.
+\newcommand{\Rhat}{\hat{R}}
 
 % NOTE: do NOT add authorsperrow here. With six authors sharing ONE \affiliation,
 % acmart keeps them in a single box, so authorsperrow only narrows that box --- it
@@ -88,11 +85,12 @@
 %=============================================================================
 \begin{document}
 
-% TITLE — see docs/PHASE2_PLAN.md §1.3. "GAN-augmented" is deliberately NOT here:
-% we do not evaluate a GAN in this paper. "Physics-Informed" was removed during
-% the Phase-2 review for the same reason: this paper does not evaluate a
-% mechanistic loss, and the regularised variants are negative results.
-\title{Gated Adaptive Graph Neural Networks for\\Multi-Horizon Dengue Forecasting}
+% TITLE. The paper reports what caps accuracy on this task and shows why a
+% mechanistic prior cannot lift it. It does not propose an architecture, so the
+% title does not name one. Earlier drafts were titled for a model (PIAG-Net, then
+% GAG-Net); both names outlived the claim they described.
+\title{What Caps Dengue Forecasting?\\Reproduction, Evaluation Artifacts,
+and the Limits of Mechanistic Priors}
 
 % AUTHORS — Phase 2 order. Phase 3 requires TAs then Prof.\ Dulani and Dr.\ Sandareka
 % appended as final co-authors; not needed for the short paper.
@@ -111,8 +109,9 @@
 
 \input{sections/00_abstract}
 
-\keywords{dengue forecasting, graph neural networks, adaptive graph learning,
-spatio-temporal modeling, epidemic early warning, peak timing}
+\keywords{dengue forecasting, graph neural networks, reproducibility,
+evaluation protocols, physics-informed learning, epidemic early warning,
+negative results}
 
 \maketitle
 
@@ -122,6 +121,8 @@ spatio-temporal modeling, epidemic early warning, peak timing}
 \input{sections/04_experimental_setup}
 \input{sections/05_results}
 \input{sections/06_discussion_conclusion}
+
+\input{tables_generated}
 
 \balance
 \bibliographystyle{ACM-Reference-Format}

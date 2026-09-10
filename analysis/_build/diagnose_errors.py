@@ -188,7 +188,7 @@ def main() -> int:
         print(f"  RMSE outbreak {o['rmse_outbreak']:.2f}   quiet {o['rmse_quiet']:.2f}")
         print(f"  bias outbreak {out['bias']['outbreak_mean']:+.2f}   "
               f"quiet {out['bias']['quiet_mean']:+.2f}")
-        print(f"  RMSE by horizon   " + "  ".join(f"h{i+1} {v:.2f}"
+        print("  RMSE by horizon   " + "  ".join(f"h{i+1} {v:.2f}"
                                                   for i, v in enumerate(out["horizon_rmse"])))
 
     OUT.parent.mkdir(parents=True, exist_ok=True)

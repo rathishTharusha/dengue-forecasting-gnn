@@ -48,6 +48,7 @@ sys.path.insert(0, str(REPO / "src"))
 
 import adaptive as base  # noqa: E402
 import renewal  # noqa: E402
+
 from dengue_gnn import seir  # noqa: E402
 
 NPY = REPO / "notebooks" / "baseline" / "sri_lanka_2013-2022_shifted.npy"
@@ -84,7 +85,7 @@ def main() -> int:
 
     # Back-solve R over the whole record, then work in log R: it is the scale the
     # decoder parameterises, roughly symmetric, and not bounded below at 0.
-    weeks, districts = cases.shape
+    weeks, _districts = cases.shape
     force = np.zeros_like(cases)
     for lag, weight in enumerate(w, start=1):
         force[lag:] += weight * cases[: weeks - lag]
@@ -156,7 +157,7 @@ def main() -> int:
     print(f"{'neighbours mean log R, t-1':32s}{nbp:8.3f}")
     report["neighbours_lagged"] = nbp
 
-    print(f"\nFor scale: cases at t-1 explain r^2 = 0.85 of cases at t (EDA F6).")
+    print("\nFor scale: cases at t-1 explain r^2 = 0.85 of cases at t (EDA F6).")
     print("A driver of R worth building on needs to be visible here, not at 0.0x.")
 
     OUT.parent.mkdir(parents=True, exist_ok=True)

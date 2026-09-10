@@ -64,6 +64,7 @@ sys.path.insert(0, str(REPO / "src"))
 
 import adaptive as base  # noqa: E402
 import renewal  # noqa: E402
+
 from dengue_gnn import seir  # noqa: E402
 
 NPY = REPO / "notebooks" / "baseline" / "sri_lanka_2013-2022_shifted.npy"
@@ -99,7 +100,7 @@ def main() -> int:
     raw = np.nan_to_num(np.load(NPY, allow_pickle=True)).astype(np.float64)
     cases, _, _ = base.load_dataset(NPY, ADJ)
     w = renewal.generation_interval(seir.PAPER_SECTION4)
-    weeks, districts = cases.shape
+    weeks, _districts = cases.shape
 
     force = np.zeros_like(cases)
     for lag, weight in enumerate(w, start=1):
@@ -171,9 +172,13 @@ def main() -> int:
         "own past + depletion + thermal structure",
         [prev, depletion[8], depletion[26], depletion[52], climate_hump])
 
-    print("\nsd(log R) = %.3f, so r^2 = 0.30 leaves a multiplicative error of "
-          "exp(%.3f) = %.2fx" % (np.nanstd(log_r), np.nanstd(log_r) * np.sqrt(0.70),
-                                 np.exp(np.nanstd(log_r) * np.sqrt(0.70))))
+    # The arithmetic that matters, spelled out: sd and r^2 must come from the same
+    # usable subset or the implied error is meaningless. Both do here.
+    sd = float(np.nanstd(log_r))
+    residual = sd * np.sqrt(1.0 - report["own_past"])
+    print(f"\nsd(log R) = {sd:.3f} at out-of-sample r^2 = {report['own_past']:.3f}, "
+          f"so the residual multiplicative error is "
+          f"exp({residual:.3f}) = {np.exp(residual):.2f}x per step")
     print("Persistence carries no such factor: cases at t-1 explain r^2 = 0.85 of\n"
           "cases at t directly. A renewal decoder only wins if R is predictable\n"
           "enough that reconstructing through it costs less than it gains.")

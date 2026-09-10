@@ -524,8 +524,8 @@ source paper supplies them, and guessing one is precisely the EXP-014 error.
 
 ### And the direction that survived (EXP-025)
 
-`R̂` is **backward**-looking: it correlates **+0.722** with the past three weeks of
-growth and **−0.319** with the next three. Pushing a forecast toward `R̂·force`
+`R̂` is **backward**-looking: it correlates **+0.798** with the past three weeks of
+growth and **−0.217** with the next three. Pushing a forecast toward `R̂·force`
 pushes it the wrong way, which is the monotonic damage EXP-023 measured.
 
 But a backward-looking state estimate is exactly what *detection* needs. Outbreaks

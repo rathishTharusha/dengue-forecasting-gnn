@@ -147,7 +147,7 @@ def main() -> int:
                 try:
                     scores = train_and_score(name, fold, edge_index,
                                              artifact[fold.origin], seed, epochs)
-                except Exception as exc:  # noqa: BLE001 - report, do not abort the sweep
+                except Exception as exc:
                     print(f"{name:15s} origin {fold.origin} seed {seed}  FAILED "
                           f"{type(exc).__name__}: {str(exc)[:80]}", flush=True)
                     continue

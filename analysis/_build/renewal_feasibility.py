@@ -47,6 +47,7 @@ sys.path.insert(0, str(REPO / "analysis" / "lib"))
 sys.path.insert(0, str(REPO / "src"))
 
 import adaptive as base  # noqa: E402
+
 from dengue_gnn import seir  # noqa: E402
 
 NPY = REPO / "notebooks" / "baseline" / "sri_lanka_2013-2022_shifted.npy"
@@ -98,7 +99,7 @@ def implied_r(cases: np.ndarray, w: np.ndarray, floor: float = 1.0) -> np.ndarra
         ``(weeks, districts)`` array with ``nan`` where the denominator is below
         ``floor``.
     """
-    weeks, districts = cases.shape
+    weeks, _districts = cases.shape
     force = np.zeros_like(cases, dtype=float)
     for lag, weight in enumerate(w, start=1):
         force[lag:] += weight * cases[: weeks - lag]
@@ -129,7 +130,7 @@ def replay(cases: np.ndarray, r: np.ndarray, w: np.ndarray, start: int, steps: i
 
 def main() -> int:
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
-    cases, _, names = base.load_dataset(NPY, ADJ)
+    cases, _, _names = base.load_dataset(NPY, ADJ)
     # The values at which the paper's Table 1 sensitivity indices actually
     # reproduce -- not its "Baseline Values" column, which disagrees with itself.
     p = seir.PAPER_SECTION4
@@ -137,7 +138,7 @@ def main() -> int:
 
     print("SEIR-SEI generation interval, weekly")
     for lag, weight in enumerate(w, start=1):
-        print(f"  lag {lag} wk  {weight:.4f}  {'#' * int(round(weight * 50))}")
+        print(f"  lag {lag} wk  {weight:.4f}  {'#' * round(weight * 50)}")
     mean_gi = float((np.arange(1, len(w) + 1) * w).sum())
     print(f"  mean {mean_gi:.2f} weeks   R0 = {seir.r0(p):.3f}\n")
 

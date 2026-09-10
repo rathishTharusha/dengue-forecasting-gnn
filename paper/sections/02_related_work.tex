@@ -1,62 +1,45 @@
 %=============================================================================
-% RELATED WORK — BUDGET: 200 words  (MEASURED. ~65 words per thread.)
-%
-% DRAFT v1 — 198 words. Within budget.
-%
-% Slides: give credit, focus on seminal + recent, EMPHASISE THE MISSING PIECES
-% that justify our work. Avoid "laundry list" citations. Read what you cite.
-% Each paragraph ENDS on the gap, not on a summary.
-%
-% This section is the FIRST place to cut when trimming. If you must lose 40
-% words, thread 2 compresses most safely -- but do NOT drop the DengueGNN
-% sentence, it is the nearest neighbour in the literature (PHASE2_PLAN.md §1.2).
+% RELATED WORK
 %=============================================================================
 \section{Related Work}
 \label{sec:related}
 
-% --- Thread 1: dengue forecasting on this dataset -- 65 words --------------
-\noindent\textbf{Spatio-temporal GNNs for dengue.}
-Weng et al.~\cite{weng2024graph} assembled the Sri Lanka district dataset and
-showed that spatio-temporal graph models --- among them DCRNN~\cite{li2018dcrnn}
---- outperform ARIMA, Random Forest, XGBoost and LSTM on it. Their evaluation
-uses a single chronological split and reports no naive baseline, and they
-identify neighbour-driven spurious spikes as an unresolved limitation. We adopt
-their dataset and address both gaps.
+\cE{\textbf{ST-GNNs for epidemic forecasting.} Spatio-temporal graph networks
+couple a graph convolution over regions with a temporal operator over history.
+The architectures we evaluate---STGAT, A3TGCN, ASTGCN, DCRNN and
+AAGCN---originate in traffic forecasting and were transferred to dengue by Weng
+et al.~\cite{weng2024graph}, who report them on the dataset used here.
+GulMohamed et al.~\cite{gulmohamed2026denguegnn} propose per-horizon output
+layers, additive temporal attention and a Gaussian predictive head; we adopt all
+three as increments and test them (\S\ref{sec:results}).}
 
-% --- Thread 2: adaptive / dynamic graph structure -- 65 words --------------
-\noindent\textbf{Learned graph structure.}
-Graph WaveNet~\cite{wu2019graphwavenet} learns a self-adaptive adjacency from
-node embeddings for traffic forecasting, and EpiGNN~\cite{xie2022epignn} and
-Cola-GNN~\cite{deng2020colagnn} learn location attention for influenza. Closest
-to our setting, DengueGNN~\cite{gulmohamed2026denguegnn} builds a dynamic
-adjacency by blending geographic proximity with a gravity-model mobility prior.
-Sri Lanka has no reliable inter-district mobility data, so we infer connectivity
-from the series themselves rather than assuming its generating process.
+\cE{\textbf{Baselines and evaluation.} The forecasting literature has repeatedly
+found that naive baselines are hard to beat on autocorrelated series, and that
+omitting them inflates apparent gains~\cite{hyndman2021forecasting}. Related
+failure modes---evaluating on data seen in training, normalising across the test
+period, and averaging per window rather than pooling---are individually well
+known. Our contribution is not to name them but to measure what each is worth on
+one dataset: on this target, per-window averaging alone reports a figure
+$\sim$39\% below the pooled value.}
 
-% --- Thread 3: physics-informed epidemic models -- 68 words ----------------
-% The positioning sentence is folded into this paragraph's last line, saving the
-% ~15 words a separate closing sentence would have cost.
-% "Mechanistically-constrained forecasting." as a run-in heading overflows the
-% column by 10pt. Shortened. Keep run-in headings under ~25 characters.
-\noindent\textbf{Constrained objectives.}
-Physics-informed neural networks~\cite{raissi2019pinn} embed governing equations
-in the training loss; EINNs~\cite{rodriguez2023einns} and
-CausalGNN~\cite{wang2022causalgnn} carry this idea into epidemic forecasting for
-influenza and COVID-19, where compartment trajectories are comparatively well
-observed. Dengue's exposed-human and infected-mosquito compartments are
-not~\cite{seirsei2022}, and no prior work constrains a district-level dengue GNN
-toward SEIR--SEI dynamics. We do not close that gap here.
+\cF{\textbf{Mechanistic models and hybrids.} Compartmental models remain the
+standard description of dengue transmission; we use the SEIR--SEI formulation and
+sensitivity analysis of Phaijoo and Gurung~\cite{phaijoo2018sensitivity}, whose
+nine published sensitivity indices we reproduce. Physics-informed neural networks
+embed such dynamics as a loss term~\cite{raissi2019pinn}, and recent work applies
+them to epidemic curves, typically in a regime where data are scarce relative to
+the dynamics---MP-PINN~\cite{nguyen2024mppinn} trains on 35 days and forecasts 97.
+That is the regime where a mechanistic prior pays. Our setting is the opposite:
+459 weeks across 25 districts forecasting three weeks, where a naive baseline is
+already near-optimal. We show that the difference is not incidental but decides
+the outcome, and we quantify the crossing point in terms of the predictability of
+the reproduction number.}
 
-How such constraints fail is as relevant to us as how they work.
-Krishnapriyan et al.~\cite{krishnapriyan2021failure} show that soft-constraint
-failures are typically optimisation failures rather than capacity limits, and
-that raising the constraint weight gradually recovers much of the loss; Wang et
-al.~\cite{wang2022ntk} attribute the same pathology to divergent convergence
-rates between loss components. Both findings shaped our experiments directly,
-and Section~\ref{sec:results} reports a case where the second explains a result
-we had previously attributed to the constraint itself.
-
-We test the weaker
-constraint first --- spatial smoothness over the graph, which requires no
-unobserved compartments --- and report that it does not help, which bears on
-whether the stronger one is worth the modelling cost.
+\cF{\textbf{Learned graph structure.} Graph WaveNet~\cite{wu2019graphwavenet}
+introduced a self-adaptive adjacency $\mathrm{softmax}(\mathrm{ReLU}(E_1
+E_2^{\top}))$ used alongside fixed transition matrices rather than in place of
+them. We evaluate learned, fixed and blended adjacencies, and report a
+methodological caveat that applies to any such comparison: without an explicit
+self-connection the learned matrix is near-uniform at initialisation and destroys
+the node's own signal, which on a strongly autocorrelated target is most of the
+information.}

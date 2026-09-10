@@ -1,115 +1,39 @@
 %=============================================================================
-% EXPERIMENTAL SETUP — Dataset, Protocol, Metrics, Baselines
-%
-% Updated for Phase 3: the protocol widened from 3 origins to 8 disjoint ones,
-% and the baseline set now covers non-graph competitors run under our own
-% protocol rather than cited from an incommensurable split.
-% See docs/PHASE2_REVIEW.md F4/F6/F7/F9 and docs/STAGE3_EXPERIMENTS.md.
+% REPRODUCTION
 %=============================================================================
-\section{Experimental Setup}
-\label{sec:setup}
+\section{Reproducing the Benchmark}
+\label{sec:repro}
 
-\subsection{Dataset}
-We evaluate on Sri Lanka's national dengue surveillance record, $N=25$
-administrative districts over $T=459$ consecutive weeks (2013--2022). Weekly case
-counts come from the Ministry of Health Epidemiology Unit; ten environmental
-covariates are drawn from NASA EarthData.
+\cE{We ran the reference implementation~\cite{weng2024graph} unmodified---their
+code, their data, their protocol---on a pinned software stack, and recovered their
+published numbers to within \textbf{7.3\%} across twenty comparisons, with AAGCN
+and DCRNN matching to four decimal places. Three deviations from their environment
+were forced and are documented with the exact error that forces each; none changes
+a reported figure. The published results are real.}
 
-The eleven channels are, by index: 0--2 mean/min/max 2\,m air temperature
-(\texttt{Tair}, in Kelvin), 3 specific humidity (\texttt{Qair}), 4 soil moisture,
-5 the forecast target (weekly cases), 6 canopy interception, 7--9 mean/min/max
-precipitation, and 10 minimum NDVI. Channels 6--9 are lag-shifted by 12 weeks and
-channel 10 by 17, reflecting vector breeding and infection-to-diagnosis intervals.
+\cE{What they measure is a different question, and three properties of the
+reference evaluation account for the entire apparent advantage.}
 
-This identification is empirical rather than taken from prose: each channel was
-matched against the named columns of the authors' released long-form CSV at every
-lag, with exact agreement on all eleven. Two corrections follow. There is no
-land-surface-temperature channel, contrary to earlier descriptions of this array;
-and mean and maximum NDVI, though present in the source table, are excluded from
-it.
+\paragraph{The reported column includes training data.}
+\cE{The column labelled ``cross validated'' is computed on a loader that spans the
+full series rather than a held-out split. It is a fit statistic, not a forecast
+statistic, and the column names are effectively inverted relative to their
+meanings.}
 
-Two data-quality caveats bear on any use of the covariates. Roughly $4\%$ of the
-GLDAS values are missing in the source and were replaced by zero, which for a
-Kelvin temperature compresses the usable dynamic range to $3.8\%$ of its true
-extent under standardisation. And week 395 carries $29\%$ of its year's national
-cases, at $19\times$ the local median, with 18 of 25 districts spiking together --
-a reporting artefact rather than an epidemic. Neither affects the published
-graph-model results, which are run on the case channel alone, but both matter for
-any model that reads the covariates.
+\paragraph{RMSE is averaged per window, not pooled.}
+\cF{Averaging per-window RMSE before aggregating is not the same as pooling
+squared error, and by Jensen's inequality it is systematically lower. On this
+target the gap is $\sim$39\%.}
 
-The target is strongly right-skewed: median 13 weekly cases, maximum 2{,}631, and
-$9.7\%$ of district-weeks zero.
+\paragraph{The naive baseline is absent.}
+\cF{Adding persistence to their own reported column reverses the result: it beats
+\emph{every} model there, on both MAE and RMSE. An independent
+re-implementation---sharing no code with either the reference or our own
+library---reproduces this conclusion, so it is not an artefact of one
+codebase.}
 
-\subsection{Evaluation Protocol}
-Models are evaluated under leakage-free rolling-origin (expanding window)
-cross-validation across \textbf{eight} chronological origins
-($a \in \{0.400, 0.475, \ldots, 0.925\}$, spaced $0.075$) and three or eight
-seeds. Each origin's test window is the following $7.5\%$ of the series, so
-consecutive test windows are \emph{disjoint} rather than overlapping.
-
-That choice is deliberate. Overlapping windows inflate the apparent sample size:
-eight folds sharing more than half their test data are not eight independent
-observations, and a paired test over them is anti-conservative. We trade a
-shorter test window ($\sim$34 weeks) for folds a paired test can legitimately
-treat as independent. Standardisation statistics are computed strictly from
-training-fold data, and each run makes one optimiser step per training window.
-
-A rolling-origin protocol is necessary rather than stylistic. Under a single
-$70/10/20$ chronological split we measured validation and test RMSE to be
-anti-correlated ($r = -0.74$): the two periods fall in different epidemic
-regimes, so selecting on one actively mis-selects for the other.
-
-\paragraph{Reporting and statistical power.}
-Results are mean $\pm$ standard deviation over matched runs. RMSE is pooled
-across horizons within a fold and then averaged across folds; we state this
-because pooling and averaging per-horizon RMSE differ by roughly $0.8$ here,
-larger than several of the effects discussed. Comparisons use a two-sided paired
-sign test over matched $(\text{fold}, \text{seed})$ runs rather than a comparison
-of means.
-
-Power is the binding constraint on this dataset and we report it explicitly. The
-paired standard deviation of the adaptive-graph effect is $12.0$ RMSE against a
-mean effect of $-4.6$, which requires $n \approx 54$ for $80\%$ power; the
-mechanistic-constraint effect ($-2.1$, SD $4.8$) requires $n \approx 44$. Results
-at smaller $n$ are reported with their $p$-values and described as
-under-powered rather than as null.
-
-\subsection{Metrics}
-Point accuracy is measured by RMSE, MAE and SMAPE on the original case scale;
-SMAPE is the primary percentage metric because frequent zero-case weeks make
-plain MAPE unusable.
-
-We additionally report \emph{peak week error}: per district, the absolute
-difference in weeks between the observed and forecast week of maximum incidence,
-averaged over districts whose observed maximum reaches ten cases. Below that
-threshold there is no outbreak to time and the argmax is noise. This is what an
-early-warning system is judged on, and it is not recoverable from RMSE. As a
-check that the metric measures what it claims, a persistence forecast at horizon
-$h$ is shifted $h$ weeks late by construction and must score approximately $h$;
-it does (Table~\ref{tab:horizon}).
-
-Following the requirement to characterise cost as well as accuracy, we record
-trainable parameter count, training wall-clock per fold and inference latency per
-25-district forward pass for every configuration, measured during the run rather
-than estimated afterwards.
-
-\subsection{Baselines}
-Rather than cite numbers from an incommensurable protocol, we re-run every
-competitor under our own.
-
-\textbf{Naive.} Persistence ($\hat{y}_{t+h} = y_t$) and seasonal naive
-($\hat{y}_{t+h} = y_{t+h-52}$), both deterministic.
-\textbf{Statistical and tabular.} Ridge regression, random forest and
-XGBoost~\cite{chen2016xgboost} over pooled district-weeks.
-\textbf{Deep, without a graph.} An LSTM over the same window. This is the control
-that isolates what the \emph{graph} contributes as distinct from what a deep
-model contributes.
-\textbf{Graph.} The dense fixed-adjacency GCN of Section~\ref{sec:framework},
-which shares \modelname's propagation path and differs only in whether the
-adjacency is learned.
-
-Every baseline consumes the identical windows, target transformation and inverse
-transform as the graph models, so differences are attributable to the method and
-not to preprocessing. We do not compare numerically against Weng et
-al.~\cite{weng2024graph}: their static $70/30$ split and different target
-normalisation make the numbers incommensurable.
+\cF{Consequently, published ST-GNN advantages on this benchmark do not survive
+contact with a naive baseline evaluated on held-out data. For the remainder of the
+paper we take only the \emph{architectures} from the reference work and evaluate
+them under the protocol of \S\ref{sec:setup}. Numbers below are therefore not
+comparable to the source table, and are comparable to each other.}

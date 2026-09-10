@@ -36,6 +36,7 @@ import improved as imp  # noqa: E402
 import physics as phys  # noqa: E402
 import renewal  # noqa: E402
 import reproduced as arch  # noqa: E402
+
 from dengue_gnn import seir  # noqa: E402
 
 NPY = REPO / "notebooks" / "baseline" / "sri_lanka_2013-2022_shifted.npy"
@@ -169,7 +170,7 @@ def main() -> int:
             try:
                 sc = run(arch_name, mode, lam, fold, histories[fold.origin],
                          edge_index, w, seed, epochs)
-            except Exception as exc:  # noqa: BLE001 - report, do not abort the sweep
+            except Exception as exc:
                 print(f"{arch_name:8s} {label:12s} o{fold.origin} s{seed} FAILED "
                       f"{type(exc).__name__}: {str(exc)[:70]}", flush=True)
                 continue

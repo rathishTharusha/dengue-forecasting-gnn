@@ -121,6 +121,31 @@ Spatial structure, Moran's I on the district graph: **log1p(cases) 0.274, log R 
 
 Outbreak episode counts, for any future generative work: **309 distinct episodes** across 25 districts, median length 1 week, **110 lasting ≥ 3 weeks**, 1117 district-weeks above threshold (9.7%).
 
+> **Correction, added while preparing the paper.** The lead/lag correlations and
+> the variance decomposition in sections 3 and 4 above were computed on a `log R`
+> series in which zero-case weeks were clipped to `log(1e-3)`. That clip is an
+> artefact of the floor, not a low reproduction number, and it inflates
+> `sd(log R)` from **0.749** to 1.137. The inflated value was then being paired
+> with an r² measured on the *other* subset (`cases > 0`, from `mechanistic_r.py`),
+> which made the derived multiplicative error wrong. Recomputed on the consistent
+> `(force >= 5) & (cases > 0)` subset by `analysis/_build/paper_measurements.py`:
+>
+> | quantity | as logged above | corrected |
+> |---|---|---|
+> | corr. `log R_hat` with past 3-week growth | +0.722 | **+0.798** |
+> | corr. with future 3-week growth | −0.319 | **−0.217** |
+> | corr. with \|future\| growth | −0.219 | **−0.106** |
+> | common weekly factor share | 33.5% | **44.0%** |
+> | district effect share | 6.8% | **3.0%** |
+> | weekly factor lag-1 autocorr | 0.590 | **0.670** |
+> | `sd(log R)` | — | **0.749** |
+>
+> Every qualitative conclusion is unchanged and two are strengthened: `R_hat` is
+> even more strongly a description of past growth, and the shared national
+> component is larger. The `sd = 0.749`, r² = 0.263 and 1.90× figures the paper
+> quotes are the corrected, mutually consistent set. Caught by the paper
+> notebook, which recomputes the arithmetic rather than restating it.
+
 - **Verdict:** answered. Detection is tractable (AUC 0.807, and 0.826 with the mechanistic quantity added); point forecasting is at its information limit and no loss term can move it without costing RMSE. The project's physics contribution is therefore state estimation and generative constraint, not point forecasting.
 - **Notes:** Two bugs were found and fixed while producing this. `cases[i-4:i]` with `i = 3` wraps to an empty slice and yields NaN, which ranked arbitrarily and showed up as a below-chance AUC of 0.324; and an unstandardised logistic regression did not converge on features of differing magnitude. Both were caught because a below-chance AUC from a *fitted* model is impossible and was treated as a bug rather than a finding.
 

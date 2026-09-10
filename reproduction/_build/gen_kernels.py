@@ -175,3 +175,11 @@ if __name__ == "__main__":
 
     # The cross-architecture ensemble needs every member in one session.
     write_kernel("Beat floor combination", cells_beat.build_combo())
+
+    # Ten of eleven channels are currently discarded; these test what they add.
+    for arch in cells_beat.COVARIATE_ARCHS:
+        write_kernel(f"Covariates {arch}", cells_beat.build_covariates(arch))
+
+    # Run this one FIRST: a --quick smoke of every configuration, so a shape
+    # error in a wide multivariate input costs minutes instead of hours.
+    write_kernel("Beat floor preflight", cells_beat.build_preflight())

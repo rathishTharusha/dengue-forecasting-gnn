@@ -1,0 +1,13 @@
+{
+  "id": "tharushaperera16/covariates-a3tgcn",
+  "title": "Covariates A3TGCN",
+  "code_file": "covariates_a3tgcn.ipynb",
+  "language": "python",
+  "kernel_type": "notebook",
+  "is_private": true,
+  "enable_gpu": false,
+  "enable_internet": true,
+  "dataset_sources": [],
+  "competition_sources": [],
+  "kernel_sources": []
+}

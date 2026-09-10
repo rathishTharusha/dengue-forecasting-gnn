@@ -86,6 +86,7 @@ sys.path.insert(0, str(REPO / "src"))
 
 import adaptive as base  # noqa: E402
 import count_loss as cl  # noqa: E402
+import features as feat  # noqa: E402
 import improved as imp  # noqa: E402
 import reproduced as arch  # noqa: E402
 
@@ -145,6 +146,7 @@ def train_one(
     seed: int,
     head: str,
     epochs: int,
+    in_width: int = WINDOW,
     patience: int = 30,
     batch_size: int = 32,
     lr: float = 1e-3,
@@ -163,7 +165,9 @@ def train_one(
     # second channel means -- a log-variance in log1p space, or an NB2 dispersion.
     inc = imp.Increments(probabilistic=head in ("gauss", "nb"))
     kwargs = {"adaptive": False, "channels": 8} if arch_name == "AAGCN" else {}
-    net = arch.build(arch_name, 25, WINDOW, HORIZON, edge_index=edge_index, inc=inc, **kwargs)
+    # `in_width` is the flattened input width. Univariate it is the window;
+    # multivariate it is features x window, packed feature-major.
+    net = arch.build(arch_name, 25, in_width, HORIZON, edge_index=edge_index, inc=inc, **kwargs)
     opt = torch.optim.Adam(net.parameters(), lr=lr, weight_decay=weight_decay)
 
     n = len(fold.x_train)
@@ -323,7 +327,8 @@ def score_arm(pred, truth, artifact, **tags) -> dict:
     return dict(**tags, **base.pooled_scores(pred, truth, artifact))
 
 
-def run_fold(arch_name, fold, cases, edge_index, seeds, head, epochs, verbose=True):
+def run_fold(arch_name, fold, cases, edge_index, seeds, head, epochs, in_width=WINDOW,
+             verbose=True):
     """Train every seed on one fold and score all estimator/combination arms."""
     truth_val = fold.inverse(fold.y_val.numpy())
     truth_test = fold.inverse(fold.y_test.numpy())
@@ -337,7 +342,7 @@ def run_fold(arch_name, fold, cases, edge_index, seeds, head, epochs, verbose=Tr
 
     for seed in seeds:
         t0 = time.time()
-        net = train_one(arch_name, fold, edge_index, seed, head, epochs)
+        net = train_one(arch_name, fold, edge_index, seed, head, epochs, in_width)
         m_val, v_val = predict(net, fold, "val", edge_index, head)
         m_test, v_test = predict(net, fold, "test", edge_index, head)
 
@@ -385,6 +390,9 @@ def main() -> int:
     ap.add_argument("--origin-hi", type=float, default=0.90)
     ap.add_argument("--seeds", type=int, default=5)
     ap.add_argument("--epochs", type=int, default=150)
+    ap.add_argument("--features", default="cases",
+                    help="Input channels: a key of features.FEATURE_SETS "
+                         "(cases, causal, climate). 'cases' is the univariate control.")
     ap.add_argument("--head", choices=HEADS, default="det",
                     help="det: Huber on log1p. gauss: Gaussian NLL, enabling the "
                          "heteroscedastic lognorm correction. nb: negative binomial "
@@ -399,13 +407,22 @@ def main() -> int:
     n_origins = 2 if args.quick else args.n_origins
 
     origins, test_frac = make_origins(n_origins, args.origin_lo, args.origin_hi)
-    cases, adjacency, _ = base.load_dataset(NPY, ADJ)
+    if args.features == "cases":
+        cases, adjacency, _ = base.load_dataset(NPY, ADJ)
+        folds = base.build_folds(cases, WINDOW, HORIZON, origins=origins, test_frac=test_frac)
+        in_width, chan_names = WINDOW, ["cases"]
+    else:
+        cases, stack, adjacency, chan_names = feat.load_multivariate(NPY, ADJ, args.features)
+        folds = feat.build_folds_mv(cases, stack, WINDOW, HORIZON,
+                                    origins=origins, test_frac=test_frac)
+        in_width = stack.shape[-1] * WINDOW
     src, dst = np.nonzero(adjacency)
     edge_index = torch.tensor(np.stack([src, dst]), dtype=torch.long)
-    folds = base.build_folds(cases, WINDOW, HORIZON, origins=origins, test_frac=test_frac)
 
     print(f"origins={origins} test_frac={test_frac} -> {len(folds)} folds, "
           f"seeds={seeds}, epochs={epochs}, head={args.head}", flush=True)
+    print(f"features={args.features} -> {len(chan_names)} channels x window {WINDOW} "
+          f"= input width {in_width}: {chan_names}", flush=True)
     sizes = [len(f.test_index) for f in folds]
     print(f"test windows per fold: {sizes} (disjoint: "
           f"{len({i for f in folds for i in f.test_index.tolist()}) == sum(sizes)})", flush=True)
@@ -421,9 +438,9 @@ def main() -> int:
         for fold in folds:
             print(f"  origin {fold.origin} (test n={len(fold.test_index)})", flush=True)
             recs, ens = run_fold(arch_name, fold, cases, edge_index, seeds,
-                                 args.head, epochs)
+                                 args.head, epochs, in_width)
             for r in recs:
-                r["head"] = args.head
+                r["head"], r["features"] = args.head, args.features
             all_records.extend(r for r in recs if r["arch"] != "persistence"
                                or arch_name == args.arch[0])
             ens_by_arch[arch_name][fold.origin] = ens
@@ -443,6 +460,8 @@ def main() -> int:
 
     tag = args.tag or "_".join(args.arch)
     suffix = "" if args.head == "det" else f"_{args.head}"
+    if args.features != "cases":
+        suffix += f"_{args.features}"
     out = out_dir / f"beat_{tag}{suffix}.json"
     out.write_text(json.dumps(all_records, indent=2), encoding="utf-8")
     print(f"\nwrote {len(all_records)} records -> {out}", flush=True)

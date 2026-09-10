@@ -268,3 +268,161 @@ The `multi_*` arms are the cross-architecture ensembles.
         md("## 4. Every arm against the floor"),
         code(_SUMMARY),
     ]
+
+
+#: Feature sets for the covariate kernels, control first.
+FEATURE_SETS = ("cases", "causal", "climate")
+
+#: Architectures that get a covariate kernel: the two that sit below the floor.
+COVARIATE_ARCHS = ("A3TGCN", "STGAT")
+
+
+def build_covariates(arch: str) -> list:
+    """Cells for one architecture's covariate kernel."""
+    return [
+        md(
+            f"""
+# Covariates - {arch}
+
+Ten of the eleven channels in the processed array are currently **discarded**.
+`adaptive.load_dataset` takes `raw[..., 5]` and drops temperature, humidity, soil
+moisture, canopy interception, precipitation and NDVI -- the variables the dengue
+literature treats as the drivers of transmission. This is the largest untested
+information lever left in the project.
+
+## Arms
+
+| features | channels | what it tests |
+|---|---|---|
+| `cases` | 1 | the univariate control; every other arm must beat it |
+| `causal` | 8 | humidity, soil moisture, mean temperature, mean precipitation |
+| `climate` | 17 | everything, plus missingness indicators |
+
+`causal` is deliberately small. A causality-tested Vietnam dengue study found
+humidity, soil moisture, wet-bulb temperature and rainfall dominated its lagged
+predictor set, and with ~200 training weeks a wide input is a variance problem
+before it is an information gain.
+
+## Two data problems handled first
+
+**A 0 K temperature.** The released array has no NaNs because the authors ran
+`np.nan_to_num`, turning missing GLDAS values into zeros. Measured, the
+missingness is almost entirely **one district**: `Jaffna` is zero across all five
+GLDAS channels for all 459 weeks -- 1 in 25, which is where `docs/DATA.md`'s
+"~4% missing" actually comes from. Interpolating along time cannot reach it, so
+it is filled from its **graph neighbours**, and an indicator channel marks every
+synthetic value.
+
+**Leakage.** Covariates are normalised from training weeks only, and
+`tests/test_features.py` pins that by perturbing the test tail and asserting the
+training inputs do not move.
+
+No second lag is applied: channels 6-10 are already shifted by 12 or 17 weeks.
+"""
+        ),
+        md("## 1. Environment"),
+        code(env_setup.PREAMBLE),
+        code(env_setup.SETUP),
+        code(env_setup.VERIFY_ENV),
+        md("## 2. Clone"),
+        code(_clone(f'ARCH = "{arch}"')),
+        *[
+            cell
+            for i, fs in enumerate(FEATURE_SETS)
+            for cell in (
+                md(f"## {i + 3}. `features={fs}`"),
+                code(
+                    _invoke(
+                        f'["--arch", ARCH, "--n-origins", "{N_ORIGINS}",'
+                        f' "--seeds", "{ARCH_SEEDS.get(arch, SEEDS)}", "--features", "{fs}",'
+                        f' "--out-dir", str(WORK), "--tag", ARCH]',
+                        f"features={fs}",
+                    )
+                ),
+            )
+        ],
+        md("## 6. Every arm against the floor"),
+        code(_SUMMARY),
+    ]
+
+
+def build_preflight() -> list:
+    """A fast smoke of every configuration, to be run before anything else.
+
+    Each combination is exercised at ``--quick`` -- one seed, two origins, 25
+    epochs -- purely to prove it constructs, trains and scores. The numbers are
+    meaningless and must never be reported; what matters is that a shape error in
+    a wide multivariate input surfaces in minutes rather than after a kernel has
+    burned four hours.
+    """
+    combos = [
+        ("A3TGCN", "det", "cases"),
+        ("A3TGCN", "gauss", "cases"),
+        ("A3TGCN", "nb", "cases"),
+        ("A3TGCN", "det", "causal"),
+        ("A3TGCN", "det", "climate"),
+        ("STGAT", "det", "climate"),
+        ("STGAT", "nb", "causal"),
+        ("ASTGCN", "det", "climate"),
+        ("AAGCN", "det", "causal"),
+        ("DCRNN", "det", "cases"),
+    ]
+    checks = "\n".join(
+        f'    ("{a}", "{h}", "{f}"),' for a, h, f in combos
+    )
+    return [
+        md(
+            """
+# Preflight - does every configuration run at all
+
+**Run this kernel first.** It exercises every architecture, head and feature-set
+combination at `--quick` (1 seed, 2 origins, 25 epochs) and reports which ones
+construct, train and score without error.
+
+The numbers it produces are **degraded and must never be reported**. The only
+output that matters is the PASS/FAIL table at the end. A wide multivariate input
+changes the input width every architecture is built with -- 3 channels becomes
+51 -- and that is exactly the kind of thing that fails at construction time,
+after a full kernel has already spent hours on the runs before it.
+"""
+        ),
+        md("## 1. Environment"),
+        code(env_setup.PREAMBLE),
+        code(env_setup.SETUP),
+        code(env_setup.VERIFY_ENV),
+        md("## 2. Clone"),
+        code(_clone()),
+        md("## 3. Smoke every configuration"),
+        code(
+            f'''
+COMBOS = [
+{checks}
+]
+
+results = []
+for arch_name, head, fset in COMBOS:
+    label = f"{{arch_name}}/{{head}}/{{fset}}"
+    started = time.time()
+    proc = subprocess.run(
+        [str(PY311), "-u", str(RUNNER), "--arch", arch_name, "--head", head,
+         "--features", fset, "--quick", "--out-dir", str(SCRATCH / "preflight"),
+         "--tag", f"pre_{{arch_name}}_{{head}}_{{fset}}"],
+        cwd=str(PROJ), capture_output=True, text=True,
+    )
+    ok = proc.returncode == 0
+    tail = "" if ok else (proc.stdout + proc.stderr).strip().splitlines()[-1][:200]
+    results.append((label, ok, time.time() - started, tail))
+    print(f"{{'PASS' if ok else 'FAIL'}}  {{label:28s}} {{time.time() - started:6.1f}}s  {{tail}}",
+          flush=True)
+
+print()
+n_ok = sum(1 for _, ok, _, _ in results if ok)
+print(f"{{n_ok}}/{{len(results)}} configurations run.")
+for label, ok, _, tail in results:
+    if not ok:
+        print(f"  FAILED {{label}}: {{tail}}")
+assert n_ok == len(results), "fix the failures above before launching the full sweeps"
+print("All configurations run. Safe to launch the full kernels.")
+'''
+        ),
+    ]

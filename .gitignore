@@ -1,13 +1,18 @@
 # =============================================================
 # Local-only reference material
-# These stay in the working folder but are NOT pushed to GitHub.
+#
+# These stay in your working folder but are NOT pushed to GitHub. None of them
+# is needed to run anything: the two data files the notebooks require are
+# tracked under notebooks/baseline/. See docs/SETUP.md.
 # =============================================================
 
-# Third-party papers (copyrighted — do not redistribute)
+# Third-party papers (copyrighted -- not ours to redistribute).
+# Obtain them yourself; reproduction/REPRODUCIBILITY_MATRIX.md cites each by DOI.
 papers/
 
-# Reference implementation cloned from MLOpenSourceOpenScience/disease_modeling_MLOS2
-# Read-only cross-check material; belongs to its original authors.
+# Clone of MLOpenSourceOpenScience/disease_modeling_MLOS2, the Weng et al.
+# reference implementation. Read-only cross-check material belonging to its
+# authors. reproduction/verify_local.py clones it for you at a pinned commit.
 reference_repo/
 
 # Course handout (not ours to publish)
@@ -18,13 +23,42 @@ CS3631 - Project - 2026.pdf
 datasets/
 
 # Byte-identical duplicate of "Literature Review - GNN for Dengue Forecasting.md".
-# Kept locally; only the "Literature Review - ..." copy is tracked.
 GNN for Dengue Forecasting.md
 
 # Session/scratch transcripts
 *chathistory*.txt
 scratch/
 scratchpad/
+
+# Kaggle staging area at the REPO ROOT only -- copies of tracked data plus
+# generated metadata. Rebuild with scripts/kaggle_run.py.
+#
+# The leading slash matters. Without it this pattern also swallowed
+# reproduction/kaggle/, hiding every Kaggle reproduction kernel from git.
+/kaggle/
+!/kaggle/.gitkeep
+
+# Generated Overleaf bundle -- rebuild with scripts/make_overleaf.py.
+overleaf/
+overleaf.zip
+
+# Reading copies of the reproduction kernels. The canonical source is
+# reproduction/kaggle/kernels/<slug>/, which carries the notebook AND its
+# kernel-metadata.json; tracking both would let them drift apart.
+reproduction/notebooks/
+
+# =============================================================
+# Virtual environments
+#
+# Each workspace builds its own; none belongs in git. crosscheck/ and
+# reproduction/ pin different, deliberately incompatible stacks -- see their
+# READMEs.
+# =============================================================
+.venv/
+venv/
+env/
+crosscheck/.venv/
+reproduction/.venv*/
 
 # =============================================================
 # Data & model artifacts
@@ -59,9 +93,6 @@ __pycache__/
 build/
 dist/
 .eggs/
-.venv/
-venv/
-env/
 .python-version
 .pytest_cache/
 .ruff_cache/
@@ -76,11 +107,16 @@ htmlcov/
 
 # =============================================================
 # Secrets & local config
+#
+# The Kaggle CLI (>= 2.2) uses ~/.kaggle/access_token, not a file in the repo.
+# Never put a credential inside this folder. See reproduction/kaggle/README.md.
 # =============================================================
 .env
 .env.*
 *.key
 kaggle.json
+access_token
+access_token.txt
 service_account*.json
 
 # =============================================================
@@ -95,6 +131,7 @@ ehthumbs.db
 .vscode/
 .idea/
 *.code-workspace
+.antigravity/
 
 # Google Drive conflict copies
 *conflicted copy*

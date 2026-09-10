@@ -1,0 +1,8 @@
+check,claim,expected,observed,passed
+T1,closed-form R0 equals the next-generation spectral radius,identical to floating-point precision,"0.782878641876 vs 0.782878641876, diff 1.11e-16",True
+T2,all nine Table 1 sensitivity indices reproduce,agreement to the paper's printed precision (<= 5e-6),largest absolute error 1.89e-06,True
+T3,closed-form indices agree with central finite differences,agreement to ~1e-6,largest gap 9.34e-11,True
+T6,"R0 < 1 implies the disease dies out (Theorems 3.2, 3.3)","with the paper's Section 4 parameters R0 < 1, so i_h -> 0",R0=0.7829; i_h(3 years)=-8.58e-14,True
+T5,endemic equilibrium is positive exactly when R0 > 1 (Theorem 3.1),"i_h* <= 0 below R0 = 1, > 0 above",sign correct across the whole sweep = True,True
+T5b,the corrected E1 is an exact fixed point; the printed one is not,residual = 0 for the corrected form; printed host components still exact,"printed residual 9.7e-05, corrected residual 1.4e-20, host components exact = True",True
+T4,sign of each sensitivity index predicts the direction of the Figures 4-8 simulations,positive index -> peak i_h rises; negative index -> peak i_h falls,5/5 parameters agree,True

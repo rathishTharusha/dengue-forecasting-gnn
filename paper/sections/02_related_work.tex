@@ -1,0 +1,45 @@
+%=============================================================================
+% RELATED WORK
+%=============================================================================
+\section{Related Work}
+\label{sec:related}
+
+\cE{\textbf{ST-GNNs for epidemic forecasting.} Spatio-temporal graph networks
+couple a graph convolution over regions with a temporal operator over history.
+The architectures we evaluate---STGAT, A3TGCN, ASTGCN, DCRNN and
+AAGCN---originate in traffic forecasting and were transferred to dengue by Weng
+et al.~\cite{weng2024graph}, who report them on the dataset used here.
+GulMohamed et al.~\cite{gulmohamed2026denguegnn} propose per-horizon output
+layers, additive temporal attention and a Gaussian predictive head; we adopt all
+three as increments and test them (\S\ref{sec:results}).}
+
+\cE{\textbf{Baselines and evaluation.} The forecasting literature has repeatedly
+found that naive baselines are hard to beat on autocorrelated series, and that
+omitting them inflates apparent gains~\cite{hyndman2021forecasting}. Related
+failure modes---evaluating on data seen in training, normalising across the test
+period, and averaging per window rather than pooling---are individually well
+known. Our contribution is not to name them but to measure what each is worth on
+one dataset: on this target, per-window averaging alone reports a figure
+$\sim$39\% below the pooled value.}
+
+\cF{\textbf{Mechanistic models and hybrids.} Compartmental models remain the
+standard description of dengue transmission; we use the SEIR--SEI formulation and
+sensitivity analysis of Phaijoo and Gurung~\cite{phaijoo2018sensitivity}, whose
+nine published sensitivity indices we reproduce. Physics-informed neural networks
+embed such dynamics as a loss term~\cite{raissi2019pinn}, and recent work applies
+them to epidemic curves, typically in a regime where data are scarce relative to
+the dynamics---MP-PINN~\cite{nguyen2024mppinn} trains on 35 days and forecasts 97.
+That is the regime where a mechanistic prior pays. Our setting is the opposite:
+459 weeks across 25 districts forecasting three weeks, where a naive baseline is
+already near-optimal. We show that the difference is not incidental but decides
+the outcome, and we quantify the crossing point in terms of the predictability of
+the reproduction number.}
+
+\cF{\textbf{Learned graph structure.} Graph WaveNet~\cite{wu2019graphwavenet}
+introduced a self-adaptive adjacency $\mathrm{softmax}(\mathrm{ReLU}(E_1
+E_2^{\top}))$ used alongside fixed transition matrices rather than in place of
+them. We evaluate learned, fixed and blended adjacencies, and report a
+methodological caveat that applies to any such comparison: without an explicit
+self-connection the learned matrix is near-uniform at initialisation and destroys
+the node's own signal, which on a strongly autocorrelated target is most of the
+information.}

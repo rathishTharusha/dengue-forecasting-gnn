@@ -1,0 +1,27 @@
+[project]
+name = "dengue-crosscheck"
+version = "0.1.0"
+description = "Independent reproductions of the four papers this project builds on"
+readme = "README.md"
+requires-python = ">=3.10"
+
+[tool.pytest.ini_options]
+# xcheck comes from crosscheck/lib; dengue_gnn from the main project's src, so
+# test_agrees_with_project_metrics can compare the two implementations. That
+# comparison is the only place the two ever meet.
+pythonpath = ["lib", "../src"]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+# Generated notebook sources are large string literals, not code we lint.
+extend-exclude = ["_build", ".venv", "notebooks"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "SIM", "NPY", "RUF"]
+ignore = [
+    "E501",  # line length is handled by the formatter
+    "B905",  # zip(strict=) not available on the Colab Python we target
+]

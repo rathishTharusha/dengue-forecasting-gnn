@@ -1,0 +1,276 @@
+# Metric lines from the authors' run_* output, extracted verbatim.
+# tqdm progress bars stripped (98% of the raw log); every Test/Full/Average
+# line the reproduction parses is preserved. Re-run the kernel for the full log.
+authors' hyperparameters, read from their module:
+  batch_size   = 1
+  window_size  = 3
+  in_channels  = 3
+  out_channels = 3
+  num_nodes    = 25
+  num_epochs   = 50
+  lr           = 0.0001
+  decay        = 5e-05
+  dropout      = 0.1
+  data_file    = ../Data/Datasets/sri_lanka_2013-2022_shifted.npy
+Loss: 0.891
+Loss: 0.832
+Loss: 0.777
+Loss: 0.728
+Loss: 0.684
+Loss: 0.644
+Loss: 0.609
+Loss: 0.577
+Loss: 0.550
+Loss: 0.527
+Loss: 0.506
+Loss: 0.489
+Loss: 0.475
+Loss: 0.463
+Loss: 0.453
+Loss: 0.444
+Loss: 0.437
+Loss: 0.432
+Loss: 0.427
+Loss: 0.424
+Loss: 0.422
+Loss: 0.420
+Loss: 0.418
+Loss: 0.418
+Loss: 0.417
+Loss: 0.417
+Loss: 0.417
+Loss: 0.418
+Loss: 0.418
+Loss: 0.418
+Loss: 0.419
+Loss: 0.419
+Loss: 0.419
+Loss: 0.420
+Loss: 0.420
+Loss: 0.420
+Loss: 0.420
+Loss: 0.420
+Loss: 0.420
+Loss: 0.420
+Loss: 0.420
+Loss: 0.420
+Loss: 0.420
+Loss: 0.420
+Loss: 0.420
+Loss: 0.420
+Loss: 0.419
+Loss: 0.419
+Loss: 0.419
+Loss: 0.419
+Test, MAE: 62.99145625738451, RMSE: 95.3800654313396, MAPE: 1.3826837855209576e+17
+Full, MAE: 43.48094985905187, RMSE: 59.30007488305964, MAPE: 3.593112868411833e+17
+Loss: 7.141
+Loss: 7.117
+Loss: 7.099
+Loss: 7.084
+Loss: 7.073
+Loss: 7.064
+Loss: 7.058
+Loss: 7.054
+Loss: 7.051
+Loss: 7.051
+Loss: 7.052
+Loss: 7.055
+Loss: 7.058
+Loss: 7.062
+Loss: 7.067
+Loss: 7.072
+Loss: 7.078
+Loss: 7.084
+Loss: 7.090
+Loss: 7.097
+Loss: 7.104
+Loss: 7.110
+Loss: 7.117
+Loss: 7.123
+Loss: 7.130
+Loss: 7.136
+Loss: 7.142
+Loss: 7.149
+Loss: 7.155
+Loss: 7.161
+Loss: 7.167
+Loss: 7.173
+Loss: 7.179
+Loss: 7.185
+Loss: 7.190
+Loss: 7.196
+Loss: 7.202
+Loss: 7.207
+Loss: 7.213
+Loss: 7.219
+Loss: 7.224
+Loss: 7.230
+Loss: 7.235
+Loss: 7.241
+Loss: 7.247
+Loss: 7.252
+Loss: 7.258
+Loss: 7.264
+Loss: 7.269
+Loss: 7.275
+Test, MAE: 32.725118000507344, RMSE: 38.37790464950036, MAPE: 1.3103712479273531e+17
+Full, MAE: 40.84253682551309, RMSE: 53.84528136832769, MAPE: 3.213051425994384e+17
+Loss: 0.272
+Loss: 0.245
+Loss: 0.223
+Loss: 0.205
+Loss: 0.188
+Loss: 0.175
+Loss: 0.164
+Loss: 0.154
+Loss: 0.145
+Loss: 0.137
+Loss: 0.131
+Loss: 0.125
+Loss: 0.120
+Loss: 0.116
+Loss: 0.113
+Loss: 0.110
+Loss: 0.108
+Loss: 0.106
+Loss: 0.104
+Loss: 0.102
+Loss: 0.101
+Loss: 0.100
+Loss: 0.099
+Loss: 0.098
+Loss: 0.097
+Loss: 0.097
+Loss: 0.096
+Loss: 0.096
+Loss: 0.095
+Loss: 0.095
+Loss: 0.095
+Loss: 0.094
+Loss: 0.094
+Loss: 0.094
+Loss: 0.094
+Loss: 0.094
+Loss: 0.093
+Loss: 0.093
+Loss: 0.093
+Loss: 0.093
+Loss: 0.093
+Loss: 0.093
+Loss: 0.093
+Loss: 0.093
+Loss: 0.093
+Loss: 0.093
+Loss: 0.093
+Loss: 0.093
+Loss: 0.093
+Loss: 0.093
+Test, MAE: 40.307052300858174, RMSE: 53.10965293344839, MAPE: 3.9449304220121254e+17
+Full, MAE: 40.496294908321, RMSE: 54.41485990741284, MAPE: 3.473468380661221e+17
+Loss: 0.129
+Loss: 0.121
+Loss: 0.116
+Loss: 0.114
+Loss: 0.112
+Loss: 0.112
+Loss: 0.112
+Loss: 0.112
+Loss: 0.113
+Loss: 0.115
+Loss: 0.117
+Loss: 0.119
+Loss: 0.121
+Loss: 0.123
+Loss: 0.126
+Loss: 0.128
+Loss: 0.131
+Loss: 0.133
+Loss: 0.135
+Loss: 0.137
+Loss: 0.139
+Loss: 0.141
+Loss: 0.142
+Loss: 0.144
+Loss: 0.146
+Loss: 0.147
+Loss: 0.149
+Loss: 0.150
+Loss: 0.151
+Loss: 0.152
+Loss: 0.153
+Loss: 0.153
+Loss: 0.154
+Loss: 0.155
+Loss: 0.156
+Loss: 0.156
+Loss: 0.157
+Loss: 0.158
+Loss: 0.158
+Loss: 0.159
+Loss: 0.159
+Loss: 0.159
+Loss: 0.160
+Loss: 0.160
+Loss: 0.160
+Loss: 0.161
+Loss: 0.161
+Loss: 0.161
+Loss: 0.162
+Loss: 0.162
+Test, MAE: 47.55340727519214, RMSE: 64.05707643649261, MAPE: 7.399949330895907e+17
+Full, MAE: 42.58081955106013, RMSE: 56.690450897382, MAPE: 4.074206577210424e+17
+Loss: 1.335
+Loss: 1.273
+Loss: 1.215
+Loss: 1.161
+Loss: 1.111
+Loss: 1.066
+Loss: 1.024
+Loss: 0.987
+Loss: 0.954
+Loss: 0.924
+Loss: 0.897
+Loss: 0.873
+Loss: 0.851
+Loss: 0.831
+Loss: 0.813
+Loss: 0.797
+Loss: 0.782
+Loss: 0.768
+Loss: 0.753
+Loss: 0.738
+Loss: 0.724
+Loss: 0.710
+Loss: 0.696
+Loss: 0.684
+Loss: 0.673
+Loss: 0.662
+Loss: 0.652
+Loss: 0.643
+Loss: 0.634
+Loss: 0.626
+Loss: 0.619
+Loss: 0.613
+Loss: 0.607
+Loss: 0.602
+Loss: 0.597
+Loss: 0.593
+Loss: 0.589
+Loss: 0.586
+Loss: 0.583
+Loss: 0.580
+Loss: 0.578
+Loss: 0.576
+Loss: 0.574
+Loss: 0.572
+Loss: 0.570
+Loss: 0.569
+Loss: 0.567
+Loss: 0.566
+Loss: 0.565
+Loss: 0.564
+Test, MAE: 40.966053264464215, RMSE: 50.2549028537924, MAPE: 7.991869316799745e+17
+Full, MAE: 42.247502934874845, RMSE: 54.89459078803932, MAPE: 4.437071084870937e+17
+Average MAE: 41.92962081576419, Standard Deviation: 1.110666952228009
+Average RMSE: 55.82905156884429, Standard Deviation: 1.9798237732492385

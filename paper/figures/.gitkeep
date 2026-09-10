@@ -1,0 +1,7 @@
+Figure sources and exported PDFs go here.
+
+Fig. 1 architecture.pdf      -- owner E, due Day 2 (Wed 19 Aug)
+Fig. 2 forecast_overlay.pdf  -- owner E, due Day 4 (Fri 21 Aug)
+
+Export as PDF (vector), single column width. Keep the source (.drawio/.tex/.py)
+alongside the export so figures are reproducible.

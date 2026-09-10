@@ -1,0 +1,10 @@
+id,finding,implication
+F1,"11 channels identified by name and lag, 100% exact",docs/DATA.md lists a land-surface-temperature channel that does not exist
+F2,unshifted array is reconstructible from vertical.csv,the 10 unshifted Table I rows may be reproducible after all
+F3,4% of weather values are 0-filled; usable range compressed 26x,must be fixed before any covariate-using contribution
+F4,week 395 is a 19x spike across 18 of 25 districts at once,affects any model trained or scored across it
+F5,"2017 outbreak is in TEST for segment 0.6, TRAIN for the rest",explains ASTGCN's +-19.85 MAE and the cross-segment spread
+F6,cases r^2=0.85 at lag 1; best covariate r^2=0.02,persistence is strong by construction; headroom is in the tails
+F7,adjacency has 2 one-way edges; Jaffna has degree 1,hand-built graph carries defects a learned graph would not inherit
+F8,neighbour r=0.62 vs non-neighbour r=0.55 (p=0.0002),graph is real but weak; argues for a learned adjacency
+F9,"RETRACTED: no usable annual cycle (shape r=-0.065, 0/25 districts, R2=0.03)",a week-of-year feature is NOT a cheap win; EXP-012 had this right

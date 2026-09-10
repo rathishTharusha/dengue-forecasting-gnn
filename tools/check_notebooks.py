@@ -20,7 +20,17 @@ import sys
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-NOTEBOOK_GLOB = "notebooks/**/*.ipynb"
+#: Every notebook tree in the repo. The three added workspaces are equally
+#: capable of arriving corrupted from a sync or with QUICK_TEST left enabled,
+#: and their notebooks are generated, so a cell-source escaping slip produces
+#: an .ipynb that looks fine in review and dies on execution.
+NOTEBOOK_GLOBS = (
+    "notebooks/**/*.ipynb",
+    "crosscheck/notebooks/**/*.ipynb",
+    "reproduction/kaggle/kernels/**/*.ipynb",
+    "analysis/notebooks/**/*.ipynb",
+    "paper/**/*.ipynb",
+)
 
 
 def check_notebook(path: Path) -> tuple[list[str], list[str]]:
@@ -55,6 +65,13 @@ def check_notebook(path: Path) -> tuple[list[str], list[str]]:
             continue
 
         source = "".join(cell.get("source", []))
+
+        # Generated notebooks can carry an escaping slip that only shows at
+        # execution time, after the expensive cells above have already run.
+        try:
+            compile(source, f"{rel}:cell{i}", "exec")
+        except SyntaxError as exc:
+            errors.append(f"{rel}: cell {i} is not valid Python ({exc.msg}, line {exc.lineno})")
         if "QUICK_TEST = True" in source.replace("QUICK_TEST=True", "QUICK_TEST = True"):
             warnings.append(f"{rel}: cell {i} has QUICK_TEST enabled -- degraded numbers")
 
@@ -71,8 +88,10 @@ def check_notebook(path: Path) -> tuple[list[str], list[str]]:
 
 
 def main() -> int:
-    notebooks = sorted(REPO_ROOT.glob(NOTEBOOK_GLOB))
-    notebooks = [p for p in notebooks if ".ipynb_checkpoints" not in p.parts]
+    notebooks = sorted({path for glob in NOTEBOOK_GLOBS for path in REPO_ROOT.glob(glob)})
+    notebooks = [
+        p for p in notebooks if ".ipynb_checkpoints" not in p.parts and ".venv" not in p.parts
+    ]
 
     if not notebooks:
         print("no notebooks found -- nothing to check")

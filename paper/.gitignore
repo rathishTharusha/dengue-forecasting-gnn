@@ -1,0 +1,13 @@
+# LaTeX build artefacts
+*.aux
+*.log
+*.out
+*.bbl
+*.blg
+*.toc
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+main.pdf
+main-highlighted.tex
+main-highlighted.pdf

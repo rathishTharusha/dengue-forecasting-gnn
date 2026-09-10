@@ -28,6 +28,13 @@ N_ORIGINS = 9
 SEEDS = 5
 COMBO_SEEDS = 3
 
+#: DCRNN is the slowest architecture and the furthest above the floor (+1.78),
+#: so it gets fewer seeds rather than a share of wall clock it cannot repay.
+ARCH_SEEDS = {"DCRNN": 3}
+
+#: Output heads, each a separate invocation of the runner.
+HEADS = ("det", "gauss", "nb")
+
 
 def _clone(extra: str = "") -> str:
     return f"""
@@ -121,6 +128,49 @@ out.to_csv(Path(WORK) / "beat_summary.csv", index=False)
 '''
 
 
+_HEAD_BLURB = {
+    "det": """## 3. Deterministic head
+
+Huber on `log1p` -- the existing pipeline, and the arm every correction is
+measured against.""",
+    "gauss": """## 4. Gaussian head
+
+The same run with a Gaussian head. This is what makes the `lognorm` correction
+*heteroscedastic*: the network predicts a variance per window, so the correction
+is largest on exactly the high-variance outbreak windows where the measured bias
+is $-12.9$ rather than $+0.4$.""",
+    # Raw: these carry LaTeX, and `\alpha` in a plain string is a bell character.
+    "nb": r"""## 5. Negative-binomial head
+
+A count likelihood, $\mathrm{Var} = \mu + \alpha\mu^2$, emitting the conditional
+**mean** directly. Where the corrections above repair a log-space median after
+the fact, this never creates the problem -- there is no retransformation step to
+be biased by. NB2 rather than Poisson because the target is heavily
+overdispersed (median 13, max 2631, 9.7% zeros).
+
+The `calib` factor fitted on top is a **diagnostic** here, not a repair: near
+1.0 means the count likelihood really did remove the bias.""",
+}
+
+
+def _head_cells(arch: str) -> list:
+    """One markdown + one invocation cell per output head."""
+    seeds = ARCH_SEEDS.get(arch, SEEDS)
+    cells = []
+    for head in HEADS:
+        cells.append(md(_HEAD_BLURB[head]))
+        cells.append(
+            code(
+                _invoke(
+                    f'["--arch", ARCH, "--n-origins", "{N_ORIGINS}", "--seeds", "{seeds}",'
+                    f' "--head", "{head}", "--out-dir", str(WORK), "--tag", ARCH]',
+                    f"{head} head",
+                )
+            )
+        )
+    return cells
+
+
 def build(arch: str) -> list:
     """Cells for one architecture's beat-the-floor kernel."""
     return [
@@ -168,30 +218,8 @@ ones. The three corrections are three ways of estimating the same factor.
         code(env_setup.VERIFY_ENV),
         md("## 2. Clone"),
         code(_clone(f'ARCH = "{arch}"')),
-        md(f"## 3. Deterministic head ({N_ORIGINS} origins x {SEEDS} seeds)"),
-        code(
-            _invoke(
-                f'["--arch", ARCH, "--n-origins", "{N_ORIGINS}", "--seeds", "{SEEDS}",'
-                f' "--out-dir", str(WORK), "--tag", ARCH]',
-                "deterministic head",
-            )
-        ),
-        md(
-            """## 4. Gaussian head
-
-The same run with a `probabilistic` head. This is what makes the `lognorm`
-correction *heteroscedastic*: the network predicts a variance per window, so the
-correction is largest exactly on the high-variance outbreak windows where the
-bias is measured to be largest."""
-        ),
-        code(
-            _invoke(
-                f'["--arch", ARCH, "--n-origins", "{N_ORIGINS}", "--seeds", "{SEEDS}",'
-                f' "--probabilistic", "--out-dir", str(WORK), "--tag", ARCH]',
-                "Gaussian head",
-            )
-        ),
-        md("## 5. Every arm against the floor"),
+        *_head_cells(arch),
+        md("## 6. Every arm against the floor"),
         code(_SUMMARY),
     ]
 
@@ -226,13 +254,17 @@ The `multi_*` arms are the cross-architecture ensembles.
         md("## 2. Clone"),
         code(_clone(f"ARCHS = [{archs}]")),
         md("## 3. Combination run"),
-        code(
-            _invoke(
-                f'["--arch"] + ARCHS + ["--n-origins", "{N_ORIGINS}",'
-                f' "--seeds", "{COMBO_SEEDS}", "--out-dir", str(WORK), "--tag", "combo"]',
-                "cross-architecture combination",
+        *[
+            code(
+                _invoke(
+                    f'["--arch"] + ARCHS + ["--n-origins", "{N_ORIGINS}", "--seeds",'
+                    f' "{COMBO_SEEDS}", "--head", "{h}", "--out-dir", str(WORK),'
+                    f' "--tag", "combo"]',
+                    f"combination, {h} head",
+                )
             )
-        ),
+            for h in HEADS
+        ],
         md("## 4. Every arm against the floor"),
         code(_SUMMARY),
     ]

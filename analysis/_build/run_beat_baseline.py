@@ -49,6 +49,16 @@ correction below is calibrated on the **validation split** and applied to test.
     Mean of the seeds' count-space predictions. Pure variance reduction, and the
     one lever here that needs no calibration at all.
 
+``--head nb`` -- remove the bias instead of correcting it
+    A negative-binomial head on raw counts, ``Var = mu + alpha mu^2``, which
+    emits the conditional **mean** directly. Where the corrections above repair
+    a log-space median after the fact, this never creates the problem: there is
+    no retransformation step. NB2 rather than Poisson because this target is
+    heavily overdispersed (median 13, max 2631, 9.7% zeros), and it is the
+    specification the dengue count-forecasting literature settles on. Fitting
+    ``calib`` on top of it is then a diagnostic -- a factor near 1.0 says the
+    likelihood really did remove the bias.
+
 Every arm is scored against persistence on the identical windows, with the
 week-395 artifact split out the same way for both.
 
@@ -75,6 +85,7 @@ sys.path.insert(0, str(REPO / "analysis" / "lib"))
 sys.path.insert(0, str(REPO / "src"))
 
 import adaptive as base  # noqa: E402
+import count_loss as cl  # noqa: E402
 import improved as imp  # noqa: E402
 import reproduced as arch  # noqa: E402
 
@@ -84,6 +95,17 @@ OUT_DIR = REPO / "analysis" / "results"
 
 WINDOW, HORIZON = 3, 3
 LOG_CLIP = 12.0
+
+#: Output heads.
+#:
+#: ``det``   -- Huber on log1p, the existing pipeline.
+#: ``gauss`` -- Gaussian NLL on log1p; predicts a per-window variance, which is
+#:              what makes the ``lognorm`` correction heteroscedastic.
+#: ``nb``    -- negative binomial on raw counts. Predicts the count **mean**
+#:              directly, so there is no retransformation step to be biased by.
+#:              Its ``calib`` factor is then a diagnostic rather than a fix: a
+#:              well-specified NB head should need a factor near 1.0.
+HEADS = ("det", "gauss", "nb")
 
 #: Point estimators, all calibrated on validation and applied to test.
 ESTIMATORS = ("raw", "smear", "lognorm", "calib")
@@ -121,7 +143,7 @@ def train_one(
     fold,
     edge_index: torch.Tensor,
     seed: int,
-    probabilistic: bool,
+    head: str,
     epochs: int,
     patience: int = 30,
     batch_size: int = 32,
@@ -137,7 +159,9 @@ def train_one(
     torch.manual_seed(seed)
     np.random.seed(seed)  # noqa: NPY002
 
-    inc = imp.Increments(probabilistic=probabilistic)
+    # Both `gauss` and `nb` need a two-channel head; they differ in what the
+    # second channel means -- a log-variance in log1p space, or an NB2 dispersion.
+    inc = imp.Increments(probabilistic=head in ("gauss", "nb"))
     kwargs = {"adaptive": False, "channels": 8} if arch_name == "AAGCN" else {}
     net = arch.build(arch_name, 25, WINDOW, HORIZON, edge_index=edge_index, inc=inc, **kwargs)
     opt = torch.optim.Adam(net.parameters(), lr=lr, weight_decay=weight_decay)
@@ -153,9 +177,12 @@ def train_one(
             x, p, y = fold.x_train[idx], fold.p_train[idx], fold.y_train[idx]
             opt.zero_grad()
             out = net(x, edge_index)
-            if probabilistic:
-                mu, log_var = out[..., 0] + p, out[..., 1]
-                loss = imp.gaussian_nll(mu, log_var, y)
+            if head == "gauss":
+                loss = imp.gaussian_nll(out[..., 0] + p, out[..., 1], y)
+            elif head == "nb":
+                mu, alpha = cl.split_nb(out, p * fold.std + fold.mean)
+                counts_true = torch.expm1((y * fold.std + fold.mean).clamp(0.0, LOG_CLIP))
+                loss = cl.nb_nll(mu, alpha, counts_true)
             else:
                 loss = nn.functional.smooth_l1_loss(out + p, y)
             loss.backward()
@@ -164,9 +191,8 @@ def train_one(
 
         net.eval()
         with torch.no_grad():
-            out = net(fold.x_val, edge_index)
-            mu = (out[..., 0] if probabilistic else out) + fold.p_val
-            val_rmse = base.rmse(fold.inverse(mu.numpy()), fold.inverse(fold.y_val.numpy()))
+            m, _ = _head_output(net, fold, "val", edge_index, head)
+            val_rmse = base.rmse(np.expm1(m), fold.inverse(fold.y_val.numpy()))
 
         if val_rmse < best_val - 1e-6:
             best_val, waited = val_rmse, 0
@@ -181,26 +207,39 @@ def train_one(
     return net
 
 
-def predict(net, fold, split: str, edge_index, probabilistic: bool):
+def _head_output(net, fold, split: str, edge_index, head: str):
     """Return ``(m, v)`` in log1p space: mean and variance of ``log(1 + y)``.
 
-    ``m`` is un-z-scored and clipped exactly as :meth:`Fold.inverse` clips, so
-    ``expm1(m)`` reproduces the existing pipeline's point prediction bit for bit.
-    ``v`` is zero for a deterministic head; the caller supplies a pooled estimate
-    in that case.
+    Every head is reported through the same pair so one estimator pipeline
+    serves all three. ``m`` is un-z-scored and clipped exactly as
+    :meth:`Fold.inverse` clips, so for ``det`` the ``raw`` estimator reproduces
+    the existing pipeline's point prediction bit for bit.
+
+    The ``nb`` head already emits a count mean, so it is reported as
+    ``m = log1p(mu)``: ``raw`` then returns ``mu`` unchanged, and the ``calib``
+    factor fitted on top becomes a *test* of the head rather than a repair of it.
+    A factor near 1.0 says the count likelihood removed the bias; a factor well
+    above 1.0 says it did not.
     """
-    net.eval()
     with torch.no_grad():
         out = net(getattr(fold, f"x_{split}"), edge_index)
         p = getattr(fold, f"p_{split}")
-        z = (out[..., 0] if probabilistic else out) + p
+        if head == "nb":
+            mu, _ = cl.split_nb(out, p * fold.std + fold.mean)
+            return np.log1p(mu.numpy()), np.zeros(mu.shape, dtype=np.float64)
+        z = (out[..., 0] if head == "gauss" else out) + p
         m = np.clip(z.numpy() * fold.std + fold.mean, 0.0, LOG_CLIP)
-        if probabilistic:
-            log_var = out[..., 1].clamp(-10.0, 10.0).numpy()
-            v = np.exp(log_var) * (fold.std**2)
+        if head == "gauss":
+            v = np.exp(out[..., 1].clamp(-10.0, 10.0).numpy()) * (fold.std**2)
         else:
             v = np.zeros_like(m)
     return m, v
+
+
+def predict(net, fold, split: str, edge_index, head: str):
+    """``_head_output`` with the module in eval mode."""
+    net.eval()
+    return _head_output(net, fold, split, edge_index, head)
 
 
 def fit_factors(m_val, v_val, truth_val) -> dict[str, np.ndarray]:
@@ -284,7 +323,7 @@ def score_arm(pred, truth, artifact, **tags) -> dict:
     return dict(**tags, **base.pooled_scores(pred, truth, artifact))
 
 
-def run_fold(arch_name, fold, cases, edge_index, seeds, probabilistic, epochs, verbose=True):
+def run_fold(arch_name, fold, cases, edge_index, seeds, head, epochs, verbose=True):
     """Train every seed on one fold and score all estimator/combination arms."""
     truth_val = fold.inverse(fold.y_val.numpy())
     truth_test = fold.inverse(fold.y_test.numpy())
@@ -298,9 +337,9 @@ def run_fold(arch_name, fold, cases, edge_index, seeds, probabilistic, epochs, v
 
     for seed in seeds:
         t0 = time.time()
-        net = train_one(arch_name, fold, edge_index, seed, probabilistic, epochs)
-        m_val, v_val = predict(net, fold, "val", edge_index, probabilistic)
-        m_test, v_test = predict(net, fold, "test", edge_index, probabilistic)
+        net = train_one(arch_name, fold, edge_index, seed, head, epochs)
+        m_val, v_val = predict(net, fold, "val", edge_index, head)
+        m_test, v_test = predict(net, fold, "test", edge_index, head)
 
         # Every correction is calibrated on validation residuals only.
         factors = fit_factors(m_val, v_val, truth_val)
@@ -346,8 +385,10 @@ def main() -> int:
     ap.add_argument("--origin-hi", type=float, default=0.90)
     ap.add_argument("--seeds", type=int, default=5)
     ap.add_argument("--epochs", type=int, default=150)
-    ap.add_argument("--probabilistic", action="store_true",
-                    help="Gaussian head, enabling the heteroscedastic lognorm correction")
+    ap.add_argument("--head", choices=HEADS, default="det",
+                    help="det: Huber on log1p. gauss: Gaussian NLL, enabling the "
+                         "heteroscedastic lognorm correction. nb: negative binomial "
+                         "on counts, which predicts the mean directly.")
     ap.add_argument("--quick", action="store_true")
     ap.add_argument("--out-dir", type=str, default=None)
     ap.add_argument("--tag", type=str, default="", help="Suffix for the output filename")
@@ -364,7 +405,7 @@ def main() -> int:
     folds = base.build_folds(cases, WINDOW, HORIZON, origins=origins, test_frac=test_frac)
 
     print(f"origins={origins} test_frac={test_frac} -> {len(folds)} folds, "
-          f"seeds={seeds}, epochs={epochs}, probabilistic={args.probabilistic}", flush=True)
+          f"seeds={seeds}, epochs={epochs}, head={args.head}", flush=True)
     sizes = [len(f.test_index) for f in folds]
     print(f"test windows per fold: {sizes} (disjoint: "
           f"{len({i for f in folds for i in f.test_index.tolist()}) == sum(sizes)})", flush=True)
@@ -380,7 +421,9 @@ def main() -> int:
         for fold in folds:
             print(f"  origin {fold.origin} (test n={len(fold.test_index)})", flush=True)
             recs, ens = run_fold(arch_name, fold, cases, edge_index, seeds,
-                                 args.probabilistic, epochs)
+                                 args.head, epochs)
+            for r in recs:
+                r["head"] = args.head
             all_records.extend(r for r in recs if r["arch"] != "persistence"
                                or arch_name == args.arch[0])
             ens_by_arch[arch_name][fold.origin] = ens
@@ -399,7 +442,7 @@ def main() -> int:
                                              seed=-1, arm=f"multi_{est}", ens=len(stack)))
 
     tag = args.tag or "_".join(args.arch)
-    suffix = "_prob" if args.probabilistic else ""
+    suffix = "" if args.head == "det" else f"_{args.head}"
     out = out_dir / f"beat_{tag}{suffix}.json"
     out.write_text(json.dumps(all_records, indent=2), encoding="utf-8")
     print(f"\nwrote {len(all_records)} records -> {out}", flush=True)

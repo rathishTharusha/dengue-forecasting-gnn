@@ -12,16 +12,16 @@ motivated by the target's skewness. All five architectures accept all four
 increments through a shared output seam, so no cell of the table covers an
 unstated subset.}
 
-\begin{figure}[t]
+\begin{figure*}[t]
   \centering
   \includegraphics[width=\linewidth]{figures/fig_results}
   \caption{Every arm against the persistence floor, scored both ways. AAGCN's
   3.8-point lead in (a) does not survive in (b): it was a lead at predicting a
   reporting backlog. Bars are means over 3 origins $\times$ 3 seeds.}
   \label{fig:results}
-\end{figure}
+\end{figure*}
 
-\cA{Figure~\ref{fig:results} and Table~\ref{tab:main} give the result. Measured
+\cA{Figure~\ref{fig:results} gives the result. Measured
 over all windows, AAGCN (40.99) appears to beat the 44.80 floor by 3.8 points and
 ASTGCN by 1.4. Measured artifact-free, AAGCN sits at 29.84 against a floor of
 29.52---\emph{above} it---and the ordering of architectures changes. The apparent
@@ -41,17 +41,6 @@ manufacture a result.}
 yields 95\% prediction intervals with empirical coverage between 0.947 and 0.962
 across all five architectures---calibrated intervals that a point forecast cannot
 supply, and the operationally useful output of the whole study.}
-
-\cC{We also tested a learned adjacency in place of the geographic one. Enabling
-AAGCN's adaptive branch costs $+2.76$ RMSE artifact-free on matched folds and
-seeds (7/9 folds worse). A controlled encoder comparison over identity, fixed,
-learned and blended adjacencies additionally exposes a methodological trap: with
-no explicit self-connection the learned matrix is near-uniform at initialisation
-and erases the node's own signal, which on a target with lag-1 $r=0.92$ is most of
-the information. Restoring the self-path---as Graph WaveNet's $k{=}0$ diffusion
-term does implicitly---moves every mode, and the blended adjacency then edges
-ahead of both extremes ($28.55$ against a fixed-graph $28.97$, $n=9$). We report
-that as suggestive and unsettled rather than as a contribution.}
 
 %=============================================================================
 \section{The Mechanistic Prior}
@@ -79,18 +68,8 @@ decoder does exactly what it was built to do---maximum predicted weekly log-grow
 rises from 0.07 to 4.14, so the flatness is gone---and is 6 RMSE worse anyway. The
 penalty degrades RMSE monotonically in its weight.}
 
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=\linewidth]{figures/fig_physics}
-  \caption{(a) Every anchor available at forecast time is worse than persistence,
-  though the same equation with oracle $R_t$ reconstructs the record.
-  (b) The reason: $\Rhat$ describes growth that has already happened and
-  anti-correlates with growth to come.}
-  \label{fig:physics}
-\end{figure}
-
-\cE{Figure~\ref{fig:physics}(a) and Table~\ref{tab:physics} localise the failure.
-Every causally available anchor loses to persistence: force alone ($R{=}1$) scores
+\cE{Table~\ref{tab:physics} localises the failure. Every causally available
+anchor loses to persistence: force alone ($R{=}1$) scores
 35.45, a damped ratio form 33.05, and $\Rhat\cdot\text{force}$ 50.01, against
 29.52. The predictive content of Eq.~\eqref{eq:renewal} is entirely in $R_t$---and
 $R_t$ is only 26\% predictable out of sample, from its own past and from nothing
@@ -99,21 +78,19 @@ error of $\exp(0.64)=\mathbf{1.90\times}$ per step, compounding over three weeks
 Persistence carries no such factor. \emph{Reconstructing a forecast through $R$
 re-injects a factor-of-two error where the naive baseline had none.}}
 
-\cE{We tested the two mechanisms that could have supplied the missing
-predictability. \textbf{Susceptible depletion}---the mechanism by which an SEIR
-epidemic turns over---adds exactly nothing beyond $R$'s own past ($r^2$
-$0.263\rightarrow0.263$). Its magnitude explains why: even at 1-in-20
-under-ascertainment, cumulative infection over the whole 8.8-year record moves
-$\log R$ by 0.618, i.e.\ $\approx0.0013$ per week, against a weekly standard
-deviation of 0.749. Sri Lankan dengue is endemic in a population of 21.9M that
-does not run out of susceptibles on a three-week horizon. \textbf{Climate driving
-$R_0$} fails too: the sensitivity indices ($b$ $+1.000$, $\mu_v$ $-0.818$, $m$
-$+0.500$, $\nu_v$ $+0.318$) imply a hump-shaped thermal response that a linear fit
-must miss, and allowing that curvature changes out-of-sample $r^2$ from $-0.025$
-to $-0.028$. We did not fit entomological response curves to our own data, since a
-mechanistic constant estimated from the series it then constrains is not a prior.}
+\cE{Neither mechanism that could supply the missing predictability does.
+\textbf{Susceptible depletion} adds nothing beyond $R$'s own past ($r^2$
+$0.263\rightarrow0.263$): even at 1-in-20 under-ascertainment, cumulative
+infection over 8.8 years moves $\log R$ by 0.618, about $0.0013$ per week against
+a weekly sd of 0.749. Sri Lankan dengue is endemic in 21.9M people who do not run
+out of susceptibles on a three-week horizon. \textbf{Climate driving $R_0$} fails
+too: the sensitivity indices ($b$ $+1.000$, $\mu_v$ $-0.818$, $m$ $+0.500$,
+$\nu_v$ $+0.318$) imply a hump-shaped thermal response, and allowing that
+curvature moves out-of-sample $r^2$ from $-0.025$ to $-0.028$. We did not fit
+entomological curves to our own data: a constant estimated from the series it then
+constrains is not a prior.}
 
-\cF{Figure~\ref{fig:physics}(b) gives the sign error directly: $\log\Rhat_t$
+\cF{Table~\ref{tab:physics} also gives the sign error directly: $\log\Rhat_t$
 correlates $+0.798$ with the \emph{past} three weeks of growth and $-0.217$ with
 the next three. It is a backward-looking state estimate, so a penalty pulling a
 forecast toward it pulls the wrong way---which is the monotonic damage we measured.
@@ -129,34 +106,53 @@ growth; they are persistence with noise. Under squared error this is
 $r^2=0.85$, and the conditional mean of what remains is approximately zero.
 Flatness is what the objective asks for. This is why an asymmetric loss, the
 renewal penalty and the renewal decoder each bought responsiveness and paid for it
-in RMSE, in the same direction. An asymmetric loss weighted $3\times$ against
-under-prediction removes the outbreak bias entirely ($-10.58 \rightarrow +1.21$
-cases) and costs 2.8 RMSE, because the model cannot tell which windows are
-outbreaks and so inflates everywhere.}
+in RMSE, in the same direction: weighting $3\times$ against under-prediction
+removes the outbreak bias entirely ($-10.58 \rightarrow +1.21$ cases) and costs
+2.8 RMSE, because the model cannot tell which windows are outbreaks.}
+
+\subsection{What the mechanism can still do: constrain, not reconstruct}
+\label{sec:constraint}
+
+\cD{Every failure above shares a form. The decoder routes the forecast
+\emph{through} $R$; the penalty pulls it \emph{toward} a target derived from
+$\Rhat$. Both make the mechanism carry predictive weight, which $\Rhat$ cannot. An
+\emph{inequality} constraint does not: it is zero inside the admissible region and
+cannot inject a target. We test two, added to the reproduced architectures'
+objective and scored against each architecture's own base on matched
+(origin, seed) runs at 20--25 seeds. A \textbf{biological envelope} bounds weekly
+log-growth above by $r_{\max}=2.3884$ and below by the host clearance rate. A
+\textbf{spatial term} penalises disagreement in \emph{relative} incidence
+$\hat{y}_i/s_i$ between adjacent districts---the scale-free form of a
+graph-Laplacian penalty, which on raw counts merely taxes population.}
+
+\cE{The two separate cleanly, and only at adequate $n$. The \textbf{spatial term
+holds}: on STGAT it improves artifact-free RMSE by $\mathbf{-0.044}$ on
+$\mathbf{57/60}$ matched runs ($p<0.0001$), and independently on each origin
+($p=0.040$, $<0.0001$, $0.025$). The \textbf{envelope does not}: $-0.186$ with
+$5/9$ better at $n=9$ becomes $-0.042$ with $38/75$ at $n=75$ ($p=0.69$), a coin
+flip. At $n=9$ the two were indistinguishable. The envelope is in any case
+\emph{provably inert} wherever a model under-reacts---STGAT and A3TGCN peak at
+$0.31$ against a ceiling of $2.3884$ and their envelope arms are bit-identical to
+base on every run---which restates EXP-014 as a design rule: a bound helps exactly
+the models that violate it, and here most do not.}
+
+\cA{The mechanism's second use is a different target. Ranking---\emph{which}
+districts will breach an alert threshold, rather than by how much---is the
+operationally relevant question and a tractable one. Defining an outbreak as a
+district-week above that district's training-set 90th percentile within the horizon
+(base rate 14.4\%), current level alone reaches AUC \textbf{0.807}; adding $\Rhat$
+raises it to \textbf{0.826}, a larger gain than recent growth ($+0.004$) or
+neighbouring districts ($+0.006$), while climate again subtracts. Before onset,
+mean $\Rhat$ runs 1.13--1.24 for six weeks against a global median of
+0.911---sustained $R>1$, visible before the outbreak is.}
+
+\cF{The forecasting gain is real and small: $0.15\%$ of a $29.52$ floor. It is a reliable
+improvement \emph{of the model}, not a move past the baseline---STGAT goes from
+$29.550$ to $29.506$ against a floor of $29.52$, a margin that remains inside noise
+($p=0.70$). So \S\ref{sec:physics} stands, with one qualification we think is the
+useful part. On a target a naive baseline already explains to $r^2=0.85$,
+mechanistic knowledge pays when it \emph{restricts the hypothesis space} and not
+when it supplies a prediction: a constraint, not a forecast. Only the first
+survives a poorly-determined $R_t$.}
 
 %=============================================================================
-\section{The Target That Is Tractable}
-\label{sec:detection}
-
-\cA{The failure above is specific to \emph{counting}. Ranking is a different
-question, and the operationally relevant one: which districts will exceed their
-alert threshold. We define an outbreak as a district-week above that district's
-training-set 90th percentile anywhere in the horizon (base rate 14.4\%) and fit a
-logistic model on training weeks only.}
-
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=\linewidth]{figures/fig_detection}
-  \caption{Outbreaks are rankable three weeks ahead. The mechanistic quantity that
-  cannot forecast a count is the largest single addition to a detector, because
-  detection asks about the present state and $\Rhat$ estimates exactly that.}
-  \label{fig:detection}
-\end{figure}
-
-\cA{Current level alone reaches AUC \textbf{0.807}. Adding $\Rhat$ raises it to
-\textbf{0.826}---a larger gain than recent growth ($+0.004$) or neighbouring
-districts ($+0.006$), and climate again subtracts. Around outbreak onset, mean
-$\Rhat$ runs 1.13--1.24 for the six weeks preceding the first threshold crossing
-against a global median of 0.911, then jumps to 3.11 at onset: sustained $R>1$ is
-the textbook signature of a growing epidemic, and it is visible before the
-outbreak is. This is where the mechanistic prior belongs.}

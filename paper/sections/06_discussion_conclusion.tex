@@ -1,68 +1,31 @@
 %=============================================================================
 % DISCUSSION AND CONCLUSION
 %=============================================================================
-\section{Discussion}
+\section{Discussion and Conclusion}
 \label{sec:discussion}
 
-\cB{\textbf{When does a mechanistic prior pay?} Physics-informed networks succeed
-where data are scarce relative to the dynamics: MP-PINN~\cite{nguyen2024mppinn}
-trains on 35 days and forecasts 97, a regime in which a purely data-driven model
-has almost nothing to learn from. Our setting is the opposite. The decisive
-quantity is not the amount of data but how much of the target a naive baseline
-already explains. Here the previous week explains $r^2=0.85$; the mechanistic
-decomposition divides that out and leaves $R_t$, which is 26\% predictable.
-A prior helps when it supplies structure the data cannot; it hurts when it
-routes a well-determined quantity through a poorly-determined one. The ratio of
-those two predictabilities, not the sample size, is the criterion we would apply
-before attempting this again.}
+\cB{\textbf{When does a mechanistic prior pay?} PINNs succeed where data are
+scarce relative to the dynamics---MP-PINN~\cite{nguyen2024mppinn} trains on 35
+days and forecasts 97. Ours is the opposite regime, and the decisive quantity is
+not sample size but how much a naive baseline already explains: here $r^2=0.85$,
+leaving an $R_t$ that is 26\% predictable. That ratio predicts \emph{which} use
+survives---a prior supplying a forecast inherits $R_t$'s error, one restricting the
+hypothesis space does not.}
 
-\cB{\textbf{Negative results with a mechanism.} Five separate physics
-formulations were tried across this project and all failed. Only the last is
-informative, because it is accompanied by the measurement that makes failure
-inevitable rather than by a hyper-parameter that was not tuned enough. We would
-argue this is the reporting standard such results need: a physics term that fails
-at one weighting is a tuning anecdote, while one that cannot succeed at any
-weighting because the quantity it depends on carries a $1.90\times$ error is a
-finding.}
+\cC{\textbf{Reporting.} A caution that applies to us as much as to the work we
+reproduce: at $n=9$ the spatial constraint ($p=0.057$) and the growth envelope
+($p=0.238$) were indistinguishable; at $n\ge60$ one holds and the other is a coin
+flip. Small effects on folds this noisy need the seeds to separate them.}
 
-\cC{\textbf{Implications for benchmarking.} Three practices would have changed the
-published conclusions on this dataset, and none is expensive: report a naive
-baseline, pool squared error rather than averaging per window, and inspect the
-test split for administrative artifacts before reporting fold-level results. The
-last is the least standard and, here, the largest---it moves the floor by 15 RMSE
-and inverts which fold looks hardest.}
+\cD{\textbf{Limitations.} One country, one disease, one processed array. We do not
+evaluate GAN augmentation---the remaining proposed contribution---and the detection
+result uses a single-week threshold where sustained exceedance would be more
+operationally meaningful.}
 
-\cD{\textbf{Limitations.} Our conclusions concern one country, one disease and one
-processed array; the artifact analysis in particular is dataset-specific, though
-the practice it motivates is not. The adaptive-graph comparison after the
-self-path correction rests on $n=9$ and is reported as unsettled. We did not
-evaluate a GAN, and the augmentation contribution the project originally proposed
-is not tested here. Finally, the detection result uses a threshold definition of
-an outbreak; 309 episodes exist in the record but the median episode lasts one
-week, so a sustained-exceedance definition would be more operationally meaningful
-and is what we would adopt next.}
-
-\section{Conclusion}
-\label{sec:conclusion}
-
-\cE{We reproduced five published spatio-temporal GNNs on Sri Lankan dengue
-surveillance to within 7.3\%, and showed that their reported advantage rests on
-training-inclusive, per-window-averaged evaluation without a naive baseline.
-Re-evaluated under a leak-free rolling-origin protocol with artifact-aware dual
-scoring, no architecture and no evidence-led increment separates from a
-persistence floor of 29.52 at $p<0.05$.}
-
-\cE{We then tested the mechanistic prior the task invites and found it cannot
-help, for a reason we can state as a number: the reproduction number is 26\%
-predictable, so reconstructing a forecast through it costs a $1.90\times$
-multiplicative error per step where persistence costs none. The ceiling on this
-task is informational, not architectural---predicted growth carries no information
-about realised growth, and under squared error that is the optimal response.}
-
-\cF{The same mechanistic quantity is, however, the largest single contributor to a
-target that \emph{is} tractable: ranking which districts will breach an alert
-threshold three weeks ahead, where it lifts AUC from 0.807 to 0.826. We suggest
-that is where mechanistic structure belongs on endemic, strongly autocorrelated
-surveillance data---in state estimation and early warning rather than in point
-forecasting. All code, data, figures and the notebook that regenerates every
-number in this paper are available in the project repository.}
+\cE{\textbf{Conclusion.} Under a leak-free, artifact-aware protocol no reproduced
+architecture and no increment separates from a persistence floor of 29.52, and
+reconstructing a forecast through the mechanism cannot close that gap. But the
+mechanism holds in the two roles that do not ask it to predict---as an inequality
+constraint and as a state estimate for ranking outbreaks. Knowing \emph{when} is
+where the mathematics comes first. Code and a reproduction notebook accompany this
+paper.}

@@ -89,8 +89,8 @@
 % mechanistic prior cannot lift it. It does not propose an architecture, so the
 % title does not name one. Earlier drafts were titled for a model (PIAG-Net, then
 % GAG-Net); both names outlived the claim they described.
-\title{What Caps Dengue Forecasting?\\Reproduction, Evaluation Artifacts,
-and the Limits of Mechanistic Priors}
+\title{Know When the Epidemic Comes:\\Mathematics Before Data in Dengue
+Outbreak Forecasting}
 
 % AUTHORS — Phase 2 order. Phase 3 requires TAs then Prof.\ Dulani and Dr.\ Sandareka
 % appended as final co-authors; not needed for the short paper.
@@ -118,11 +118,14 @@ negative results}
 \input{sections/01_introduction}
 \input{sections/02_related_work}
 \input{sections/03_framework}
+% Table floats can only move FORWARD, so the input sits early: declared late it
+% landed on the references page, and each step earlier lets it settle sooner and
+% frees the text after it to reflow.
+\input{tables_generated}
+
 \input{sections/04_experimental_setup}
 \input{sections/05_results}
 \input{sections/06_discussion_conclusion}
-
-\input{tables_generated}
 
 \balance
 \bibliographystyle{ACM-Reference-Format}

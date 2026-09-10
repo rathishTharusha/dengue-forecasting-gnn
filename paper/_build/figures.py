@@ -100,39 +100,34 @@ def fig_artifact():
     It is that this one sits in exactly one fold's *test* split and in no training
     split, so it inflates that fold's error without any model being able to learn
     from it, and it inverts which fold looks hardest.
+
+    Single column and single panel, deliberately. The per-fold RMSE breakdown that
+    used to be panel (b) is three numbers, and three numbers belong in the caption
+    or the running text -- spending a full-width float on them cost more page than
+    they were worth against a four-page limit.
     """
     cases = load_cases(NPY)
     national = cases.sum(axis=1)
 
-    fig, (ax, bx) = plt.subplots(1, 2, figsize=(7.0, 2.15),
-                                 gridspec_kw={"width_ratios": [2.05, 1]})
+    fig, ax = plt.subplots(figsize=(3.34, 1.95))
 
     ax.plot(national, color=BLUE, lw=0.9)
     ax.axvline(ARTIFACT_WEEK, color=ORANGE, lw=1.0, ls="--")
-    ax.annotate("week 395\n19$\\times$ spike, 18 of 25 districts",
-                xy=(ARTIFACT_WEEK, national[ARTIFACT_WEEK]),
-                xytext=(ARTIFACT_WEEK - 150, national.max() * 0.82),
+    ax.annotate("week 395", xy=(ARTIFACT_WEEK, national[ARTIFACT_WEEK]),
+                xytext=(ARTIFACT_WEEK - 175, national.max() * 0.88),
                 color=ORANGE, fontsize=7,
                 arrowprops=dict(arrowstyle="->", color=ORANGE, lw=0.8))
     # Shade the three test splits so the reader can see where 395 lands.
     n_ids = len(cases) - 6
+    # Adjacent spans abut, so without a divider the first two read as one block
+    # and the caption promises three.
     for origin, colour in zip((0.55, 0.70, 0.85), (GREY, GREY, PURPLE)):
         lo = 3 + int(origin * n_ids)
         hi = 3 + int(min(origin + 0.15, 1.0) * n_ids)
-        ax.axvspan(lo, hi, color=colour, alpha=0.16, lw=0)
+        ax.axvspan(lo, hi, color=colour, alpha=0.18, lw=0)
+        ax.axvline(lo, color="white", lw=0.8)
     ax.set_xlabel("week index")
     ax.set_ylabel("national weekly cases")
-    ax.set_title("(a) The record, with the three test splits shaded", loc="left")
-
-    labels = ["all 68\nwindows", "the 6 touching\nweek 395", "the other\n62"]
-    values = [68.62, 219.07, 22.80]
-    bars = bx.bar(labels, values, color=[GREY, ORANGE, GREEN], width=0.62)
-    for bar, v in zip(bars, values):
-        bx.text(bar.get_x() + bar.get_width() / 2, v + 5, f"{v:.1f}",
-                ha="center", fontsize=7, color=INK)
-    bx.set_ylabel("persistence RMSE")
-    bx.set_ylim(0, 250)
-    bx.set_title("(b) Origin-0.85 fold, split three ways", loc="left")
 
     fig.tight_layout()
     return _save(fig, "fig_artifact")
@@ -166,7 +161,7 @@ def fig_results():
     reporting backlog rather than at forecasting.
     """
     records = load("improved_sweep")
-    fig, axes = plt.subplots(1, 2, figsize=(7.0, 2.5), sharey=False)
+    fig, axes = plt.subplots(1, 2, figsize=(7.0, 1.85), sharey=False)
 
     for ax, field, title in zip(
         axes, ("RMSE", "RMSE_clean"),
@@ -427,7 +422,6 @@ def table_physics() -> str:
     m = load("paper_measurements")
     mr = load("mechanistic_r")
     a = m["anchors"]["mean"]
-    ll = m["lead_lag"]
     lines = [
         "\\begin{table}[t]",
         "\\centering",
@@ -445,18 +439,9 @@ def table_physics() -> str:
         f"ratio form, damped & {a['ratio_0.5']:.2f} \\\\",
         f"$\\hat{{R}}\\cdot$force & {a['rhat_force']:.2f} \\\\",
         "\\midrule",
-        "\\multicolumn{2}{l}{\\emph{Predicting} $\\log R_t$ --- out-of-sample $r^2$} \\\\",
-        "\\midrule",
-        f"own past & {mr['own_past']:.3f} \\\\",
-        f"climate, linear & {mr['climate_linear']:.3f} \\\\",
-        f"climate $+$ thermal curvature & {mr['climate_hump']:.3f} \\\\",
-        f"susceptible depletion & {mr['depletion_all']:.3f} \\\\",
-        f"own past $+$ depletion $+$ climate & {mr['everything']:.3f} \\\\",
-        "\\midrule",
-        "\\multicolumn{2}{l}{\\emph{Direction of} $\\log \\hat{R}_t$} \\\\",
-        "\\midrule",
-        f"corr.\\ with past 3-week growth & ${ll['log_r_vs_past_growth']:+.3f}$ \\\\",
-        f"corr.\\ with future 3-week growth & ${ll['log_r_vs_future_growth']:+.3f}$ \\\\",
+        f"own past $\\rightarrow \\log R_t$ ($r^2$, out of sample) "
+        f"& {mr['own_past']:.3f} \\\\",
+        f"climate $\\rightarrow \\log R_t$ & {mr['climate_linear']:.3f} \\\\",
         "\\bottomrule",
         "\\end{tabular}",
         "\\end{table}",
@@ -494,7 +479,14 @@ def table_detection() -> str:
     return "\n".join(lines)
 
 
-def build_all(verbose: bool = True):
+#: Tables the four-page version emits. `main` duplicates fig_results and
+#: `detection` duplicates fig_detection(b); against a 4-page limit the figures
+#: are the better use of the space, so both are still generated -- and printed
+#: by the notebook -- but not written into the LaTeX.
+INCLUDED_TABLES = ("physics",)
+
+
+def build_all(verbose: bool = True, include: tuple[str, ...] = INCLUDED_TABLES):
     """Regenerate every figure and the generated-tables file."""
     style()
     figures = {}
@@ -502,10 +494,12 @@ def build_all(verbose: bool = True):
         figures[fn.__name__] = fn()
         if verbose:
             print(f"  {fn.__name__} -> paper/figures/{fn.__name__.replace('fig_', 'fig_')}")
-    tables = "\n\n".join([
-        "% Generated by paper/_build/figures.py -- do not edit by hand.",
-        table_main(), table_physics(), table_detection(),
-    ])
+    builders = {"main": table_main, "physics": table_physics,
+                "detection": table_detection}
+    tables = "\n\n".join(
+        ["% Generated by paper/_build/figures.py -- do not edit by hand."]
+        + [builders[name]() for name in include]
+    )
     (REPO / "paper" / "tables_generated.tex").write_text(tables + "\n", encoding="utf-8")
     if verbose:
         print("  tables  -> paper/tables_generated.tex")

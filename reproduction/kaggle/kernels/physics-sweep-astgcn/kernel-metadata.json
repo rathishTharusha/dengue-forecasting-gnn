@@ -1,0 +1,13 @@
+{
+  "id": "tharushaperera16/physics-sweep-astgcn",
+  "title": "Physics sweep ASTGCN",
+  "code_file": "physics_sweep_astgcn.ipynb",
+  "language": "python",
+  "kernel_type": "notebook",
+  "is_private": true,
+  "enable_gpu": false,
+  "enable_internet": true,
+  "dataset_sources": [],
+  "competition_sources": [],
+  "kernel_sources": []
+}

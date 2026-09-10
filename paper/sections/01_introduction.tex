@@ -11,12 +11,11 @@ separate infection from clinical diagnosis, so district-level forecasts issued
 $H=3$ weeks ahead carry actionable lead time for pre-positioning clinical capacity
 and intensifying vector control.}
 
-\cB{Three properties of this task shape everything that follows. Transmission is
-spatially coupled, which motivates a graph. The panel is small---25 districts over
-459 weeks, against the hundreds of nodes typical in traffic benchmarks---so
-parameters are cheap to overfit. And the target is severely heavy-tailed
-(skewness 8.6; the top 1\% of district-weeks hold 18.3\% of all cases), which
-makes squared error a measurement of a few dozen windows.}
+\cB{Three properties shape the task. Transmission is spatially coupled, which
+motivates a graph; the panel is small (25 districts, 459 weeks) so parameters are
+cheap to overfit; and the target is severely heavy-tailed (skewness 8.6, the top
+1\% of district-weeks holding 18.3\% of cases), which makes squared error a
+measurement of a few dozen windows.}
 
 \cC{A fourth property is easy to miss and dominates the rest: weekly incidence is
 strongly autocorrelated. Cases at $t-1$ explain $r^2=0.85$ of cases at $t$. Any
@@ -25,39 +24,33 @@ $\hat{y}_{t+h}=y_t$ that is already close to optimal, and a benchmark that omits
 that baseline cannot tell whether its architecture contributed anything. Weng
 et al.~\cite{weng2024graph}, the reference benchmark for this dataset, omit it.}
 
-\cD{We set out to add three contributions to an ST-GNN baseline---a learned
-adaptive graph, a physics-informed loss derived from an SEIR--SEI compartmental
-model, and GAN augmentation. Establishing what the baseline actually was turned
-out to be the harder and more informative problem, and this paper reports that.
-We reproduce the published results exactly, re-evaluate them honestly, identify a
-data artifact that distorts the evaluation, and then test the mechanistic prior to
-destruction---reporting not only that it fails but the quantity that makes failure
-inevitable.}
+\cD{We proposed three stackable contributions to an ST-GNN baseline: (a) a
+physics-informed loss from an SEIR--SEI compartmental model, as
+$\mathcal{L}_{\mathrm{data}} + \lambda_p\mathcal{L}_{\mathrm{phys}} +
+\lambda_c\mathcal{L}_{\mathrm{cons}} + \lambda_s\mathcal{L}_{\mathrm{smooth}}$;
+(b) GAN augmentation; and (c) a learned adaptive graph. This paper reports (a) and
+(c); (b) is left to the full study. Establishing what the baseline actually
+\emph{was} turned out to be the harder problem, and it reframes the target. Cases
+at $t-1$ explain $r^2=0.85$ of cases at $t$, so \emph{how many} is close to
+answered before a model starts; \emph{when}---which district crosses an alert
+threshold, and roughly when---is not. That is the question early warning actually
+asks, and it is where we find the mechanism earns its place.}
 
 \noindent\textbf{Contributions.}
-\begin{itemize}\itemsep2pt
-  \item \textbf{Exact reproduction, and what it reveals.} We reproduce five
-        published ST-GNNs to within 7.3\% across twenty comparisons, two to four
-        decimal places, and show that the reported column is computed with
-        training data included and averaged per window rather than pooled. Naive
-        persistence beats every model in it (\S\ref{sec:repro}).
-  \item \textbf{An artifact-aware protocol.} We identify a 19$\times$ reporting
-        backlog at week~395 spanning 18 of 25 districts. It falls in one fold's
-        test split and no training split, contributes $\sim$90\% of that fold's
-        squared error, and inverts fold difficulty. We score every arm and the
-        baseline with and without it (\S\ref{sec:setup}).
-  \item \textbf{A null result, stated as one.} Five verified architectures and
-        four evidence-led increments, over 3 origins $\times$ 3 seeds. Against the
-        artifact-free floor of 29.52, no increment differs from its own baseline
-        at $p<0.05$ (\S\ref{sec:results}).
-  \item \textbf{Why the mechanistic prior cannot help.} A renewal equation seeded
-        by a validated SEIR--SEI generation interval reconstructs the record given
-        oracle $R_t$ but loses as a forecaster. We trace this to a single
-        measurement---$R_t$ is 26\% predictable, implying a 1.90$\times$ error per
-        step---and rule out the two mechanisms that could have supplied the
-        missing predictability (\S\ref{sec:physics}).
-  \item \textbf{The target that is tractable.} Outbreaks are rankable three weeks
-        ahead (AUC 0.826) even though they are not countable, and the mechanistic
-        quantity is the largest single contributor to that ranking
-        (\S\ref{sec:detection}).
+\begin{itemize}\itemsep1pt
+  \item \textbf{Exact reproduction.} Five published ST-GNNs to within 7.3\%
+        across twenty comparisons; the reported column is training-inclusive and
+        per-window averaged, and naive persistence beats every model in it
+        (\S\ref{sec:repro}).
+  \item \textbf{An artifact-aware protocol.} A 19$\times$ reporting backlog at
+        week~395 occupies one fold's test split, carries $\sim$90\% of its squared
+        error and inverts fold difficulty; we score every arm and the baseline
+        with and without it (\S\ref{sec:setup}).
+  \item \textbf{A null result, stated as one.} Over 3 origins $\times$ 3 seeds, no
+        architecture and no increment differs from its own baseline at $p<0.05$
+        against an artifact-free floor of 29.52 (\S\ref{sec:results}).
+  \item \textbf{Why the mechanistic prior cannot help, and where it can.}
+        $R_t$ is 26\% predictable, implying a 1.90$\times$ error per step
+        (\S\ref{sec:physics}); the same quantity is the largest single contributor
+        to ranking outbreaks three weeks ahead (\S\ref{sec:constraint}).
 \end{itemize}

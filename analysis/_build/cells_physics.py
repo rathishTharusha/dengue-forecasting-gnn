@@ -114,11 +114,16 @@ We load the results from:
     ),
     code(
         """
-# Load STGAT Physics Sweep (3 origins x 3 seeds = 9 runs per arm)
-stgat_path = RESULTS / "physics_envelope_STGAT.json"
-stgat_records = json.loads(stgat_path.read_text(encoding="utf-8"))
-df_stgat = pd.DataFrame(stgat_records)
-df_stgat = df_stgat[df_stgat["arch"] == "STGAT"]
+# Load Merged Physics Sweep Results
+summary_path = RESULTS / "physics_sweep_summary.json"
+if summary_path.exists():
+    df_phys = pd.read_json(summary_path)
+else:
+    df_phys = pd.read_json(RESULTS / "physics_envelope_STGAT.json")
+
+df_stgat = df_phys[df_phys["arch"] == "STGAT"]
+df_aagcn_phys = df_phys[df_phys["arch"] == "AAGCN"]
+df_a3tgcn_phys = df_phys[df_phys["arch"] == "A3TGCN"]
 
 # Load Improved Sweep for Adaptive Models
 sweep_path = RESULTS / "improved_sweep.csv"
@@ -129,7 +134,7 @@ df_aagcn = df_sweep[df_sweep["arch"] == "AAGCN"]
 ad_path = RESULTS / "adaptive_graph_summary.csv"
 df_ad = pd.read_csv(ad_path)
 
-print("Loaded all empirical result datasets successfully.")
+print(f"Loaded {len(df_phys)} physics records across architectures: {sorted(df_phys['arch'].unique())}")
 """
     ),
     md(
@@ -142,7 +147,7 @@ Let's compute the mean and standard deviation for all models across the 9 evalua
     code(
         """
 print("=" * 80)
-print(f"{'Model / Arm':32s}{'All RMSE':>12s}{'Clean RMSE':>14s}{'Clean MAE':>12s}{'g_max':>8s}")
+print(f"{'Model / Arm':34s}{'All RMSE':>12s}{'Clean RMSE':>14s}{'Clean MAE':>12s}{'g_max':>8s}")
 print("=" * 80)
 
 # Persistence benchmark
@@ -150,27 +155,40 @@ p_row = df_sweep[df_sweep["arch"] == "persistence"]
 p_clean = p_row["RMSE_clean"].mean()
 p_all = p_row["RMSE"].mean()
 p_mae = p_row["MAE_clean"].mean()
-print(f"{'Persistence Benchmark Floor':32s}{p_all:12.2f}{p_clean:14.2f}{p_mae:12.2f}{'—':>8s}")
+print(f"{'Persistence Benchmark Floor':34s}{p_all:12.2f}{p_clean:14.2f}{p_mae:12.2f}{'—':>8s}")
 print("-" * 80)
 
-# Adaptive AAGCN models
+# Adaptive AAGCN models from Sweep
 for inc in ["base", "probabilistic"]:
     sub = df_aagcn[df_aagcn["increment"] == inc]
     r_all = sub["RMSE"].mean()
     r_clean = sub["RMSE_clean"].mean()
     r_mae = sub["MAE_clean"].mean()
-    print(f"{'AAGCN Adaptive (' + inc + ')':32s}{r_all:12.2f}{r_clean:14.2f}{r_mae:12.2f}{'0.71':>8s}")
+    print(f"{'AAGCN Adaptive (' + inc + ')':34s}{r_all:12.2f}{r_clean:14.2f}{r_mae:12.2f}{'0.71':>8s}")
 
 print("-" * 80)
 
 # Physics-informed STGAT models
 for inc in ["base", "spatial", "composite", "outbreak_aware"]:
     sub = df_stgat[df_stgat["increment"] == inc]
-    r_all = sub["RMSE"].mean()
-    r_clean = sub["RMSE_clean"].mean()
-    r_mae = sub["MAE_clean"].mean()
-    g_max = sub["growth_max"].mean()
-    print(f"{'Physics STGAT (' + inc + ')':32s}{r_all:12.2f}{r_clean:14.2f}{r_mae:12.2f}{g_max:8.2f}")
+    if len(sub) > 0:
+        r_all = sub["RMSE"].mean()
+        r_clean = sub["RMSE_clean"].mean()
+        r_mae = sub["MAE_clean"].mean()
+        g_max = sub["growth_max"].mean()
+        print(f"{'Physics STGAT (' + inc + ')':34s}{r_all:12.2f}{r_clean:14.2f}{r_mae:12.2f}{g_max:8.2f}")
+
+print("-" * 80)
+
+# Physics-informed AAGCN models
+for inc in ["base", "envelope", "spatial", "outbreak_aware"]:
+    sub = df_aagcn_phys[df_aagcn_phys["increment"] == inc]
+    if len(sub) > 0:
+        r_all = sub["RMSE"].mean()
+        r_clean = sub["RMSE_clean"].mean()
+        r_mae = sub["MAE_clean"].mean()
+        g_max = sub["growth_max"].mean()
+        print(f"{'Physics AAGCN (' + inc + ')':34s}{r_all:12.2f}{r_clean:14.2f}{r_mae:12.2f}{g_max:8.2f}")
 
 print("=" * 80)
 """

@@ -135,6 +135,7 @@ def write_kernel(title: str, cells: list[dict]) -> None:
 
 
 if __name__ == "__main__":
+    import cells_graph
     import cells_seir
     import cells_sweep
     import cells_weng
@@ -154,3 +155,7 @@ if __name__ == "__main__":
     # per architecture -- DCRNN alone runs ~10 h against Kaggle's 12 h CPU limit.
     for model in cells_sweep.ARCHITECTURES:
         write_kernel(f"Improved architecture sweep {model}", cells_sweep.build(model))
+
+    # One encoder, four graph modes: the only place the adjacency is a free
+    # variable with everything else held identical.
+    write_kernel("Graph mode sweep dengue GNN", cells_graph.build())

@@ -13,7 +13,7 @@ import env_setup
 from gen_kernels import code, md
 
 BRANCH = "feat/physics-informed-loss"
-ARCHITECTURES = ("STGAT", "AAGCN", "A3TGCN")
+ARCHITECTURES = ("STGAT", "AAGCN", "A3TGCN", "ASTGCN", "DCRNN")
 
 
 def build(arch: str) -> list:
@@ -63,7 +63,7 @@ RESULTS_JSON = WORK / f"physics_envelope_{{ARCH}}.json"
         code(
             f"""
 started = time.time()
-print(f"Executing physics sweep for {{ARCH}} (3 seeds x 3 origins x 5 arms = 45 runs)...")
+print(f"Executing physics sweep for {{ARCH}} (20 seeds x 3 origins x 2 arms = 120 runs)...")
 
 proc = subprocess.Popen(
     [
@@ -72,8 +72,11 @@ proc = subprocess.Popen(
         str(RUNNER),
         "--arch",
         ARCH,
+        "--arms",
+        "base",
+        "spatial",
         "--seeds",
-        "3",
+        "20",
         "--out-dir",
         str(WORK),
     ],

@@ -12,16 +12,16 @@ motivated by the target's skewness. All five architectures accept all four
 increments through a shared output seam, so no cell of the table covers an
 unstated subset.}
 
-\begin{figure}[t]
+\begin{figure*}[t]
   \centering
   \includegraphics[width=\linewidth]{figures/fig_results}
   \caption{Every arm against the persistence floor, scored both ways. AAGCN's
   3.8-point lead in (a) does not survive in (b): it was a lead at predicting a
   reporting backlog. Bars are means over 3 origins $\times$ 3 seeds.}
   \label{fig:results}
-\end{figure}
+\end{figure*}
 
-\cA{Figure~\ref{fig:results} and Table~\ref{tab:main} give the result. Measured
+\cA{Figure~\ref{fig:results} gives the result. Measured
 over all windows, AAGCN (40.99) appears to beat the 44.80 floor by 3.8 points and
 ASTGCN by 1.4. Measured artifact-free, AAGCN sits at 29.84 against a floor of
 29.52---\emph{above} it---and the ordering of architectures changes. The apparent
@@ -44,14 +44,10 @@ supply, and the operationally useful output of the whole study.}
 
 \cC{We also tested a learned adjacency in place of the geographic one. Enabling
 AAGCN's adaptive branch costs $+2.76$ RMSE artifact-free on matched folds and
-seeds (7/9 folds worse). A controlled encoder comparison over identity, fixed,
-learned and blended adjacencies additionally exposes a methodological trap: with
-no explicit self-connection the learned matrix is near-uniform at initialisation
-and erases the node's own signal, which on a target with lag-1 $r=0.92$ is most of
-the information. Restoring the self-path---as Graph WaveNet's $k{=}0$ diffusion
-term does implicitly---moves every mode, and the blended adjacency then edges
-ahead of both extremes ($28.55$ against a fixed-graph $28.97$, $n=9$). We report
-that as suggestive and unsettled rather than as a contribution.}
+seeds (7/9 worse). A controlled comparison over identity, fixed, learned and
+blended adjacencies is confounded until an explicit self-connection is restored,
+after which a blended graph edges ahead of both extremes ($28.55$ against a
+fixed-graph $28.97$); at $n=9$ we report that as unsettled.}
 
 %=============================================================================
 \section{The Mechanistic Prior}
@@ -79,18 +75,8 @@ decoder does exactly what it was built to do---maximum predicted weekly log-grow
 rises from 0.07 to 4.14, so the flatness is gone---and is 6 RMSE worse anyway. The
 penalty degrades RMSE monotonically in its weight.}
 
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=\linewidth]{figures/fig_physics}
-  \caption{(a) Every anchor available at forecast time is worse than persistence,
-  though the same equation with oracle $R_t$ reconstructs the record.
-  (b) The reason: $\Rhat$ describes growth that has already happened and
-  anti-correlates with growth to come.}
-  \label{fig:physics}
-\end{figure}
-
-\cE{Figure~\ref{fig:physics}(a) and Table~\ref{tab:physics} localise the failure.
-Every causally available anchor loses to persistence: force alone ($R{=}1$) scores
+\cE{Table~\ref{tab:physics} localises the failure. Every causally available
+anchor loses to persistence: force alone ($R{=}1$) scores
 35.45, a damped ratio form 33.05, and $\Rhat\cdot\text{force}$ 50.01, against
 29.52. The predictive content of Eq.~\eqref{eq:renewal} is entirely in $R_t$---and
 $R_t$ is only 26\% predictable out of sample, from its own past and from nothing
@@ -113,7 +99,7 @@ must miss, and allowing that curvature changes out-of-sample $r^2$ from $-0.025$
 to $-0.028$. We did not fit entomological response curves to our own data, since a
 mechanistic constant estimated from the series it then constrains is not a prior.}
 
-\cF{Figure~\ref{fig:physics}(b) gives the sign error directly: $\log\Rhat_t$
+\cF{Table~\ref{tab:physics} also gives the sign error directly: $\log\Rhat_t$
 correlates $+0.798$ with the \emph{past} three weeks of growth and $-0.217$ with
 the next three. It is a backward-looking state estimate, so a penalty pulling a
 forecast toward it pulls the wrong way---which is the monotonic damage we measured.
@@ -144,19 +130,10 @@ alert threshold. We define an outbreak as a district-week above that district's
 training-set 90th percentile anywhere in the horizon (base rate 14.4\%) and fit a
 logistic model on training weeks only.}
 
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=\linewidth]{figures/fig_detection}
-  \caption{Outbreaks are rankable three weeks ahead. The mechanistic quantity that
-  cannot forecast a count is the largest single addition to a detector, because
-  detection asks about the present state and $\Rhat$ estimates exactly that.}
-  \label{fig:detection}
-\end{figure}
-
-\cA{Current level alone reaches AUC \textbf{0.807}. Adding $\Rhat$ raises it to
+\cA{Current level alone reaches AUC \textbf{0.807} (average precision 0.598
+against a 14.4\% base rate). Adding $\Rhat$ raises it to
 \textbf{0.826}---a larger gain than recent growth ($+0.004$) or neighbouring
-districts ($+0.006$), and climate again subtracts. Around outbreak onset, mean
-$\Rhat$ runs 1.13--1.24 for the six weeks preceding the first threshold crossing
-against a global median of 0.911, then jumps to 3.11 at onset: sustained $R>1$ is
-the textbook signature of a growing epidemic, and it is visible before the
-outbreak is. This is where the mechanistic prior belongs.}
+districts ($+0.006$), and climate again subtracts. Before onset, mean $\Rhat$ runs
+1.13--1.24 for six weeks against a global median of 0.911: sustained $R>1$ is the
+textbook signature of a growing epidemic, and it is visible before the outbreak is.
+This is where the mechanistic prior belongs.}

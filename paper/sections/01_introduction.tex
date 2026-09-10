@@ -35,29 +35,20 @@ destruction---reporting not only that it fails but the quantity that makes failu
 inevitable.}
 
 \noindent\textbf{Contributions.}
-\begin{itemize}\itemsep2pt
-  \item \textbf{Exact reproduction, and what it reveals.} We reproduce five
-        published ST-GNNs to within 7.3\% across twenty comparisons, two to four
-        decimal places, and show that the reported column is computed with
-        training data included and averaged per window rather than pooled. Naive
-        persistence beats every model in it (\S\ref{sec:repro}).
-  \item \textbf{An artifact-aware protocol.} We identify a 19$\times$ reporting
-        backlog at week~395 spanning 18 of 25 districts. It falls in one fold's
-        test split and no training split, contributes $\sim$90\% of that fold's
-        squared error, and inverts fold difficulty. We score every arm and the
-        baseline with and without it (\S\ref{sec:setup}).
-  \item \textbf{A null result, stated as one.} Five verified architectures and
-        four evidence-led increments, over 3 origins $\times$ 3 seeds. Against the
-        artifact-free floor of 29.52, no increment differs from its own baseline
-        at $p<0.05$ (\S\ref{sec:results}).
-  \item \textbf{Why the mechanistic prior cannot help.} A renewal equation seeded
-        by a validated SEIR--SEI generation interval reconstructs the record given
-        oracle $R_t$ but loses as a forecaster. We trace this to a single
-        measurement---$R_t$ is 26\% predictable, implying a 1.90$\times$ error per
-        step---and rule out the two mechanisms that could have supplied the
-        missing predictability (\S\ref{sec:physics}).
-  \item \textbf{The target that is tractable.} Outbreaks are rankable three weeks
-        ahead (AUC 0.826) even though they are not countable, and the mechanistic
-        quantity is the largest single contributor to that ranking
-        (\S\ref{sec:detection}).
+\begin{itemize}\itemsep1pt
+  \item \textbf{Exact reproduction.} Five published ST-GNNs to within 7.3\%
+        across twenty comparisons; the reported column is training-inclusive and
+        per-window averaged, and naive persistence beats every model in it
+        (\S\ref{sec:repro}).
+  \item \textbf{An artifact-aware protocol.} A 19$\times$ reporting backlog at
+        week~395 occupies one fold's test split, carries $\sim$90\% of its squared
+        error and inverts fold difficulty; we score every arm and the baseline
+        with and without it (\S\ref{sec:setup}).
+  \item \textbf{A null result, stated as one.} Over 3 origins $\times$ 3 seeds, no
+        architecture and no increment differs from its own baseline at $p<0.05$
+        against an artifact-free floor of 29.52 (\S\ref{sec:results}).
+  \item \textbf{Why the mechanistic prior cannot help, and where it can.}
+        $R_t$ is 26\% predictable, implying a 1.90$\times$ error per step
+        (\S\ref{sec:physics}); the same quantity is the largest single contributor
+        to ranking outbreaks three weeks ahead (\S\ref{sec:detection}).
 \end{itemize}

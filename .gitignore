@@ -9,6 +9,7 @@
 # Third-party papers (copyrighted -- not ours to redistribute).
 # Obtain them yourself; reproduction/REPRODUCIBILITY_MATRIX.md cites each by DOI.
 papers/
+short_paper/references/*.pdf
 
 # Clone of MLOpenSourceOpenScience/disease_modeling_MLOS2, the Weng et al.
 # reference implementation. Read-only cross-check material belonging to its

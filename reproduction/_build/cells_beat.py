@@ -14,8 +14,10 @@ the cross-architecture ensemble cannot be assembled from separate sessions.
 import env_setup
 from gen_kernels import code, md
 
-#: The experiment branch. Must be pushed before a kernel can clone it.
-BRANCH = "exp/beat-baseline"
+#: Where the kernels clone from. This work was merged to main in c57b9ff, so
+#: main is the reproducible reference -- same rule as the physics sweep. Must be
+#: pushed before a kernel can clone it.
+BRANCH = "main"
 
 ARCHITECTURES = ("A3TGCN", "STGAT", "ASTGCN", "AAGCN", "DCRNN")
 

@@ -1,0 +1,30 @@
+%=============================================================================
+% REPRODUCTION
+%=============================================================================
+\section{Reproducing the Benchmark}
+\label{sec:repro}
+
+\cE{We ran the reference implementation~\cite{weng2024graph} unmodified---their
+code, their data, their protocol---on a pinned software stack, and recovered their
+published numbers to within \textbf{7.3\%} across twenty comparisons, with AAGCN
+and DCRNN matching to four decimal places. Three deviations from their environment
+were forced and are documented with the exact error that forces each; none changes
+a reported figure. The published results are real.}
+
+\cE{What they measure is a different question, and three properties of the
+reference evaluation account for the entire apparent advantage.}
+
+\cE{\textbf{The reported column includes training data.} The column labelled
+``cross validated'' is computed on a loader spanning the full series rather than
+a held-out split; it is a fit statistic, and the column names are effectively
+inverted relative to their meanings. \textbf{RMSE is averaged per window, not
+pooled.} By Jensen's inequality that is systematically lower, and on this target
+the gap is $\sim$39\%. \textbf{The naive baseline is absent.} Adding persistence
+to their own reported column reverses the result: it beats \emph{every} model
+there, on both MAE and RMSE. An independent re-implementation sharing no code
+with either codebase reproduces this, so it is not an artefact of one.}
+
+\cF{Published advantages here therefore do not survive contact with a naive
+baseline on held-out data. We take only the \emph{architectures} forward, under
+\S\ref{sec:setup}; numbers below are comparable to each other, not to the source
+table.}

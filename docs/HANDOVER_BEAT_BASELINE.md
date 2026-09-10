@@ -1,6 +1,6 @@
 # Handover — beating the persistence floor
 
-**Branch:** `exp/beat-baseline` · **Goal:** get an arm below the artifact-free
+**Where:** `main`, as of `c57b9ff` · **Goal:** get an arm below the artifact-free
 persistence floor of **29.52** with a p-value that survives clustering *and*
 multiple-comparison correction.
 
@@ -119,10 +119,13 @@ covariate normalisation does not leak across the split.
 
 ## 2. Step by step
 
-### Step 0 — push the branch (required; kernels clone from GitHub)
+### Step 0 — push (required; kernels clone from GitHub)
+
+This work was merged into `main` as `c57b9ff`, so that is what the kernels clone
+(`exp/beat-baseline` points at the same commit and is now redundant).
 
 ```bash
-git push -u origin exp/beat-baseline
+git push origin main
 ```
 
 ### Step 1 — preflight (run this FIRST, ~10 minutes)

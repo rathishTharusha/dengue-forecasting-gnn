@@ -1,0 +1,29 @@
+%=============================================================================
+% ABSTRACT
+%=============================================================================
+\begin{abstract}
+Early warning asks \emph{when} an epidemic arrives, not only how many cases
+follow. We show these are different problems on district-level dengue, and that
+mechanistic structure answers the first while data answers the second.
+Spatio-temporal graph neural networks are widely applied here, yet their advantage
+over naive baselines is rarely verified under a leak-free protocol. We reproduce five published ST-GNNs on Sri Lanka's
+dengue record (25 districts, 459 weeks) to within 7.3\%, and find the reported
+gains are measured with training data included: naive persistence beats every
+model in the column the source paper reports. We also identify an administrative
+reporting backlog occupying one fold's test split and carrying $\sim$90\% of its
+squared error; scoring with and without those windows moves the persistence floor
+from RMSE 44.80 to 29.52 and erases the best architecture's 3.8-point lead.
+Against that floor, no architecture and none of four evidence-led increments
+separate from their own baseline at $p<0.05$. Testing the mechanistic prior the
+task invites---a renewal equation whose generation interval comes from a validated
+SEIR--SEI model---it reconstructs the record given oracle $R_t$ (RMSE 13.44) and
+fails as a forecaster, because $R_t$ is only 26\% predictable, so routing a
+forecast through it re-injects a 1.90$\times$ error per step where persistence
+carries none. The ceiling is informational, not architectural. The mechanism is
+nonetheless useful in the two roles that do not ask it to predict: as an
+inequality constraint it reliably improves a model ($-0.044$ RMSE on 57/60 paired
+runs, $p<0.0001$), and it is the largest single contributor to ranking which
+districts will breach an alert threshold (AUC $0.807 \rightarrow 0.826$).
+Mechanistic knowledge pays here when it restricts the hypothesis space, not when
+it supplies a forecast.
+\end{abstract}

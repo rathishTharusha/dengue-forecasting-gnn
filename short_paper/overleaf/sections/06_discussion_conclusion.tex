@@ -1,0 +1,31 @@
+%=============================================================================
+% DISCUSSION AND CONCLUSION
+%=============================================================================
+\section{Discussion and Conclusion}
+\label{sec:discussion}
+
+\cB{\textbf{When does a mechanistic prior pay?} PINNs succeed where data are
+scarce relative to the dynamics---MP-PINN~\cite{nguyen2024mppinn} trains on 35
+days and forecasts 97. Ours is the opposite regime, and the decisive quantity is
+not sample size but how much a naive baseline already explains: here $r^2=0.85$,
+leaving an $R_t$ that is 26\% predictable. That ratio predicts \emph{which} use
+survives---a prior supplying a forecast inherits $R_t$'s error, one restricting the
+hypothesis space does not.}
+
+\cC{\textbf{Reporting.} A caution that applies to us as much as to the work we
+reproduce: at $n=9$ the spatial constraint ($p=0.057$) and the growth envelope
+($p=0.238$) were indistinguishable; at $n\ge60$ one holds and the other is a coin
+flip. Small effects on folds this noisy need the seeds to separate them.}
+
+\cD{\textbf{Limitations.} One country, one disease, one processed array. We do not
+evaluate GAN augmentation---the remaining proposed contribution---and the detection
+result uses a single-week threshold where sustained exceedance would be more
+operationally meaningful.}
+
+\cE{\textbf{Conclusion.} Under a leak-free, artifact-aware protocol no reproduced
+architecture and no increment separates from a persistence floor of 29.52, and
+reconstructing a forecast through the mechanism cannot close that gap. But the
+mechanism holds in the two roles that do not ask it to predict---as an inequality
+constraint and as a state estimate for ranking outbreaks. Knowing \emph{when} is
+where the mathematics comes first. Code and a reproduction notebook accompany this
+paper.}

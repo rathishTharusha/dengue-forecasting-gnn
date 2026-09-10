@@ -38,9 +38,13 @@ scratchpad/
 /kaggle/
 !/kaggle/.gitkeep
 
-# Generated Overleaf bundle -- rebuild with scripts/make_overleaf.py.
-overleaf/
-overleaf.zip
+# Generated Overleaf bundle at root -- rebuild with scripts/make_overleaf.py.
+/overleaf/
+/overleaf.zip
+
+# Windows directory junction for space-safe directory alias
+/short paper
+/short paper/
 
 # Reading copies of the reproduction kernels. The canonical source is
 # reproduction/kaggle/kernels/<slug>/, which carries the notebook AND its

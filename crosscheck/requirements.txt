@@ -1,0 +1,38 @@
+# Cross-check workspace dependencies.
+#
+# This workspace has its OWN venv (crosscheck/.venv), deliberately separate from
+# the main project environment. The whole point of the workspace is that a
+# result here is arrived at independently, so it does not share an environment,
+# a package version, or a line of code with src/dengue_gnn.
+#
+# Install:  see crosscheck/README.md ("Setting up the venv")
+
+# --- core scientific stack ---
+numpy>=1.24
+scipy>=1.10
+pandas>=2.0
+scikit-learn>=1.3
+matplotlib>=3.7
+
+# --- classical baselines (R1) ---
+statsmodels>=0.14
+xgboost>=2.0
+
+# --- notebooks & tooling ---
+jupyter>=1.0
+nbformat>=5.9
+tqdm>=4.65
+pytest>=7.4
+ruff>=0.5
+
+# --- deep learning (R1, R2) ---
+# torch and torch-geometric are installed separately because the correct wheel
+# depends on your hardware. See crosscheck/README.md.
+#   torch>=2.1
+#   torch-geometric>=2.5
+#
+# torch-geometric-temporal is OPTIONAL and only needed to reproduce Weng et al.'s
+# five architectures on their original stack. It pins old torch versions and
+# breaks often (see docs/decisions/0002); R1 detects its absence and falls back
+# to the plain-PyTorch-Geometric reimplementations in xcheck.models.
+#   torch-geometric-temporal>=0.54

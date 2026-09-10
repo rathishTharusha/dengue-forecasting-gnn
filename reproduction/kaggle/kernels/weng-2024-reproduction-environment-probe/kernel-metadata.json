@@ -1,0 +1,13 @@
+{
+  "id": "tharushaperera16/weng-2024-reproduction-environment-probe",
+  "title": "Weng 2024 reproduction environment probe",
+  "code_file": "weng_2024_reproduction_environment_probe.ipynb",
+  "language": "python",
+  "kernel_type": "notebook",
+  "is_private": true,
+  "enable_gpu": false,
+  "enable_internet": true,
+  "dataset_sources": [],
+  "competition_sources": [],
+  "kernel_sources": []
+}

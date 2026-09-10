@@ -1,0 +1,2 @@
+model,runner,segments,commit,env_python,env_torch,env_torch_geometric,env_pandas,env_numpy,minutes,mae,mae_sd,rmse,rmse_sd,target_mae,target_mae_sd,target_rmse,target_rmse_sd,paper_mae,paper_rmse,mae_rel_error_pct,rmse_rel_error_pct
+STGAT,run_stgat,"[0.6, 0.7, 0.8, 0.9, 1.0]",45f1c0878f002407633ed1237638734faa9ceb2b,3.11.16,2.1.2+cpu,2.4.0,2.2.3,1.26.4,3.46,25.799427804612407,1.5795065929162684,45.43166697230324,2.5710312442854284,25.38192804812382,1.3723462830059112,44.7822111235735,2.2630818940691015,25.38,44.78,1.644870144210521,1.4502540907093986

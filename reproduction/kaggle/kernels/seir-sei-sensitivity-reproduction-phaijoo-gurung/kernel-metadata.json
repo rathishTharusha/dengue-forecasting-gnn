@@ -1,0 +1,13 @@
+{
+  "id": "tharushaperera16/seir-sei-sensitivity-reproduction-phaijoo-gurung",
+  "title": "SEIR SEI sensitivity reproduction Phaijoo Gurung",
+  "code_file": "seir_sei_sensitivity_reproduction_phaijoo_gurung.ipynb",
+  "language": "python",
+  "kernel_type": "notebook",
+  "is_private": true,
+  "enable_gpu": false,
+  "enable_internet": true,
+  "dataset_sources": [],
+  "competition_sources": [],
+  "kernel_sources": []
+}

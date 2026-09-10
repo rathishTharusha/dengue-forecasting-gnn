@@ -1,0 +1,4 @@
+check,claim,expected,observed,passed
+T1,closed-form R0 equals the next-generation spectral radius,identical to floating-point precision,diff 1.11e-16,True
+T2,all nine Table 1 sensitivity indices reproduce,agreement to the paper's printed precision (<= 5e-6),largest absolute error 1.89e-06,True
+T3,closed-form indices agree with central finite differences,~1e-6,see table,True

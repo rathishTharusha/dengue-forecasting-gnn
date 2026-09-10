@@ -1,0 +1,7 @@
+check,claim,expected,observed,passed
+T1,"beta=1, sigma=1, gamma=0.1 gives a bell-shaped infection curve","interior peak, decays to near zero, mass conserved",peak i=0.5956 at t=12.77; final i=6.73e-03; sum=1.0000000000,True
+T2,"reducing beta, raising gamma, lowering sigma each flatten or delay the curve",beta=0.5 flatter; gamma=0.5 flatter; sigma=0.1 later peak,"0.4322, 0.1048, t=34.24",True
+T3,every equilibrium of the basic SEIR model is disease-free,"RHS residual = 0 at (s, 0, 0, r); long solve drives e, i -> 0",max|residual|=0.00e+00; settled=2.38e-07,True
+T4,influx turns the disease-free equilibrium into an endemic one near 5%,"i settles at approximately 0.05, not decaying to 0",mean i over t>=120 is 0.0611 (drift 0.0024),True
+T5,R0 = beta*s0/gamma separates outbreak from no outbreak,R0=0.54 -> no growth; R0=1.80 -> growth,R0=0.54 grew=False; R0=1.80 grew=True,True
+T6,vaccinating fraction v scales R0 by (1 - v); threshold at R0 = 1,threshold v* = 1 - gamma/(beta*s0) = 0.4444,R0(v*+eps)=0.999998 < 1 < R0(v*-eps)=1.000002,True

@@ -21,6 +21,113 @@ Copy this block for a new entry:
 
 ---
 
+## EXP-018 - Adaptive graph re-tested under the frozen protocol: no improvement
+- **Date:** 2026-09-10
+- **Who:** Group 05
+- **Commit:** _(branch `feat/reproduction-and-eda`; re-log the SHA on merge)_
+- **Notebook:** `analysis/notebooks/E2_adaptive_graph.ipynb`
+- **Config:** `analysis/lib/adaptive.py` STGNN, window 3 -> horizon 3, residual over
+  persistence, log1p, train-fold normalisation; rolling-origin 3 origins x 3 seeds,
+  150 epochs, early stopping on validation RMSE, pooled held-out RMSE.
+  Four arms differing **only** in the adjacency: `none` / `fixed` / `adaptive`
+  (`softmax(ReLU(E1 E2^T))`) / `hybrid` (0.5/0.5).
+- **Question:** does a learned adjacency improve on the hand-built graph?
+- **Result:** paired against `fixed` on identical (origin, seed):
+
+  | arm | mean dRMSE | sd | better in | paired t p |
+  |---|---|---|---|---|
+  | `none` | -0.535 | 2.202 | 4/9 | 0.487 |
+  | `adaptive` | +0.459 | 0.714 | 4/9 | 0.090 |
+  | `hybrid` | +0.191 | 0.605 | 5/9 | 0.372 |
+
+  Seed-only noise floor 0.6-2.7%. All four arms beat persistence by 1-2 RMSE;
+  `adaptive` and `hybrid` on 3/3 origins.
+- **Verdict:** answered, negative. No evidence a learned adjacency helps; **and no
+  evidence the graph helps at all** -- 25 independent series match the graph model.
+- **Corroborates EXP-009**, which found the adaptive-graph effect did not survive
+  8-seed replication. That was this project's own architecture; EXP-018 is an
+  independent implementation under the frozen protocol, reaching the same place.
+- **Notes:** Predicted in advance by EDA F6/F8. Weng et al.'s `adaptive=False` was
+  not a choice: with `out_channels=1`, PGT computes `inter_c = 1 // 4 = 0` and the
+  adaptive branch crashes. 3 seeds x 3 origins is thin -- the supported claim is
+  "no evidence of improvement", not "proof of no effect".
+
+## EXP-017 - Dataset EDA: nine findings
+- **Date:** 2026-09-10
+- **Who:** Group 05
+- **Notebook:** `analysis/notebooks/E1_dataset_eda.ipynb`
+- **Question:** what is actually in the array, and what caps accuracy?
+- **Result:** F1 all 11 channels identified by name and lag, 100% exact (corrects
+  `docs/DATA.md`, which named a land-surface-temperature channel that does not exist).
+  F2 the unshifted array is reconstructible. F3 4% of weather values are 0-filled,
+  compressing usable range 26x. F4 week 395 is a 19x reporting artifact across 18 of
+  25 districts. F5 the 2017 outbreak is in test for Weng's segment 0.6 and train for
+  the rest, explaining ASTGCN's +-19.85 MAE. F6 cases r2=0.85 at lag 1 vs best
+  covariate r2=0.02. F7 the adjacency has two one-way edges; Jaffna has degree 1.
+  F8 neighbours r=0.62 vs non-neighbours r=0.55 (p=0.0002). F9 bimodal seasonality
+  (2.9x) that no model is given a feature for.
+- **Verdict:** answered. The ceiling looks temporal, not architectural.
+- **Notes:** F6/F8 are *pooled linear* correlations and F3 attenuates them -- "the
+  covariates are useless" is not established, only "no linear signal on this array
+  as released".
+
+## EXP-016 - Reproducing the SEIR and SEIR-SEI papers
+- **Date:** 2026-09-09
+- **Who:** Group 05
+- **Notebooks:** `reproduction/kaggle/kernels/seir-*/`, run on Kaggle
+- **Result:** Gopalakrishnan SEIR 6/6 checks pass. Phaijoo & Gurung SEIR-SEI 3/3
+  checks; all nine Table 1 sensitivity indices to max abs error 1.9e-06.
+- **Verdict:** answered -- both reproduce exactly.
+- **Notes:** three defects found in Phaijoo & Gurung, none fatal: Table 1's baseline
+  column contradicts its own indices; the Section 4 parameters give R0 ~ 0.78 < 1
+  (disease-free) despite Figures 2-3 showing an outbreak; and the printed endemic
+  equilibrium is not a fixed point in its vector components. See
+  `crosscheck/FINDINGS.md` F4.2-F4.4.
+
+## EXP-015 - Exact reproduction of Weng et al. (2024), all five GNNs
+- **Date:** 2026-09-09
+- **Who:** Group 05 (cross-check workspace)
+- **Commit:** _(uncommitted — `crosscheck/` is untracked at time of writing; re-log the SHA on commit)_
+- **Notebook:** `crosscheck/notebooks/R1_weng2024_graph_representation.ipynb`, §7–§8
+- **Hardware:** local CPU (torch 2.14.0+cpu, PyTorch Geometric 2.8.0, `crosscheck/.venv`)
+- **Config:** STGAT reimplemented from `reference_repo/Models/gnn_models.py`;
+  `window=3, horizon=3, cases_idx=5, self_loops=True, use_disease_only=True,`
+  `batch_size=1, epochs=50, lr=1e-4, weight_decay=5e-5, dropout=0.1, heads=8,`
+  `hidden=64, seed=0`; segment CV over 5 nested prefixes (0.6–1.0), 70/30 within
+  each. `QUICK_TEST=False`.
+- **Question:** does Weng et al.'s Table I reproduce, and is 44.78 RMSE a bar our
+  Phase-1 baseline should be measured against?
+- **Result:**
+
+  | | MAE | RMSE (per-window avg, as the reference reports) | RMSE (pooled) |
+  |---|---|---|---|
+  | Weng et al., Table I — STGAT | 25.38 ± 1.37 | 44.78 ± 2.26 | not reported |
+  | This reproduction, published protocol | 24.012458 ± 1.322934 | 42.307108 ± 2.466764 | 63.65 |
+  | persistence, identical slices | 18.58 ± 0.48 | 34.67 ± 0.89 | 55.59 |
+  | This reproduction, corrected protocol | 35.469915 ± 11.788351 | 62.095883 ± 21.044325 | 89.77 |
+  | persistence, identical slices | 21.66 ± 7.08 | 39.08 ± 12.87 | 61.08 |
+
+  "Corrected protocol" = held-out test slice only, fold-local normalization.
+  CSVs: `crosscheck/results/R1_*.csv` (per-segment, not pre-aggregated).
+
+- **Verdict:** answered, twice over.
+  1. **Table I reproduces** — within ~5% on both metrics with matching spread, so
+     the published numbers are real and our reimplementation is faithful.
+  2. **Persistence beats it on the cross-validated column.** On identical
+     slices with the identical metric convention, last-week-carried-forward
+     scores MAE 18.58 / RMSE 34.67, better than all ten models in Table I's
+     *Cross Validated* column. On the *Full Dataset* column persistence
+     (17.87 / 33.48) still wins on MAE but loses RMSE to A3TGCN (30.55) and
+     ASTGCN (32.41). The paper reports no naive baseline.
+- **Notes:** Five protocol issues found in the released implementation, each
+  measured in R1 §2–§6 and written up in `crosscheck/FINDINGS.md` (F1.1–F1.6).
+  The largest single effect is per-window RMSE averaging, which reports RMSE 39%
+  below pooled on this target. **Consequence for the report: cite our own
+  persistence floor, not Weng's Table I.** Our Phase-1 result matching the
+  persistence floor is the same outcome the benchmark gets, reported honestly.
+  STGAT only — `torch-geometric-temporal` was not installed, so ASTGCN, A3TGCN,
+  DCRNN and AAGCN were not independently re-run.
+
 ## EXP-014 — The physics-informed ceiling was wrong, and correcting it makes the term inert
 - **Date:** 2026-09-09
 - **Who:** Tharusha Perera

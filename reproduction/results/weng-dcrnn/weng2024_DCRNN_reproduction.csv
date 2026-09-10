@@ -1,0 +1,2 @@
+model,runner,segments,commit,env_python,env_torch,env_torch_geometric,env_pandas,env_numpy,minutes,mae,mae_sd,rmse,rmse_sd,target_mae,target_mae_sd,target_rmse,target_rmse_sd,paper_mae,paper_rmse,mae_rel_error_pct,rmse_rel_error_pct
+DCRNN,run_dcrnn,"[0.6, 0.7, 0.8, 0.9, 1.0]",45f1c0878f002407633ed1237638734faa9ceb2b,3.11.16,2.1.2+cpu,2.4.0,2.2.3,1.26.4,72.17,45.813535011916414,2.418149903716903,71.32110395219658,2.655572794861608,45.97544632682798,2.3412923164313133,71.60834584214274,2.559600671175839,45.98,71.61,-0.3521690986109765,-0.4011290675242948

@@ -1,0 +1,3 @@
+horizon (weeks),Moran's I (predicted),Moran's I (observed),paper Table 5,quick_test
+1,0.4483263037159067,0.09640584936291591,0.76,True
+4,0.35826562250574157,0.09753861068050548,0.68,True

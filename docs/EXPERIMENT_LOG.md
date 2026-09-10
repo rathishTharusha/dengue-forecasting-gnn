@@ -334,6 +334,9 @@ Copy this block for a new entry:
   4. **On that footing every model in their Table I loses to persistence**: STGAT
      44.78, ASTGCN 47.72, A3TGCN 58.52, RF 84.66, LSTM 131.36, ARIMA 189.22, all
      against persistence at 38.46. They do not report persistence.
+- **Corrected in EXP-015 (2026-09-10):** 38.46 is persistence on the held-out
+  test slices; Table I's Cross Validated column uses the training-inclusive
+  `full` loader, whose matching comparator is **34.67**. Conclusion unchanged.
   5. **The residual parameterisation is not a ceiling.** Ablation on folds 1/4/6,
      seed 0, with the temporal encoder: residual+log **85.32**; absolute+log
      187.57; absolute without log 70,318. ADR-0001 stands -- removing the residual

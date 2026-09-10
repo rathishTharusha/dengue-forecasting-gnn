@@ -1,3 +1,19 @@
+> ## ⚠️ SUPERSEDED — do not cite
+>
+> This table is from the **n=24** run. It was superseded by
+> [`final_table_main.md`](final_table_main.md), generated from the **n=64** replication
+> (EXP-009). Kept for provenance only.
+>
+> The difference matters. At n=24 the adaptive graph appeared to beat its
+> matched fixed-graph control (17/24, p=0.064). At n=64 that effect **did not
+> survive** — see EXP-009 in `docs/EXPERIMENT_LOG.md`. An independent
+> reimplementation under the frozen protocol reached the same conclusion
+> (EXP-018, `analysis/notebooks/E2_adaptive_graph.ipynb`): paired against a fixed
+> graph, `adaptive` was +0.46 RMSE *worse* (p=0.09), and removing the graph
+> entirely was statistically indistinguishable from keeping it (p=0.49).
+>
+> `paper/sections/05_results.tex` already cites the n=64 figures and is correct.
+
 # Main results — rolling-origin CV, pooled across horizons
 
 Mean ± SD over matched runs. `vs floor` is a two-sided paired sign test

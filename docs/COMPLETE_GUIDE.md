@@ -80,7 +80,10 @@ plausibly drive mosquito populations:
 
 - precipitation
 - air temperature
-- land-surface temperature
+- ~~land-surface temperature~~ — **there is no LST channel**; corrected in
+  `docs/DATA.md`. The three temperature channels are 2 m air temperature
+  (`Tair`) in Kelvin. Verified channel-by-channel in
+  `analysis/notebooks/E1_dataset_eda.ipynb` (F1).
 - humidity
 - NDVI (Normalised Difference Vegetation Index — a satellite greenness measure, a
   proxy for vegetation and standing water)
@@ -1092,6 +1095,12 @@ different numbers.
 This is not academic. When reconciling against Weng et al. (2024), inspection of their
 `evaluation.py` showed `batch_size = 1` with `rmse += RMSE(batch)` then `rmse /= n` —
 which is aggregation method **3**. Persistence computed *their* way scores **38.46**,
+> **Corrected 2026-09-10.** The 38.46 figure is persistence on the held-out
+> `test` slices. Weng et al.'s *Cross Validated* column is not computed there —
+> it uses the `full` loader, training data included — so the matching
+> comparator is **34.67**. See `docs/RECONCILIATION_WITH_PRIOR_WORK.md` §7.2.
+> The conclusion is unchanged: every model in their table still loses.
+
 and every model in their published Table I loses to it (STGAT 44.78, RF 84.66, LSTM
 131.36).
 
@@ -2513,6 +2522,12 @@ Contribution (b) and the temporal operator the original design lacked.
 Covered in §4.7.3. The apparent contradiction with Weng et al. was entirely an
 aggregation-convention difference: their `evaluation.py` computes mean-of-per-window
 RMSE, and persistence computed *their* way scores 38.46 — beating every model in their
+> **Corrected 2026-09-10.** The 38.46 figure is persistence on the held-out
+> `test` slices. Weng et al.'s *Cross Validated* column is not computed there —
+> it uses the `full` loader, training data included — so the matching
+> comparator is **34.67**. See `docs/RECONCILIATION_WITH_PRIOR_WORK.md` §7.2.
+> The conclusion is unchanged: every model in their table still loses.
+
 published table.
 
 Also contains the residual-parameterisation ablation (§5.2.1).

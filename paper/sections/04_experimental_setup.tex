@@ -13,12 +13,32 @@
 We evaluate on Sri Lanka's national dengue surveillance record, $N=25$
 administrative districts over $T=459$ consecutive weeks (2013--2022). Weekly case
 counts come from the Ministry of Health Epidemiology Unit; ten environmental
-covariates (precipitation, air and land-surface temperature, humidity, NDVI, soil
-moisture, canopy cover) are drawn from NASA EarthData. Covariates are pre-shifted
-by their empirically optimal lags --- precipitation $\sim$12 weeks, NDVI
-$\sim$17 weeks --- reflecting vector breeding and infection-to-diagnosis
-intervals. The target is strongly right-skewed: median 13 weekly cases, maximum
-2{,}631, and $9.7\%$ of district-weeks zero.
+covariates are drawn from NASA EarthData.
+
+The eleven channels are, by index: 0--2 mean/min/max 2\,m air temperature
+(\texttt{Tair}, in Kelvin), 3 specific humidity (\texttt{Qair}), 4 soil moisture,
+5 the forecast target (weekly cases), 6 canopy interception, 7--9 mean/min/max
+precipitation, and 10 minimum NDVI. Channels 6--9 are lag-shifted by 12 weeks and
+channel 10 by 17, reflecting vector breeding and infection-to-diagnosis intervals.
+
+This identification is empirical rather than taken from prose: each channel was
+matched against the named columns of the authors' released long-form CSV at every
+lag, with exact agreement on all eleven. Two corrections follow. There is no
+land-surface-temperature channel, contrary to earlier descriptions of this array;
+and mean and maximum NDVI, though present in the source table, are excluded from
+it.
+
+Two data-quality caveats bear on any use of the covariates. Roughly $4\%$ of the
+GLDAS values are missing in the source and were replaced by zero, which for a
+Kelvin temperature compresses the usable dynamic range to $3.8\%$ of its true
+extent under standardisation. And week 395 carries $29\%$ of its year's national
+cases, at $19\times$ the local median, with 18 of 25 districts spiking together --
+a reporting artefact rather than an epidemic. Neither affects the published
+graph-model results, which are run on the case channel alone, but both matter for
+any model that reads the covariates.
+
+The target is strongly right-skewed: median 13 weekly cases, maximum 2{,}631, and
+$9.7\%$ of district-weeks zero.
 
 \subsection{Evaluation Protocol}
 Models are evaluated under leakage-free rolling-origin (expanding window)

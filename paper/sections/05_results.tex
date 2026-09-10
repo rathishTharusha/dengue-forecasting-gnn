@@ -169,10 +169,23 @@ latter is systematically smaller.
 
 Their released implementation resolves which applies. It evaluates with
 \texttt{batch\_size = 1} and accumulates the RMSE of each batch before dividing by
-the batch count, so the published values are means of per-window RMSEs. The
-corresponding persistence figure is $38.46$, and on that footing every model in
-their Table~I --- from STGAT at $44.78$ to ARIMA at $189.22$ --- is worse than a
-naive forecast. Persistence is not among the baselines they report.
+the batch count, so the published values are means of per-window RMSEs.
+
+A second choice compounds it, and their code settles that too. Every
+\texttt{run\_*} function computes the held-out score and discards it, reporting
+instead the loader over the whole segment --- so Table~I's ``Cross Validated''
+column is \emph{training-inclusive}, with roughly $70\%$ of each reported
+evaluation set seen during training, while its ``Full Dataset'' column is the
+genuinely held-out score. The column names invert the usual reading. Recomputing
+persistence under their aggregation on each basis gives $34.67$ against the
+cross-validated column and $39.08$ against the full-dataset column.
+
+On the matching basis every model in their Table~I --- from STGAT at $44.78$ to
+ARIMA at $189.22$ --- is worse than a naive forecast. Persistence is not among the
+baselines they report. We have since run their released code unmodified at a
+pinned commit: all five graph architectures reproduce, four of them within
+$3.4\%$ and AAGCN to $0.002\%$, so this comparison rests on a reproduction rather
+than on their printed table alone.
 
 Two conclusions follow. Our finding is not in tension with the published result;
 it is the same phenomenon, visible once a naive baseline is included. And absolute

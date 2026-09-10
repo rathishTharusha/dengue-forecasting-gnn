@@ -1,7 +1,7 @@
 {
-  "id": "tharushaperera16/physics-informed-sweep-dengue-gnn",
-  "title": "Physics informed sweep dengue GNN",
-  "code_file": "physics_informed_sweep_dengue_gnn.ipynb",
+  "id": "tharushaperera16/physics-sweep-stgat",
+  "title": "Physics sweep STGAT",
+  "code_file": "physics_sweep_stgat.ipynb",
   "language": "python",
   "kernel_type": "notebook",
   "is_private": true,

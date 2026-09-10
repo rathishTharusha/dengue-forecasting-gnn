@@ -154,6 +154,7 @@ def main() -> int:
     ap.add_argument("--quick", action="store_true", help="Quick smoke test (1 seed, 25 epochs, 2 arms)")
     ap.add_argument("--epochs", type=int, default=150)
     ap.add_argument("--seeds", type=int, default=3)
+    ap.add_argument("--out-dir", type=str, default=None, help="Output directory for result files")
     args = ap.parse_args()
 
     epochs = 25 if args.quick else args.epochs
@@ -174,6 +175,9 @@ def main() -> int:
         for f in folds
     }
 
+    out_dir = Path(args.out_dir) if args.out_dir else OUT_DIR
+    out_dir.mkdir(parents=True, exist_ok=True)
+
     for arch_name in args.arch:
         print(f"\n{'='*30} Running {arch_name} {'='*30}")
         records = [
@@ -187,7 +191,7 @@ def main() -> int:
             for f in folds
         ]
 
-        out = OUT_DIR / f"physics_envelope_{arch_name}.json"
+        out = out_dir / f"physics_envelope_{arch_name}.json"
         started = time.time()
 
         for arm, fold, seed in itertools.product(arms, folds, seeds):
@@ -218,6 +222,11 @@ def main() -> int:
                 flush=True,
             )
             out.write_text(json.dumps(records, indent=1), encoding="utf-8")
+            try:
+                import pandas as pd
+                pd.DataFrame(records).to_csv(out.with_suffix(".csv"), index=False)
+            except Exception:
+                pass
 
         print(f"\n{arch_name} complete in {time.time()-started:.0f}s -> {out}")
         floor = np.mean([r["RMSE_clean"] for r in records if r["arch"] == "persistence"])

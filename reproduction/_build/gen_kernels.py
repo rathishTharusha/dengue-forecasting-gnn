@@ -161,5 +161,6 @@ if __name__ == "__main__":
     # variable with everything else held identical.
     write_kernel("Graph mode sweep dengue GNN", cells_graph.build())
 
-    # Physics-informed loss sweep: relaxed biological envelope and spatial regularizers
-    write_kernel("Physics informed sweep dengue GNN", cells_physics_sweep.build())
+    # Physics-informed loss sweep: one kernel per architecture
+    for arch in cells_physics_sweep.ARCHITECTURES:
+        write_kernel(f"Physics sweep {arch}", cells_physics_sweep.build(arch))

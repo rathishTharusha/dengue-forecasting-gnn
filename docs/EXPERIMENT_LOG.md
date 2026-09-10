@@ -19,6 +19,95 @@ Copy this block for a new entry:
 - **Notes:** anything surprising
 ```
 
+## EXP-025 — Outbreak detection is tractable; the point forecast is provably not
+- **Date:** 2026-09-10
+- **Who:** Group 05
+- **Commit:** `5adb595` (working tree dirty; scripts committed alongside this entry)
+- **Scripts:** `analysis/_build/outbreak_signal.py`, `analysis/_build/response_diagnosis.py`
+- **Config:** No training for the ranking tests (ordinary least squares / logistic regression, rolling origin, thresholds fitted on training weeks only, contiguous blocks, never shuffled). The damping and response measurements train A3TGCN over 3 origins × 2 seeds × 150 epochs and capture held-out predictions. All figures artifact-free.
+- **Question:** EXP-024 closed off *anticipating* outbreaks through the mechanistic route. Two questions remained: is an outbreak **rankable** three weeks ahead even if it cannot be counted, and does the model **respond** to an outbreak already visible in its own input?
+
+### 1. Outbreak detection is tractable
+
+Outbreak = district-week above that district's training-set 90th percentile, anywhere in the 3-week horizon. Base rate 14.4% (5.8% to 25.0% across origins).
+
+| scorer | AUC | AvgPrec | lift vs base rate |
+|---|---|---|---|
+| current level / threshold | **0.807** | 0.598 | 4.16× |
+| level × growth | 0.793 | 0.548 | 3.82× |
+| neighbour pressure | 0.773 | 0.472 | 3.28× |
+| `R_hat` (renewal) | 0.611 | 0.206 | 1.43× |
+| recent growth | 0.580 | 0.189 | 1.32× |
+| temperature | 0.405 | 0.125 | 0.87× |
+| precipitation | 0.364 | 0.121 | 0.84× |
+
+Incremental value over the trivial baseline, logistic regression fitted on training weeks:
+
+| model | AUC | AvgPrec | ΔAUC |
+|---|---|---|---|
+| level only | 0.807 | 0.598 | — |
+| level + growth | 0.811 | 0.602 | +0.004 |
+| **level + `R_hat`** | **0.826** | **0.608** | **+0.019** |
+| level + neighbours | 0.813 | 0.581 | +0.006 |
+| level + `R_hat` + neighbours | 0.826 | 0.593 | +0.019 |
+| everything incl. climate | 0.820 | 0.595 | +0.013 |
+
+**`R_hat` is the largest single addition** — the first time in this project that the mechanistic quantity has measurably added anything. Climate makes the model worse, consistently with EXP-024.
+
+Around outbreak onset (305 onsets), mean `R_hat` runs 1.13–1.24 for the six weeks before the first week above threshold, against a global median of 0.911, then jumps to 3.109 at onset. Sustained `R > 1` is the textbook definition of a growing epidemic and it is visible before the outbreak is — a modest, noisy precursor, but a real and mechanistic one.
+
+### 2. The point forecast is flat, and that is optimal
+
+| | A3TGCN |
+|---|---|
+| slope of predicted log-growth on **true** log-growth | **0.002** |
+| slope of predicted log-growth on `log R_hat` | −0.007 |
+
+The network's growth predictions carry **no information about growth at all**. This is not under-reaction; it is persistence. And it is the correct answer under squared error: the target is a residual over persistence, lag-1 already explains r² = 0.85, and the conditional mean of what remains is approximately zero. **Flatness is what MSE is asking for**, which is why the asymmetric loss (EXP-021), the renewal penalty and the renewal decoder (EXP-023) all traded RMSE for responsiveness in the same direction.
+
+Response conditional on what the model can already see:
+
+| `R_hat` at forecast time | n | bias | RMSE | mean true growth |
+|---|---|---|---|---|
+| < 0.8 | 4220 | −1.91 | 22.65 | +0.060 |
+| 0.8–1.2 | 2802 | −0.09 | 30.87 | −0.036 |
+| 1.2–1.5 | 1160 | −2.44 | 37.84 | −0.033 |
+| 1.5–2.5 | 1330 | −2.29 | 39.21 | −0.062 |
+| ≥ 2.5 | 388 | +4.89 | 31.42 | −0.138 |
+
+**True growth is negative in every elevated-`R_hat` band.** High `R_hat` means last week spiked relative to recent history, and the following weeks revert.
+
+### 3. Why the renewal penalty had to fail
+
+| correlation of `log R_hat(t)` with | value |
+|---|---|
+| **past** 3-week log growth | **+0.722** |
+| **future** 3-week log growth | **−0.319** |
+| **\|future\|** 3-week log growth | −0.219 |
+
+`R_hat` is a backward-looking descriptor. Pushing a forecast toward `R_hat · force` pushes it the wrong way, which is exactly the monotonic damage EXP-023 measured. A physics-informed *variance* model fails for the same reason with the same sign: growth volatility is **highest** at low `R_hat` (sd 1.011) and lowest at high `R_hat` (sd 0.749).
+
+### 4. Two structural facts for future design
+
+Variance decomposition of `log R` (total variance 1.2919):
+
+| component | share |
+|---|---|
+| common weekly national factor | **33.5%** |
+| district fixed effect | 6.8% |
+| residual | 66.1% |
+
+The common weekly factor has lag-1 autocorrelation **0.590**, against 0.483 for district-level `log R`. Pooling across all 25 districts is therefore 25× the effective data for the component of `R` that is actually persistent.
+
+Spatial structure, Moran's I on the district graph: **log1p(cases) 0.274, log R 0.005.** `R` has essentially no *local* spatial structure — the apparent neighbour signal is a shared national component, not a graph effect. A Laplacian smoothness penalty on `R` is therefore not supported, and the retired `losses.smoothness_loss`, which penalised neighbouring differences in predicted **counts**, was penalising geography: counts differ by orders of magnitude across districts while `R` is scale-free.
+
+Outbreak episode counts, for any future generative work: **309 distinct episodes** across 25 districts, median length 1 week, **110 lasting ≥ 3 weeks**, 1117 district-weeks above threshold (9.7%).
+
+- **Verdict:** answered. Detection is tractable (AUC 0.807, and 0.826 with the mechanistic quantity added); point forecasting is at its information limit and no loss term can move it without costing RMSE. The project's physics contribution is therefore state estimation and generative constraint, not point forecasting.
+- **Notes:** Two bugs were found and fixed while producing this. `cases[i-4:i]` with `i = 3` wraps to an empty slice and yields NaN, which ranked arbitrarily and showed up as a below-chance AUC of 0.324; and an unstandardised logistic regression did not converge on features of differing magnitude. Both were caught because a below-chance AUC from a *fitted* model is impossible and was treated as a bug rather than a finding.
+
+---
+
 ## EXP-024 — Why the physics cannot help here: R is only 26% predictable
 - **Date:** 2026-09-10
 - **Who:** Group 05

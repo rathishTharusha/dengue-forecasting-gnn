@@ -12,7 +12,9 @@ Architectures:
 import env_setup
 from gen_kernels import code, md
 
-BRANCH = "feat/physics-informed-loss"
+# Merged to main in 9e02a69; the branch name would still resolve but
+# main is the reproducible reference.
+BRANCH = "main"
 ARCHITECTURES = ("STGAT", "AAGCN", "A3TGCN", "ASTGCN", "DCRNN")
 
 

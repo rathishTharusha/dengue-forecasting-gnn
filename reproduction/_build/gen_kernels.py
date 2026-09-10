@@ -135,6 +135,7 @@ def write_kernel(title: str, cells: list[dict]) -> None:
 
 
 if __name__ == "__main__":
+    import cells_beat
     import cells_graph
     import cells_physics_sweep
     import cells_seir
@@ -164,3 +165,13 @@ if __name__ == "__main__":
     # Physics-informed loss sweep: one kernel per architecture
     for arch in cells_physics_sweep.ARCHITECTURES:
         write_kernel(f"Physics sweep {arch}", cells_physics_sweep.build(arch))
+
+    # Beat the floor: disjoint origins, retransformation corrections and
+    # combination. Nothing here changes what the network learns, so it shares the
+    # physics sweep's training loop and differs only in how folds are drawn and
+    # how predictions are corrected after training.
+    for arch in cells_beat.ARCHITECTURES:
+        write_kernel(f"Beat floor {arch}", cells_beat.build(arch))
+
+    # The cross-architecture ensemble needs every member in one session.
+    write_kernel("Beat floor combination", cells_beat.build_combo())

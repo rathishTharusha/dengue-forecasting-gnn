@@ -1,0 +1,13 @@
+{
+  "id": "tharushaperera16/beat-floor-astgcn",
+  "title": "Beat floor ASTGCN",
+  "code_file": "beat_floor_astgcn.ipynb",
+  "language": "python",
+  "kernel_type": "notebook",
+  "is_private": true,
+  "enable_gpu": false,
+  "enable_internet": true,
+  "dataset_sources": [],
+  "competition_sources": [],
+  "kernel_sources": []
+}

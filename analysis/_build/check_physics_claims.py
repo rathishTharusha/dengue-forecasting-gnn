@@ -24,6 +24,7 @@ Run::
 
 from __future__ import annotations
 
+import argparse
 import json
 import sys
 from pathlib import Path
@@ -35,19 +36,29 @@ REPO = Path(__file__).resolve().parent.parent.parent
 SWEEP = REPO / "analysis" / "results" / "physics_sweep"
 OUT = REPO / "analysis" / "results" / "physics_claims_check.json"
 
-ARMS = ["base", "envelope", "spatial", "composite", "outbreak_aware"]
+ARMS = ["base", "envelope", "spatial", "spatial_log", "composite",
+        "composite_log", "outbreak_aware"]
 
 
-def load_records() -> list[dict]:
+def load_records(directory: Path) -> list[dict]:
     records: list[dict] = []
-    for path in sorted(SWEEP.glob("physics_envelope_*.json")):
+    for path in sorted(directory.glob("physics_envelope_*.json")):
         records.extend(json.loads(path.read_text(encoding="utf-8")))
+    if not records:
+        raise SystemExit(f"no physics_envelope_*.json under {directory}")
     return records
 
 
 def main() -> int:
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--dir", type=Path, default=SWEEP,
+                    help="directory of physics_envelope_*.json files")
+    ap.add_argument("--out", type=Path, default=OUT)
+    args = ap.parse_args()
+
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
-    records = load_records()
+    records = load_records(args.dir)
+    print(f"{len(records)} records from {args.dir}")
     model = [r for r in records if r["arch"] != "persistence"]
     floor_rows = [r for r in records if r["arch"] == "persistence"]
     archs = sorted({r["arch"] for r in model})
@@ -134,8 +145,8 @@ def main() -> int:
             print(f"{arch:8s}{arm:16s}{vals.mean():12.2f}{delta:+10.3f}"
                   f"{'   n/a' if np.isnan(p) else f'{p:9.3f}'}")
 
-    OUT.write_text(json.dumps(report, indent=1), encoding="utf-8")
-    print(f"\n-> {OUT}")
+    args.out.write_text(json.dumps(report, indent=1), encoding="utf-8")
+    print(f"\n-> {args.out}")
     return 0
 
 

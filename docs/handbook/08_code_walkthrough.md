@@ -153,10 +153,34 @@ to reach.
 **The smoothness term was penalising geography.** It charged squared differences in
 predicted counts between neighbouring districts — but counts differ by orders of
 magnitude between Colombo and rural districts, so the term was mostly a tax on
-population. The scale-free quantity is `R`, and EXP-025 measured whether a
-Laplacian belonged there instead: **Moran's I for `log R` is 0.005**, against 0.274
-for `log1p(cases)`. `R` has no local spatial structure, so the term has no correct
-version on this data. Measuring before rebuilding saved a second wrong implementation.
+population.
+
+> ⚠ **This section previously concluded that the term "has no correct version on
+> this data." That was wrong, and the error is instructive.**
+>
+> The reasoning was: the fix needs a scale-free quantity → test `R` → **Moran's I
+> for `log R` is 0.005** against 0.274 for `log1p(cases)` → `R` has no local
+> spatial structure → therefore no correct version exists.
+>
+> The measurement is right; the inference is too strong. It tested **one**
+> scale-free candidate and generalised to *none*. The obvious other candidate is
+> **relative incidence**, `ŷ_i / s_i` — counts divided by each district's own
+> baseline. That is scale-free without going anywhere near `R`, and it is what
+> `analysis/lib/physics_loss.py` implements. On a controlled sweep it is the most
+> consistent positive arm in the whole physics study.
+>
+> The failure mode has a name worth carrying: **a measurement on a proxy was used
+> to close a design space rather than to narrow it.** "Measuring before rebuilding
+> saved a second wrong implementation" — the original closing line — had it exactly
+> backwards. The measurement produced false confidence to stop looking.
+
+The term that works normalises before differencing, and one refinement follows
+from a second measurement. The ratio form `ŷ_i / s_i` is scale-free in the mean
+but not in the tail: on the observed record its penalty is **85.6× larger on weeks
+containing an outbreak than on quiet weeks**. Since outbreak windows are 12.6% of
+the data and 61.7% of the squared error, that concentrates the pressure to flatten
+exactly where accuracy is decided. `log_smoothness_loss` differences in log space
+instead, where the same concentration ratio is **1.1×**.
 
 One implementation detail is worth stealing verbatim:
 

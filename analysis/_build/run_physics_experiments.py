@@ -23,18 +23,16 @@ from pathlib import Path
 
 import numpy as np
 import torch
-from torch import nn
 
 REPO = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(REPO / "analysis" / "lib"))
 sys.path.insert(0, str(REPO / "src"))
 
-import adaptive as base
-import improved as imp
-import physics as phys
-import physics_loss as ploss
-import physics_net as pnet
-import reproduced as arch
+import adaptive as base  # noqa: E402
+import improved as imp  # noqa: E402
+import physics as phys  # noqa: E402
+import physics_net as pnet  # noqa: E402
+import reproduced as arch  # noqa: E402
 
 NPY = REPO / "notebooks" / "baseline" / "sri_lanka_2013-2022_shifted.npy"
 ADJ = REPO / "notebooks" / "baseline" / "sri_lanka_adj_list.json"
@@ -59,7 +57,7 @@ def run_fold(
 ) -> dict:
     """Train one architecture with specified physics arm on one fold."""
     torch.manual_seed(seed)
-    np.random.seed(seed)
+    np.random.seed(seed)  # noqa: NPY002
 
     kwargs = {"adaptive": False, "channels": 8} if arch_name == "AAGCN" else {}
     backbone = arch.build(arch_name, 25, WINDOW, HORIZON, edge_index=edge_index, **kwargs)
@@ -88,7 +86,7 @@ def run_fold(
     best_val = float("inf")
     waited = 0
 
-    for epoch in range(epochs):
+    for _epoch in range(epochs):
         net.train()
         order = torch.randperm(n)
         for start in range(0, n, batch_size):
@@ -159,10 +157,8 @@ def main() -> int:
 
     epochs = 25 if args.quick else args.epochs
     seeds = (0,) if args.quick else tuple(range(args.seeds))
-    if args.arms:
-        arms = args.arms
-    else:
-        arms = ["base", "composite"] if args.quick else list(pnet.PHYSICS_ARMS)
+    arms = args.arms or (["base", "composite"] if args.quick
+                         else list(pnet.PHYSICS_ARMS))
 
     cases, adjacency, _ = base.load_dataset(NPY, ADJ)
     src, dst = np.nonzero(adjacency)

@@ -21,11 +21,11 @@ and *spatial flux constraints*:
 from __future__ import annotations
 
 import torch
-from torch import nn
 
 __all__ = [
     "asymmetric_outbreak_loss",
     "biological_envelope_loss",
+    "log_smoothness_loss",
     "nonnegativity_loss",
     "normalized_smoothness_loss",
 ]
@@ -111,6 +111,59 @@ def normalized_smoothness_loss(
 
     # Pairwise differences: (B, N, 1, H) - (B, 1, N, H) -> (B, N, N, H)
     diff = rel_pred.unsqueeze(2) - rel_pred.unsqueeze(1)
+    weighted = adj.unsqueeze(0).unsqueeze(-1) * diff.pow(2)
+
+    batch, _, _, horizon = weighted.shape
+    denom = batch * horizon * adj.abs().sum().clamp_min(1e-8)
+    return weighted.sum() / denom
+
+
+def log_smoothness_loss(
+    pred_counts: torch.Tensor,
+    adj: torch.Tensor,
+    district_scales: torch.Tensor,
+) -> torch.Tensor:
+    """Spatial smoothness on *log* relative incidence rather than the ratio.
+
+        L = Σ_ij A_ij ( [log(1+ŷ_i) − log(1+s_i)] − [log(1+ŷ_j) − log(1+s_j)] )²
+            / (B · H · ‖A‖₁)
+
+    Same intent as :func:`normalized_smoothness_loss` -- penalise disagreement in
+    *relative* incidence between neighbours, not in raw counts -- but bounded.
+
+    Why this variant exists. The ratio form ``ŷ_i / s_i`` is scale-free in the
+    mean and not in the tail: during an outbreak a district reaches 10--20 times
+    its baseline while its neighbour sits at 1, so the squared difference grows
+    quadratically in outbreak magnitude. Measured on the observed record, the
+    ratio penalty is **85.6x larger on weeks containing an outbreak than on quiet
+    weeks**; the log form is 1.1x, i.e. essentially flat.
+
+    That matters because outbreak windows are 12.6% of this dataset and 61.7% of
+    its squared error (``analysis/results/error_diagnosis.json``). A penalty
+    concentrated there is asking the model to flatten outbreaks toward their
+    neighbours in exactly the windows where accuracy is decided, and it forces the
+    weight down to keep that pressure tolerable. Working in log space
+    de-concentrates the term, so the same weight regularises the whole range --
+    or a larger weight becomes usable.
+
+    Args:
+        pred_counts: ``(batch, nodes, horizon)`` on the raw count scale.
+        adj: ``(nodes, nodes)`` adjacency.
+        district_scales: ``(nodes,)`` positive baseline scale per district.
+
+    Returns:
+        Scalar tensor penalty.
+    """
+    if pred_counts.dim() != 3:
+        raise ValueError(f"expected (batch, nodes, horizon), got {tuple(pred_counts.shape)}")
+    n = pred_counts.shape[1]
+    if adj.shape != (n, n):
+        raise ValueError(f"adj must be ({n}, {n}), got {tuple(adj.shape)}")
+
+    offset = torch.log1p(district_scales.clamp_min(0.0)).view(1, n, 1)
+    rel = torch.log1p(pred_counts.clamp_min(0.0)) - offset
+
+    diff = rel.unsqueeze(2) - rel.unsqueeze(1)
     weighted = adj.unsqueeze(0).unsqueeze(-1) * diff.pow(2)
 
     batch, _, _, horizon = weighted.shape

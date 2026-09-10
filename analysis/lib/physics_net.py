@@ -4,20 +4,23 @@ Supported arms:
 - base: unconstrained residual GNN baseline.
 - envelope: biological growth ceiling (r_max = 2.3884) and host clearance rate bounds.
 - spatial: district-normalized spatial smoothness across adjacent districts.
+- spatial_log: the same term in log space, which does not concentrate its
+  pressure on outbreak windows (85.6x vs 1.1x; see physics_loss).
 - composite: envelope + spatial + conservation (non-negativity).
+- composite_log: envelope + spatial_log + conservation.
 - outbreak_aware: composite + asymmetric weighting on under-predictions.
 """
 
 from __future__ import annotations
 
-import numpy as np
 import physics_loss as ploss
 import torch
 from torch import nn
 
 __all__ = ["PHYSICS_ARMS", "RelaxedPhysicsNet"]
 
-PHYSICS_ARMS = ("base", "envelope", "spatial", "composite", "outbreak_aware")
+PHYSICS_ARMS = ("base", "envelope", "spatial", "spatial_log", "composite",
+                "composite_log", "outbreak_aware")
 
 
 class RelaxedPhysicsNet(nn.Module):
@@ -32,7 +35,8 @@ class RelaxedPhysicsNet(nn.Module):
         mean: Training-fold mean of log1p(cases).
         std: Training-fold standard deviation of log1p(cases).
         lambda_env: Weight for biological envelope loss (default 0.1).
-        lambda_smooth: Weight for normalized spatial smoothness (default 0.05).
+        lambda_smooth: Weight for ratio-space spatial smoothness (default 0.001).
+        lambda_smooth_log: Weight for log-space spatial smoothness (default 0.05).
         lambda_cons: Weight for non-negativity loss (default 0.1).
     """
 
@@ -47,6 +51,7 @@ class RelaxedPhysicsNet(nn.Module):
         std: float = 1.0,
         lambda_env: float = 0.05,
         lambda_smooth: float = 0.001,
+        lambda_smooth_log: float = 0.05,
         lambda_cons: float = 0.01,
     ) -> None:
         super().__init__()
@@ -59,6 +64,10 @@ class RelaxedPhysicsNet(nn.Module):
         self.std = std
         self.lambda_env = lambda_env
         self.lambda_smooth = lambda_smooth
+        # The log term is ~50x smaller in magnitude than the ratio term on this
+        # data, so it carries a proportionally larger weight to apply comparable
+        # pressure rather than a weaker constraint.
+        self.lambda_smooth_log = lambda_smooth_log
         self.lambda_cons = lambda_cons
 
         self.register_buffer("edge_index", edge_index)
@@ -99,17 +108,23 @@ class RelaxedPhysicsNet(nn.Module):
             return total_loss, metrics
 
         # 1. Biological envelope
-        if self.mode in ("envelope", "composite", "outbreak_aware"):
+        if self.mode in ("envelope", "composite", "composite_log", "outbreak_aware"):
             l_env = ploss.biological_envelope_loss(counts_pred, history)
             total_loss = total_loss + self.lambda_env * l_env
             metrics["l_env"] = l_env.item()
 
-        # 2. Normalized spatial smoothness
+        # 2. Spatial smoothness, in ratio or log space
         if self.mode in ("spatial", "composite", "outbreak_aware"):
             l_smooth = ploss.normalized_smoothness_loss(
                 counts_pred, self.adj_dense, self.district_scales
             )
             total_loss = total_loss + self.lambda_smooth * l_smooth
+            metrics["l_smooth"] = l_smooth.item()
+        elif self.mode in ("spatial_log", "composite_log"):
+            l_smooth = ploss.log_smoothness_loss(
+                counts_pred, self.adj_dense, self.district_scales
+            )
+            total_loss = total_loss + self.lambda_smooth_log * l_smooth
             metrics["l_smooth"] = l_smooth.item()
 
         # 3. Non-negativity conservation

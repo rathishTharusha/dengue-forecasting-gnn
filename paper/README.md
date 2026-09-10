@@ -3,7 +3,7 @@
 **Due:** Sunday 23 Aug 2026, 11:59 PM · **Limit:** 4 pages excluding references ·
 **Template:** ACM `sigconf`
 
-Execution plan and positioning: [`../docs/PHASE2_PLAN.md`](../docs/PHASE2_PLAN.md).
+Execution plan and positioning: `docs/PHASE2_PLAN.md` (tag `phase23-archive`).
 Read §1 (Positioning) before writing anything.
 
 ## Build

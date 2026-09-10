@@ -5,8 +5,8 @@ the claim that this addresses the measured under-reaction stops being true, and
 that is exactly the kind of silent drift EXP-014 caught too late.
 
 ``analysis/lib`` is not a package, so the module is loaded by path. CI installs
-only numpy/pytest/ruff, but this module needs torch -- the tests skip cleanly
-where it is absent, matching the convention in ``tests/test_mechanistic.py``.
+only numpy/pytest/ruff, but this module needs torch, so the whole file skips
+cleanly where torch is absent.
 """
 
 from __future__ import annotations
@@ -50,8 +50,7 @@ def test_generation_interval_matches_the_stage_durations():
     """
     w = renewal.generation_interval(_Stages())
     mean_weeks = float((np.arange(1, len(w) + 1) * w).sum())
-    exact_days = sum(1 / r for r in (_Stages.nu_h, _Stages.gamma_h,
-                                     _Stages.nu_v, _Stages.mu_v))
+    exact_days = sum(1 / r for r in (_Stages.nu_h, _Stages.gamma_h, _Stages.nu_v, _Stages.mu_v))
     assert exact_days / 7 < mean_weeks < exact_days / 7 + 1.0
 
 
@@ -110,8 +109,7 @@ def test_estimate_r_recovers_a_known_multiplier():
     for _ in range(5):
         force = sum(w_np[lag] * series[-(lag + 1)] for lag in range(renewal.KERNEL_WEEKS))
         series.append(1.6 * force)
-    history = torch.tensor(series[-renewal.HISTORY_WEEKS:],
-                           dtype=torch.float32).reshape(1, 1, -1)
+    history = torch.tensor(series[-renewal.HISTORY_WEEKS :], dtype=torch.float32).reshape(1, 1, -1)
     assert renewal.estimate_r(history, w).item() == pytest.approx(1.6, rel=0.05)
 
 
@@ -130,12 +128,13 @@ def test_penalty_is_zero_on_a_renewal_consistent_forecast():
     for _ in range(5):
         force = sum(w_np[lag] * series[-(lag + 1)] for lag in range(renewal.KERNEL_WEEKS))
         series.append(1.6 * force)
-    history = torch.tensor(series[-renewal.HISTORY_WEEKS:],
-                           dtype=torch.float32).reshape(1, 1, -1)
+    history = torch.tensor(series[-renewal.HISTORY_WEEKS :], dtype=torch.float32).reshape(1, 1, -1)
     r = renewal.estimate_r(history, w)
     consistent = renewal.renewal_forecast(
         torch.log(r).reshape(1, 1, 1).expand(1, 1, 3).contiguous(),
-        history[..., -renewal.KERNEL_WEEKS:], w)
+        history[..., -renewal.KERNEL_WEEKS :],
+        w,
+    )
     assert renewal.renewal_penalty(consistent, history, w).item() < 1e-4
 
 
@@ -151,8 +150,7 @@ def test_penalty_pushes_a_flat_forecast_upward_when_r_exceeds_one():
     for _ in range(5):
         force = sum(w_np[lag] * series[-(lag + 1)] for lag in range(renewal.KERNEL_WEEKS))
         series.append(2.0 * force)
-    history = torch.tensor(series[-renewal.HISTORY_WEEKS:],
-                           dtype=torch.float32).reshape(1, 1, -1)
+    history = torch.tensor(series[-renewal.HISTORY_WEEKS :], dtype=torch.float32).reshape(1, 1, -1)
 
     flat = torch.full((1, 1, 3), float(series[-1]), requires_grad=True)
     renewal.renewal_penalty(flat, history, w).backward()

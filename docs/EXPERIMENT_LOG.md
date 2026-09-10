@@ -19,6 +19,24 @@ Copy this block for a new entry:
 - **Notes:** anything surprising
 ```
 
+> **EXP-001 – EXP-014 ran on code that is no longer in the working tree.** The
+> Phase-2/3 implementation (`src/dengue_gnn/{experiment,models,losses,augment,
+> baselines,provenance,results_logger,mechanistic}.py`, `scripts/run_phase2.py`,
+> `scripts/run_phase3.py`, `notebooks/03_proposed.ipynb`,
+> `notebooks/04_kaggle_search.ipynb`) and its `results/phase*.csv` outputs were
+> removed once EXP-015 onward rebuilt on architectures verified against the
+> published papers. Every entry keeps its config and unrounded numbers inline, so
+> nothing here is uncitable — but to *re-run* any of those experiments, check out
+> the tag `phase23-archive`:
+>
+> ```bash
+> git checkout phase23-archive
+> ```
+>
+> The derived growth ceiling those experiments turned on (`MAX_WEEKLY_LOG_GROWTH`,
+> `CEILING_R0_MAX`) survived the cleanup and now lives in `dengue_gnn.seir`, still
+> asserted by `tests/test_seir.py` and reproduced by `scripts/verify_seir_paper.py`.
+
 ## EXP-025 — Outbreak detection is tractable; the point forecast is provably not
 - **Date:** 2026-09-10
 - **Who:** Group 05

@@ -9,8 +9,8 @@ Why this module exists
 ----------------------
 We do not fit this system. One of its seven compartments is observed, and only
 as under-ascertained reported cases, so a hard compartmental residual is
-structurally under-determined (see ``mechanistic.py`` and
-``docs/STAGE3_EXPERIMENTS.md``). What the model *can* supply is a defensible
+structurally under-determined (EXP-014 and EXP-024; the modules that tried it
+are at tag ``phase23-archive``). What the model *can* supply is a defensible
 bound on how fast an epidemic can grow, which is a statement about observables.
 
 That bound was previously a guess. ``MAX_WEEKLY_LOG_GROWTH`` was set to 0.70
@@ -47,8 +47,10 @@ from dataclasses import dataclass, replace
 import numpy as np
 
 __all__ = [
+    "CEILING_R0_MAX",
     "DEFAULT_RANGES",
     "INFECTED_STATES",
+    "MAX_WEEKLY_LOG_GROWTH",
     "PAPER_SECTION4",
     "Params",
     "growth_rate",
@@ -293,3 +295,50 @@ def weekly_log_growth_ceiling(
     if best is None:
         raise ValueError(f"no grid point satisfies R0 <= {r0_max}")
     return 7.0 * best[0], best[1]
+
+
+# ---------------------------------------------------------------------------
+# Derived ceiling
+#
+# These lived in `dengue_gnn.mechanistic` alongside the loss terms that used
+# them. EXP-014 retired those terms -- with the corrected ceiling the hinge never
+# activates, so it contributed exactly zero gradient on all 96 rows -- and the
+# module was removed in the Phase-2/3 cleanup. The constants stay because they
+# are derivations *of this model*, they are asserted against `seir` in
+# `tests/test_seir.py`, and the 1.07%-of-observations figure is cited in
+# EXP-014. See tag `phase23-archive` for the loss terms themselves.
+# ---------------------------------------------------------------------------
+
+#: Ceiling on ``|d log(1+cases)/dweek|``, derived rather than guessed.
+#:
+#: This was 0.70, from ``ln(R)/GI`` with R=8 and a 3-week generation interval.
+#: That was wrong, for a reason worth stating: ``ln(R)/GI`` assumes every onward
+#: infection lands exactly one generation interval later, but the SEIR-SEI stage
+#: durations are exponential, and for a given R0 a high-variance generation
+#: interval produces markedly faster early growth than a fixed delay does
+#: (Wallinga & Lipsitch 2007). It understated the bound by 3-4x.
+#:
+#: The consequence was not academic. **20.9% of the observed district-week growth
+#: rates in our own data exceeded 0.70** -- the term was declaring a fifth of the
+#: record physically impossible and penalising forecasts for tracking real
+#: outbreaks. That is the most likely reason the band constraint never helped in
+#: EXP-008 and EXP-014: not the weight, the constant.
+#:
+#: The value below is the largest weekly log growth the linearised SEIR-SEI model
+#: can produce subject to ``R0 <= 6``, i.e. ``7 * max Re eig(F - V)``, from
+#: Phaijoo & Gurung (2018). Only 1.07% of observations exceed it, which is the
+#: right order for a genuine physical ceiling. Recomputed and asserted in
+#: ``tests/test_seir.py``; derivation and data comparison in
+#: ``scripts/verify_seir_paper.py`` and ``results/table_seir_validation.md``.
+#:
+#: Hard-coded rather than computed at import because the search takes ~3 s and
+#: every pool worker would pay it.
+#:
+#: OWNER: confirm the ``R0 <= 6`` cap and the parameter ranges in
+#: ``seir.DEFAULT_RANGES``. Those are the epidemiological judgements (D13);
+#: everything downstream of them is mechanical.
+MAX_WEEKLY_LOG_GROWTH = 2.3884
+
+#: The R0 cap the ceiling above was derived at. Kept beside it so the two cannot
+#: drift apart, and so the test can recompute one from the other.
+CEILING_R0_MAX = 6.0

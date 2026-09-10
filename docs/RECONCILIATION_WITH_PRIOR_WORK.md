@@ -34,7 +34,7 @@ different scale, not the Sri Lanka series. It is a useful methodological referen
 compared to ours and do not bear on this question.
 
 `09_SEIR_model.pdf` is a Portland State teaching notebook on the single-population
-SEIR model for influenza, not a dengue paper. See `docs/STAGE3_EXPERIMENTS.md` §1.1.
+SEIR model for influenza, not a dengue paper. See `docs/STAGE3_EXPERIMENTS.md` §1.1 (tag `phase23-archive`).
 
 ---
 

@@ -1,0 +1,19 @@
+{
+ "own_past": 0.27584899340588276,
+ "per_channel": {
+  "meanTair": 0.0005070975835036462,
+  "minTair": 0.0005159211904869343,
+  "maxTair": 0.0004932928495287037,
+  "meanQair(humidity)": 6.543446275775189e-05,
+  "soilMoisture": 0.00046979551786163753,
+  "canopyInt(+12wk)": 0.00025621926027452613,
+  "meanPrecip(+12wk)": 4.492412360779241e-06,
+  "minPrecip(+12wk)": 2.1655665273345726e-05,
+  "maxPrecip(+12wk)": 2.295371509752897e-05,
+  "minNdvi(+17wk)": 0.0005457748465602652
+ },
+ "all_covariates": 0.007553373090512294,
+ "covariates_plus_own_past": 0.2787085034178264,
+ "neighbours_same_week": 0.3220379159540896,
+ "neighbours_lagged": 0.17052320805614773
+}

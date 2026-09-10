@@ -274,9 +274,12 @@ and every effect here sits at or below it.
 
 This is exactly what EDA F6 and F8 predicted: cases at *t−1* explain r² = 0.85,
 adjacency adds only +0.07 correlation over a national baseline of 0.55, and the
-2.9× bimodal seasonality (F9) is shared across districts. Most inter-district
-co-movement is common seasonality, not spatial transmission — so there is little
-for any graph, learned or given, to extract.
+Most inter-district co-movement is a shared national trend rather than spatial
+transmission — so there is little for any graph, learned or given, to extract.
+
+(An earlier draft attributed that shared movement to seasonality, citing EDA F9.
+F9 has since been retracted: there is no usable annual cycle in this dataset. The
+shared movement is real; calling it *seasonal* was not supported.)
 
 **One positive result worth keeping.** Under this clean protocol all four model
 variants do beat persistence, by 1–2 RMSE, with `adaptive` and `hybrid` beating
@@ -290,13 +293,16 @@ Contribution (c) as written — "replace the fixed adjacency with a learned one"
 is not supported by this evidence. Three avenues remain, in the order the
 evidence supports them:
 
-1. **A seasonal feature.** EDA F9: seasonality is bimodal with a 2.9× peak-to-trough
-   ratio, and *no model in this project sees week-of-year*. A 3-week window cannot
-   represent a 52-week cycle. It is the cheapest untested idea here, and this
-   notebook's null result raises its priority rather than lowering it.
+1. ~~**A seasonal feature.**~~ **Ruled out.** An earlier draft made this the top
+   recommendation on the strength of EDA F9. F9 has been retracted: the seasonal
+   shape does not repeat once amplitude is normalised (r = −0.065, chance), no
+   district shows a week-of-year effect, and week-of-year explains R² = 0.03
+   against 0.86 from the previous week. EXP-012 had already concluded this.
 2. **The physics-informed loss.** If features carry no signal and persistence
    captures the autocorrelation, extra accuracy must come from structure rather
-   than data. A compartmental prior supplies structure.
+   than data. A compartmental prior supplies structure. Note EXP-014's warning:
+   with a correctly derived ceiling the constraint became inert, so the term needs
+   a mechanism, not just a weight.
 3. **Outbreak augmentation.** The failure mode is extrapolation to unseen regimes.
    But EDA F3 and F4 say clean first — a generator trained on this array will
    learn to reproduce a 19× reporting artifact.

@@ -41,6 +41,7 @@ __all__ = [
     "evaluate",
     "load_dataset",
     "persistence_scores",
+    "pooled_scores",
     "train_one",
 ]
 
@@ -97,6 +98,8 @@ class Fold:
     mean: float
     std: float
     test_index: np.ndarray = field(default_factory=lambda: np.array([]))
+    train_index: np.ndarray = field(default_factory=lambda: np.array([]))
+    val_index: np.ndarray = field(default_factory=lambda: np.array([]))
 
     def inverse(self, values: np.ndarray) -> np.ndarray:
         """Undo log1p + z-score, returning raw counts."""
@@ -149,7 +152,8 @@ def build_folds(
         xte, yte, pte = pack(test_ids)
         folds.append(
             Fold(
-                origin, xtr, ytr, ptr, xva, yva, pva, xte, yte, pte, mean, std, np.asarray(test_ids)
+                origin, xtr, ytr, ptr, xva, yva, pva, xte, yte, pte, mean, std,
+                np.asarray(test_ids), np.asarray(train_ids), np.asarray(val_ids),
             )
         )
     return folds
@@ -240,6 +244,38 @@ def mae(pred: np.ndarray, truth: np.ndarray) -> float:
     return float(np.mean(np.abs(pred - truth)))
 
 
+def pooled_scores(
+    pred: np.ndarray, truth: np.ndarray, artifact: np.ndarray | None = None
+) -> dict:
+    """Pooled RMSE/MAE, reported twice when an artifact mask is supplied.
+
+    Args:
+        pred: Predictions, ``(windows, nodes, horizon)`` raw counts.
+        truth: Ground truth, same shape.
+        artifact: Optional boolean mask over the window axis, ``True`` for
+            windows contaminated by the week-395 reporting spike
+            (:func:`improved.artifact_windows`).
+
+    Returns:
+        ``RMSE``/``MAE`` over all windows, plus ``RMSE_clean``/``MAE_clean`` over
+        the artifact-free windows and the counts, when a mask is given.
+
+    Both numbers are reported because neither alone is honest. Including week 395
+    measures a reporting backlog -- on the origin-0.85 fold, 6 of 68 windows carry
+    90% of the squared error. Excluding it silently would flatter every arm
+    equally and hide that the fold's difficulty is one week of bad data.
+    """
+    out = {"RMSE": rmse(pred, truth), "MAE": mae(pred, truth)}
+    if artifact is None:
+        return out
+    keep = ~np.asarray(artifact, dtype=bool)
+    out["n_windows"] = int(keep.size)
+    out["n_artifact"] = int(keep.size - keep.sum())
+    out["RMSE_clean"] = rmse(pred[keep], truth[keep]) if keep.any() else float("nan")
+    out["MAE_clean"] = mae(pred[keep], truth[keep]) if keep.any() else float("nan")
+    return out
+
+
 @torch.no_grad()
 def evaluate(model: STGNN, fold: Fold, fixed: torch.Tensor, split: str = "test") -> dict:
     """Score one split of a fold on the raw case scale."""
@@ -250,7 +286,7 @@ def evaluate(model: STGNN, fold: Fold, fixed: torch.Tensor, split: str = "test")
     pred = model(x, fixed) + p  # residual over persistence
     pred_raw = fold.inverse(pred.numpy())
     truth_raw = fold.inverse(y.numpy())
-    return {"RMSE": rmse(pred_raw, truth_raw), "MAE": mae(pred_raw, truth_raw)}
+    return pooled_scores(pred_raw, truth_raw)
 
 
 def train_one(
@@ -310,8 +346,15 @@ def train_one(
     return model, evaluate(model, fold, fixed, "test")
 
 
-def persistence_scores(fold: Fold, cases: np.ndarray, horizon: int = 3) -> dict:
-    """Last-value-carried-forward on the same test windows -- the floor to beat."""
+def persistence_scores(
+    fold: Fold, cases: np.ndarray, horizon: int = 3, artifact: np.ndarray | None = None
+) -> dict:
+    """Last-value-carried-forward on the same test windows -- the floor to beat.
+
+    Pass ``artifact`` to get the floor reported with and without the week-395
+    windows; the floor has to be split the same way the models are, or the
+    comparison is between two different test sets.
+    """
     pred = np.stack([np.repeat(cases[i - 1][:, None], horizon, axis=1) for i in fold.test_index])
     truth = np.stack([cases[i : i + horizon].T for i in fold.test_index])
-    return {"RMSE": rmse(pred, truth), "MAE": mae(pred, truth)}
+    return pooled_scores(pred, truth, artifact)

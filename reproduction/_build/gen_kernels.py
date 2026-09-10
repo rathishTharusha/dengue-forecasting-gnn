@@ -136,6 +136,7 @@ def write_kernel(title: str, cells: list[dict]) -> None:
 
 if __name__ == "__main__":
     import cells_seir
+    import cells_sweep
     import cells_weng
 
     # Titles use only letters, digits and spaces so the slug is predictable.
@@ -147,3 +148,9 @@ if __name__ == "__main__":
 
     write_kernel("SEIR model reproduction Gopalakrishnan", cells_seir.basic())
     write_kernel("SEIR SEI sensitivity reproduction Phaijoo Gurung", cells_seir.sei_sensitivity())
+
+    # Not a reproduction: the verified architectures under this project's own
+    # protocol, plus the increments the papers and our EDA justify. One kernel
+    # per architecture -- DCRNN alone runs ~10 h against Kaggle's 12 h CPU limit.
+    for model in cells_sweep.ARCHITECTURES:
+        write_kernel(f"Improved architecture sweep {model}", cells_sweep.build(model))

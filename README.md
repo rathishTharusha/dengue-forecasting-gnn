@@ -83,6 +83,19 @@ A genuine negative result, reported as one.
 
 ---
 
+## New to this project? Start with the handbook
+
+[`docs/handbook/`](docs/handbook/00_START_HERE.md) is a complete twelve-chapter
+course on this project — the disease, the mathematics, the machine learning, the
+code, and every decision behind them. It assumes you can read Python and nothing
+else, and builds up epidemiology, graph neural networks and forecasting
+evaluation from first principles.
+
+It is written so that you could delete this repository and rebuild it from
+scratch using only official library documentation.
+
+---
+
 ## Quick start
 
 ```bash

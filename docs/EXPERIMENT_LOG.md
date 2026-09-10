@@ -64,8 +64,16 @@ Copy this block for a new entry:
   25 districts. F5 the 2017 outbreak is in test for Weng's segment 0.6 and train for
   the rest, explaining ASTGCN's +-19.85 MAE. F6 cases r2=0.85 at lag 1 vs best
   covariate r2=0.02. F7 the adjacency has two one-way edges; Jaffna has degree 1.
-  F8 neighbours r=0.62 vs non-neighbours r=0.55 (p=0.0002). F9 bimodal seasonality
+  F8 neighbours r=0.62 vs non-neighbours r=0.55 (p=0.0002). ~~F9 bimodal seasonality~~
   (2.9x) that no model is given a feature for.
+- **F9 RETRACTED 2026-09-10.** The 2.9x peak/trough came from averaging a
+  seasonal profile across years whose totals span 6.8x, so it measured the
+  timing of the 2017 outbreak rather than a recurring cycle. Sharper tests:
+  amplitude-normalised yearly shapes correlate at r=-0.065 (chance), 0/25
+  districts show a week-of-year effect at p<0.05, and week-of-year explains
+  R2=0.03 of national log-incidence against 0.86 from the previous week.
+  **EXP-012 reached the correct conclusion first** and is vindicated.
+  A week-of-year feature is not a cheap win and should not be prioritised.
 - **Verdict:** answered. The ceiling looks temporal, not architectural.
 - **Notes:** F6/F8 are *pooled linear* correlations and F3 attenuates them -- "the
   covariates are useless" is not established, only "no linear signal on this array

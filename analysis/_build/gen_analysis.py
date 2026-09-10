@@ -67,6 +67,8 @@ def write_nb(filename: str, cells: list[dict]) -> None:
 if __name__ == "__main__":
     import cells_adaptive
     import cells_eda
+    import cells_physics
 
     write_nb("E1_dataset_eda.ipynb", cells_eda.CELLS)
     write_nb("E2_adaptive_graph.ipynb", cells_adaptive.CELLS)
+    write_nb("E3_physics_vs_adaptive.ipynb", cells_physics.CELLS)

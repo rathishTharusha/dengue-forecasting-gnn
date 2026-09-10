@@ -161,7 +161,7 @@ def fig_results():
     reporting backlog rather than at forecasting.
     """
     records = load("improved_sweep")
-    fig, axes = plt.subplots(1, 2, figsize=(7.0, 2.1), sharey=False)
+    fig, axes = plt.subplots(1, 2, figsize=(7.0, 1.85), sharey=False)
 
     for ax, field, title in zip(
         axes, ("RMSE", "RMSE_clean"),
@@ -422,7 +422,6 @@ def table_physics() -> str:
     m = load("paper_measurements")
     mr = load("mechanistic_r")
     a = m["anchors"]["mean"]
-    ll = m["lead_lag"]
     lines = [
         "\\begin{table}[t]",
         "\\centering",
@@ -440,17 +439,9 @@ def table_physics() -> str:
         f"ratio form, damped & {a['ratio_0.5']:.2f} \\\\",
         f"$\\hat{{R}}\\cdot$force & {a['rhat_force']:.2f} \\\\",
         "\\midrule",
-        "\\multicolumn{2}{l}{\\emph{Predicting} $\\log R_t$ --- out-of-sample $r^2$} \\\\",
-        "\\midrule",
-        f"own past & {mr['own_past']:.3f} \\\\",
-        f"climate, linear & {mr['climate_linear']:.3f} \\\\",
-        f"climate $+$ thermal curvature & {mr['climate_hump']:.3f} \\\\",
-        f"susceptible depletion & {mr['depletion_all']:.3f} \\\\",
-        "\\midrule",
-        f"corr.\\ $\\log\\hat{{R}}_t$ with \\emph{{past}} growth "
-        f"& ${ll['log_r_vs_past_growth']:+.3f}$ \\\\",
-        f"corr.\\ with \\emph{{future}} growth "
-        f"& ${ll['log_r_vs_future_growth']:+.3f}$ \\\\",
+        f"own past $\\rightarrow \\log R_t$ ($r^2$, out of sample) "
+        f"& {mr['own_past']:.3f} \\\\",
+        f"climate $\\rightarrow \\log R_t$ & {mr['climate_linear']:.3f} \\\\",
         "\\bottomrule",
         "\\end{tabular}",
         "\\end{table}",

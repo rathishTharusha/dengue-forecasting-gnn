@@ -17,6 +17,25 @@ between them is attributable to the graph and nothing else:
     ``0.5 * fixed + 0.5 * adaptive``, which is how Graph WaveNet actually uses it:
     the learned graph augments the prior rather than replacing it.
 
+The self-path, and why it was added
+-----------------------------------
+The first run of this comparison put ``none`` (42.82) ahead of ``fixed`` (43.36),
+``hybrid`` (43.55) and ``adaptive`` (43.81) -- identity beating a real district
+adjacency, which is not a result about geography so much as a symptom.
+
+The cause is that propagation was ``relu(A @ W h)`` with no separate route for a
+node's own state. ``none`` and ``fixed`` both carry a diagonal (``fixed`` is built
+with self-loops), so they keep it; ``adaptive`` is ``softmax(ReLU(E1 E2.T))``,
+which at small initialisation is close to *uniform* over 25 districts -- an
+averaging matrix that erases the node's own signal at exactly the point where
+lag-1 autocorrelation (r = 0.92) carries almost all the information.
+
+Graph WaveNet does not have this problem because its diffusion convolution
+includes a ``k=0`` identity term. :class:`STGNN` now does the same, via an
+explicit ``self_path`` transform present in **every** mode, so the graph is a
+correction to a node's own state rather than the only route information can take.
+Pass ``self_path=False`` to reproduce the earlier numbers.
+
 Modelling choices other than the graph follow ``docs/decisions/0001``: predict
 the residual over persistence, in log1p space, with normalisation from training
 weeks only. Those are the choices that made this project's own baseline
@@ -41,6 +60,7 @@ __all__ = [
     "evaluate",
     "load_dataset",
     "persistence_scores",
+    "pooled_scores",
     "train_one",
 ]
 
@@ -97,6 +117,8 @@ class Fold:
     mean: float
     std: float
     test_index: np.ndarray = field(default_factory=lambda: np.array([]))
+    train_index: np.ndarray = field(default_factory=lambda: np.array([]))
+    val_index: np.ndarray = field(default_factory=lambda: np.array([]))
 
     def inverse(self, values: np.ndarray) -> np.ndarray:
         """Undo log1p + z-score, returning raw counts."""
@@ -149,7 +171,8 @@ def build_folds(
         xte, yte, pte = pack(test_ids)
         folds.append(
             Fold(
-                origin, xtr, ytr, ptr, xva, yva, pva, xte, yte, pte, mean, std, np.asarray(test_ids)
+                origin, xtr, ytr, ptr, xva, yva, pva, xte, yte, pte, mean, std,
+                np.asarray(test_ids), np.asarray(train_ids), np.asarray(val_ids),
             )
         )
     return folds
@@ -172,6 +195,10 @@ class STGNN(nn.Module):
         emb_dim: Node-embedding width for the learned adjacency.
         dropout: Dropout between the two graph layers.
         alpha: Weight on the fixed graph in ``hybrid`` mode.
+        self_path: Give each layer a separate transform of the node's own state,
+            as Graph WaveNet's ``k=0`` diffusion term does. ``False`` reproduces
+            the first run of this experiment, in which the learned adjacency had
+            no diagonal to fall back on.
     """
 
     def __init__(
@@ -184,6 +211,7 @@ class STGNN(nn.Module):
         emb_dim: int = 16,
         dropout: float = 0.1,
         alpha: float = 0.5,
+        self_path: bool = True,
     ) -> None:
         super().__init__()
         if graph_mode not in GRAPH_MODES:
@@ -195,6 +223,11 @@ class STGNN(nn.Module):
         self.lin_in = nn.Linear(window, hidden)
         self.gc1 = nn.Linear(hidden, hidden)
         self.gc2 = nn.Linear(hidden, hidden)
+        # Created unconditionally, like the embeddings below, so every arm draws
+        # the same number of initialisation samples from the RNG.
+        self.self1 = nn.Linear(hidden, hidden)
+        self.self2 = nn.Linear(hidden, hidden)
+        self.self_path = self_path
         self.drop = nn.Dropout(dropout)
         self.head = nn.Linear(hidden, horizon)
 
@@ -219,10 +252,15 @@ class STGNN(nn.Module):
         """``(batch, nodes, window)`` -> ``(batch, nodes, horizon)``."""
         a = self.adjacency(fixed)
         h = torch.relu(self.lin_in(x))
-        h = torch.relu(a @ self.gc1(h))
+        h = torch.relu(self._propagate(a, h, self.gc1, self.self1))
         h = self.drop(h)
-        h = torch.relu(a @ self.gc2(h))
+        h = torch.relu(self._propagate(a, h, self.gc2, self.self2))
         return self.head(h)
+
+    def _propagate(self, a, h, graph, own):
+        """One graph layer: neighbours through ``a``, plus the node's own state."""
+        message = a @ graph(h)
+        return message + own(h) if self.self_path else message
 
 
 # --------------------------------------------------------------------------
@@ -240,6 +278,38 @@ def mae(pred: np.ndarray, truth: np.ndarray) -> float:
     return float(np.mean(np.abs(pred - truth)))
 
 
+def pooled_scores(
+    pred: np.ndarray, truth: np.ndarray, artifact: np.ndarray | None = None
+) -> dict:
+    """Pooled RMSE/MAE, reported twice when an artifact mask is supplied.
+
+    Args:
+        pred: Predictions, ``(windows, nodes, horizon)`` raw counts.
+        truth: Ground truth, same shape.
+        artifact: Optional boolean mask over the window axis, ``True`` for
+            windows contaminated by the week-395 reporting spike
+            (:func:`improved.artifact_windows`).
+
+    Returns:
+        ``RMSE``/``MAE`` over all windows, plus ``RMSE_clean``/``MAE_clean`` over
+        the artifact-free windows and the counts, when a mask is given.
+
+    Both numbers are reported because neither alone is honest. Including week 395
+    measures a reporting backlog -- on the origin-0.85 fold, 6 of 68 windows carry
+    90% of the squared error. Excluding it silently would flatter every arm
+    equally and hide that the fold's difficulty is one week of bad data.
+    """
+    out = {"RMSE": rmse(pred, truth), "MAE": mae(pred, truth)}
+    if artifact is None:
+        return out
+    keep = ~np.asarray(artifact, dtype=bool)
+    out["n_windows"] = int(keep.size)
+    out["n_artifact"] = int(keep.size - keep.sum())
+    out["RMSE_clean"] = rmse(pred[keep], truth[keep]) if keep.any() else float("nan")
+    out["MAE_clean"] = mae(pred[keep], truth[keep]) if keep.any() else float("nan")
+    return out
+
+
 @torch.no_grad()
 def evaluate(model: STGNN, fold: Fold, fixed: torch.Tensor, split: str = "test") -> dict:
     """Score one split of a fold on the raw case scale."""
@@ -250,7 +320,7 @@ def evaluate(model: STGNN, fold: Fold, fixed: torch.Tensor, split: str = "test")
     pred = model(x, fixed) + p  # residual over persistence
     pred_raw = fold.inverse(pred.numpy())
     truth_raw = fold.inverse(y.numpy())
-    return {"RMSE": rmse(pred_raw, truth_raw), "MAE": mae(pred_raw, truth_raw)}
+    return pooled_scores(pred_raw, truth_raw)
 
 
 def train_one(
@@ -310,8 +380,15 @@ def train_one(
     return model, evaluate(model, fold, fixed, "test")
 
 
-def persistence_scores(fold: Fold, cases: np.ndarray, horizon: int = 3) -> dict:
-    """Last-value-carried-forward on the same test windows -- the floor to beat."""
+def persistence_scores(
+    fold: Fold, cases: np.ndarray, horizon: int = 3, artifact: np.ndarray | None = None
+) -> dict:
+    """Last-value-carried-forward on the same test windows -- the floor to beat.
+
+    Pass ``artifact`` to get the floor reported with and without the week-395
+    windows; the floor has to be split the same way the models are, or the
+    comparison is between two different test sets.
+    """
     pred = np.stack([np.repeat(cases[i - 1][:, None], horizon, axis=1) for i in fold.test_index])
     truth = np.stack([cases[i : i + horizon].T for i in fold.test_index])
-    return {"RMSE": rmse(pred, truth), "MAE": mae(pred, truth)}
+    return pooled_scores(pred, truth, artifact)

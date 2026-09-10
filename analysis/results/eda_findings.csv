@@ -7,4 +7,4 @@ F5,"2017 outbreak is in TEST for segment 0.6, TRAIN for the rest",explains ASTGC
 F6,cases r^2=0.85 at lag 1; best covariate r^2=0.02,persistence is strong by construction; headroom is in the tails
 F7,adjacency has 2 one-way edges; Jaffna has degree 1,hand-built graph carries defects a learned graph would not inherit
 F8,neighbour r=0.62 vs non-neighbour r=0.55 (p=0.0002),graph is real but weak; argues for a learned adjacency
-F9,"bimodal seasonality, 2.9x peak/trough, no seasonal feature in any model",a 3-week window cannot represent a 52-week cycle
+F9,"RETRACTED: no usable annual cycle (shape r=-0.065, 0/25 districts, R2=0.03)",a week-of-year feature is NOT a cheap win; EXP-012 had this right

@@ -1,72 +1,68 @@
 %=============================================================================
-% DISCUSSION & CONCLUSION
-% Rewritten for Phase 3 against results/phase3_final.csv and stage3_search.csv.
+% DISCUSSION AND CONCLUSION
 %=============================================================================
-\section{Discussion and Conclusion}
+\section{Discussion}
+\label{sec:discussion}
+
+\cB{\textbf{When does a mechanistic prior pay?} Physics-informed networks succeed
+where data are scarce relative to the dynamics: MP-PINN~\cite{nguyen2024mppinn}
+trains on 35 days and forecasts 97, a regime in which a purely data-driven model
+has almost nothing to learn from. Our setting is the opposite. The decisive
+quantity is not the amount of data but how much of the target a naive baseline
+already explains. Here the previous week explains $r^2=0.85$; the mechanistic
+decomposition divides that out and leaves $R_t$, which is 26\% predictable.
+A prior helps when it supplies structure the data cannot; it hurts when it
+routes a well-determined quantity through a poorly-determined one. The ratio of
+those two predictabilities, not the sample size, is the criterion we would apply
+before attempting this again.}
+
+\cB{\textbf{Negative results with a mechanism.} Five separate physics
+formulations were tried across this project and all failed. Only the last is
+informative, because it is accompanied by the measurement that makes failure
+inevitable rather than by a hyper-parameter that was not tuned enough. We would
+argue this is the reporting standard such results need: a physics term that fails
+at one weighting is a tuning anecdote, while one that cannot succeed at any
+weighting because the quantity it depends on carries a $1.90\times$ error is a
+finding.}
+
+\cC{\textbf{Implications for benchmarking.} Three practices would have changed the
+published conclusions on this dataset, and none is expensive: report a naive
+baseline, pool squared error rather than averaging per window, and inspect the
+test split for administrative artifacts before reporting fold-level results. The
+last is the least standard and, here, the largest---it moves the floor by 15 RMSE
+and inverts which fold looks hardest.}
+
+\cD{\textbf{Limitations.} Our conclusions concern one country, one disease and one
+processed array; the artifact analysis in particular is dataset-specific, though
+the practice it motivates is not. The adaptive-graph comparison after the
+self-path correction rests on $n=9$ and is reported as unsettled. We did not
+evaluate a GAN, and the augmentation contribution the project originally proposed
+is not tested here. Finally, the detection result uses a threshold definition of
+an outbreak; 309 episodes exist in the record but the median episode lasts one
+week, so a sustained-exceedance definition would be more operationally meaningful
+and is what we would adopt next.}
+
+\section{Conclusion}
 \label{sec:conclusion}
 
-\subsection{Discussion}
-We set out to improve district-level dengue forecasting with a learned graph, a
-mechanistic constraint and generative augmentation. One of the three survives
-scrutiny, one does not replicate, and one is actively harmful --- and the largest
-improvement we measured came from none of them.
+\cE{We reproduced five published spatio-temporal GNNs on Sri Lankan dengue
+surveillance to within 7.3\%, and showed that their reported advantage rests on
+training-inclusive, per-window-averaged evaluation without a naive baseline.
+Re-evaluated under a leak-free rolling-origin protocol with artifact-aware dual
+scoring, no architecture and no evidence-led increment separates from a
+persistence floor of 29.52 at $p<0.05$.}
 
-\paragraph{Sample size decided more than architecture did.}
-The learned adjacency won $17/24$ paired runs at three seeds and $35/64$ at eight.
-Nothing about the model changed; only the number of runs did. A paired power
-analysis on the three-seed results had already indicated $n \approx 54$ was needed,
-which is why the replication was run at all. We think this is the most transferable
-lesson here: on a 25-node graph with fold-to-fold RMSE spanning 27 to 68, a search
-over configurations at small $n$ will return apparently promising effects at a rate
-that has little to do with which of them are real. Two of our four were not.
+\cE{We then tested the mechanistic prior the task invites and found it cannot
+help, for a reason we can state as a number: the reproduction number is 26\%
+predictable, so reconstructing a forecast through it costs a $1.90\times$
+multiplicative error per step where persistence costs none. The ceiling on this
+task is informational, not architectural---predicted growth carries no information
+about realised growth, and under squared error that is the optimal response.}
 
-\paragraph{The missing component was temporal, not spatial.}
-Our strongest result is the correction of our own omission. The model contained no
-temporal operator --- it flattened the input window and applied a linear map ---
-while every method it was compared against carries one. Restoring a gated causal
-convolution improved RMSE by 5.0 points, more than any graph or loss modification
-we tried, and produced the only model statistically indistinguishable from
-persistence. A graph-free LSTM outperforming graph models was the symptom; this was
-the cause.
-
-\paragraph{Constraints must be measured before they are weighted.}
-The spatial penalty exceeded the data loss by four orders of magnitude, one
-constraint term was provably inert --- five runs were bit-identical to the
-unconstrained control --- and the usable weight range sat two orders of magnitude
-from any value a grid search would naturally cover. The constraint that did work
-was found by measuring its gradient magnitude first. We would not have found it by
-searching harder.
-
-\paragraph{Naive baselines are not a formality.}
-Persistence ($55.12$), a random forest ($56.31$) and a graph-free LSTM ($57.95$)
-all outperform the graph models, and the random forest is not significantly worse
-than persistence. Prior work on this dataset reports none of these comparisons. We do not conclude
-that graph methods cannot help here, but we do conclude that on this benchmark
-their advantage has not been demonstrated, and that reporting it requires
-comparators that were absent.
-
-\subsection{Limitations}
-\textbf{(1) One dataset, one disease.} All findings are for 25 districts of Sri
-Lankan dengue; whether they transfer to larger graphs where message passing has
-more structure to exploit is untested.
-\textbf{(2) Under-ascertainment.} Every model treats reported cases as incidence.
-Reporting rates vary by district and season, and no observation model corrects for
-it.
-\textbf{(3) Point forecasts only.} Calibration is unassessed; CRPS and interval
-coverage are not reported.
-\textbf{(4) A negative result is not a proof.} We show that these methods do not
-help under this protocol, not that no such method could.
-
-\subsection{Future Work}
-The mechanistic direction remains open but needs a different formulation. The
-SEIR--SEI model has seven compartments of which one is observed, so a hard residual
-is under-determined on this data; the constraint that worked here avoided latent
-compartments entirely, and extending that family is more promising than
-instantiating the full system. Adaptive loss weighting from gradient
-statistics~\cite{wang2021gradient} is the natural successor to the fixed weights
-and curricula tested here, given how narrow the usable range proved. Beyond that:
-probabilistic forecasts evaluated with CRPS and interval
-coverage~\cite{bracher2021evaluating}, sparsified graph learning for small
-node counts~\cite{wu2020mtgnn}, and validation on
-OpenDengue~\cite{clarke2024opendengue} to test whether these conclusions are
-specific to this benchmark.
+\cF{The same mechanistic quantity is, however, the largest single contributor to a
+target that \emph{is} tractable: ranking which districts will breach an alert
+threshold three weeks ahead, where it lifts AUC from 0.807 to 0.826. We suggest
+that is where mechanistic structure belongs on endemic, strongly autocorrelated
+surveillance data---in state estimation and early warning rather than in point
+forecasting. All code, data, figures and the notebook that regenerates every
+number in this paper are available in the project repository.}

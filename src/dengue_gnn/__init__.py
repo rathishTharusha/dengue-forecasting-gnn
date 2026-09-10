@@ -6,9 +6,14 @@ with exactly the same implementation.
 
 See CONTRIBUTING.md for the notebook -> src promotion rule.
 
-Torch-dependent modules (``models``, ``losses``) are not imported here, so that
-``dengue_gnn.metrics`` stays importable in environments without torch -- CI
-installs numpy only.
+Everything here is torch-free, so it stays importable in environments without
+torch -- CI installs numpy, pytest and ruff only. The modelling code lives in
+``analysis/lib`` and does pull in torch.
+
+``metrics`` is the shared scoring implementation; ``seir`` is the SEIR-SEI model
+validated against Phaijoo & Gurung (2018); ``data`` is a minimal case-series
+loader. The Phase-2/3 modelling modules were removed once the work moved to
+verified architectures -- see tag ``phase23-archive``.
 """
 
 __version__ = "0.2.0"

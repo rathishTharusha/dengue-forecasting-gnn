@@ -1,0 +1,13 @@
+{
+  "id": "tharushaperera16/improved-architecture-sweep-dcrnn",
+  "title": "Improved architecture sweep DCRNN",
+  "code_file": "improved_architecture_sweep_dcrnn.ipynb",
+  "language": "python",
+  "kernel_type": "notebook",
+  "is_private": true,
+  "enable_gpu": false,
+  "enable_internet": true,
+  "dataset_sources": [],
+  "competition_sources": [],
+  "kernel_sources": []
+}

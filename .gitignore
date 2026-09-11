@@ -30,6 +30,8 @@ GNN for Dengue Forecasting.md
 *chathistory*.txt
 scratch/
 scratchpad/
+.downloaded_*
+*.log
 
 # Kaggle staging area at the REPO ROOT only -- copies of tracked data plus
 # generated metadata. Rebuild with scripts/kaggle_run.py.

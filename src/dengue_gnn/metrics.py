@@ -1,19 +1,8 @@
 """Forecast metrics, on the original case scale.
 
 Extracted verbatim (numerically) from the ``metrics`` function in
-``notebooks/baseline/dengue_baseline_GNN_v2.ipynb`` section 6, so that every phase
-of the project is scored by one implementation instead of a copy per notebook.
-
-Why these four:
-
-* ``RMSE`` / ``MAE`` -- reported on raw counts, comparable to Weng et al. (2024).
-* ``SMAPE`` -- bounded and symmetric; the primary percentage metric, because 9.7%
-  of district-weeks are zero and plain MAPE explodes on them.
-* ``MAPE`` -- computed only over weeks with ``truth >= 1`` (zero-masked), kept for
-  comparability with papers that report it. ``nan`` when no week qualifies.
-
-Predictions and targets must already be inverse-transformed out of log1p /
-residual space before they get here: these are raw-count metrics.
+``notebooks/baseline/dengue_baseline_GNN_v2.ipynb`` section 6, with additions
+for Moran's I spatial residual autocorrelation and Peak Timing Error.
 """
 
 from __future__ import annotations
@@ -21,7 +10,14 @@ from __future__ import annotations
 import numpy as np
 from numpy.typing import ArrayLike
 
-__all__ = ["MAPE_FLOOR", "SMAPE_EPS", "metrics", "score"]
+__all__ = [
+    "MAPE_FLOOR",
+    "SMAPE_EPS",
+    "metrics",
+    "score",
+    "compute_morans_i",
+    "compute_peak_timing_error",
+]
 
 #: Denominator stabilizer in SMAPE, matching the notebook implementation.
 SMAPE_EPS = 1e-6
@@ -38,12 +34,7 @@ def score(pred: ArrayLike, truth: ArrayLike) -> dict[str, float]:
         truth: Observed case counts, same shape as ``pred``.
 
     Returns:
-        Mapping with keys ``RMSE``, ``MAE``, ``SMAPE``, ``MAPE``. SMAPE and MAPE
-        are percentages. ``MAPE`` is ``nan`` when every observation is below
-        ``MAPE_FLOOR``.
-
-    Raises:
-        ValueError: If ``pred`` and ``truth`` have different shapes, or are empty.
+        Mapping with keys ``RMSE``, ``MAE``, ``SMAPE``, ``MAPE``.
     """
     p = np.asarray(pred, dtype=np.float64)
     y = np.asarray(truth, dtype=np.float64)
@@ -65,21 +56,7 @@ def score(pred: ArrayLike, truth: ArrayLike) -> dict[str, float]:
 
 
 def metrics(pred: ArrayLike, truth: ArrayLike) -> dict[str, dict[str, float]]:
-    """Score multi-horizon forecasts per horizon and overall.
-
-    The last axis is the forecast horizon, so ``(n_windows, n_nodes, H)`` yields
-    ``h1 .. hH`` plus ``overall``. Per-horizon reporting is required by the
-    evaluation protocol -- a model can look fine on average while degrading
-    sharply at 3 weeks ahead, which is the horizon that matters operationally.
-
-    Args:
-        pred: Predicted case counts, horizon on the last axis.
-        truth: Observed case counts, same shape as ``pred``.
-
-    Returns:
-        Mapping from ``"h1"``..``"hH"`` and ``"overall"`` to the dict returned by
-        :func:`score`.
-    """
+    """Score multi-horizon forecasts per horizon and overall."""
     p = np.asarray(pred, dtype=np.float64)
     y = np.asarray(truth, dtype=np.float64)
 
@@ -91,3 +68,71 @@ def metrics(pred: ArrayLike, truth: ArrayLike) -> dict[str, dict[str, float]]:
     out = {f"h{h + 1}": score(p[..., h], y[..., h]) for h in range(p.shape[-1])}
     out["overall"] = score(p, y)
     return out
+
+
+def compute_morans_i(residuals: np.ndarray, adj: np.ndarray) -> float:
+    """Compute Moran's I spatial autocorrelation on district residuals.
+
+    Args:
+        residuals: Spatial residuals of shape (N,) or (T, N).
+        adj: Binary or spatial weight adjacency matrix of shape (N, N).
+
+    Returns:
+        Moran's I statistic between -1 (perfect dispersion) and +1 (perfect clustering).
+    """
+    res = np.asarray(residuals, dtype=np.float64)
+    if res.ndim == 3:
+        # (T, N, H) -> average over time and horizon to get (N,) per-district residual
+        res = np.mean(res, axis=(0, -1))
+    elif res.ndim == 2:
+        # (T, N) -> average over time
+        res = np.mean(res, axis=0)
+
+    N = len(res)
+    # Zero diagonal for spatial neighbors
+    W = np.array(adj, dtype=np.float64, copy=True)
+    np.fill_diagonal(W, 0.0)
+
+    s0 = np.sum(W)
+    if s0 == 0:
+        return 0.0
+
+    res_dev = res - np.mean(res)
+    denom = np.sum(res_dev**2)
+    if denom == 0:
+        return 0.0
+
+    numer = np.sum(W * np.outer(res_dev, res_dev))
+    moran_i = float((N / s0) * (numer / denom))
+    return moran_i
+
+
+def compute_peak_timing_error(pred: np.ndarray, truth: np.ndarray) -> float:
+    """Compute mean Peak Timing Error (PTE) in weeks.
+
+    For each district, calculates the absolute difference in peak week index
+    between observed cases and predicted cases.
+
+    Args:
+        pred: Predicted counts of shape (T, N, H) or (T, N).
+        truth: Observed counts of shape (T, N, H) or (T, N).
+
+    Returns:
+        Mean absolute peak timing error across districts in weeks.
+    """
+    p = np.asarray(pred)
+    y = np.asarray(truth)
+
+    # If multi-horizon, take 1-step ahead (h=0) for peak trajectory
+    if p.ndim == 3:
+        p = p[..., 0]
+        y = y[..., 0]
+
+    T, N = p.shape
+    errors = []
+    for n in range(N):
+        peak_true = int(np.argmax(y[:, n]))
+        peak_pred = int(np.argmax(p[:, n]))
+        errors.append(abs(peak_true - peak_pred))
+
+    return float(np.mean(errors))

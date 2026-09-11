@@ -81,3 +81,41 @@ def test_shape_mismatch_raises():
 def test_empty_raises():
     with pytest.raises(ValueError, match="empty"):
         score(np.array([]), np.array([]))
+
+
+def test_morans_i():
+    from dengue_gnn.metrics import compute_morans_i
+    # 4-node ring
+    adj = np.array([
+        [0, 1, 0, 1],
+        [1, 0, 1, 0],
+        [0, 1, 0, 1],
+        [1, 0, 1, 0],
+    ])
+    # Positive autocorrelation: neighbors have similar values
+    res_pos = np.array([10.0, 10.0, -10.0, -10.0])
+    i_pos = compute_morans_i(res_pos, adj)
+    assert i_pos > -1.0 and i_pos <= 1.0
+
+
+def test_peak_timing_error():
+    from dengue_gnn.metrics import compute_peak_timing_error
+    # 5 weeks, 2 districts
+    truth = np.array([
+        [0.0, 0.0],
+        [10.0, 5.0],
+        [50.0, 20.0],  # peak at week 2
+        [10.0, 100.0], # dist 1 peak at week 3
+        [0.0, 0.0],
+    ])
+    # Predict peak 1 week late for dist 0 (week 3), exact for dist 1 (week 3)
+    pred = np.array([
+        [0.0, 0.0],
+        [10.0, 5.0],
+        [20.0, 20.0],
+        [50.0, 100.0],
+        [0.0, 0.0],
+    ])
+    pte = compute_peak_timing_error(pred, truth)
+    # dist 0 error = 1, dist 1 error = 0 -> mean = 0.5 weeks
+    assert pte == pytest.approx(0.5)

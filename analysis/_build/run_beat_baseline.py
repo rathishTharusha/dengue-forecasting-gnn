@@ -195,9 +195,12 @@ def train_one(
             out = net(x, edge_index)
             if pnet_wrapper is not None and cases is not None:
                 h_idx = torch.tensor(cases[fold.train_index[idx.numpy()] - 1], dtype=torch.float32)
-                counts_pred = pnet_wrapper.to_counts(out + p)
+                pred_z = (out[..., 0] if head == "gauss" else out) + p
+                counts_pred = pnet_wrapper.to_counts(pred_z)
                 counts_true = torch.tensor(fold.inverse(y.numpy()), dtype=torch.float32)
-                loss, _ = pnet_wrapper.compute_loss(out + p, counts_pred, y, counts_true, h_idx)
+                loss, _ = pnet_wrapper.compute_loss(pred_z, counts_pred, y, counts_true, h_idx)
+                if head == "gauss":
+                    loss = loss + imp.gaussian_nll(pred_z, out[..., 1], y)
             elif head == "gauss":
                 loss = imp.gaussian_nll(out[..., 0] + p, out[..., 1], y)
             elif head == "nb":

@@ -63,7 +63,7 @@ def get_status(api: KaggleApi, name: str) -> dict:
     except Exception as e:
         return {"status": "ERROR", "error": str(e)}
 
-def download_output(api: KaggleApi, name: str):
+def download_output(api: KaggleApi, name: str) -> bool:
     marker = OUT_DIR / f".downloaded_{name}"
     # Always check or download if marker doesn't exist
     if not marker.exists():
@@ -72,8 +72,11 @@ def download_output(api: KaggleApi, name: str):
             api.kernels_output(f"tharushaperera16/{name}", path=str(OUT_DIR))
             marker.write_text(f"completed at {time.time()}\n", encoding="utf-8")
             print(f"  Downloaded {name} successfully.")
+            return True
         except Exception as e:
             print(f"  Error downloading {name}: {e}")
+            return False
+    return False
 
 def main():
     api = KaggleApi()
@@ -85,6 +88,7 @@ def main():
 
     counts = {"RUNNING": 0, "COMPLETE": 0, "ERROR": 0, "QUEUED": 0, "OTHER": 0}
     status_map = {}
+    downloaded_count = 0
 
     for name in TRACKED_KERNELS:
         info = get_status(api, name)
@@ -99,7 +103,8 @@ def main():
         print(f"  {name:30s} : {st:12s}{err_str}")
 
         if st == "COMPLETE":
-            download_output(api, name)
+            if download_output(api, name):
+                downloaded_count += 1
 
     print("-" * 65)
     print(f"Summary: Complete={counts['COMPLETE']}, Running={counts['RUNNING']}, Error={counts['ERROR']}")
@@ -152,6 +157,22 @@ def main():
             print(res_a.stdout)
     except Exception as e:
         print(f"Error running analyze_beat_floor: {e}")
+
+    # 4. Auto commit and push if new files were downloaded
+    if downloaded_count > 0:
+        print(f"\nAuto-committing and pushing {downloaded_count} newly downloaded outputs...")
+        try:
+            subprocess.run(["git", "add", "analysis/results/"], cwd=str(REPO), check=True)
+            msg = f"chore(results): auto-sync {downloaded_count} sweep kernel outputs"
+            subprocess.run(
+                ["git", "commit", "--author=rathishTharusha <tharushaperera2018@gmail.com>", "-m", msg],
+                cwd=str(REPO),
+                check=False
+            )
+            subprocess.run(["git", "push", "origin", "exp/beat-baseline"], cwd=str(REPO), check=False)
+            print("Successfully committed and pushed new results.")
+        except Exception as e:
+            print(f"Error during auto-commit: {e}")
 
 if __name__ == "__main__":
     main()

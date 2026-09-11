@@ -54,6 +54,7 @@ TRACKED_KERNELS = [
     "beat-floor-super-ensemble",
     "beat-floor-dual-champion-ensemble",
     "beat-floor-physics-super-ensemble",
+    "beat-floor-quad-champion-ensemble",
 ]
 
 def get_status(api: KaggleApi, name: str) -> dict:
@@ -172,7 +173,11 @@ def main():
                 check=False
             )
             subprocess.run(["git", "push", "origin", "exp/beat-baseline"], cwd=str(REPO), check=False)
-            print("Successfully committed and pushed new results.")
+            subprocess.run(["git", "checkout", "main"], cwd=str(REPO), check=False)
+            subprocess.run(["git", "merge", "exp/beat-baseline", "--ff-only"], cwd=str(REPO), check=False)
+            subprocess.run(["git", "push", "origin", "main"], cwd=str(REPO), check=False)
+            subprocess.run(["git", "checkout", "exp/beat-baseline"], cwd=str(REPO), check=False)
+            print("Successfully committed and pushed new results to both branches.")
         except Exception as e:
             print(f"Error during auto-commit: {e}")
 

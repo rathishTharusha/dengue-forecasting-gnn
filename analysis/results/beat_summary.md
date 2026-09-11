@@ -1,32 +1,32 @@
-| arch | head | features | arm | RMSE | vs floor | wins | p | BH |
-|---|---|---|---|---:|---:|---:|---:|:--:|
-| AAGCN+ASTGCN+A3TGCN | det | cases | `multi_raw` | 26.702 | -0.869 | 6/9 | 0.0705 | no |
-| AAGCN+ASTGCN | det | cases | `multi_raw` | 26.821 | -0.750 | 6/9 | 0.0778 | no |
-| A3TGCN+STGAT+ASTGCN | det | cases | `multi_raw` | 26.851 | -0.720 | 8/9 | 0.0134 | no |
-| AAGCN+ASTGCN+A3TGCN | gauss | cases | `multi_blend_raw` | 26.871 | -0.700 | 6/9 | 0.0542 | no |
-| AAGCN+ASTGCN+A3TGCN | gauss | cases | `multi_raw` | 26.875 | -0.696 | 6/9 | 0.0576 | no |
-| AAGCN+ASTGCN+A3TGCN | det | cases | `multi_opt_raw` | 26.916 | -0.655 | 8/9 | 0.0410 | no |
-| AAGCN+ASTGCN+A3TGCN | det | cases | `multi_blend_raw` | 26.929 | -0.642 | 6/9 | 0.0247 | no |
-| AAGCN+ASTGCN+A3TGCN | det | cases | `multi_super_raw` | 26.934 | -0.637 | 8/9 | 0.0405 | no |
-| ASTGCN | det | cases | `ens_raw` | 26.938 | -0.634 | 8/9 | 0.0531 | no |
-| AAGCN+ASTGCN | det | cases | `multi_opt_raw` | 26.946 | -0.625 | 8/9 | 0.0487 | no |
-| ASTGCN | det | cases | `ens_blend_raw` | 26.948 | -0.623 | 8/9 | 0.0515 | no |
-| AAGCN+ASTGCN | gauss | cases | `multi_raw` | 26.975 | -0.596 | 6/9 | 0.1273 | no |
-| AAGCN+ASTGCN | det | cases | `multi_blend_raw` | 26.977 | -0.594 | 6/9 | 0.0358 | no |
-| AAGCN+ASTGCN | det | cases | `multi_super_raw` | 26.980 | -0.591 | 8/9 | 0.0471 | no |
-| AAGCN | det | cases | `ens_raw` | 26.985 | -0.586 | 6/9 | 0.3018 | no |
-| AAGCN+ASTGCN | gauss | cases | `multi_blend_raw` | 26.993 | -0.579 | 6/9 | 0.1130 | no |
-| A3TGCN | det | cases | `ens_raw` | 26.993 | -0.578 | 5/9 | 0.2715 | no |
-| A3TGCN+STGAT+ASTGCN | gauss | cases | `multi_raw` | 26.993 | -0.578 | 6/9 | 0.0372 | no |
-| AAGCN | gauss | cases | `ens_blend_raw` | 27.011 | -0.560 | 6/9 | 0.1165 | no |
-| AAGCN+ASTGCN | gauss | cases | `multi_opt_raw` | 27.048 | -0.524 | 7/9 | 0.2049 | no |
-| AAGCN | det | cases | `ens_blend_raw` | 27.053 | -0.518 | 6/9 | 0.0744 | no |
-| AAGCN+ASTGCN+A3TGCN | gauss | cases | `multi_opt_raw` | 27.054 | -0.517 | 7/9 | 0.1714 | no |
-| AAGCN+ASTGCN+A3TGCN | gauss | cases | `multi_super_raw` | 27.054 | -0.517 | 7/9 | 0.1716 | no |
-| AAGCN | gauss | cases | `ens_raw` | 27.069 | -0.503 | 5/9 | 0.3425 | no |
-| AAGCN+ASTGCN | gauss | cases | `multi_super_raw` | 27.088 | -0.483 | 7/9 | 0.2140 | no |
-| AAGCN+ASTGCN | nb | cases | `multi_raw` | 27.098 | -0.473 | 6/9 | 0.1407 | no |
-| AAGCN+ASTGCN | nb | cases | `multi_blend_raw` | 27.127 | -0.445 | 6/9 | 0.1434 | no |
-| ASTGCN | gauss | cases | `ens_raw` | 27.141 | -0.430 | 7/9 | 0.2621 | no |
-| A3TGCN | det | cases | `raw` | 27.148 | -0.423 | 4/9 | 0.3727 | no |
-| ASTGCN | det | cases | `blend_raw` | 27.157 | -0.414 | 7/9 | 0.1652 | no |
+| arch | head | phys | feat | arm | RMSE | vs floor | wins | p | BH |
+|---|---|---|---|---|---:|---:|---:|---:|:--:|
+| AAGCN+ASTGCN+A3TGCN | det | none | cases | `multi_raw` | 26.681 | -0.890 | 7/9 | 0.0530 | no |
+| AAGCN+ASTGCN+A3TGCN | det | spatial | cases | `multi_raw` | 26.723 | -0.848 | 7/9 | 0.0905 | no |
+| AAGCN+ASTGCN | det | none | cases | `multi_raw` | 26.821 | -0.750 | 6/9 | 0.0778 | no |
+| AAGCN+ASTGCN+A3TGCN | gauss | spatial | cases | `multi_raw` | 26.847 | -0.724 | 6/9 | 0.1102 | no |
+| A3TGCN+STGAT+ASTGCN | det | none | cases | `multi_raw` | 26.851 | -0.720 | 8/9 | 0.0134 | no |
+| AAGCN+ASTGCN+A3TGCN | gauss | none | cases | `multi_blend_raw` | 26.871 | -0.700 | 6/9 | 0.0542 | no |
+| AAGCN+ASTGCN+A3TGCN | gauss | none | cases | `multi_raw` | 26.875 | -0.696 | 6/9 | 0.0576 | no |
+| AAGCN+ASTGCN+A3TGCN | det | none | cases | `multi_opt_raw` | 26.911 | -0.660 | 8/9 | 0.0315 | no |
+| AAGCN | det | none | cases | `ens_raw` | 26.911 | -0.660 | 6/9 | 0.2369 | no |
+| AAGCN+ASTGCN+A3TGCN | det | none | cases | `multi_blend_raw` | 26.915 | -0.656 | 7/9 | 0.0216 | no |
+| AAGCN+ASTGCN+A3TGCN | det | spatial | cases | `multi_opt_raw` | 26.917 | -0.654 | 7/9 | 0.0533 | no |
+| ASTGCN | det | spatial | cases | `ens_raw` | 26.918 | -0.653 | 7/9 | 0.0801 | no |
+| AAGCN+ASTGCN+A3TGCN | gauss | spatial | cases | `multi_blend_raw` | 26.929 | -0.643 | 6/9 | 0.1058 | no |
+| A3TGCN | det | spatial | cases | `ens_raw` | 26.939 | -0.632 | 5/9 | 0.3075 | no |
+| ASTGCN | det | spatial | cases | `ens_blend_raw` | 26.943 | -0.628 | 7/9 | 0.0781 | no |
+| AAGCN+ASTGCN+A3TGCN | det | spatial | cases | `multi_super_raw` | 26.944 | -0.627 | 7/9 | 0.0510 | no |
+| ASTGCN | det | none | cases | `ens_raw` | 26.944 | -0.627 | 8/9 | 0.0475 | no |
+| AAGCN+ASTGCN | det | none | cases | `multi_opt_raw` | 26.946 | -0.625 | 8/9 | 0.0487 | no |
+| AAGCN+ASTGCN+A3TGCN | det | none | cases | `multi_super_raw` | 26.947 | -0.624 | 8/9 | 0.0309 | no |
+| AAGCN+ASTGCN+A3TGCN | det | spatial | cases | `multi_blend_raw` | 26.954 | -0.617 | 7/9 | 0.0284 | no |
+| ASTGCN | det | none | cases | `ens_blend_raw` | 26.960 | -0.612 | 8/9 | 0.0467 | no |
+| AAGCN+ASTGCN | gauss | none | cases | `multi_raw` | 26.975 | -0.596 | 6/9 | 0.1273 | no |
+| AAGCN+ASTGCN | det | none | cases | `multi_blend_raw` | 26.977 | -0.594 | 6/9 | 0.0358 | no |
+| AAGCN+ASTGCN | det | none | cases | `multi_super_raw` | 26.980 | -0.591 | 8/9 | 0.0471 | no |
+| AAGCN+ASTGCN | gauss | none | cases | `multi_blend_raw` | 26.993 | -0.579 | 6/9 | 0.1130 | no |
+| A3TGCN+STGAT+ASTGCN | gauss | none | cases | `multi_raw` | 26.993 | -0.578 | 6/9 | 0.0372 | no |
+| A3TGCN | det | none | cases | `ens_raw` | 27.011 | -0.560 | 6/9 | 0.2579 | no |
+| AAGCN | gauss | none | cases | `ens_blend_raw` | 27.011 | -0.560 | 6/9 | 0.1165 | no |
+| AAGCN | det | none | cases | `ens_blend_raw` | 27.025 | -0.547 | 6/9 | 0.0724 | no |
+| A3TGCN | gauss | spatial | cases | `ens_raw` | 27.032 | -0.539 | 6/9 | 0.1547 | no |

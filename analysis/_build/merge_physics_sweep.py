@@ -17,7 +17,9 @@ import pandas as pd
 from scipy import stats
 
 REPO = Path(__file__).resolve().parent.parent.parent
-IN_DIR = REPO / "analysis" / "results" / "physics_sweep"
+IN_DIR = REPO / "analysis" / "results" / "beat_baseline"
+if not list(IN_DIR.glob("physics_envelope_*.json")):
+    IN_DIR = REPO / "analysis" / "results" / "physics_sweep"
 OUT_JSON = REPO / "analysis" / "results" / "physics_sweep_summary.json"
 OUT_CSV = REPO / "analysis" / "results" / "physics_sweep_summary.csv"
 

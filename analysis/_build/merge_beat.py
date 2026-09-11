@@ -50,11 +50,14 @@ def load_all(directory: Path) -> list[dict]:
         stem = path.stem.lower()
         default_head = "gauss" if "_gauss" in stem else ("nb" if "_nb" in stem else "det")
         default_feats = "climate" if "_climate" in stem else ("causal" if "_causal" in stem else "cases")
+        default_phys = "spatial" if "_spatial" in stem else "none"
         for r in rows:
             if not r.get("head"):
                 r["head"] = default_head
             if not r.get("features"):
                 r["features"] = default_feats
+            if not r.get("physics"):
+                r["physics"] = default_phys
             r["source"] = path.stem
         records.extend(rows)
     return records
@@ -77,7 +80,7 @@ def benjamini_hochberg(pvalues: np.ndarray, alpha: float = 0.05) -> np.ndarray:
 
 
 def summarise(records: list[dict], metric: str = "RMSE_clean") -> list[dict]:
-    """One row per (arch, head, features, arm), tested against the floor."""
+    """One row per (arch, head, physics, features, arm), tested against the floor."""
     floor: dict[float, list[float]] = {}
     for r in records:
         if r["arch"] == "persistence":
@@ -90,11 +93,11 @@ def summarise(records: list[dict], metric: str = "RMSE_clean") -> list[dict]:
     for r in records:
         if r["arch"] == "persistence":
             continue
-        key = (r["arch"], r["head"], r["features"], r["arm"])
+        key = (r["arch"], r["head"], r.get("physics", "none"), r["features"], r["arm"])
         groups.setdefault(key, {}).setdefault(r["origin"], []).append(r[metric])
 
     rows = []
-    for (arch, head, feats, arm), by_origin in groups.items():
+    for (arch, head, phys, feats, arm), by_origin in groups.items():
         origins = sorted(o for o in by_origin if o in floor_mean)
         if len(origins) < 2:
             continue
@@ -103,7 +106,7 @@ def summarise(records: list[dict], metric: str = "RMSE_clean") -> list[dict]:
         f = np.array([floor_mean[o] for o in origins])
         d = v - f
         t, p = stats.ttest_rel(v, f)
-        rows.append(dict(arch=arch, head=head, features=feats, arm=arm,
+        rows.append(dict(arch=arch, head=head, physics=phys, features=feats, arm=arm,
                          n_origins=len(v), n_runs=sum(len(x) for x in by_origin.values()),
                          RMSE=float(v.mean()), floor=float(f.mean()),
                          vs_floor=float(d.mean()), wins=int((d < 0).sum()),
@@ -119,10 +122,10 @@ def summarise(records: list[dict], metric: str = "RMSE_clean") -> list[dict]:
 
 def to_markdown(rows: list[dict], limit: int = 30) -> str:
     """A table for the experiment log, best arms first."""
-    head = ("| arch | head | features | arm | RMSE | vs floor | wins | p | BH |\n"
-            "|---|---|---|---|---:|---:|---:|---:|:--:|\n")
+    head = ("| arch | head | phys | feat | arm | RMSE | vs floor | wins | p | BH |\n"
+            "|---|---|---|---|---|---:|---:|---:|---:|:--:|\n")
     body = "".join(
-        f"| {r['arch']} | {r['head']} | {r['features']} | `{r['arm']}` | "
+        f"| {r['arch']} | {r['head']} | {r['physics']} | {r['features']} | `{r['arm']}` | "
         f"{r['RMSE']:.3f} | {r['vs_floor']:+.3f} | {r['wins']}/{r['n_origins']} | "
         f"{r['p']:.4f} | {'**yes**' if r['bh_significant'] else 'no'} |\n"
         for r in rows[:limit]
@@ -152,11 +155,11 @@ def main() -> int:
 
     rows = summarise(records, args.metric)
     print(f"\n=== {args.metric}, clustered by origin, {len(rows)} arms ===")
-    print(f"{'arch':10s}{'head':7s}{'feat':9s}{'arm':20s}"
+    print(f"{'arch':20s}{'head':7s}{'phys':9s}{'feat':9s}{'arm':20s}"
           f"{'RMSE':>9s}{'vs floor':>10s}{'wins':>8s}{'p':>9s}  BH")
-    print("-" * 94)
+    print("-" * 105)
     for r in rows[: args.limit]:
-        print(f"{r['arch']:10s}{r['head']:7s}{r['features']:9s}{r['arm']:20s}"
+        print(f"{r['arch']:20s}{r['head']:7s}{r['physics']:9s}{r['features']:9s}{r['arm']:20s}"
               f"{r['RMSE']:9.3f}{r['vs_floor']:+10.3f}"
               f"{r['wins']:5d}/{r['n_origins']:<3d}{r['p']:9.4f}"
               f"  {'YES' if r['bh_significant'] else '.'}")

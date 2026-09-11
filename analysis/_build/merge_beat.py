@@ -56,7 +56,7 @@ def load_all(directory: Path) -> list[dict]:
                 r["head"] = default_head
             if not r.get("features"):
                 r["features"] = default_feats
-            if not r.get("physics"):
+            if not r.get("physics") or r.get("physics") == "base":
                 r["physics"] = default_phys
             r["source"] = path.stem
         records.extend(rows)

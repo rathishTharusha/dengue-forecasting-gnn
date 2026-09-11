@@ -21,7 +21,7 @@ def load_records():
                 r["head"] = default_head
             if not r.get("features"):
                 r["features"] = default_feats
-            if not r.get("physics"):
+            if not r.get("physics") or r.get("physics") == "base":
                 r["physics"] = default_phys
             r["source"] = p.stem
             records.append(r)
@@ -56,6 +56,11 @@ def main():
         ("AAGCN+ASTGCN+A3TGCN", "det", "none", "cases", "multi_blend_raw"),
         ("AAGCN+ASTGCN+A3TGCN", "det", "none", "cases", "multi_opt_raw"),
         ("AAGCN+ASTGCN+A3TGCN", "det", "none", "cases", "multi_super_raw"),
+        # Quad-model ensemble (4 architectures)
+        ("AAGCN+ASTGCN+A3TGCN+STGAT", "det", "none", "cases", "multi_raw"),
+        ("AAGCN+ASTGCN+A3TGCN+STGAT", "det", "none", "cases", "multi_opt_raw"),
+        ("AAGCN+ASTGCN+A3TGCN+STGAT", "det", "none", "cases", "multi_blend_raw"),
+        ("AAGCN+ASTGCN+A3TGCN+STGAT", "det", "none", "cases", "multi_super_raw"),
         # Physics-informed candidates (Spatial Dirichlet regularizer)
         ("ASTGCN", "det", "spatial", "cases", "ens_raw"),
         ("A3TGCN", "det", "spatial", "cases", "ens_raw"),
@@ -108,6 +113,11 @@ def main():
         ("AAGCN+ASTGCN+A3TGCN", "det", "none", "cases", "multi_opt_raw"),
         ("AAGCN+ASTGCN+A3TGCN", "det", "none", "cases", "multi_blend_raw"),
         ("AAGCN+ASTGCN+A3TGCN", "det", "none", "cases", "multi_super_raw"),
+        # Quad-model challengers
+        ("AAGCN+ASTGCN+A3TGCN+STGAT", "det", "none", "cases", "multi_raw"),
+        ("AAGCN+ASTGCN+A3TGCN+STGAT", "det", "none", "cases", "multi_opt_raw"),
+        ("AAGCN+ASTGCN+A3TGCN+STGAT", "det", "none", "cases", "multi_blend_raw"),
+        ("AAGCN+ASTGCN+A3TGCN+STGAT", "det", "none", "cases", "multi_super_raw"),
         # Physics challengers
         ("ASTGCN", "det", "spatial", "cases", "ens_raw"),
         ("A3TGCN", "det", "spatial", "cases", "ens_raw"),

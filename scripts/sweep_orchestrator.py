@@ -50,6 +50,8 @@ TRACKED_KERNELS = [
     "physics-sweep-aagcn",
     "physics-sweep-astgcn",
     "physics-sweep-dcrnn",
+    # Super-Ensemble Wave
+    "beat-floor-super-ensemble",
 ]
 
 def get_status(api: KaggleApi, name: str) -> dict:

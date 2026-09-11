@@ -33,6 +33,8 @@ ALL_KERNELS = [
     "physics-sweep-astgcn",
     "physics-sweep-aagcn",
     "physics-sweep-dcrnn",
+    # Super-Ensemble Wave:
+    "beat-floor-super-ensemble",
 ]
 
 def get_status(api, kernel_name):

@@ -12,9 +12,14 @@ def load_records():
     records = []
     for p in sorted(DIR.glob("beat_*.json")):
         data = json.load(open(p, encoding="utf-8"))
+        stem = p.stem.lower()
+        default_head = "gauss" if "_gauss" in stem else ("nb" if "_nb" in stem else "det")
+        default_feats = "climate" if "_climate" in stem else ("causal" if "_causal" in stem else "cases")
         for r in data:
-            r.setdefault("head", "det")
-            r.setdefault("features", "cases")
+            if not r.get("head"):
+                r["head"] = default_head
+            if not r.get("features"):
+                r["features"] = default_feats
             r["source"] = p.stem
             records.append(r)
     return records
@@ -40,6 +45,10 @@ def main():
         ("A3TGCN", "det", "cases", "ens_raw"),
         ("A3TGCN", "det", "cases", "ens_blend_raw"),
         ("A3TGCN+STGAT+ASTGCN", "det", "cases", "multi_raw"),
+        ("AAGCN+ASTGCN", "det", "cases", "multi_raw"),
+        ("AAGCN+ASTGCN", "det", "cases", "multi_opt_raw"),
+        ("AAGCN+ASTGCN", "det", "cases", "multi_blend_raw"),
+        ("AAGCN+ASTGCN", "det", "cases", "multi_super_raw"),
         ("AAGCN+ASTGCN+A3TGCN", "det", "cases", "multi_raw"),
         ("AAGCN+ASTGCN+A3TGCN", "det", "cases", "multi_blend_raw"),
         ("AAGCN+ASTGCN+A3TGCN", "det", "cases", "multi_opt_raw"),
@@ -68,7 +77,7 @@ def main():
     # Now let's compare top contenders directly against A3TGCN baseline!
     a3tgcn_ens = df[(df["arch"] == "A3TGCN") & (df["head"] == "det") & (df["features"] == "cases") & (df["arm"] == "ens_raw")].groupby("origin")["RMSE_clean"].mean()
 
-    print("\n=== Direct Pairwise Comparisons against A3TGCN Baseline (27.041 RMSE) ===")
+    print("\n=== Direct Pairwise Comparisons against A3TGCN Baseline (26.993 RMSE) ===")
     print(f"{'Challenger Arch':24s} {'Arm':16s} {'Challenger':>10s} {'A3TGCN':>8s} {'Diff':>8s} {'Wins':>6s} {'p-val':>8s}")
     print("-" * 88)
 
@@ -78,7 +87,13 @@ def main():
         ("ASTGCN", "det", "cases", "ens_raw"),
         ("ASTGCN", "det", "cases", "ens_blend_raw"),
         ("A3TGCN+STGAT+ASTGCN", "det", "cases", "multi_raw"),
+        ("AAGCN+ASTGCN", "det", "cases", "multi_raw"),
+        ("AAGCN+ASTGCN", "det", "cases", "multi_opt_raw"),
+        ("AAGCN+ASTGCN", "det", "cases", "multi_blend_raw"),
+        ("AAGCN+ASTGCN", "det", "cases", "multi_super_raw"),
         ("AAGCN+ASTGCN+A3TGCN", "det", "cases", "multi_raw"),
+        ("AAGCN+ASTGCN+A3TGCN", "det", "cases", "multi_opt_raw"),
+        ("AAGCN+ASTGCN+A3TGCN", "det", "cases", "multi_blend_raw"),
         ("AAGCN+ASTGCN+A3TGCN", "det", "cases", "multi_super_raw"),
     ]
 

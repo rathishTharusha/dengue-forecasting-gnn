@@ -47,9 +47,14 @@ def load_all(directory: Path) -> list[dict]:
     records: list[dict] = []
     for path in sorted(directory.glob("beat_*.json")):
         rows = json.loads(path.read_text(encoding="utf-8"))
+        stem = path.stem.lower()
+        default_head = "gauss" if "_gauss" in stem else ("nb" if "_nb" in stem else "det")
+        default_feats = "climate" if "_climate" in stem else ("causal" if "_causal" in stem else "cases")
         for r in rows:
-            r.setdefault("head", "det")
-            r.setdefault("features", "cases")
+            if not r.get("head"):
+                r["head"] = default_head
+            if not r.get("features"):
+                r["features"] = default_feats
             r["source"] = path.stem
         records.extend(rows)
     return records

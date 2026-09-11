@@ -526,7 +526,8 @@ def main() -> int:
                 all_records.append(score_arm(pred_mean, truth, artifact,
                                              arch="+".join(args.arch), origin=fold.origin,
                                              seed=-1, arm=f"multi_{est}", ens=len(stack),
-                                             physics=args.physics_mode))
+                                             physics=args.physics_mode,
+                                             head=args.head, features=args.features))
 
                 # Blend equal multi with persistence:
                 stack_val = [ens_val_by_arch[a][fold.origin][est] for a in args.arch]
@@ -536,7 +537,8 @@ def main() -> int:
                                              arch="+".join(args.arch), origin=fold.origin,
                                              seed=-1, arm=f"multi_blend_{est}", ens=len(stack),
                                              w=[round(float(x), 4) for x in w_b],
-                                             physics=args.physics_mode))
+                                             physics=args.physics_mode,
+                                             head=args.head, features=args.features))
 
                 # Simplex-optimal weights across models (fit on validation):
                 w_opt = fit_multi_weights(stack_val, truth_val)
@@ -544,7 +546,8 @@ def main() -> int:
                 all_records.append(score_arm(pred_opt, truth, artifact,
                                              arch="+".join(args.arch), origin=fold.origin,
                                              seed=-1, arm=f"multi_opt_{est}", ens=len(stack),
-                                             physics=args.physics_mode))
+                                             physics=args.physics_mode,
+                                             head=args.head, features=args.features))
 
                 # Super-ensemble: simplex-optimal across models + persistence:
                 w_super = fit_multi_weights(stack_val + [pers_val], truth_val)
@@ -552,7 +555,8 @@ def main() -> int:
                 all_records.append(score_arm(pred_super, truth, artifact,
                                              arch="+".join(args.arch), origin=fold.origin,
                                              seed=-1, arm=f"multi_super_{est}", ens=len(stack) + 1,
-                                             physics=args.physics_mode))
+                                             physics=args.physics_mode,
+                                             head=args.head, features=args.features))
 
     tag = args.tag or "_".join(args.arch)
     suffix = "" if args.head == "det" else f"_{args.head}"

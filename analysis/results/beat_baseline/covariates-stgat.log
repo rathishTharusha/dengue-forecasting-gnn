@@ -1,0 +1,359 @@
+[{"stream_name":"stderr","time":7.09921672,"data":"0.00s - Debugger warning: It seems that frozen modules are being used, which may\n"}
+,{"stream_name":"stderr","time":7.09927197,"data":"0.00s - make the debugger miss breakpoints. Please pass -Xfrozen_modules=off\n"}
+,{"stream_name":"stderr","time":7.09927603,"data":"0.00s - to python to disable frozen modules.\n"}
+,{"stream_name":"stderr","time":7.09927854,"data":"0.00s - Note: Debugging will proceed. Set PYDEVD_DISABLE_FILE_VALIDATION=1 to disable this validation.\n"}
+,{"stream_name":"stderr","time":7.686511341,"data":"0.00s - Debugger warning: It seems that frozen modules are being used, which may\n"}
+,{"stream_name":"stderr","time":7.686549761,"data":"0.00s - make the debugger miss breakpoints. Please pass -Xfrozen_modules=off\n"}
+,{"stream_name":"stderr","time":7.686554732,"data":"0.00s - to python to disable frozen modules.\n"}
+,{"stream_name":"stderr","time":7.686558412,"data":"0.00s - Note: Debugging will proceed. Set PYDEVD_DISABLE_FILE_VALIDATION=1 to disable this validation.\n"}
+,{"stream_name":"stdout","time":8.749522051,"data":"kernel python: 3.12.13\n"}
+,{"stream_name":"stdout","time":8.949945896,"data":"$ /usr/bin/python3 -m pip install -q uv\n"}
+,{"stream_name":"stdout","time":15.015346459,"data":"   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 20.0/20.0 MB 53.5 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":15.015388469,"data":"\n"}
+,{"stream_name":"stdout","time":15.015394919,"data":"$ /usr/bin/python3 -m uv python install 3.11\n"}
+,{"stream_name":"stdout","time":16.225547013,"data":"$ /usr/bin/python3 -m uv venv --python 3.11 /tmp/repro/venv311\n"}
+,{"stream_name":"stdout","time":16.538978848,"data":"$ /usr/bin/python3 -m uv pip install -q --python /tmp/repro/venv311/bin/python torch==2.1.2 --index-url https://download.pytorch.org/whl/cpu\n"}
+,{"stream_name":"stdout","time":20.507132547,"data":"$ /usr/bin/python3 -m uv pip install -q --python /tmp/repro/venv311/bin/python torch_scatter torch_sparse -f https://data.pyg.org/whl/torch-2.1.2+cpu.html\n"}
+,{"stream_name":"stdout","time":24.061089925,"data":"$ /usr/bin/python3 -m uv pip install -q --python /tmp/repro/venv311/bin/python torch_geometric==2.4.0 numpy~=1.26.2 pandas~=2.2.0 scikit_learn==1.4.0 statsmodels==0.14.1 decorator==4.4.2 cython matplotlib tqdm\n"}
+,{"stream_name":"stdout","time":26.213621507,"data":"$ /usr/bin/python3 -m uv pip install -q --python /tmp/repro/venv311/bin/python --no-deps torch_geometric_temporal==0.54.0\n"}
+,{"stream_name":"stdout","time":38.217388253,"data":"{\n"}
+,{"stream_name":"stdout","time":38.217432623,"data":"  \"python\": \"3.11.16\",\n"}
+,{"stream_name":"stdout","time":38.217440463,"data":"  \"torch\": \"2.1.2+cpu\",\n"}
+,{"stream_name":"stdout","time":38.217446203,"data":"  \"torch_geometric\": \"2.4.0\",\n"}
+,{"stream_name":"stdout","time":38.217451163,"data":"  \"pandas\": \"2.2.3\",\n"}
+,{"stream_name":"stdout","time":38.217465093,"data":"  \"numpy\": \"1.26.4\"\n"}
+,{"stream_name":"stdout","time":38.217470813,"data":"}\n"}
+,{"stream_name":"stdout","time":38.217475393,"data":"all five architectures import OK under Python 3.11\n"}
+,{"stream_name":"stdout","time":38.418537568,"data":"$ git clone --depth 1 --branch main https://github.com/rathishTharusha/dengue-forecasting-gnn.git /tmp/repro/project\n"}
+,{"stream_name":"stdout","time":39.907271462,"data":"Cloned branch: main\n"}
+,{"stream_name":"stdout","time":39.924902709,"data":"=== features=cases ===\n"}
+,{"stream_name":"stdout","time":41.366507622,"data":"origins=(0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9) test_frac=0.05 -\u003e 9 folds, seeds=(0, 1, 2, 3, 4), epochs=150, head=det\n"}
+,{"stream_name":"stdout","time":41.366575322,"data":"features=cases -\u003e 1 channels x window 3 = input width 3: ['cases']\n"}
+,{"stream_name":"stdout","time":41.366582642,"data":"test windows per fold: [23, 22, 23, 23, 22, 23, 23, 22, 23] (disjoint: True)\n"}
+,{"stream_name":"stdout","time":41.366586462,"data":"\n"}
+,{"stream_name":"stdout","time":41.366589802,"data":"======================== STGAT ========================\n"}
+,{"stream_name":"stdout","time":41.366593311,"data":"  origin 0.5 (test n=23)\n"}
+,{"stream_name":"stdout","time":47.089099168,"data":"      seed 0: factors={'smear': 1.291, 'lognorm': 1.226, 'calib': 0.912} (6s)\n"}
+,{"stream_name":"stdout","time":50.583290987,"data":"      seed 1: factors={'smear': 1.291, 'lognorm': 1.226, 'calib': 0.916} (3s)\n"}
+,{"stream_name":"stdout","time":55.427209124,"data":"      seed 2: factors={'smear': 1.305, 'lognorm': 1.226, 'calib': 0.927} (5s)\n"}
+,{"stream_name":"stdout","time":59.061420149,"data":"      seed 3: factors={'smear': 1.305, 'lognorm': 1.226, 'calib': 0.921} (4s)\n"}
+,{"stream_name":"stdout","time":64.52781867,"data":"      seed 4: factors={'smear': 1.29, 'lognorm': 1.226, 'calib': 0.915} (5s)\n"}
+,{"stream_name":"stdout","time":64.52788146,"data":"  origin 0.55 (test n=22)\n"}
+,{"stream_name":"stdout","time":71.082569393,"data":"      seed 0: factors={'smear': 1.013, 'lognorm': 1.151, 'calib': 0.637} (7s)\n"}
+,{"stream_name":"stdout","time":74.996514451,"data":"      seed 1: factors={'smear': 1.013, 'lognorm': 1.151, 'calib': 0.638} (4s)\n"}
+,{"stream_name":"stdout","time":77.050141752,"data":"      seed 2: factors={'smear': 1.015, 'lognorm': 1.152, 'calib': 0.643} (2s)\n"}
+,{"stream_name":"stdout","time":78.621805076,"data":"      seed 3: factors={'smear': 1.018, 'lognorm': 1.156, 'calib': 0.657} (2s)\n"}
+,{"stream_name":"stdout","time":81.78003443,"data":"      seed 4: factors={'smear': 1.013, 'lognorm': 1.15, 'calib': 0.637} (3s)\n"}
+,{"stream_name":"stdout","time":81.78007562,"data":"  origin 0.6 (test n=23)\n"}
+,{"stream_name":"stdout","time":85.932134366,"data":"      seed 0: factors={'smear': 1.192, 'lognorm': 1.23, 'calib': 0.89} (4s)\n"}
+,{"stream_name":"stdout","time":88.654740065,"data":"      seed 1: factors={'smear': 1.19, 'lognorm': 1.23, 'calib': 0.889} (3s)\n"}
+,{"stream_name":"stdout","time":90.897861754,"data":"      seed 2: factors={'smear': 1.192, 'lognorm': 1.23, 'calib': 0.899} (2s)\n"}
+,{"stream_name":"stdout","time":93.51738742,"data":"      seed 3: factors={'smear': 1.194, 'lognorm': 1.23, 'calib': 0.894} (3s)\n"}
+,{"stream_name":"stdout","time":101.921140405,"data":"      seed 4: factors={'smear': 1.192, 'lognorm': 1.23, 'calib': 0.888} (8s)\n"}
+,{"stream_name":"stdout","time":101.921214975,"data":"  origin 0.65 (test n=23)\n"}
+,{"stream_name":"stdout","time":107.076274651,"data":"      seed 0: factors={'smear': 1.257, 'lognorm': 1.23, 'calib': 0.942} (5s)\n"}
+,{"stream_name":"stdout","time":110.240808625,"data":"      seed 1: factors={'smear': 1.257, 'lognorm': 1.23, 'calib': 0.942} (3s)\n"}
+,{"stream_name":"stdout","time":112.671643602,"data":"      seed 2: factors={'smear': 1.256, 'lognorm': 1.23, 'calib': 0.945} (2s)\n"}
+,{"stream_name":"stdout","time":116.521230789,"data":"      seed 3: factors={'smear': 1.256, 'lognorm': 1.23, 'calib': 0.946} (4s)\n"}
+,{"stream_name":"stdout","time":121.033363934,"data":"      seed 4: factors={'smear': 1.26, 'lognorm': 1.23, 'calib': 0.943} (5s)\n"}
+,{"stream_name":"stdout","time":121.033403004,"data":"  origin 0.7 (test n=22)\n"}
+,{"stream_name":"stdout","time":123.77034412,"data":"      seed 0: factors={'smear': 1.225, 'lognorm': 1.201, 'calib': 0.982} (3s)\n"}
+,{"stream_name":"stdout","time":128.336206516,"data":"      seed 1: factors={'smear': 1.226, 'lognorm': 1.201, 'calib': 0.989} (5s)\n"}
+,{"stream_name":"stdout","time":135.511660269,"data":"      seed 2: factors={'smear': 1.228, 'lognorm': 1.201, 'calib': 0.991} (7s)\n"}
+,{"stream_name":"stdout","time":140.43685091,"data":"      seed 3: factors={'smear': 1.226, 'lognorm': 1.201, 'calib': 0.991} (5s)\n"}
+,{"stream_name":"stdout","time":145.371105822,"data":"      seed 4: factors={'smear': 1.227, 'lognorm': 1.201, 'calib': 0.99} (5s)\n"}
+,{"stream_name":"stdout","time":145.371193422,"data":"  origin 0.75 (test n=23)\n"}
+,{"stream_name":"stdout","time":153.866539934,"data":"      seed 0: factors={'smear': 1.359, 'lognorm': 1.182, 'calib': 0.999} (8s)\n"}
+,{"stream_name":"stdout","time":162.026773133,"data":"      seed 1: factors={'smear': 1.357, 'lognorm': 1.182, 'calib': 0.998} (8s)\n"}
+,{"stream_name":"stdout","time":166.812602878,"data":"      seed 2: factors={'smear': 1.357, 'lognorm': 1.182, 'calib': 0.999} (5s)\n"}
+,{"stream_name":"stdout","time":171.825940669,"data":"      seed 3: factors={'smear': 1.357, 'lognorm': 1.182, 'calib': 1.0} (5s)\n"}
+,{"stream_name":"stdout","time":175.623289194,"data":"      seed 4: factors={'smear': 1.354, 'lognorm': 1.182, 'calib': 0.996} (4s)\n"}
+,{"stream_name":"stdout","time":175.623323884,"data":"  origin 0.8 (test n=23)\n"}
+,{"stream_name":"stdout","time":180.38197317,"data":"      seed 0: factors={'smear': 1.182, 'lognorm': 1.314, 'calib': 0.872} (5s)\n"}
+,{"stream_name":"stdout","time":185.798735073,"data":"      seed 1: factors={'smear': 1.178, 'lognorm': 1.314, 'calib': 0.868} (5s)\n"}
+,{"stream_name":"stdout","time":189.147960097,"data":"      seed 2: factors={'smear': 1.177, 'lognorm': 1.314, 'calib': 0.87} (3s)\n"}
+,{"stream_name":"stdout","time":191.679040507,"data":"      seed 3: factors={'smear': 1.176, 'lognorm': 1.316, 'calib': 0.885} (3s)\n"}
+,{"stream_name":"stdout","time":196.432862793,"data":"      seed 4: factors={'smear': 1.178, 'lognorm': 1.314, 'calib': 0.869} (5s)\n"}
+,{"stream_name":"stdout","time":196.432902563,"data":"  origin 0.85 (test n=22)\n"}
+,{"stream_name":"stdout","time":202.164920749,"data":"      seed 0: factors={'smear': 1.381, 'lognorm': 1.279, 'calib': 0.944} (6s)\n"}
+,{"stream_name":"stdout","time":206.461858669,"data":"      seed 1: factors={'smear': 1.374, 'lognorm': 1.279, 'calib': 0.945} (4s)\n"}
+,{"stream_name":"stdout","time":212.059217641,"data":"      seed 2: factors={'smear': 1.373, 'lognorm': 1.279, 'calib': 0.943} (6s)\n"}
+,{"stream_name":"stdout","time":218.286003271,"data":"      seed 3: factors={'smear': 1.374, 'lognorm': 1.279, 'calib': 0.944} (6s)\n"}
+,{"stream_name":"stdout","time":223.813209572,"data":"      seed 4: factors={'smear': 1.372, 'lognorm': 1.279, 'calib': 0.943} (6s)\n"}
+,{"stream_name":"stdout","time":223.814524542,"data":"  origin 0.9 (test n=23)\n"}
+,{"stream_name":"stdout","time":227.179108025,"data":"      seed 0: factors={'smear': 3.0, 'lognorm': 2.141, 'calib': 0.5} (3s)\n"}
+,{"stream_name":"stdout","time":239.519576103,"data":"      seed 1: factors={'smear': 3.0, 'lognorm': 2.144, 'calib': 0.5} (12s)\n"}
+,{"stream_name":"stdout","time":250.696294897,"data":"      seed 2: factors={'smear': 3.0, 'lognorm': 2.144, 'calib': 0.5} (11s)\n"}
+,{"stream_name":"stdout","time":253.909495098,"data":"      seed 3: factors={'smear': 3.0, 'lognorm': 2.143, 'calib': 0.5} (3s)\n"}
+,{"stream_name":"stdout","time":263.246444588,"data":"      seed 4: factors={'smear': 3.0, 'lognorm': 2.144, 'calib': 0.5} (9s)\n"}
+,{"stream_name":"stdout","time":263.246486548,"data":"\n"}
+,{"stream_name":"stdout","time":263.246492278,"data":"wrote 441 records -\u003e /kaggle/working/beat_STGAT.json\n"}
+,{"stream_name":"stdout","time":264.260194911,"data":"\n"}
+,{"stream_name":"stdout","time":264.260228601,"data":"floor by origin: {0.5: 30.92, 0.55: 24.62, 0.6: 20.17, 0.65: 33.91, 0.7: 56.78, 0.75: 35.79, 0.8: 10.31, 0.85: 17.2, 0.9: 18.45}\n"}
+,{"stream_name":"stdout","time":264.260232841,"data":"\n"}
+,{"stream_name":"stdout","time":264.260235781,"data":"arch                  arm                      RMSE  vs floor    wins        p\n"}
+,{"stream_name":"stdout","time":264.260238641,"data":"------------------------------------------------------------------------------\n"}
+,{"stream_name":"stdout","time":264.260241601,"data":"STGAT                 raw                    27.533    -0.038    4/9     0.6549\n"}
+,{"stream_name":"stdout","time":264.260244261,"data":"STGAT                 blend_raw              27.529    -0.042    5/9     0.4759\n"}
+,{"stream_name":"stdout","time":264.260247101,"data":"STGAT                 smear                  42.038   +14.467    0/9     0.0233\n"}
+,{"stream_name":"stdout","time":264.260249861,"data":"STGAT                 blend_smear            27.590    +0.019    1/9     0.2178\n"}
+,{"stream_name":"stdout","time":264.260252621,"data":"STGAT                 lognorm                37.236    +9.665    0/9     0.0029\n"}
+,{"stream_name":"stdout","time":264.260255441,"data":"STGAT                 blend_lognorm          27.576    +0.005    1/9     0.2594\n"}
+,{"stream_name":"stdout","time":264.260258511,"data":"STGAT                 calib                  28.505    +0.934    4/9     0.3970\n"}
+,{"stream_name":"stdout","time":264.260261431,"data":"STGAT                 blend_calib            28.509    +0.938    4/9     0.3875\n"}
+,{"stream_name":"stdout","time":264.260264291,"data":"STGAT                 ens_raw                27.484    -0.087    5/9     0.2290\n"}
+,{"stream_name":"stdout","time":264.260267001,"data":"STGAT                 ens_blend_raw          27.494    -0.078    5/9     0.1892\n"}
+,{"stream_name":"stdout","time":264.260270531,"data":"STGAT                 ens_smear              41.985   +14.414    0/9     0.0238\n"}
+,{"stream_name":"stdout","time":264.260273521,"data":"STGAT                 ens_blend_smear        27.576    +0.005    0/9     0.2718\n"}
+,{"stream_name":"stdout","time":264.260276841,"data":"STGAT                 ens_lognorm            37.179    +9.608    0/9     0.0031\n"}
+,{"stream_name":"stdout","time":264.260280001,"data":"STGAT                 ens_blend_lognorm      27.576    +0.005    0/9     0.2848\n"}
+,{"stream_name":"stdout","time":264.260282781,"data":"STGAT                 ens_calib              28.484    +0.913    4/9     0.4040\n"}
+,{"stream_name":"stdout","time":264.260285571,"data":"STGAT                 ens_blend_calib        28.504    +0.933    4/9     0.3906\n"}
+,{"stream_name":"stdout","time":264.596572316,"data":"\n"}
+,{"stream_name":"stdout","time":264.596617376,"data":"features=cases finished in 3.7 min\n"}
+,{"stream_name":"stdout","time":264.620375666,"data":"=== features=causal ===\n"}
+,{"stream_name":"stdout","time":266.112232285,"data":"origins=(0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9) test_frac=0.05 -\u003e 9 folds, seeds=(0, 1, 2, 3, 4), epochs=150, head=det\n"}
+,{"stream_name":"stdout","time":266.112267085,"data":"features=causal -\u003e 8 channels x window 3 = input width 24: ['cases', 'meanQair', 'meanSoilmoi', 'meanTair', 'meanPrecip', 'meanQair_missing', 'meanSoilmoi_missing', 'meanTair_missing']\n"}
+,{"stream_name":"stdout","time":266.112273795,"data":"test windows per fold: [23, 22, 23, 23, 22, 23, 23, 22, 23] (disjoint: True)\n"}
+,{"stream_name":"stdout","time":266.112277275,"data":"\n"}
+,{"stream_name":"stdout","time":266.112281285,"data":"======================== STGAT ========================\n"}
+,{"stream_name":"stdout","time":266.112299805,"data":"  origin 0.5 (test n=23)\n"}
+,{"stream_name":"stdout","time":276.254864312,"data":"      seed 0: factors={'smear': 1.303, 'lognorm': 1.226, 'calib': 0.922} (10s)\n"}
+,{"stream_name":"stdout","time":281.787862601,"data":"      seed 1: factors={'smear': 1.301, 'lognorm': 1.226, 'calib': 0.917} (6s)\n"}
+,{"stream_name":"stdout","time":289.219348865,"data":"      seed 2: factors={'smear': 1.295, 'lognorm': 1.227, 'calib': 0.918} (7s)\n"}
+,{"stream_name":"stdout","time":295.227600317,"data":"      seed 3: factors={'smear': 1.303, 'lognorm': 1.226, 'calib': 0.92} (6s)\n"}
+,{"stream_name":"stdout","time":301.150477682,"data":"      seed 4: factors={'smear': 1.286, 'lognorm': 1.226, 'calib': 0.915} (6s)\n"}
+,{"stream_name":"stdout","time":301.150522942,"data":"  origin 0.55 (test n=22)\n"}
+,{"stream_name":"stdout","time":304.310309253,"data":"      seed 0: factors={'smear': 1.012, 'lognorm': 1.155, 'calib': 0.636} (3s)\n"}
+,{"stream_name":"stdout","time":310.566832489,"data":"      seed 1: factors={'smear': 1.012, 'lognorm': 1.15, 'calib': 0.635} (6s)\n"}
+,{"stream_name":"stdout","time":314.286644621,"data":"      seed 2: factors={'smear': 1.022, 'lognorm': 1.153, 'calib': 0.638} (4s)\n"}
+,{"stream_name":"stdout","time":319.181231481,"data":"      seed 3: factors={'smear': 1.014, 'lognorm': 1.151, 'calib': 0.636} (5s)\n"}
+,{"stream_name":"stdout","time":324.206313193,"data":"      seed 4: factors={'smear': 1.011, 'lognorm': 1.151, 'calib': 0.637} (5s)\n"}
+,{"stream_name":"stdout","time":324.206356283,"data":"  origin 0.6 (test n=23)\n"}
+,{"stream_name":"stdout","time":334.742983801,"data":"      seed 0: factors={'smear': 1.194, 'lognorm': 1.23, 'calib': 0.892} (11s)\n"}
+,{"stream_name":"stdout","time":347.655783664,"data":"      seed 1: factors={'smear': 1.194, 'lognorm': 1.23, 'calib': 0.889} (13s)\n"}
+,{"stream_name":"stdout","time":358.136915201,"data":"      seed 2: factors={'smear': 1.191, 'lognorm': 1.23, 'calib': 0.89} (10s)\n"}
+,{"stream_name":"stdout","time":364.13530686,"data":"      seed 3: factors={'smear': 1.195, 'lognorm': 1.23, 'calib': 0.894} (6s)\n"}
+,{"stream_name":"stdout","time":371.417985427,"data":"      seed 4: factors={'smear': 1.193, 'lognorm': 1.23, 'calib': 0.891} (7s)\n"}
+,{"stream_name":"stdout","time":371.418014916,"data":"  origin 0.65 (test n=23)\n"}
+,{"stream_name":"stdout","time":383.656702215,"data":"      seed 0: factors={'smear': 1.257, 'lognorm': 1.23, 'calib': 0.944} (12s)\n"}
+,{"stream_name":"stdout","time":395.661085723,"data":"      seed 1: factors={'smear': 1.259, 'lognorm': 1.23, 'calib': 0.946} (12s)\n"}
+,{"stream_name":"stdout","time":409.618398892,"data":"      seed 2: factors={'smear': 1.256, 'lognorm': 1.23, 'calib': 0.944} (14s)\n"}
+,{"stream_name":"stdout","time":416.128349696,"data":"      seed 3: factors={'smear': 1.26, 'lognorm': 1.23, 'calib': 0.946} (7s)\n"}
+,{"stream_name":"stdout","time":424.219217401,"data":"      seed 4: factors={'smear': 1.255, 'lognorm': 1.23, 'calib': 0.946} (8s)\n"}
+,{"stream_name":"stdout","time":424.21930209,"data":"  origin 0.7 (test n=22)\n"}
+,{"stream_name":"stdout","time":443.058720161,"data":"      seed 0: factors={'smear': 1.227, 'lognorm': 1.201, 'calib': 0.99} (19s)\n"}
+,{"stream_name":"stdout","time":447.677825101,"data":"      seed 1: factors={'smear': 1.221, 'lognorm': 1.201, 'calib': 0.979} (5s)\n"}
+,{"stream_name":"stdout","time":455.066377202,"data":"      seed 2: factors={'smear': 1.228, 'lognorm': 1.201, 'calib': 0.992} (7s)\n"}
+,{"stream_name":"stdout","time":465.303496397,"data":"      seed 3: factors={'smear': 1.228, 'lognorm': 1.201, 'calib': 0.99} (10s)\n"}
+,{"stream_name":"stdout","time":484.20625932,"data":"      seed 4: factors={'smear': 1.228, 'lognorm': 1.201, 'calib': 0.99} (19s)\n"}
+,{"stream_name":"stdout","time":484.20631874,"data":"  origin 0.75 (test n=23)\n"}
+,{"stream_name":"stdout","time":502.738204331,"data":"      seed 0: factors={'smear': 1.356, 'lognorm': 1.182, 'calib': 0.998} (19s)\n"}
+,{"stream_name":"stdout","time":508.640071968,"data":"      seed 1: factors={'smear': 1.358, 'lognorm': 1.181, 'calib': 0.997} (6s)\n"}
+,{"stream_name":"stdout","time":514.620898308,"data":"      seed 2: factors={'smear': 1.358, 'lognorm': 1.182, 'calib': 1.001} (6s)\n"}
+,{"stream_name":"stdout","time":529.050562478,"data":"      seed 3: factors={'smear': 1.358, 'lognorm': 1.182, 'calib': 0.998} (14s)\n"}
+,{"stream_name":"stdout","time":540.437015875,"data":"      seed 4: factors={'smear': 1.357, 'lognorm': 1.182, 'calib': 0.998} (11s)\n"}
+,{"stream_name":"stdout","time":540.437059705,"data":"  origin 0.8 (test n=23)\n"}
+,{"stream_name":"stdout","time":548.849404695,"data":"      seed 0: factors={'smear': 1.181, 'lognorm': 1.314, 'calib': 0.872} (8s)\n"}
+,{"stream_name":"stdout","time":557.250860195,"data":"      seed 1: factors={'smear': 1.178, 'lognorm': 1.314, 'calib': 0.87} (8s)\n"}
+,{"stream_name":"stdout","time":566.010187818,"data":"      seed 2: factors={'smear': 1.18, 'lognorm': 1.314, 'calib': 0.872} (9s)\n"}
+,{"stream_name":"stdout","time":572.358758387,"data":"      seed 3: factors={'smear': 1.183, 'lognorm': 1.314, 'calib': 0.872} (6s)\n"}
+,{"stream_name":"stdout","time":578.946556485,"data":"      seed 4: factors={'smear': 1.179, 'lognorm': 1.314, 'calib': 0.871} (7s)\n"}
+,{"stream_name":"stdout","time":578.946588805,"data":"  origin 0.85 (test n=22)\n"}
+,{"stream_name":"stdout","time":587.136726527,"data":"      seed 0: factors={'smear': 1.375, 'lognorm': 1.279, 'calib': 0.947} (8s)\n"}
+,{"stream_name":"stdout","time":600.367485215,"data":"      seed 1: factors={'smear': 1.378, 'lognorm': 1.278, 'calib': 0.946} (13s)\n"}
+,{"stream_name":"stdout","time":607.894343396,"data":"      seed 2: factors={'smear': 1.373, 'lognorm': 1.279, 'calib': 0.942} (8s)\n"}
+,{"stream_name":"stdout","time":617.779347182,"data":"      seed 3: factors={'smear': 1.375, 'lognorm': 1.279, 'calib': 0.94} (10s)\n"}
+,{"stream_name":"stdout","time":627.450260982,"data":"      seed 4: factors={'smear': 1.373, 'lognorm': 1.279, 'calib': 0.944} (10s)\n"}
+,{"stream_name":"stdout","time":627.450330192,"data":"  origin 0.9 (test n=23)\n"}
+,{"stream_name":"stdout","time":634.80380453,"data":"      seed 0: factors={'smear': 3.0, 'lognorm': 2.143, 'calib': 0.5} (7s)\n"}
+,{"stream_name":"stdout","time":639.906098056,"data":"      seed 1: factors={'smear': 3.0, 'lognorm': 2.138, 'calib': 0.5} (5s)\n"}
+,{"stream_name":"stdout","time":652.624444656,"data":"      seed 2: factors={'smear': 3.0, 'lognorm': 2.144, 'calib': 0.5} (13s)\n"}
+,{"stream_name":"stdout","time":657.84820253,"data":"      seed 3: factors={'smear': 3.0, 'lognorm': 2.14, 'calib': 0.5} (5s)\n"}
+,{"stream_name":"stdout","time":666.594720349,"data":"      seed 4: factors={'smear': 3.0, 'lognorm': 2.143, 'calib': 0.5} (9s)\n"}
+,{"stream_name":"stdout","time":666.594764949,"data":"\n"}
+,{"stream_name":"stdout","time":666.594770899,"data":"wrote 441 records -\u003e /kaggle/working/beat_STGAT_causal.json\n"}
+,{"stream_name":"stdout","time":666.98607989,"data":"\n"}
+,{"stream_name":"stdout","time":666.98611716,"data":"floor by origin: {0.5: 30.92, 0.55: 24.62, 0.6: 20.17, 0.65: 33.91, 0.7: 56.78, 0.75: 35.79, 0.8: 10.31, 0.85: 17.2, 0.9: 18.45}\n"}
+,{"stream_name":"stdout","time":666.98612326,"data":"\n"}
+,{"stream_name":"stdout","time":666.98612835,"data":"arch                  arm                      RMSE  vs floor    wins        p\n"}
+,{"stream_name":"stdout","time":666.9861685,"data":"------------------------------------------------------------------------------\n"}
+,{"stream_name":"stdout","time":666.98617635,"data":"STGAT                 raw                    27.522    -0.049    5/9     0.5692\n"}
+,{"stream_name":"stdout","time":666.98617943,"data":"STGAT                 blend_raw              27.503    -0.068    5/9     0.3060\n"}
+,{"stream_name":"stdout","time":666.98618254,"data":"STGAT                 smear                  42.091   +14.520    0/9     0.0243\n"}
+,{"stream_name":"stdout","time":666.98618553,"data":"STGAT                 blend_smear            27.584    +0.013    1/9     0.1334\n"}
+,{"stream_name":"stdout","time":666.98618875,"data":"STGAT                 lognorm                37.244    +9.673    0/9     0.0032\n"}
+,{"stream_name":"stdout","time":666.98619175,"data":"STGAT                 blend_lognorm          27.577    +0.006    1/9     0.2137\n"}
+,{"stream_name":"stdout","time":666.98619472,"data":"STGAT                 calib                  28.505    +0.934    4/9     0.3974\n"}
+,{"stream_name":"stdout","time":666.98619808,"data":"STGAT                 blend_calib            28.493    +0.921    4/9     0.3911\n"}
+,{"stream_name":"stdout","time":666.98620128,"data":"STGAT                 ens_raw                27.481    -0.090    6/9     0.2531\n"}
+,{"stream_name":"stdout","time":666.98620469,"data":"STGAT                 ens_blend_raw          27.473    -0.098    7/9     0.1855\n"}
+,{"stream_name":"stdout","time":666.98620665,"data":"STGAT                 ens_smear              42.047   +14.476    0/9     0.0246\n"}
+,{"stream_name":"stdout","time":666.9862086,"data":"STGAT                 ens_blend_smear        27.576    +0.005    1/9     0.2957\n"}
+,{"stream_name":"stdout","time":666.98621058,"data":"STGAT                 ens_lognorm            37.196    +9.625    0/9     0.0034\n"}
+,{"stream_name":"stdout","time":666.98621252,"data":"STGAT                 ens_blend_lognorm      27.577    +0.006    0/9     0.2127\n"}
+,{"stream_name":"stdout","time":666.98621444,"data":"STGAT                 ens_calib              28.488    +0.917    4/9     0.4039\n"}
+,{"stream_name":"stdout","time":666.98621638,"data":"STGAT                 ens_blend_calib        28.486    +0.915    4/9     0.3962\n"}
+,{"stream_name":"stdout","time":667.306643252,"data":"\n"}
+,{"stream_name":"stdout","time":667.306679902,"data":"features=causal finished in 6.7 min\n"}
+,{"stream_name":"stdout","time":667.335480562,"data":"=== features=climate ===\n"}
+,{"stream_name":"stdout","time":668.898299899,"data":"origins=(0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9) test_frac=0.05 -\u003e 9 folds, seeds=(0, 1, 2, 3, 4), epochs=150, head=det\n"}
+,{"stream_name":"stdout","time":668.898338279,"data":"features=climate -\u003e 17 channels x window 3 = input width 51: ['cases', 'meanTair', 'minTair', 'maxTair', 'meanQair', 'meanSoilmoi', 'meanCanopint', 'meanPrecip', 'minPrecip', 'maxPrecip', 'minNdvi', 'meanTair_missing', 'minTair_missing', 'maxTair_missing', 'meanQair_missing', 'meanSoilmoi_missing', 'meanCanopint_missing']\n"}
+,{"stream_name":"stdout","time":668.898347359,"data":"test windows per fold: [23, 22, 23, 23, 22, 23, 23, 22, 23] (disjoint: True)\n"}
+,{"stream_name":"stdout","time":668.898350869,"data":"\n"}
+,{"stream_name":"stdout","time":668.898353849,"data":"======================== STGAT ========================\n"}
+,{"stream_name":"stdout","time":668.898356769,"data":"  origin 0.5 (test n=23)\n"}
+,{"stream_name":"stdout","time":686.677935867,"data":"      seed 0: factors={'smear': 1.299, 'lognorm': 1.226, 'calib': 0.92} (18s)\n"}
+,{"stream_name":"stdout","time":696.662830291,"data":"      seed 1: factors={'smear': 1.292, 'lognorm': 1.226, 'calib': 0.916} (10s)\n"}
+,{"stream_name":"stdout","time":714.355532838,"data":"      seed 2: factors={'smear': 1.295, 'lognorm': 1.226, 'calib': 0.914} (18s)\n"}
+,{"stream_name":"stdout","time":737.157279348,"data":"      seed 3: factors={'smear': 1.294, 'lognorm': 1.226, 'calib': 0.92} (23s)\n"}
+,{"stream_name":"stdout","time":745.829188956,"data":"      seed 4: factors={'smear': 1.307, 'lognorm': 1.227, 'calib': 0.927} (9s)\n"}
+,{"stream_name":"stdout","time":745.829220156,"data":"  origin 0.55 (test n=22)\n"}
+,{"stream_name":"stdout","time":754.479817164,"data":"      seed 0: factors={'smear': 1.012, 'lognorm': 1.151, 'calib': 0.637} (9s)\n"}
+,{"stream_name":"stdout","time":766.436018607,"data":"      seed 1: factors={'smear': 1.012, 'lognorm': 1.151, 'calib': 0.637} (12s)\n"}
+,{"stream_name":"stdout","time":775.691225977,"data":"      seed 2: factors={'smear': 1.014, 'lognorm': 1.151, 'calib': 0.636} (9s)\n"}
+,{"stream_name":"stdout","time":782.706591878,"data":"      seed 3: factors={'smear': 1.02, 'lognorm': 1.154, 'calib': 0.656} (7s)\n"}
+,{"stream_name":"stdout","time":789.898275557,"data":"      seed 4: factors={'smear': 1.02, 'lognorm': 1.153, 'calib': 0.645} (7s)\n"}
+,{"stream_name":"stdout","time":789.898323366,"data":"  origin 0.6 (test n=23)\n"}
+,{"stream_name":"stdout","time":809.562745998,"data":"      seed 0: factors={'smear': 1.193, 'lognorm': 1.23, 'calib': 0.89} (20s)\n"}
+,{"stream_name":"stdout","time":831.035400778,"data":"      seed 1: factors={'smear': 1.191, 'lognorm': 1.23, 'calib': 0.888} (21s)\n"}
+,{"stream_name":"stdout","time":841.656230941,"data":"      seed 2: factors={'smear': 1.193, 'lognorm': 1.23, 'calib': 0.89} (11s)\n"}
+,{"stream_name":"stdout","time":852.204136803,"data":"      seed 3: factors={'smear': 1.194, 'lognorm': 1.23, 'calib': 0.895} (11s)\n"}
+,{"stream_name":"stdout","time":860.5325844,"data":"      seed 4: factors={'smear': 1.207, 'lognorm': 1.23, 'calib': 0.904} (8s)\n"}
+,{"stream_name":"stdout","time":860.53262525,"data":"  origin 0.65 (test n=23)\n"}
+,{"stream_name":"stdout","time":878.685681209,"data":"      seed 0: factors={'smear': 1.261, 'lognorm': 1.23, 'calib': 0.941} (18s)\n"}
+,{"stream_name":"stdout","time":895.7229594,"data":"      seed 1: factors={'smear': 1.258, 'lognorm': 1.23, 'calib': 0.939} (17s)\n"}
+,{"stream_name":"stdout","time":908.383918314,"data":"      seed 2: factors={'smear': 1.259, 'lognorm': 1.23, 'calib': 0.942} (13s)\n"}
+,{"stream_name":"stdout","time":920.508273457,"data":"      seed 3: factors={'smear': 1.259, 'lognorm': 1.23, 'calib': 0.949} (12s)\n"}
+,{"stream_name":"stdout","time":933.879305795,"data":"      seed 4: factors={'smear': 1.264, 'lognorm': 1.23, 'calib': 0.951} (13s)\n"}
+,{"stream_name":"stdout","time":933.879347115,"data":"  origin 0.7 (test n=22)\n"}
+,{"stream_name":"stdout","time":953.84810227,"data":"      seed 0: factors={'smear': 1.228, 'lognorm': 1.201, 'calib': 0.989} (20s)\n"}
+,{"stream_name":"stdout","time":963.198221724,"data":"      seed 1: factors={'smear': 1.227, 'lognorm': 1.201, 'calib': 0.984} (9s)\n"}
+,{"stream_name":"stdout","time":972.389609924,"data":"      seed 2: factors={'smear': 1.226, 'lognorm': 1.201, 'calib': 0.988} (9s)\n"}
+,{"stream_name":"stdout","time":983.21373008,"data":"      seed 3: factors={'smear': 1.23, 'lognorm': 1.201, 'calib': 0.995} (11s)\n"}
+,{"stream_name":"stdout","time":1013.735649282,"data":"      seed 4: factors={'smear': 1.227, 'lognorm': 1.201, 'calib': 0.99} (31s)\n"}
+,{"stream_name":"stdout","time":1013.735684393,"data":"  origin 0.75 (test n=23)\n"}
+,{"stream_name":"stdout","time":1062.646690239,"data":"      seed 0: factors={'smear': 1.358, 'lognorm': 1.182, 'calib': 0.999} (49s)\n"}
+,{"stream_name":"stdout","time":1078.665903821,"data":"      seed 1: factors={'smear': 1.354, 'lognorm': 1.182, 'calib': 0.995} (16s)\n"}
+,{"stream_name":"stdout","time":1092.733022861,"data":"      seed 2: factors={'smear': 1.359, 'lognorm': 1.181, 'calib': 0.999} (14s)\n"}
+,{"stream_name":"stdout","time":1104.487814671,"data":"      seed 3: factors={'smear': 1.358, 'lognorm': 1.182, 'calib': 1.002} (12s)\n"}
+,{"stream_name":"stdout","time":1131.796337135,"data":"      seed 4: factors={'smear': 1.358, 'lognorm': 1.182, 'calib': 0.998} (27s)\n"}
+,{"stream_name":"stdout","time":1131.796385755,"data":"  origin 0.8 (test n=23)\n"}
+,{"stream_name":"stdout","time":1155.371479301,"data":"      seed 0: factors={'smear': 1.181, 'lognorm': 1.314, 'calib': 0.87} (24s)\n"}
+,{"stream_name":"stdout","time":1170.538366529,"data":"      seed 1: factors={'smear': 1.179, 'lognorm': 1.314, 'calib': 0.867} (15s)\n"}
+,{"stream_name":"stdout","time":1199.018182316,"data":"      seed 2: factors={'smear': 1.18, 'lognorm': 1.314, 'calib': 0.869} (28s)\n"}
+,{"stream_name":"stdout","time":1210.381977453,"data":"      seed 3: factors={'smear': 1.18, 'lognorm': 1.313, 'calib': 0.885} (11s)\n"}
+,{"stream_name":"stdout","time":1221.422506001,"data":"      seed 4: factors={'smear': 1.187, 'lognorm': 1.314, 'calib': 0.877} (11s)\n"}
+,{"stream_name":"stdout","time":1221.422576811,"data":"  origin 0.85 (test n=22)\n"}
+,{"stream_name":"stdout","time":1242.656791407,"data":"      seed 0: factors={'smear': 1.376, 'lognorm': 1.279, 'calib': 0.946} (21s)\n"}
+,{"stream_name":"stdout","time":1260.238600671,"data":"      seed 1: factors={'smear': 1.373, 'lognorm': 1.279, 'calib': 0.943} (18s)\n"}
+,{"stream_name":"stdout","time":1277.590132818,"data":"      seed 2: factors={'smear': 1.38, 'lognorm': 1.278, 'calib': 0.946} (17s)\n"}
+,{"stream_name":"stdout","time":1296.2630157,"data":"      seed 3: factors={'smear': 1.376, 'lognorm': 1.279, 'calib': 0.947} (19s)\n"}
+,{"stream_name":"stdout","time":1318.708806189,"data":"      seed 4: factors={'smear': 1.371, 'lognorm': 1.28, 'calib': 0.94} (22s)\n"}
+,{"stream_name":"stdout","time":1318.708875409,"data":"  origin 0.9 (test n=23)\n"}
+,{"stream_name":"stdout","time":1339.908935638,"data":"      seed 0: factors={'smear': 3.0, 'lognorm': 2.143, 'calib': 0.5} (21s)\n"}
+,{"stream_name":"stdout","time":1397.025142679,"data":"      seed 1: factors={'smear': 3.0, 'lognorm': 2.144, 'calib': 0.5} (57s)\n"}
+,{"stream_name":"stdout","time":1412.990830201,"data":"      seed 2: factors={'smear': 3.0, 'lognorm': 2.142, 'calib': 0.5} (16s)\n"}
+,{"stream_name":"stdout","time":1427.129616696,"data":"      seed 3: factors={'smear': 3.0, 'lognorm': 2.143, 'calib': 0.5} (14s)\n"}
+,{"stream_name":"stdout","time":1438.955945537,"data":"      seed 4: factors={'smear': 3.0, 'lognorm': 2.141, 'calib': 0.5} (12s)\n"}
+,{"stream_name":"stdout","time":1438.955990597,"data":"\n"}
+,{"stream_name":"stdout","time":1438.955996188,"data":"wrote 441 records -\u003e /kaggle/working/beat_STGAT_climate.json\n"}
+,{"stream_name":"stdout","time":1439.329610107,"data":"\n"}
+,{"stream_name":"stdout","time":1439.329647197,"data":"floor by origin: {0.5: 30.92, 0.55: 24.62, 0.6: 20.17, 0.65: 33.91, 0.7: 56.78, 0.75: 35.79, 0.8: 10.31, 0.85: 17.2, 0.9: 18.45}\n"}
+,{"stream_name":"stdout","time":1439.329661697,"data":"\n"}
+,{"stream_name":"stdout","time":1439.329666197,"data":"arch                  arm                      RMSE  vs floor    wins        p\n"}
+,{"stream_name":"stdout","time":1439.329669277,"data":"------------------------------------------------------------------------------\n"}
+,{"stream_name":"stdout","time":1439.329672217,"data":"STGAT                 raw                    27.535    -0.036    4/9     0.6917\n"}
+,{"stream_name":"stdout","time":1439.329690077,"data":"STGAT                 blend_raw              27.514    -0.057    4/9     0.3864\n"}
+,{"stream_name":"stdout","time":1439.329692317,"data":"STGAT                 smear                  41.975   +14.404    0/9     0.0221\n"}
+,{"stream_name":"stdout","time":1439.329694277,"data":"STGAT                 blend_smear            27.598    +0.027    1/9     0.2200\n"}
+,{"stream_name":"stdout","time":1439.329696217,"data":"STGAT                 lognorm                37.121    +9.550    0/9     0.0027\n"}
+,{"stream_name":"stdout","time":1439.329698157,"data":"STGAT                 blend_lognorm          27.579    +0.007    1/9     0.1777\n"}
+,{"stream_name":"stdout","time":1439.329700337,"data":"STGAT                 calib                  28.530    +0.959    4/9     0.3831\n"}
+,{"stream_name":"stdout","time":1439.329702277,"data":"STGAT                 blend_calib            28.521    +0.950    4/9     0.3789\n"}
+,{"stream_name":"stdout","time":1439.329704297,"data":"STGAT                 ens_raw                27.470    -0.101    6/9     0.1755\n"}
+,{"stream_name":"stdout","time":1439.329706247,"data":"STGAT                 ens_blend_raw          27.461    -0.110    7/9     0.1225\n"}
+,{"stream_name":"stdout","time":1439.329708187,"data":"STGAT                 ens_smear              41.906   +14.335    0/9     0.0228\n"}
+,{"stream_name":"stdout","time":1439.329710147,"data":"STGAT                 ens_blend_smear        27.582    +0.011    0/9     0.0984\n"}
+,{"stream_name":"stdout","time":1439.329712417,"data":"STGAT                 ens_lognorm            37.046    +9.475    0/9     0.0029\n"}
+,{"stream_name":"stdout","time":1439.329714327,"data":"STGAT                 ens_blend_lognorm      27.579    +0.007    0/9     0.1779\n"}
+,{"stream_name":"stdout","time":1439.329716347,"data":"STGAT                 ens_calib              28.500    +0.929    5/9     0.3942\n"}
+,{"stream_name":"stdout","time":1439.329718277,"data":"STGAT                 ens_blend_calib        28.508    +0.937    4/9     0.3879\n"}
+,{"stream_name":"stdout","time":1439.631556196,"data":"\n"}
+,{"stream_name":"stdout","time":1439.631593556,"data":"features=climate finished in 12.9 min\n"}
+,{"stream_name":"stdout","time":1442.0838787,"data":"1323 records from 3 run(s)\n"}
+,{"stream_name":"stdout","time":1442.0839046,"data":"\n"}
+,{"stream_name":"stdout","time":1442.08390967,"data":"Persistence floor by origin (artifact-free):\n"}
+,{"stream_name":"stdout","time":1442.08391363,"data":"   0.50   30.922\n"}
+,{"stream_name":"stdout","time":1442.08391711,"data":"   0.55   24.616\n"}
+,{"stream_name":"stdout","time":1442.08392038,"data":"   0.60   20.170\n"}
+,{"stream_name":"stdout","time":1442.08392384,"data":"   0.65   33.914\n"}
+,{"stream_name":"stdout","time":1442.08392683,"data":"   0.70   56.776\n"}
+,{"stream_name":"stdout","time":1442.08393038,"data":"   0.75   35.790\n"}
+,{"stream_name":"stdout","time":1442.08393354,"data":"   0.80   10.307\n"}
+,{"stream_name":"stdout","time":1442.0839476,"data":"   0.85   17.197\n"}
+,{"stream_name":"stdout","time":1442.08395167,"data":"   0.90   18.449\n"}
+,{"stream_name":"stdout","time":1442.08395516,"data":"  mean    27.571\n"}
+,{"stream_name":"stdout","time":1442.08395831,"data":"\n"}
+,{"stream_name":"stdout","time":1442.08396167,"data":"=== every arm against the floor, clustered by origin ===\n"}
+,{"stream_name":"stdout","time":1442.08396549,"data":"            source  arch               arm  n_origins     RMSE  vs_floor  wins        p\n"}
+,{"stream_name":"stdout","time":1442.08396899,"data":"beat_STGAT_climate STGAT     ens_blend_raw          9  27.4610   -0.1101     7   0.1225\n"}
+,{"stream_name":"stdout","time":1442.0839839,"data":"beat_STGAT_climate STGAT           ens_raw          9  27.4700   -0.1011     6   0.1755\n"}
+,{"stream_name":"stdout","time":1442.08398804,"data":" beat_STGAT_causal STGAT     ens_blend_raw          9  27.4733   -0.0978     7   0.1855\n"}
+,{"stream_name":"stdout","time":1442.08399158,"data":" beat_STGAT_causal STGAT           ens_raw          9  27.4811   -0.0900     6   0.2531\n"}
+,{"stream_name":"stdout","time":1442.08399508,"data":"        beat_STGAT STGAT           ens_raw          9  27.4840   -0.0871     5   0.2290\n"}
+,{"stream_name":"stdout","time":1442.08399872,"data":"        beat_STGAT STGAT     ens_blend_raw          9  27.4936   -0.0775     5   0.1892\n"}
+,{"stream_name":"stdout","time":1442.08400231,"data":" beat_STGAT_causal STGAT         blend_raw          9  27.5028   -0.0683     5   0.3060\n"}
+,{"stream_name":"stdout","time":1442.08400604,"data":"beat_STGAT_climate STGAT         blend_raw          9  27.5138   -0.0574     4   0.3864\n"}
+,{"stream_name":"stdout","time":1442.08400944,"data":" beat_STGAT_causal STGAT               raw          9  27.5221   -0.0490     5   0.5692\n"}
+,{"stream_name":"stdout","time":1442.084013,"data":"        beat_STGAT STGAT         blend_raw          9  27.5289   -0.0422     5   0.4759\n"}
+,{"stream_name":"stdout","time":1442.08401648,"data":"        beat_STGAT STGAT               raw          9  27.5329   -0.0382     4   0.6549\n"}
+,{"stream_name":"stdout","time":1442.08402,"data":"beat_STGAT_climate STGAT               raw          9  27.5348   -0.0363     4   0.6917\n"}
+,{"stream_name":"stdout","time":1442.08402319,"data":"        beat_STGAT STGAT ens_blend_lognorm          9  27.5757    0.0045     0   0.2848\n"}
+,{"stream_name":"stdout","time":1442.08402659,"data":"        beat_STGAT STGAT   ens_blend_smear          9  27.5758    0.0047     0   0.2718\n"}
+,{"stream_name":"stdout","time":1442.08402979,"data":"        beat_STGAT STGAT     blend_lognorm          9  27.5759    0.0048     1   0.2594\n"}
+,{"stream_name":"stdout","time":1442.08403337,"data":" beat_STGAT_causal STGAT   ens_blend_smear          9  27.5763    0.0051     1   0.2957\n"}
+,{"stream_name":"stdout","time":1442.08403689,"data":" beat_STGAT_causal STGAT ens_blend_lognorm          9  27.5773    0.0062     0   0.2127\n"}
+,{"stream_name":"stdout","time":1442.08404039,"data":" beat_STGAT_causal STGAT     blend_lognorm          9  27.5774    0.0063     1   0.2137\n"}
+,{"stream_name":"stdout","time":1442.08404568,"data":"beat_STGAT_climate STGAT     blend_lognorm          9  27.5785    0.0074     1   0.1777\n"}
+,{"stream_name":"stdout","time":1442.08404922,"data":"beat_STGAT_climate STGAT ens_blend_lognorm          9  27.5786    0.0075     0   0.1779\n"}
+,{"stream_name":"stdout","time":1442.08405262,"data":"beat_STGAT_climate STGAT   ens_blend_smear          9  27.5819    0.0108     0   0.0984\n"}
+,{"stream_name":"stdout","time":1442.08405636,"data":" beat_STGAT_causal STGAT       blend_smear          9  27.5839    0.0127     1   0.1334\n"}
+,{"stream_name":"stdout","time":1442.08406903,"data":"        beat_STGAT STGAT       blend_smear          9  27.5901    0.0189     1   0.2178\n"}
+,{"stream_name":"stdout","time":1442.08407277,"data":"beat_STGAT_climate STGAT       blend_smear          9  27.5979    0.0268     1   0.2200\n"}
+,{"stream_name":"stdout","time":1442.08407644,"data":"        beat_STGAT STGAT         ens_calib          9  28.4843    0.9132     4   0.4040\n"}
+,{"stream_name":"stdout","time":1442.08407988,"data":" beat_STGAT_causal STGAT   ens_blend_calib          9  28.4861    0.9149     4   0.3962\n"}
+,{"stream_name":"stdout","time":1442.08408338,"data":" beat_STGAT_causal STGAT         ens_calib          9  28.4877    0.9166     4   0.4039\n"}
+,{"stream_name":"stdout","time":1442.08409265,"data":" beat_STGAT_causal STGAT       blend_calib          9  28.4925    0.9214     4   0.3911\n"}
+,{"stream_name":"stdout","time":1442.08409661,"data":"beat_STGAT_climate STGAT         ens_calib          9  28.5004    0.9292     5   0.3942\n"}
+,{"stream_name":"stdout","time":1442.08409989,"data":"        beat_STGAT STGAT   ens_blend_calib          9  28.5041    0.9330     4   0.3906\n"}
+,{"stream_name":"stdout","time":1442.08410363,"data":"        beat_STGAT STGAT             calib          9  28.5053    0.9342     4   0.3970\n"}
+,{"stream_name":"stdout","time":1442.08410667,"data":" beat_STGAT_causal STGAT             calib          9  28.5054    0.9342     4   0.3974\n"}
+,{"stream_name":"stdout","time":1442.08410959,"data":"beat_STGAT_climate STGAT   ens_blend_calib          9  28.5082    0.9370     4   0.3879\n"}
+,{"stream_name":"stdout","time":1442.0841126,"data":"        beat_STGAT STGAT       blend_calib          9  28.5090    0.9378     4   0.3875\n"}
+,{"stream_name":"stdout","time":1442.08411571,"data":"beat_STGAT_climate STGAT       blend_calib          9  28.5214    0.9503     4   0.3789\n"}
+,{"stream_name":"stdout","time":1442.08411871,"data":"beat_STGAT_climate STGAT             calib          9  28.5300    0.9589     4   0.3831\n"}
+,{"stream_name":"stdout","time":1442.08412167,"data":"beat_STGAT_climate STGAT       ens_lognorm          9  37.0460    9.4748     0   0.0029\n"}
+,{"stream_name":"stdout","time":1442.0841246,"data":"beat_STGAT_climate STGAT           lognorm          9  37.1214    9.5503     0   0.0027\n"}
+,{"stream_name":"stdout","time":1442.08412751,"data":"        beat_STGAT STGAT       ens_lognorm          9  37.1790    9.6079     0   0.0031\n"}
+,{"stream_name":"stdout","time":1442.08413072,"data":" beat_STGAT_causal STGAT       ens_lognorm          9  37.1958    9.6247     0   0.0034\n"}
+,{"stream_name":"stdout","time":1442.08413427,"data":"        beat_STGAT STGAT           lognorm          9  37.2358    9.6647     0   0.0029\n"}
+,{"stream_name":"stdout","time":1442.08413768,"data":" beat_STGAT_causal STGAT           lognorm          9  37.2440    9.6728     0   0.0032\n"}
+,{"stream_name":"stdout","time":1442.0841419,"data":"beat_STGAT_climate STGAT         ens_smear          9  41.9060   14.3349     0   0.0228\n"}
+,{"stream_name":"stdout","time":1442.08414519,"data":"beat_STGAT_climate STGAT             smear          9  41.9750   14.4039     0   0.0221\n"}
+,{"stream_name":"stdout","time":1442.08416246,"data":"        beat_STGAT STGAT         ens_smear          9  41.9848   14.4136     0   0.0238\n"}
+,{"stream_name":"stdout","time":1442.08416999,"data":"        beat_STGAT STGAT             smear          9  42.0377   14.4665     0   0.0233\n"}
+,{"stream_name":"stdout","time":1442.08417372,"data":" beat_STGAT_causal STGAT         ens_smear          9  42.0466   14.4755     0   0.0246\n"}
+,{"stream_name":"stdout","time":1442.08417747,"data":" beat_STGAT_causal STGAT             smear          9  42.0914   14.5203     0   0.0243\n"}
+,{"stream_name":"stdout","time":1442.08418118,"data":"\n"}
+,{"stream_name":"stdout","time":1442.08418445,"data":"Best arm: STGAT ens_blend_raw -\u003e 27.461 (-0.110 vs floor, 7/9 origins, p=0.1225)\n"}
+,{"stream_name":"stdout","time":1442.08418872,"data":"Does not clear the floor at p\u003c0.05. Report as measured.\n"}
+,{"stream_name":"stderr","time":1444.669310813,"data":"/usr/local/lib/python3.12/dist-packages/mistune.py:435: SyntaxWarning: invalid escape sequence '\\|'\n"}
+,{"stream_name":"stderr","time":1444.669354733,"data":"  cells[i][c] = re.sub('\\\\\\\\\\|', '|', cell)\n"}
+,{"stream_name":"stderr","time":1444.815321733,"data":"/usr/local/lib/python3.12/dist-packages/nbconvert/filters/filter_links.py:36: SyntaxWarning: invalid escape sequence '\\_'\n"}
+,{"stream_name":"stderr","time":1444.815358823,"data":"  text = re.sub(r'_', '\\_', text) # Escape underscores in display text\n"}
+,{"stream_name":"stderr","time":1445.384515342,"data":"[NbConvertApp] Converting notebook __notebook__.ipynb to notebook\n"}
+,{"stream_name":"stderr","time":1445.660776171,"data":"[NbConvertApp] Writing 48416 bytes to __notebook__.ipynb\n"}
+,{"stream_name":"stderr","time":1447.888073426,"data":"[NbConvertApp] Converting notebook __notebook__.ipynb to html\n"}
+,{"stream_name":"stderr","time":1448.633257674,"data":"[NbConvertApp] Writing 353831 bytes to __results__.html\n"}
+]

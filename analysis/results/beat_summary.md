@@ -1,0 +1,32 @@
+| arch | head | features | arm | RMSE | vs floor | wins | p | BH |
+|---|---|---|---|---:|---:|---:|---:|:--:|
+| ASTGCN | det | cases | `ens_blend_raw` | 26.922 | -0.649 | 8/9 | 0.0329 | no |
+| ASTGCN | det | cases | `ens_raw` | 26.923 | -0.648 | 8/9 | 0.0322 | no |
+| A3TGCN | det | cases | `ens_raw` | 27.041 | -0.530 | 6/9 | 0.2537 | no |
+| ASTGCN | gauss | cases | `ens_raw` | 27.079 | -0.492 | 7/9 | 0.1838 | no |
+| A3TGCN | gauss | cases | `ens_raw` | 27.127 | -0.444 | 5/9 | 0.2610 | no |
+| ASTGCN | gauss | cases | `ens_blend_raw` | 27.138 | -0.433 | 7/9 | 0.2328 | no |
+| ASTGCN | det | cases | `blend_raw` | 27.155 | -0.416 | 7/9 | 0.1237 | no |
+| ASTGCN | det | cases | `raw` | 27.172 | -0.399 | 7/9 | 0.1669 | no |
+| A3TGCN | det | cases | `ens_blend_raw` | 27.191 | -0.380 | 7/9 | 0.1472 | no |
+| A3TGCN | gauss | cases | `ens_blend_raw` | 27.202 | -0.369 | 6/9 | 0.2282 | no |
+| A3TGCN | det | cases | `raw` | 27.208 | -0.363 | 4/9 | 0.3740 | no |
+| A3TGCN | gauss | cases | `raw` | 27.237 | -0.334 | 4/9 | 0.3732 | no |
+| ASTGCN | gauss | cases | `blend_raw` | 27.256 | -0.315 | 7/9 | 0.3484 | no |
+| ASTGCN | nb | cases | `ens_blend_raw` | 27.310 | -0.261 | 6/9 | 0.5494 | no |
+| A3TGCN | det | causal | `ens_raw` | 27.322 | -0.250 | 7/9 | 0.1259 | no |
+| A3TGCN+STGAT+ASTGCN | det | cases | `multi_raw` | 27.328 | -0.243 | 8/9 | 0.3337 | no |
+| ASTGCN | nb | cases | `ens_raw` | 27.330 | -0.241 | 6/9 | 0.5869 | no |
+| ASTGCN | gauss | cases | `raw` | 27.330 | -0.241 | 7/9 | 0.4946 | no |
+| A3TGCN | gauss | cases | `blend_raw` | 27.333 | -0.238 | 6/9 | 0.3294 | no |
+| A3TGCN | det | causal | `ens_blend_raw` | 27.351 | -0.220 | 7/9 | 0.1478 | no |
+| A3TGCN | det | cases | `blend_raw` | 27.353 | -0.218 | 7/9 | 0.2707 | no |
+| A3TGCN | det | causal | `blend_raw` | 27.407 | -0.164 | 7/9 | 0.2570 | no |
+| STGAT | gauss | cases | `ens_raw` | 27.413 | -0.158 | 6/9 | 0.6093 | no |
+| A3TGCN | det | climate | `ens_raw` | 27.419 | -0.152 | 6/9 | 0.1288 | no |
+| A3TGCN | det | causal | `raw` | 27.423 | -0.148 | 6/9 | 0.3754 | no |
+| A3TGCN | det | climate | `ens_blend_raw` | 27.440 | -0.131 | 5/9 | 0.1632 | no |
+| ASTGCN | nb | cases | `blend_raw` | 27.452 | -0.120 | 5/9 | 0.7763 | no |
+| STGAT | det | climate | `ens_blend_raw` | 27.461 | -0.110 | 7/9 | 0.1225 | no |
+| STGAT | det | climate | `ens_raw` | 27.470 | -0.101 | 6/9 | 0.1755 | no |
+| STGAT | det | causal | `ens_blend_raw` | 27.473 | -0.098 | 7/9 | 0.1855 | no |

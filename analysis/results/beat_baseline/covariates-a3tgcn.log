@@ -1,0 +1,359 @@
+[{"stream_name":"stderr","time":13.350062556,"data":"0.00s - Debugger warning: It seems that frozen modules are being used, which may\n"}
+,{"stream_name":"stderr","time":13.350143216,"data":"0.00s - make the debugger miss breakpoints. Please pass -Xfrozen_modules=off\n"}
+,{"stream_name":"stderr","time":13.350149412,"data":"0.00s - to python to disable frozen modules.\n"}
+,{"stream_name":"stderr","time":13.350153254,"data":"0.00s - Note: Debugging will proceed. Set PYDEVD_DISABLE_FILE_VALIDATION=1 to disable this validation.\n"}
+,{"stream_name":"stderr","time":14.294860644,"data":"0.00s - Debugger warning: It seems that frozen modules are being used, which may\n"}
+,{"stream_name":"stderr","time":14.294930162,"data":"0.00s - make the debugger miss breakpoints. Please pass -Xfrozen_modules=off\n"}
+,{"stream_name":"stderr","time":14.294941153,"data":"0.00s - to python to disable frozen modules.\n"}
+,{"stream_name":"stderr","time":14.294946939,"data":"0.00s - Note: Debugging will proceed. Set PYDEVD_DISABLE_FILE_VALIDATION=1 to disable this validation.\n"}
+,{"stream_name":"stdout","time":15.988253835,"data":"kernel python: 3.12.13\n"}
+,{"stream_name":"stdout","time":16.188300811,"data":"$ /usr/bin/python3 -m pip install -q uv\n"}
+,{"stream_name":"stdout","time":24.744696544,"data":"   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 20.0/20.0 MB 58.9 MB/s eta 0:00:00\n"}
+,{"stream_name":"stdout","time":24.744740992,"data":"\n"}
+,{"stream_name":"stdout","time":24.744744789,"data":"$ /usr/bin/python3 -m uv python install 3.11\n"}
+,{"stream_name":"stdout","time":26.967570318,"data":"$ /usr/bin/python3 -m uv venv --python 3.11 /tmp/repro/venv311\n"}
+,{"stream_name":"stdout","time":27.454534256,"data":"$ /usr/bin/python3 -m uv pip install -q --python /tmp/repro/venv311/bin/python torch==2.1.2 --index-url https://download.pytorch.org/whl/cpu\n"}
+,{"stream_name":"stdout","time":31.700773856,"data":"$ /usr/bin/python3 -m uv pip install -q --python /tmp/repro/venv311/bin/python torch_scatter torch_sparse -f https://data.pyg.org/whl/torch-2.1.2+cpu.html\n"}
+,{"stream_name":"stdout","time":33.190648139,"data":"$ /usr/bin/python3 -m uv pip install -q --python /tmp/repro/venv311/bin/python torch_geometric==2.4.0 numpy~=1.26.2 pandas~=2.2.0 scikit_learn==1.4.0 statsmodels==0.14.1 decorator==4.4.2 cython matplotlib tqdm\n"}
+,{"stream_name":"stdout","time":35.283241526,"data":"$ /usr/bin/python3 -m uv pip install -q --python /tmp/repro/venv311/bin/python --no-deps torch_geometric_temporal==0.54.0\n"}
+,{"stream_name":"stdout","time":49.767397667,"data":"{\n"}
+,{"stream_name":"stdout","time":49.767453072,"data":"  \"python\": \"3.11.16\",\n"}
+,{"stream_name":"stdout","time":49.767459834,"data":"  \"torch\": \"2.1.2+cpu\",\n"}
+,{"stream_name":"stdout","time":49.767465014,"data":"  \"torch_geometric\": \"2.4.0\",\n"}
+,{"stream_name":"stdout","time":49.767468908,"data":"  \"pandas\": \"2.2.3\",\n"}
+,{"stream_name":"stdout","time":49.76747232,"data":"  \"numpy\": \"1.26.4\"\n"}
+,{"stream_name":"stdout","time":49.767475619,"data":"}\n"}
+,{"stream_name":"stdout","time":49.76747864,"data":"all five architectures import OK under Python 3.11\n"}
+,{"stream_name":"stdout","time":49.968723204,"data":"$ git clone --depth 1 --branch main https://github.com/rathishTharusha/dengue-forecasting-gnn.git /tmp/repro/project\n"}
+,{"stream_name":"stdout","time":53.067003978,"data":"Cloned branch: main\n"}
+,{"stream_name":"stdout","time":53.092055971,"data":"=== features=cases ===\n"}
+,{"stream_name":"stdout","time":55.292323122,"data":"origins=(0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9) test_frac=0.05 -\u003e 9 folds, seeds=(0, 1, 2, 3, 4), epochs=150, head=det\n"}
+,{"stream_name":"stdout","time":55.292514508,"data":"features=cases -\u003e 1 channels x window 3 = input width 3: ['cases']\n"}
+,{"stream_name":"stdout","time":55.292653818,"data":"test windows per fold: [23, 22, 23, 23, 22, 23, 23, 22, 23] (disjoint: True)\n"}
+,{"stream_name":"stdout","time":55.292660979,"data":"\n"}
+,{"stream_name":"stdout","time":55.292663712,"data":"======================== A3TGCN ========================\n"}
+,{"stream_name":"stdout","time":55.292666434,"data":"  origin 0.5 (test n=23)\n"}
+,{"stream_name":"stdout","time":62.608399379,"data":"      seed 0: factors={'smear': 1.381, 'lognorm': 1.222, 'calib': 1.038} (7s)\n"}
+,{"stream_name":"stdout","time":69.345370753,"data":"      seed 1: factors={'smear': 1.318, 'lognorm': 1.222, 'calib': 1.021} (7s)\n"}
+,{"stream_name":"stdout","time":75.654218046,"data":"      seed 2: factors={'smear': 1.376, 'lognorm': 1.222, 'calib': 1.013} (6s)\n"}
+,{"stream_name":"stdout","time":81.776132124,"data":"      seed 3: factors={'smear': 1.296, 'lognorm': 1.22, 'calib': 1.021} (6s)\n"}
+,{"stream_name":"stdout","time":88.36732607,"data":"      seed 4: factors={'smear': 1.278, 'lognorm': 1.221, 'calib': 1.03} (7s)\n"}
+,{"stream_name":"stdout","time":88.367366147,"data":"  origin 0.55 (test n=22)\n"}
+,{"stream_name":"stdout","time":94.280489765,"data":"      seed 0: factors={'smear': 1.051, 'lognorm': 1.147, 'calib': 0.663} (6s)\n"}
+,{"stream_name":"stdout","time":102.242482244,"data":"      seed 1: factors={'smear': 1.001, 'lognorm': 1.146, 'calib': 0.699} (8s)\n"}
+,{"stream_name":"stdout","time":109.901391249,"data":"      seed 2: factors={'smear': 1.037, 'lognorm': 1.148, 'calib': 0.671} (8s)\n"}
+,{"stream_name":"stdout","time":117.959064772,"data":"      seed 3: factors={'smear': 1.011, 'lognorm': 1.144, 'calib': 0.71} (8s)\n"}
+,{"stream_name":"stdout","time":125.48101242,"data":"      seed 4: factors={'smear': 1.008, 'lognorm': 1.143, 'calib': 0.734} (8s)\n"}
+,{"stream_name":"stdout","time":125.481047537,"data":"  origin 0.6 (test n=23)\n"}
+,{"stream_name":"stdout","time":139.762139888,"data":"      seed 0: factors={'smear': 1.207, 'lognorm': 1.226, 'calib': 0.941} (14s)\n"}
+,{"stream_name":"stdout","time":147.72098727,"data":"      seed 1: factors={'smear': 1.182, 'lognorm': 1.225, 'calib': 0.941} (8s)\n"}
+,{"stream_name":"stdout","time":156.135354607,"data":"      seed 2: factors={'smear': 1.213, 'lognorm': 1.226, 'calib': 0.942} (8s)\n"}
+,{"stream_name":"stdout","time":164.014866485,"data":"      seed 3: factors={'smear': 1.187, 'lognorm': 1.225, 'calib': 0.947} (8s)\n"}
+,{"stream_name":"stdout","time":174.761837653,"data":"      seed 4: factors={'smear': 1.197, 'lognorm': 1.225, 'calib': 0.956} (11s)\n"}
+,{"stream_name":"stdout","time":174.761881201,"data":"  origin 0.65 (test n=23)\n"}
+,{"stream_name":"stdout","time":184.783151792,"data":"      seed 0: factors={'smear': 1.258, 'lognorm': 1.226, 'calib': 0.999} (10s)\n"}
+,{"stream_name":"stdout","time":194.239510293,"data":"      seed 1: factors={'smear': 1.241, 'lognorm': 1.226, 'calib': 1.011} (9s)\n"}
+,{"stream_name":"stdout","time":206.113170344,"data":"      seed 2: factors={'smear': 1.268, 'lognorm': 1.227, 'calib': 1.001} (12s)\n"}
+,{"stream_name":"stdout","time":215.298946785,"data":"      seed 3: factors={'smear': 1.248, 'lognorm': 1.226, 'calib': 1.012} (9s)\n"}
+,{"stream_name":"stdout","time":226.41906968,"data":"      seed 4: factors={'smear': 1.229, 'lognorm': 1.226, 'calib': 1.016} (11s)\n"}
+,{"stream_name":"stdout","time":226.419106759,"data":"  origin 0.7 (test n=22)\n"}
+,{"stream_name":"stdout","time":238.432410401,"data":"      seed 0: factors={'smear': 1.235, 'lognorm': 1.203, 'calib': 1.057} (12s)\n"}
+,{"stream_name":"stdout","time":251.422663035,"data":"      seed 1: factors={'smear': 1.229, 'lognorm': 1.203, 'calib': 1.057} (13s)\n"}
+,{"stream_name":"stdout","time":258.662509035,"data":"      seed 2: factors={'smear': 1.243, 'lognorm': 1.202, 'calib': 1.045} (7s)\n"}
+,{"stream_name":"stdout","time":266.290372826,"data":"      seed 3: factors={'smear': 1.164, 'lognorm': 1.203, 'calib': 1.007} (8s)\n"}
+,{"stream_name":"stdout","time":279.540701792,"data":"      seed 4: factors={'smear': 1.228, 'lognorm': 1.203, 'calib': 1.068} (13s)\n"}
+,{"stream_name":"stdout","time":279.540782491,"data":"  origin 0.75 (test n=23)\n"}
+,{"stream_name":"stdout","time":297.369645297,"data":"      seed 0: factors={'smear': 1.381, 'lognorm': 1.18, 'calib': 1.089} (18s)\n"}
+,{"stream_name":"stdout","time":305.429804623,"data":"      seed 1: factors={'smear': 1.319, 'lognorm': 1.179, 'calib': 1.064} (8s)\n"}
+,{"stream_name":"stdout","time":313.392928347,"data":"      seed 2: factors={'smear': 1.386, 'lognorm': 1.18, 'calib': 1.052} (8s)\n"}
+,{"stream_name":"stdout","time":320.881928763,"data":"      seed 3: factors={'smear': 1.274, 'lognorm': 1.178, 'calib': 1.011} (7s)\n"}
+,{"stream_name":"stdout","time":328.915832525,"data":"      seed 4: factors={'smear': 1.252, 'lognorm': 1.178, 'calib': 1.022} (8s)\n"}
+,{"stream_name":"stdout","time":328.915876373,"data":"  origin 0.8 (test n=23)\n"}
+,{"stream_name":"stdout","time":337.003210833,"data":"      seed 0: factors={'smear': 1.193, 'lognorm': 1.307, 'calib': 0.957} (8s)\n"}
+,{"stream_name":"stdout","time":346.326039763,"data":"      seed 1: factors={'smear': 1.178, 'lognorm': 1.306, 'calib': 0.979} (9s)\n"}
+,{"stream_name":"stdout","time":365.405423281,"data":"      seed 2: factors={'smear': 1.173, 'lognorm': 1.303, 'calib': 0.94} (19s)\n"}
+,{"stream_name":"stdout","time":376.047260025,"data":"      seed 3: factors={'smear': 1.183, 'lognorm': 1.308, 'calib': 0.98} (11s)\n"}
+,{"stream_name":"stdout","time":386.858692644,"data":"      seed 4: factors={'smear': 1.182, 'lognorm': 1.309, 'calib': 0.984} (11s)\n"}
+,{"stream_name":"stdout","time":386.85873753,"data":"  origin 0.85 (test n=22)\n"}
+,{"stream_name":"stdout","time":405.485306087,"data":"      seed 0: factors={'smear': 1.315, 'lognorm': 1.278, 'calib': 0.931} (19s)\n"}
+,{"stream_name":"stdout","time":423.413400437,"data":"      seed 1: factors={'smear': 1.322, 'lognorm': 1.278, 'calib': 0.933} (18s)\n"}
+,{"stream_name":"stdout","time":448.147660214,"data":"      seed 2: factors={'smear': 1.315, 'lognorm': 1.278, 'calib': 0.934} (25s)\n"}
+,{"stream_name":"stdout","time":465.439979987,"data":"      seed 3: factors={'smear': 1.32, 'lognorm': 1.278, 'calib': 0.936} (17s)\n"}
+,{"stream_name":"stdout","time":495.169920575,"data":"      seed 4: factors={'smear': 1.297, 'lognorm': 1.277, 'calib': 0.925} (30s)\n"}
+,{"stream_name":"stdout","time":495.169960938,"data":"  origin 0.9 (test n=23)\n"}
+,{"stream_name":"stdout","time":557.098683675,"data":"      seed 0: factors={'smear': 3.0, 'lognorm': 2.117, 'calib': 0.5} (62s)\n"}
+,{"stream_name":"stdout","time":619.743443747,"data":"      seed 1: factors={'smear': 3.0, 'lognorm': 2.117, 'calib': 0.5} (63s)\n"}
+,{"stream_name":"stdout","time":685.981774839,"data":"      seed 2: factors={'smear': 3.0, 'lognorm': 2.115, 'calib': 0.5} (66s)\n"}
+,{"stream_name":"stdout","time":753.260323429,"data":"      seed 3: factors={'smear': 3.0, 'lognorm': 2.118, 'calib': 0.5} (67s)\n"}
+,{"stream_name":"stdout","time":814.381394977,"data":"      seed 4: factors={'smear': 3.0, 'lognorm': 2.119, 'calib': 0.5} (61s)\n"}
+,{"stream_name":"stdout","time":814.381432737,"data":"\n"}
+,{"stream_name":"stdout","time":814.381438565,"data":"wrote 441 records -\u003e /kaggle/working/beat_A3TGCN.json\n"}
+,{"stream_name":"stdout","time":816.009412308,"data":"\n"}
+,{"stream_name":"stdout","time":816.009457434,"data":"floor by origin: {0.5: 30.92, 0.55: 24.62, 0.6: 20.17, 0.65: 33.91, 0.7: 56.78, 0.75: 35.79, 0.8: 10.31, 0.85: 17.2, 0.9: 18.45}\n"}
+,{"stream_name":"stdout","time":816.009463537,"data":"\n"}
+,{"stream_name":"stdout","time":816.009468816,"data":"arch                  arm                      RMSE  vs floor    wins        p\n"}
+,{"stream_name":"stdout","time":816.009473695,"data":"------------------------------------------------------------------------------\n"}
+,{"stream_name":"stdout","time":816.009478488,"data":"A3TGCN                raw                    27.288    -0.283    5/9     0.4034\n"}
+,{"stream_name":"stdout","time":816.009482974,"data":"A3TGCN                blend_raw              27.390    -0.181    7/9     0.3169\n"}
+,{"stream_name":"stdout","time":816.009487717,"data":"A3TGCN                smear                  38.513   +10.942    1/9     0.0497\n"}
+,{"stream_name":"stdout","time":816.009492358,"data":"A3TGCN                blend_smear            27.652    +0.080    2/9     0.3336\n"}
+,{"stream_name":"stdout","time":816.009496735,"data":"A3TGCN                lognorm                34.329    +6.758    0/9     0.0102\n"}
+,{"stream_name":"stdout","time":816.00950158,"data":"A3TGCN                blend_lognorm          28.088    +0.517    1/9     0.0925\n"}
+,{"stream_name":"stdout","time":816.009506191,"data":"A3TGCN                calib                  28.417    +0.846    4/9     0.3413\n"}
+,{"stream_name":"stdout","time":816.009510731,"data":"A3TGCN                blend_calib            28.491    +0.920    4/9     0.2926\n"}
+,{"stream_name":"stdout","time":816.009515216,"data":"A3TGCN                ens_raw                27.132    -0.440    6/9     0.2422\n"}
+,{"stream_name":"stdout","time":816.009519901,"data":"A3TGCN                ens_blend_raw          27.193    -0.378    7/9     0.1460\n"}
+,{"stream_name":"stdout","time":816.009524288,"data":"A3TGCN                ens_smear              38.441   +10.870    1/9     0.0513\n"}
+,{"stream_name":"stdout","time":816.009529208,"data":"A3TGCN                ens_blend_smear        27.611    +0.040    2/9     0.5660\n"}
+,{"stream_name":"stdout","time":816.009533944,"data":"A3TGCN                ens_lognorm            34.159    +6.588    0/9     0.0116\n"}
+,{"stream_name":"stdout","time":816.009538696,"data":"A3TGCN                ens_blend_lognorm      28.018    +0.447    1/9     0.1706\n"}
+,{"stream_name":"stdout","time":816.009555507,"data":"A3TGCN                ens_calib              28.345    +0.774    4/9     0.3809\n"}
+,{"stream_name":"stdout","time":816.009560762,"data":"A3TGCN                ens_blend_calib        28.434    +0.863    4/9     0.3198\n"}
+,{"stream_name":"stdout","time":816.553117234,"data":"\n"}
+,{"stream_name":"stdout","time":816.553176614,"data":"features=cases finished in 12.7 min\n"}
+,{"stream_name":"stdout","time":816.586267496,"data":"=== features=causal ===\n"}
+,{"stream_name":"stdout","time":818.815070046,"data":"origins=(0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9) test_frac=0.05 -\u003e 9 folds, seeds=(0, 1, 2, 3, 4), epochs=150, head=det\n"}
+,{"stream_name":"stdout","time":818.815112013,"data":"features=causal -\u003e 8 channels x window 3 = input width 24: ['cases', 'meanQair', 'meanSoilmoi', 'meanTair', 'meanPrecip', 'meanQair_missing', 'meanSoilmoi_missing', 'meanTair_missing']\n"}
+,{"stream_name":"stdout","time":818.815118572,"data":"test windows per fold: [23, 22, 23, 23, 22, 23, 23, 22, 23] (disjoint: True)\n"}
+,{"stream_name":"stdout","time":818.815122582,"data":"\n"}
+,{"stream_name":"stdout","time":818.815125881,"data":"======================== A3TGCN ========================\n"}
+,{"stream_name":"stdout","time":818.815148959,"data":"  origin 0.5 (test n=23)\n"}
+,{"stream_name":"stdout","time":880.094438154,"data":"      seed 0: factors={'smear': 1.312, 'lognorm': 1.221, 'calib': 0.949} (61s)\n"}
+,{"stream_name":"stdout","time":974.812211059,"data":"      seed 1: factors={'smear': 1.328, 'lognorm': 1.222, 'calib': 0.956} (95s)\n"}
+,{"stream_name":"stdout","time":1014.931701428,"data":"      seed 2: factors={'smear': 1.364, 'lognorm': 1.223, 'calib': 0.965} (40s)\n"}
+,{"stream_name":"stdout","time":1050.368185177,"data":"      seed 3: factors={'smear': 1.363, 'lognorm': 1.223, 'calib': 0.962} (35s)\n"}
+,{"stream_name":"stdout","time":1108.923306165,"data":"      seed 4: factors={'smear': 1.327, 'lognorm': 1.22, 'calib': 0.958} (59s)\n"}
+,{"stream_name":"stdout","time":1108.9233472,"data":"  origin 0.55 (test n=22)\n"}
+,{"stream_name":"stdout","time":1166.076994156,"data":"      seed 0: factors={'smear': 1.016, 'lognorm': 1.15, 'calib': 0.654} (57s)\n"}
+,{"stream_name":"stdout","time":1229.946262886,"data":"      seed 1: factors={'smear': 1.014, 'lognorm': 1.15, 'calib': 0.648} (64s)\n"}
+,{"stream_name":"stdout","time":1268.228758993,"data":"      seed 2: factors={'smear': 1.094, 'lognorm': 1.148, 'calib': 0.69} (38s)\n"}
+,{"stream_name":"stdout","time":1307.552219016,"data":"      seed 3: factors={'smear': 1.052, 'lognorm': 1.149, 'calib': 0.671} (39s)\n"}
+,{"stream_name":"stdout","time":1354.280162002,"data":"      seed 4: factors={'smear': 1.058, 'lognorm': 1.149, 'calib': 0.648} (47s)\n"}
+,{"stream_name":"stdout","time":1354.280235898,"data":"  origin 0.6 (test n=23)\n"}
+,{"stream_name":"stdout","time":1423.055027757,"data":"      seed 0: factors={'smear': 1.203, 'lognorm': 1.231, 'calib': 0.909} (69s)\n"}
+,{"stream_name":"stdout","time":1519.77434174,"data":"      seed 1: factors={'smear': 1.199, 'lognorm': 1.231, 'calib': 0.904} (97s)\n"}
+,{"stream_name":"stdout","time":1560.852982699,"data":"      seed 2: factors={'smear': 1.306, 'lognorm': 1.228, 'calib': 0.979} (41s)\n"}
+,{"stream_name":"stdout","time":1601.482623547,"data":"      seed 3: factors={'smear': 1.261, 'lognorm': 1.229, 'calib': 0.948} (41s)\n"}
+,{"stream_name":"stdout","time":1646.617585603,"data":"      seed 4: factors={'smear': 1.221, 'lognorm': 1.231, 'calib': 0.916} (45s)\n"}
+,{"stream_name":"stdout","time":1646.617632179,"data":"  origin 0.65 (test n=23)\n"}
+,{"stream_name":"stdout","time":1723.452598561,"data":"      seed 0: factors={'smear': 1.263, 'lognorm': 1.23, 'calib': 0.962} (77s)\n"}
+,{"stream_name":"stdout","time":1819.43954946,"data":"      seed 1: factors={'smear': 1.265, 'lognorm': 1.231, 'calib': 0.963} (96s)\n"}
+,{"stream_name":"stdout","time":1868.74038775,"data":"      seed 2: factors={'smear': 1.308, 'lognorm': 1.228, 'calib': 0.993} (49s)\n"}
+,{"stream_name":"stdout","time":1913.844243085,"data":"      seed 3: factors={'smear': 1.31, 'lognorm': 1.228, 'calib': 0.993} (45s)\n"}
+,{"stream_name":"stdout","time":1963.916774673,"data":"      seed 4: factors={'smear': 1.276, 'lognorm': 1.23, 'calib': 0.967} (50s)\n"}
+,{"stream_name":"stdout","time":1963.916843087,"data":"  origin 0.7 (test n=22)\n"}
+,{"stream_name":"stdout","time":2209.985307181,"data":"      seed 0: factors={'smear': 1.225, 'lognorm': 1.202, 'calib': 1.0} (246s)\n"}
+,{"stream_name":"stdout","time":2269.857142713,"data":"      seed 1: factors={'smear': 1.213, 'lognorm': 1.201, 'calib': 0.993} (60s)\n"}
+,{"stream_name":"stdout","time":2425.255327028,"data":"      seed 2: factors={'smear': 1.228, 'lognorm': 1.202, 'calib': 1.004} (155s)\n"}
+,{"stream_name":"stdout","time":2687.810227125,"data":"      seed 3: factors={'smear': 1.225, 'lognorm': 1.201, 'calib': 0.997} (263s)\n"}
+,{"stream_name":"stdout","time":2949.942797953,"data":"      seed 4: factors={'smear': 1.225, 'lognorm': 1.202, 'calib': 1.0} (262s)\n"}
+,{"stream_name":"stdout","time":2949.94284246,"data":"  origin 0.75 (test n=23)\n"}
+,{"stream_name":"stdout","time":3021.293010245,"data":"      seed 0: factors={'smear': 1.341, 'lognorm': 1.182, 'calib': 1.004} (71s)\n"}
+,{"stream_name":"stdout","time":3095.287551454,"data":"      seed 1: factors={'smear': 1.355, 'lognorm': 1.182, 'calib': 1.011} (74s)\n"}
+,{"stream_name":"stdout","time":3275.645710215,"data":"      seed 2: factors={'smear': 1.353, 'lognorm': 1.181, 'calib': 1.003} (180s)\n"}
+,{"stream_name":"stdout","time":3410.638306984,"data":"      seed 3: factors={'smear': 1.357, 'lognorm': 1.181, 'calib': 1.006} (135s)\n"}
+,{"stream_name":"stdout","time":3622.005547803,"data":"      seed 4: factors={'smear': 1.359, 'lognorm': 1.181, 'calib': 1.007} (211s)\n"}
+,{"stream_name":"stdout","time":3622.005589533,"data":"  origin 0.8 (test n=23)\n"}
+,{"stream_name":"stdout","time":3704.837342196,"data":"      seed 0: factors={'smear': 1.179, 'lognorm': 1.314, 'calib': 0.888} (83s)\n"}
+,{"stream_name":"stdout","time":3789.871080592,"data":"      seed 1: factors={'smear': 1.178, 'lognorm': 1.314, 'calib': 0.885} (85s)\n"}
+,{"stream_name":"stdout","time":3844.225999046,"data":"      seed 2: factors={'smear': 1.261, 'lognorm': 1.307, 'calib': 0.951} (54s)\n"}
+,{"stream_name":"stdout","time":3898.913790427,"data":"      seed 3: factors={'smear': 1.222, 'lognorm': 1.31, 'calib': 0.921} (55s)\n"}
+,{"stream_name":"stdout","time":3959.366019673,"data":"      seed 4: factors={'smear': 1.193, 'lognorm': 1.312, 'calib': 0.892} (60s)\n"}
+,{"stream_name":"stdout","time":3959.366065526,"data":"  origin 0.85 (test n=22)\n"}
+,{"stream_name":"stdout","time":4079.810487372,"data":"      seed 0: factors={'smear': 1.381, 'lognorm': 1.278, 'calib': 0.948} (120s)\n"}
+,{"stream_name":"stdout","time":4261.949548824,"data":"      seed 1: factors={'smear': 1.382, 'lognorm': 1.278, 'calib': 0.949} (182s)\n"}
+,{"stream_name":"stdout","time":4377.518061057,"data":"      seed 2: factors={'smear': 1.389, 'lognorm': 1.277, 'calib': 0.956} (116s)\n"}
+,{"stream_name":"stdout","time":4439.38104293,"data":"      seed 3: factors={'smear': 1.404, 'lognorm': 1.275, 'calib': 0.972} (62s)\n"}
+,{"stream_name":"stdout","time":4507.612953516,"data":"      seed 4: factors={'smear': 1.385, 'lognorm': 1.276, 'calib': 0.955} (68s)\n"}
+,{"stream_name":"stdout","time":4507.612990282,"data":"  origin 0.9 (test n=23)\n"}
+,{"stream_name":"stdout","time":4604.959654245,"data":"      seed 0: factors={'smear': 3.0, 'lognorm': 2.142, 'calib': 0.5} (97s)\n"}
+,{"stream_name":"stdout","time":4714.532134751,"data":"      seed 1: factors={'smear': 3.0, 'lognorm': 2.143, 'calib': 0.5} (110s)\n"}
+,{"stream_name":"stdout","time":4779.180368338,"data":"      seed 2: factors={'smear': 3.0, 'lognorm': 2.124, 'calib': 0.5} (65s)\n"}
+,{"stream_name":"stdout","time":4845.83623646,"data":"      seed 3: factors={'smear': 3.0, 'lognorm': 2.132, 'calib': 0.5} (67s)\n"}
+,{"stream_name":"stdout","time":4915.359230954,"data":"      seed 4: factors={'smear': 3.0, 'lognorm': 2.127, 'calib': 0.5} (70s)\n"}
+,{"stream_name":"stdout","time":4915.35929929,"data":"\n"}
+,{"stream_name":"stdout","time":4915.359306024,"data":"wrote 441 records -\u003e /kaggle/working/beat_A3TGCN_causal.json\n"}
+,{"stream_name":"stdout","time":4915.998832597,"data":"\n"}
+,{"stream_name":"stdout","time":4915.998877995,"data":"floor by origin: {0.5: 30.92, 0.55: 24.62, 0.6: 20.17, 0.65: 33.91, 0.7: 56.78, 0.75: 35.79, 0.8: 10.31, 0.85: 17.2, 0.9: 18.45}\n"}
+,{"stream_name":"stdout","time":4915.998884724,"data":"\n"}
+,{"stream_name":"stdout","time":4915.998889562,"data":"arch                  arm                      RMSE  vs floor    wins        p\n"}
+,{"stream_name":"stdout","time":4915.998939524,"data":"------------------------------------------------------------------------------\n"}
+,{"stream_name":"stdout","time":4915.998944703,"data":"A3TGCN                raw                    27.423    -0.148    6/9     0.3754\n"}
+,{"stream_name":"stdout","time":4915.998948613,"data":"A3TGCN                blend_raw              27.407    -0.164    7/9     0.2570\n"}
+,{"stream_name":"stdout","time":4915.998952506,"data":"A3TGCN                smear                  41.120   +13.549    0/9     0.0249\n"}
+,{"stream_name":"stdout","time":4915.998956266,"data":"A3TGCN                blend_smear            27.557    -0.014    2/9     0.5174\n"}
+,{"stream_name":"stdout","time":4915.998960536,"data":"A3TGCN                lognorm                35.707    +8.136    0/9     0.0061\n"}
+,{"stream_name":"stdout","time":4915.998964762,"data":"A3TGCN                blend_lognorm          27.574    +0.003    2/9     0.6645\n"}
+,{"stream_name":"stdout","time":4915.998968491,"data":"A3TGCN                calib                  28.589    +1.018    5/9     0.3581\n"}
+,{"stream_name":"stdout","time":4915.998972485,"data":"A3TGCN                blend_calib            28.586    +1.014    5/9     0.3590\n"}
+,{"stream_name":"stdout","time":4915.998975217,"data":"A3TGCN                ens_raw                27.322    -0.250    7/9     0.1259\n"}
+,{"stream_name":"stdout","time":4915.998977719,"data":"A3TGCN                ens_blend_raw          27.351    -0.220    7/9     0.1478\n"}
+,{"stream_name":"stdout","time":4915.998980283,"data":"A3TGCN                ens_smear              41.092   +13.521    1/9     0.0249\n"}
+,{"stream_name":"stdout","time":4915.998983089,"data":"A3TGCN                ens_blend_smear        27.555    -0.016    1/9     0.4973\n"}
+,{"stream_name":"stdout","time":4915.998987355,"data":"A3TGCN                ens_lognorm            35.578    +8.007    0/9     0.0069\n"}
+,{"stream_name":"stdout","time":4915.998991274,"data":"A3TGCN                ens_blend_lognorm      27.578    +0.007    0/9     0.1702\n"}
+,{"stream_name":"stdout","time":4915.998995469,"data":"A3TGCN                ens_calib              28.581    +1.010    5/9     0.3621\n"}
+,{"stream_name":"stdout","time":4915.998999386,"data":"A3TGCN                ens_blend_calib        28.583    +1.011    5/9     0.3607\n"}
+,{"stream_name":"stdout","time":4916.597010561,"data":"\n"}
+,{"stream_name":"stdout","time":4916.597049804,"data":"features=causal finished in 68.3 min\n"}
+,{"stream_name":"stdout","time":4916.64996895,"data":"=== features=climate ===\n"}
+,{"stream_name":"stdout","time":4919.008799363,"data":"origins=(0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9) test_frac=0.05 -\u003e 9 folds, seeds=(0, 1, 2, 3, 4), epochs=150, head=det\n"}
+,{"stream_name":"stdout","time":4919.008839428,"data":"features=climate -\u003e 17 channels x window 3 = input width 51: ['cases', 'meanTair', 'minTair', 'maxTair', 'meanQair', 'meanSoilmoi', 'meanCanopint', 'meanPrecip', 'minPrecip', 'maxPrecip', 'minNdvi', 'meanTair_missing', 'minTair_missing', 'maxTair_missing', 'meanQair_missing', 'meanSoilmoi_missing', 'meanCanopint_missing']\n"}
+,{"stream_name":"stdout","time":4919.008851955,"data":"test windows per fold: [23, 22, 23, 23, 22, 23, 23, 22, 23] (disjoint: True)\n"}
+,{"stream_name":"stdout","time":4919.00885611,"data":"\n"}
+,{"stream_name":"stdout","time":4919.008859787,"data":"======================== A3TGCN ========================\n"}
+,{"stream_name":"stdout","time":4919.008863796,"data":"  origin 0.5 (test n=23)\n"}
+,{"stream_name":"stdout","time":5042.249673898,"data":"      seed 0: factors={'smear': 1.313, 'lognorm': 1.223, 'calib': 0.931} (123s)\n"}
+,{"stream_name":"stdout","time":5159.434844886,"data":"      seed 1: factors={'smear': 1.31, 'lognorm': 1.222, 'calib': 0.932} (117s)\n"}
+,{"stream_name":"stdout","time":5269.070024762,"data":"      seed 2: factors={'smear': 1.314, 'lognorm': 1.222, 'calib': 0.935} (110s)\n"}
+,{"stream_name":"stdout","time":5404.004966037,"data":"      seed 3: factors={'smear': 1.303, 'lognorm': 1.221, 'calib': 0.934} (135s)\n"}
+,{"stream_name":"stdout","time":5515.738317273,"data":"      seed 4: factors={'smear': 1.303, 'lognorm': 1.22, 'calib': 0.935} (112s)\n"}
+,{"stream_name":"stdout","time":5515.738354699,"data":"  origin 0.55 (test n=22)\n"}
+,{"stream_name":"stdout","time":5595.508062451,"data":"      seed 0: factors={'smear': 1.068, 'lognorm': 1.148, 'calib': 0.64} (80s)\n"}
+,{"stream_name":"stdout","time":5698.497989789,"data":"      seed 1: factors={'smear': 1.013, 'lognorm': 1.149, 'calib': 0.646} (103s)\n"}
+,{"stream_name":"stdout","time":5804.99021601,"data":"      seed 2: factors={'smear': 1.011, 'lognorm': 1.149, 'calib': 0.644} (106s)\n"}
+,{"stream_name":"stdout","time":5888.136864273,"data":"      seed 3: factors={'smear': 1.151, 'lognorm': 1.148, 'calib': 0.74} (83s)\n"}
+,{"stream_name":"stdout","time":6024.033325408,"data":"      seed 4: factors={'smear': 1.014, 'lognorm': 1.149, 'calib': 0.647} (136s)\n"}
+,{"stream_name":"stdout","time":6024.033368579,"data":"  origin 0.6 (test n=23)\n"}
+,{"stream_name":"stdout","time":6154.739606203,"data":"      seed 0: factors={'smear': 1.191, 'lognorm': 1.229, 'calib': 0.9} (131s)\n"}
+,{"stream_name":"stdout","time":6268.160499326,"data":"      seed 1: factors={'smear': 1.192, 'lognorm': 1.229, 'calib': 0.904} (113s)\n"}
+,{"stream_name":"stdout","time":6460.616359231,"data":"      seed 2: factors={'smear': 1.2, 'lognorm': 1.229, 'calib': 0.906} (192s)\n"}
+,{"stream_name":"stdout","time":6564.678463854,"data":"      seed 3: factors={'smear': 1.28, 'lognorm': 1.228, 'calib': 0.97} (104s)\n"}
+,{"stream_name":"stdout","time":6708.203374736,"data":"      seed 4: factors={'smear': 1.195, 'lognorm': 1.229, 'calib': 0.906} (144s)\n"}
+,{"stream_name":"stdout","time":6708.203417915,"data":"  origin 0.65 (test n=23)\n"}
+,{"stream_name":"stdout","time":6862.102341287,"data":"      seed 0: factors={'smear': 1.26, 'lognorm': 1.228, 'calib': 0.959} (154s)\n"}
+,{"stream_name":"stdout","time":7035.529066664,"data":"      seed 1: factors={'smear': 1.268, 'lognorm': 1.228, 'calib': 0.966} (173s)\n"}
+,{"stream_name":"stdout","time":7176.06410543,"data":"      seed 2: factors={'smear': 1.262, 'lognorm': 1.228, 'calib': 0.959} (141s)\n"}
+,{"stream_name":"stdout","time":7293.459778089,"data":"      seed 3: factors={'smear': 1.266, 'lognorm': 1.227, 'calib': 0.967} (117s)\n"}
+,{"stream_name":"stdout","time":7432.863081655,"data":"      seed 4: factors={'smear': 1.259, 'lognorm': 1.227, 'calib': 0.961} (139s)\n"}
+,{"stream_name":"stdout","time":7432.863127082,"data":"  origin 0.7 (test n=22)\n"}
+,{"stream_name":"stdout","time":7672.965066456,"data":"      seed 0: factors={'smear': 1.216, 'lognorm': 1.202, 'calib': 1.0} (240s)\n"}
+,{"stream_name":"stdout","time":7798.55109875,"data":"      seed 1: factors={'smear': 1.207, 'lognorm': 1.202, 'calib': 0.994} (126s)\n"}
+,{"stream_name":"stdout","time":8329.421656121,"data":"      seed 2: factors={'smear': 1.217, 'lognorm': 1.202, 'calib': 1.001} (531s)\n"}
+,{"stream_name":"stdout","time":8513.920679547,"data":"      seed 3: factors={'smear': 1.213, 'lognorm': 1.202, 'calib': 1.007} (185s)\n"}
+,{"stream_name":"stdout","time":8629.036842092,"data":"      seed 4: factors={'smear': 1.215, 'lognorm': 1.201, 'calib': 1.0} (115s)\n"}
+,{"stream_name":"stdout","time":8629.036941285,"data":"  origin 0.75 (test n=23)\n"}
+,{"stream_name":"stdout","time":8905.969839243,"data":"      seed 0: factors={'smear': 1.36, 'lognorm': 1.181, 'calib': 1.008} (277s)\n"}
+,{"stream_name":"stdout","time":9029.069782389,"data":"      seed 1: factors={'smear': 1.346, 'lognorm': 1.182, 'calib': 0.999} (123s)\n"}
+,{"stream_name":"stdout","time":9482.360295681,"data":"      seed 2: factors={'smear': 1.359, 'lognorm': 1.181, 'calib': 1.007} (453s)\n"}
+,{"stream_name":"stdout","time":9795.30167861,"data":"      seed 3: factors={'smear': 1.367, 'lognorm': 1.181, 'calib': 1.016} (313s)\n"}
+,{"stream_name":"stdout","time":9916.268112533,"data":"      seed 4: factors={'smear': 1.357, 'lognorm': 1.182, 'calib': 1.008} (121s)\n"}
+,{"stream_name":"stdout","time":9916.26814666,"data":"  origin 0.8 (test n=23)\n"}
+,{"stream_name":"stdout","time":10039.589337179,"data":"      seed 0: factors={'smear': 1.186, 'lognorm': 1.311, 'calib': 0.885} (123s)\n"}
+,{"stream_name":"stdout","time":10175.512200908,"data":"      seed 1: factors={'smear': 1.176, 'lognorm': 1.312, 'calib': 0.882} (136s)\n"}
+,{"stream_name":"stdout","time":10498.657966043,"data":"      seed 2: factors={'smear': 1.183, 'lognorm': 1.314, 'calib': 0.879} (323s)\n"}
+,{"stream_name":"stdout","time":10611.553358058,"data":"      seed 3: factors={'smear': 1.31, 'lognorm': 1.304, 'calib': 1.002} (113s)\n"}
+,{"stream_name":"stdout","time":10740.9251331,"data":"      seed 4: factors={'smear': 1.173, 'lognorm': 1.313, 'calib': 0.878} (129s)\n"}
+,{"stream_name":"stdout","time":10740.9251968,"data":"  origin 0.85 (test n=22)\n"}
+,{"stream_name":"stdout","time":10942.462079878,"data":"      seed 0: factors={'smear': 1.379, 'lognorm': 1.278, 'calib': 0.944} (202s)\n"}
+,{"stream_name":"stdout","time":11210.404574311,"data":"      seed 1: factors={'smear': 1.375, 'lognorm': 1.279, 'calib': 0.94} (268s)\n"}
+,{"stream_name":"stdout","time":11492.61097798,"data":"      seed 2: factors={'smear': 1.384, 'lognorm': 1.278, 'calib': 0.949} (282s)\n"}
+,{"stream_name":"stdout","time":11617.779798714,"data":"      seed 3: factors={'smear': 1.437, 'lognorm': 1.271, 'calib': 1.007} (125s)\n"}
+,{"stream_name":"stdout","time":12026.577327023,"data":"      seed 4: factors={'smear': 1.376, 'lognorm': 1.279, 'calib': 0.942} (409s)\n"}
+,{"stream_name":"stdout","time":12026.577366149,"data":"  origin 0.9 (test n=23)\n"}
+,{"stream_name":"stdout","time":12163.593782216,"data":"      seed 0: factors={'smear': 3.0, 'lognorm': 2.135, 'calib': 0.5} (137s)\n"}
+,{"stream_name":"stdout","time":12629.168194774,"data":"      seed 1: factors={'smear': 3.0, 'lognorm': 2.142, 'calib': 0.5} (466s)\n"}
+,{"stream_name":"stdout","time":12931.785230954,"data":"      seed 2: factors={'smear': 3.0, 'lognorm': 2.142, 'calib': 0.5} (303s)\n"}
+,{"stream_name":"stdout","time":13060.686081708,"data":"      seed 3: factors={'smear': 3.0, 'lognorm': 2.113, 'calib': 0.5} (129s)\n"}
+,{"stream_name":"stdout","time":13310.827777997,"data":"      seed 4: factors={'smear': 3.0, 'lognorm': 2.141, 'calib': 0.5} (250s)\n"}
+,{"stream_name":"stdout","time":13310.827821477,"data":"\n"}
+,{"stream_name":"stdout","time":13310.827959148,"data":"wrote 441 records -\u003e /kaggle/working/beat_A3TGCN_climate.json\n"}
+,{"stream_name":"stdout","time":13311.51038208,"data":"\n"}
+,{"stream_name":"stdout","time":13311.51042301,"data":"floor by origin: {0.5: 30.92, 0.55: 24.62, 0.6: 20.17, 0.65: 33.91, 0.7: 56.78, 0.75: 35.79, 0.8: 10.31, 0.85: 17.2, 0.9: 18.45}\n"}
+,{"stream_name":"stdout","time":13311.510428687,"data":"\n"}
+,{"stream_name":"stdout","time":13311.510432955,"data":"arch                  arm                      RMSE  vs floor    wins        p\n"}
+,{"stream_name":"stdout","time":13311.510437277,"data":"------------------------------------------------------------------------------\n"}
+,{"stream_name":"stdout","time":13311.510462098,"data":"A3TGCN                raw                    27.541    -0.030    5/9     0.7573\n"}
+,{"stream_name":"stdout","time":13311.510466146,"data":"A3TGCN                blend_raw              27.498    -0.073    6/9     0.3391\n"}
+,{"stream_name":"stdout","time":13311.510470325,"data":"A3TGCN                smear                  41.227   +13.656    0/9     0.0261\n"}
+,{"stream_name":"stdout","time":13311.510473523,"data":"A3TGCN                blend_smear            27.544    -0.027    2/9     0.4443\n"}
+,{"stream_name":"stdout","time":13311.510477135,"data":"A3TGCN                lognorm                36.284    +8.713    0/9     0.0044\n"}
+,{"stream_name":"stdout","time":13311.510480353,"data":"A3TGCN                blend_lognorm          27.578    +0.007    1/9     0.2647\n"}
+,{"stream_name":"stdout","time":13311.510483607,"data":"A3TGCN                calib                  28.622    +1.051    3/9     0.3320\n"}
+,{"stream_name":"stdout","time":13311.510486937,"data":"A3TGCN                blend_calib            28.585    +1.014    4/9     0.3497\n"}
+,{"stream_name":"stdout","time":13311.51049029,"data":"A3TGCN                ens_raw                27.419    -0.152    6/9     0.1288\n"}
+,{"stream_name":"stdout","time":13311.510493478,"data":"A3TGCN                ens_blend_raw          27.440    -0.131    5/9     0.1632\n"}
+,{"stream_name":"stdout","time":13311.510496797,"data":"A3TGCN                ens_smear              41.198   +13.627    1/9     0.0264\n"}
+,{"stream_name":"stdout","time":13311.510500189,"data":"A3TGCN                ens_blend_smear        27.541    -0.030    1/9     0.4347\n"}
+,{"stream_name":"stdout","time":13311.510503575,"data":"A3TGCN                ens_lognorm            36.151    +8.580    0/9     0.0052\n"}
+,{"stream_name":"stdout","time":13311.51050691,"data":"A3TGCN                ens_blend_lognorm      27.577    +0.005    0/9     0.3466\n"}
+,{"stream_name":"stdout","time":13311.510510177,"data":"A3TGCN                ens_calib              28.616    +1.045    3/9     0.3345\n"}
+,{"stream_name":"stdout","time":13311.51051337,"data":"A3TGCN                ens_blend_calib        28.588    +1.017    3/9     0.3483\n"}
+,{"stream_name":"stdout","time":13312.038839631,"data":"\n"}
+,{"stream_name":"stdout","time":13312.03887903,"data":"features=climate finished in 139.9 min\n"}
+,{"stream_name":"stdout","time":13316.159751551,"data":"1323 records from 3 run(s)\n"}
+,{"stream_name":"stdout","time":13316.159801112,"data":"\n"}
+,{"stream_name":"stdout","time":13316.159807502,"data":"Persistence floor by origin (artifact-free):\n"}
+,{"stream_name":"stdout","time":13316.159811206,"data":"   0.50   30.922\n"}
+,{"stream_name":"stdout","time":13316.159814259,"data":"   0.55   24.616\n"}
+,{"stream_name":"stdout","time":13316.159817263,"data":"   0.60   20.170\n"}
+,{"stream_name":"stdout","time":13316.159820699,"data":"   0.65   33.914\n"}
+,{"stream_name":"stdout","time":13316.159823724,"data":"   0.70   56.776\n"}
+,{"stream_name":"stdout","time":13316.159826778,"data":"   0.75   35.790\n"}
+,{"stream_name":"stdout","time":13316.159829672,"data":"   0.80   10.307\n"}
+,{"stream_name":"stdout","time":13316.159832609,"data":"   0.85   17.197\n"}
+,{"stream_name":"stdout","time":13316.159836178,"data":"   0.90   18.449\n"}
+,{"stream_name":"stdout","time":13316.159839159,"data":"  mean    27.571\n"}
+,{"stream_name":"stdout","time":13316.159842071,"data":"\n"}
+,{"stream_name":"stdout","time":13316.159845096,"data":"=== every arm against the floor, clustered by origin ===\n"}
+,{"stream_name":"stdout","time":13316.159848156,"data":"             source   arch               arm  n_origins     RMSE  vs_floor  wins        p\n"}
+,{"stream_name":"stdout","time":13316.159851232,"data":"        beat_A3TGCN A3TGCN           ens_raw          9  27.1316   -0.4396     6   0.2422\n"}
+,{"stream_name":"stdout","time":13316.159867128,"data":"        beat_A3TGCN A3TGCN     ens_blend_raw          9  27.1933   -0.3778     7   0.1460\n"}
+,{"stream_name":"stdout","time":13316.159869881,"data":"        beat_A3TGCN A3TGCN               raw          9  27.2885   -0.2826     5   0.4034\n"}
+,{"stream_name":"stdout","time":13316.159872572,"data":" beat_A3TGCN_causal A3TGCN           ens_raw          9  27.3216   -0.2496     7   0.1259\n"}
+,{"stream_name":"stdout","time":13316.159875037,"data":" beat_A3TGCN_causal A3TGCN     ens_blend_raw          9  27.3509   -0.2202     7   0.1478\n"}
+,{"stream_name":"stdout","time":13316.159877534,"data":"        beat_A3TGCN A3TGCN         blend_raw          9  27.3898   -0.1813     7   0.3169\n"}
+,{"stream_name":"stdout","time":13316.159880188,"data":" beat_A3TGCN_causal A3TGCN         blend_raw          9  27.4067   -0.1644     7   0.2570\n"}
+,{"stream_name":"stdout","time":13316.15988265,"data":"beat_A3TGCN_climate A3TGCN           ens_raw          9  27.4188   -0.1524     6   0.1288\n"}
+,{"stream_name":"stdout","time":13316.159885123,"data":" beat_A3TGCN_causal A3TGCN               raw          9  27.4229   -0.1482     6   0.3754\n"}
+,{"stream_name":"stdout","time":13316.159887557,"data":"beat_A3TGCN_climate A3TGCN     ens_blend_raw          9  27.4403   -0.1308     5   0.1632\n"}
+,{"stream_name":"stdout","time":13316.159912389,"data":"beat_A3TGCN_climate A3TGCN         blend_raw          9  27.4976   -0.0735     6   0.3391\n"}
+,{"stream_name":"stdout","time":13316.159919531,"data":"beat_A3TGCN_climate A3TGCN               raw          9  27.5410   -0.0301     5   0.7573\n"}
+,{"stream_name":"stdout","time":13316.159923778,"data":"beat_A3TGCN_climate A3TGCN   ens_blend_smear          9  27.5415   -0.0296     1   0.4347\n"}
+,{"stream_name":"stdout","time":13316.15992776,"data":"beat_A3TGCN_climate A3TGCN       blend_smear          9  27.5445   -0.0267     2   0.4443\n"}
+,{"stream_name":"stdout","time":13316.159931741,"data":" beat_A3TGCN_causal A3TGCN   ens_blend_smear          9  27.5546   -0.0165     1   0.4973\n"}
+,{"stream_name":"stdout","time":13316.159935307,"data":" beat_A3TGCN_causal A3TGCN       blend_smear          9  27.5570   -0.0142     2   0.5174\n"}
+,{"stream_name":"stdout","time":13316.159939297,"data":" beat_A3TGCN_causal A3TGCN     blend_lognorm          9  27.5742    0.0031     2   0.6645\n"}
+,{"stream_name":"stdout","time":13316.159943396,"data":"beat_A3TGCN_climate A3TGCN ens_blend_lognorm          9  27.5766    0.0054     0   0.3466\n"}
+,{"stream_name":"stdout","time":13316.159949282,"data":"beat_A3TGCN_climate A3TGCN     blend_lognorm          9  27.5776    0.0065     1   0.2647\n"}
+,{"stream_name":"stdout","time":13316.159953104,"data":" beat_A3TGCN_causal A3TGCN ens_blend_lognorm          9  27.5779    0.0068     0   0.1702\n"}
+,{"stream_name":"stdout","time":13316.159956961,"data":"        beat_A3TGCN A3TGCN   ens_blend_smear          9  27.6112    0.0401     2   0.5660\n"}
+,{"stream_name":"stdout","time":13316.159960778,"data":"        beat_A3TGCN A3TGCN       blend_smear          9  27.6516    0.0804     2   0.3336\n"}
+,{"stream_name":"stdout","time":13316.15996449,"data":"        beat_A3TGCN A3TGCN ens_blend_lognorm          9  28.0179    0.4468     1   0.1706\n"}
+,{"stream_name":"stdout","time":13316.159968305,"data":"        beat_A3TGCN A3TGCN     blend_lognorm          9  28.0882    0.5171     1   0.0925\n"}
+,{"stream_name":"stdout","time":13316.159970791,"data":"        beat_A3TGCN A3TGCN         ens_calib          9  28.3449    0.7738     4   0.3809\n"}
+,{"stream_name":"stdout","time":13316.159973439,"data":"        beat_A3TGCN A3TGCN             calib          9  28.4168    0.8457     4   0.3413\n"}
+,{"stream_name":"stdout","time":13316.159980077,"data":"        beat_A3TGCN A3TGCN   ens_blend_calib          9  28.4341    0.8630     4   0.3198\n"}
+,{"stream_name":"stdout","time":13316.159982746,"data":"        beat_A3TGCN A3TGCN       blend_calib          9  28.4910    0.9199     4   0.2926\n"}
+,{"stream_name":"stdout","time":13316.159985248,"data":" beat_A3TGCN_causal A3TGCN         ens_calib          9  28.5808    1.0097     5   0.3621\n"}
+,{"stream_name":"stdout","time":13316.159987666,"data":" beat_A3TGCN_causal A3TGCN   ens_blend_calib          9  28.5825    1.0114     5   0.3607\n"}
+,{"stream_name":"stdout","time":13316.159990095,"data":"beat_A3TGCN_climate A3TGCN       blend_calib          9  28.5850    1.0138     4   0.3497\n"}
+,{"stream_name":"stdout","time":13316.159992588,"data":" beat_A3TGCN_causal A3TGCN       blend_calib          9  28.5856    1.0145     5   0.3590\n"}
+,{"stream_name":"stdout","time":13316.159995,"data":"beat_A3TGCN_climate A3TGCN   ens_blend_calib          9  28.5882    1.0171     3   0.3483\n"}
+,{"stream_name":"stdout","time":13316.159997675,"data":" beat_A3TGCN_causal A3TGCN             calib          9  28.5890    1.0178     5   0.3581\n"}
+,{"stream_name":"stdout","time":13316.160000141,"data":"beat_A3TGCN_climate A3TGCN         ens_calib          9  28.6165    1.0454     3   0.3345\n"}
+,{"stream_name":"stdout","time":13316.160002629,"data":"beat_A3TGCN_climate A3TGCN             calib          9  28.6219    1.0508     3   0.3320\n"}
+,{"stream_name":"stdout","time":13316.160005077,"data":"        beat_A3TGCN A3TGCN       ens_lognorm          9  34.1591    6.5879     0   0.0116\n"}
+,{"stream_name":"stdout","time":13316.160007701,"data":"        beat_A3TGCN A3TGCN           lognorm          9  34.3286    6.7575     0   0.0102\n"}
+,{"stream_name":"stdout","time":13316.160011377,"data":" beat_A3TGCN_causal A3TGCN       ens_lognorm          9  35.5778    8.0066     0   0.0069\n"}
+,{"stream_name":"stdout","time":13316.160015307,"data":" beat_A3TGCN_causal A3TGCN           lognorm          9  35.7070    8.1359     0   0.0061\n"}
+,{"stream_name":"stdout","time":13316.160019217,"data":"beat_A3TGCN_climate A3TGCN       ens_lognorm          9  36.1512    8.5801     0   0.0052\n"}
+,{"stream_name":"stdout","time":13316.160023832,"data":"beat_A3TGCN_climate A3TGCN           lognorm          9  36.2844    8.7133     0   0.0044\n"}
+,{"stream_name":"stdout","time":13316.16002747,"data":"        beat_A3TGCN A3TGCN         ens_smear          9  38.4407   10.8696     1   0.0513\n"}
+,{"stream_name":"stdout","time":13316.160031022,"data":"        beat_A3TGCN A3TGCN             smear          9  38.5134   10.9422     1   0.0497\n"}
+,{"stream_name":"stdout","time":13316.160035028,"data":" beat_A3TGCN_causal A3TGCN         ens_smear          9  41.0916   13.5205     1   0.0249\n"}
+,{"stream_name":"stdout","time":13316.160038868,"data":" beat_A3TGCN_causal A3TGCN             smear          9  41.1203   13.5491     0   0.0249\n"}
+,{"stream_name":"stdout","time":13316.160042381,"data":"beat_A3TGCN_climate A3TGCN         ens_smear          9  41.1982   13.6271     1   0.0264\n"}
+,{"stream_name":"stdout","time":13316.160046584,"data":"beat_A3TGCN_climate A3TGCN             smear          9  41.2271   13.6559     0   0.0261\n"}
+,{"stream_name":"stdout","time":13316.160050464,"data":"\n"}
+,{"stream_name":"stdout","time":13316.160054229,"data":"Best arm: A3TGCN ens_raw -\u003e 27.132 (-0.440 vs floor, 6/9 origins, p=0.2422)\n"}
+,{"stream_name":"stdout","time":13316.160058538,"data":"Does not clear the floor at p\u003c0.05. Report as measured.\n"}
+,{"stream_name":"stderr","time":13320.169483438,"data":"/usr/local/lib/python3.12/dist-packages/mistune.py:435: SyntaxWarning: invalid escape sequence '\\|'\n"}
+,{"stream_name":"stderr","time":13320.169549422,"data":"  cells[i][c] = re.sub('\\\\\\\\\\|', '|', cell)\n"}
+,{"stream_name":"stderr","time":13320.416433806,"data":"/usr/local/lib/python3.12/dist-packages/nbconvert/filters/filter_links.py:36: SyntaxWarning: invalid escape sequence '\\_'\n"}
+,{"stream_name":"stderr","time":13320.416468684,"data":"  text = re.sub(r'_', '\\_', text) # Escape underscores in display text\n"}
+,{"stream_name":"stderr","time":13321.240175042,"data":"[NbConvertApp] Converting notebook __notebook__.ipynb to notebook\n"}
+,{"stream_name":"stderr","time":13321.684518066,"data":"[NbConvertApp] Writing 48658 bytes to __notebook__.ipynb\n"}
+,{"stream_name":"stderr","time":13324.879878279,"data":"[NbConvertApp] Converting notebook __notebook__.ipynb to html\n"}
+,{"stream_name":"stderr","time":13326.126807588,"data":"[NbConvertApp] Writing 354073 bytes to __results__.html\n"}
+]

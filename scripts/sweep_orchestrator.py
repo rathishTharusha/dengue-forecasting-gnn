@@ -105,7 +105,7 @@ def main():
     print(f"Summary: Complete={counts['COMPLETE']}, Running={counts['RUNNING']}, Error={counts['ERROR']}")
     print("=================================================================")
 
-    # If any new outputs were downloaded, run merge_beat
+    # 1. Run merge_beat
     try:
         res = subprocess.run(
             [sys.executable, str(REPO / "analysis" / "_build" / "merge_beat.py"),
@@ -116,11 +116,42 @@ def main():
             encoding="utf-8",
             errors="replace"
         )
-        print(res.stdout)
-        if res.stderr and "Error" in res.stderr:
-            print(res.stderr)
+        if res.stdout.strip():
+            print(res.stdout)
     except Exception as e:
         print(f"Error running merge_beat: {e}")
+
+    # 2. Run merge_physics_sweep if physics files exist
+    try:
+        phys_files = list(OUT_DIR.glob("physics_envelope_*.json"))
+        if phys_files:
+            print(f"\nMerging {len(phys_files)} physics sweep file(s)...")
+            res_p = subprocess.run(
+                [sys.executable, str(REPO / "analysis" / "_build" / "merge_physics_sweep.py"),
+                 "--in-dir", str(OUT_DIR)],
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+                errors="replace"
+            )
+            if res_p.stdout.strip():
+                print(res_p.stdout)
+    except Exception as e:
+        print(f"Error running merge_physics_sweep: {e}")
+
+    # 3. Run in-depth statistical beat analysis
+    try:
+        res_a = subprocess.run(
+            [sys.executable, str(REPO / "scripts" / "analyze_beat_floor.py")],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace"
+        )
+        if res_a.stdout.strip():
+            print(res_a.stdout)
+    except Exception as e:
+        print(f"Error running analyze_beat_floor: {e}")
 
 if __name__ == "__main__":
     main()

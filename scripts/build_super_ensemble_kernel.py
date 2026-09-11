@@ -42,13 +42,12 @@ for cell in nb["cells"]:
                 "and super-ensemble combining all three models + persistence (multi_super_raw).\n"
             ]
     elif cell.get("cell_type") == "code":
-        src = "".join(cell.get("source", []))
-        if 'ARCHS = ["A3TGCN", "STGAT", "ASTGCN"]' in src:
-            src = src.replace('ARCHS = ["A3TGCN", "STGAT", "ASTGCN"]', 'ARCHS = ["AAGCN", "ASTGCN", "A3TGCN"]')
-            cell["source"] = [line + "\n" for line in src.split("\n")[:-1]] or [src]
-        if '"--tag", "combo"' in src:
-            src = src.replace('"combo"', '"super"')
-            cell["source"] = [line + "\n" for line in src.split("\n")[:-1]] or [src]
+        new_source = []
+        for line in cell.get("source", []):
+            mod = line.replace('ARCHS = ["A3TGCN", "STGAT", "ASTGCN"]', 'ARCHS = ["AAGCN", "ASTGCN", "A3TGCN"]')
+            mod = mod.replace('"combo"', '"super"')
+            new_source.append(mod)
+        cell["source"] = new_source
 
 (DST_DIR / "beat_floor_super_ensemble.ipynb").write_text(json.dumps(nb, indent=1), encoding="utf-8")
 print(f"Generated {DST_DIR / 'beat_floor_super_ensemble.ipynb'} and metadata successfully.")

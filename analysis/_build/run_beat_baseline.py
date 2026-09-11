@@ -317,6 +317,38 @@ def blend_weights(model_val: np.ndarray, pers_val: np.ndarray, truth_val: np.nda
     return np.clip(w, 0.0, 1.0)
 
 
+def fit_multi_weights(preds_val: list[np.ndarray], truth_val: np.ndarray) -> np.ndarray:
+    """Fit simplex combination weights per horizon on validation: min ||y - X w||^2 s.t. w >= 0, sum(w) = 1."""
+    from scipy.optimize import minimize
+    horizon = preds_val[0].shape[-1]
+    n_models = len(preds_val)
+    weights = np.zeros((horizon, n_models))
+    for h in range(horizon):
+        cols = [p[..., h].ravel() for p in preds_val]
+        X = np.column_stack(cols)
+        y = truth_val[..., h].ravel()
+
+        def loss(w):
+            return np.mean((y - X @ w) ** 2)
+
+        w0 = np.ones(n_models) / n_models
+        bounds = [(0.0, 1.0) for _ in range(n_models)]
+        constraints = {"type": "eq", "fun": lambda w: np.sum(w) - 1.0}
+        res = minimize(loss, w0, bounds=bounds, constraints=constraints, method="SLSQP", options={"maxiter": 100})
+        weights[h] = res.x if res.success else w0
+    return weights
+
+
+def apply_weights(preds: list[np.ndarray], weights: np.ndarray) -> np.ndarray:
+    """Apply horizon-specific combination weights to prediction arrays."""
+    horizon = preds[0].shape[-1]
+    out = np.zeros_like(preds[0])
+    for h in range(horizon):
+        for i, p in enumerate(preds):
+            out[..., h] += weights[h, i] * p[..., h]
+    return out
+
+
 def persistence_counts(cases: np.ndarray, index: np.ndarray, horizon: int) -> np.ndarray:
     """Last-value-carried-forward on the given windows."""
     return np.stack([np.repeat(cases[i - 1][:, None], horizon, axis=1) for i in index])
@@ -379,7 +411,11 @@ def run_fold(arch_name, fold, cases, edge_index, seeds, head, epochs, in_width=W
     # The floor, on exactly these windows and split the same way.
     records.append(score_arm(pers_test, truth_test, artifact, arch="persistence",
                              origin=fold.origin, seed=-1, arm="floor", ens=1))
-    return records, {e: np.mean(per_seed_test[e], axis=0) for e in ESTIMATORS}
+    return (
+        records,
+        {e: np.mean(per_seed_test[e], axis=0) for e in ESTIMATORS},
+        {e: np.mean(per_seed_val[e], axis=0) for e in ESTIMATORS},
+    )
 
 
 def main() -> int:
@@ -432,31 +468,61 @@ def main() -> int:
 
     all_records: list[dict] = []
     ens_by_arch: dict[str, dict] = {}
+    ens_val_by_arch: dict[str, dict] = {}
     for arch_name in args.arch:
         print(f"\n{'=' * 24} {arch_name} {'=' * 24}", flush=True)
         ens_by_arch[arch_name] = {}
+        ens_val_by_arch[arch_name] = {}
         for fold in folds:
             print(f"  origin {fold.origin} (test n={len(fold.test_index)})", flush=True)
-            recs, ens = run_fold(arch_name, fold, cases, edge_index, seeds,
-                                 args.head, epochs, in_width)
+            recs, ens, ens_val = run_fold(arch_name, fold, cases, edge_index, seeds,
+                                          args.head, epochs, in_width)
             for r in recs:
                 r["head"], r["features"] = args.head, args.features
             all_records.extend(r for r in recs if r["arch"] != "persistence"
                                or arch_name == args.arch[0])
             ens_by_arch[arch_name][fold.origin] = ens
+            ens_val_by_arch[arch_name][fold.origin] = ens_val
 
     # Cross-architecture ensemble: the combination literature's strongest single
     # recommendation is to average diverse models, so it is measured whenever
     # more than one architecture is present in the same run.
     if len(args.arch) > 1:
         for fold in folds:
+            truth_val = fold.inverse(fold.y_val.numpy())
             truth = fold.inverse(fold.y_test.numpy())
+            pers_val = persistence_counts(cases, fold.val_index, HORIZON)
+            pers_test = persistence_counts(cases, fold.test_index, HORIZON)
             artifact = imp.artifact_windows(fold.test_index, WINDOW, HORIZON)
             for est in ESTIMATORS:
                 stack = [ens_by_arch[a][fold.origin][est] for a in args.arch]
-                all_records.append(score_arm(np.mean(stack, axis=0), truth, artifact,
+                pred_mean = np.mean(stack, axis=0)
+                all_records.append(score_arm(pred_mean, truth, artifact,
                                              arch="+".join(args.arch), origin=fold.origin,
                                              seed=-1, arm=f"multi_{est}", ens=len(stack)))
+
+                # Blend equal multi with persistence:
+                stack_val = [ens_val_by_arch[a][fold.origin][est] for a in args.arch]
+                pv_mean = np.mean(stack_val, axis=0)
+                w_b = blend_weights(pv_mean, pers_val, truth_val)
+                all_records.append(score_arm(w_b * pred_mean + (1.0 - w_b) * pers_test, truth, artifact,
+                                             arch="+".join(args.arch), origin=fold.origin,
+                                             seed=-1, arm=f"multi_blend_{est}", ens=len(stack),
+                                             w=[round(float(x), 4) for x in w_b]))
+
+                # Simplex-optimal weights across models (fit on validation):
+                w_opt = fit_multi_weights(stack_val, truth_val)
+                pred_opt = apply_weights(stack, w_opt)
+                all_records.append(score_arm(pred_opt, truth, artifact,
+                                             arch="+".join(args.arch), origin=fold.origin,
+                                             seed=-1, arm=f"multi_opt_{est}", ens=len(stack)))
+
+                # Super-ensemble: simplex-optimal across models + persistence:
+                w_super = fit_multi_weights(stack_val + [pers_val], truth_val)
+                pred_super = apply_weights(stack + [pers_test], w_super)
+                all_records.append(score_arm(pred_super, truth, artifact,
+                                             arch="+".join(args.arch), origin=fold.origin,
+                                             seed=-1, arm=f"multi_super_{est}", ens=len(stack) + 1))
 
     tag = args.tag or "_".join(args.arch)
     suffix = "" if args.head == "det" else f"_{args.head}"

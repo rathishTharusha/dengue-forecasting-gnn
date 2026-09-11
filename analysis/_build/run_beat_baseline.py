@@ -88,6 +88,7 @@ import adaptive as base  # noqa: E402
 import count_loss as cl  # noqa: E402
 import features as feat  # noqa: E402
 import improved as imp  # noqa: E402
+import physics_net as pnet  # noqa: E402
 import reproduced as arch  # noqa: E402
 
 NPY = REPO / "notebooks" / "baseline" / "sri_lanka_2013-2022_shifted.npy"
@@ -151,13 +152,11 @@ def train_one(
     batch_size: int = 32,
     lr: float = 1e-3,
     weight_decay: float = 5e-4,
+    physics_mode: str = "base",
+    adj_dense: torch.Tensor | None = None,
+    cases: np.ndarray | None = None,
 ) -> nn.Module:
-    """Train one backbone on one fold. Identical protocol to the physics sweep.
-
-    Model selection is on raw validation RMSE -- the same criterion the existing
-    sweep uses -- so the trained weights are unchanged by anything in this file
-    and every estimator below is strictly post-hoc.
-    """
+    """Train one backbone on one fold. Supports standard and physics-informed modes."""
     torch.manual_seed(seed)
     np.random.seed(seed)  # noqa: NPY002
 
@@ -170,6 +169,19 @@ def train_one(
     net = arch.build(arch_name, 25, in_width, HORIZON, edge_index=edge_index, inc=inc, **kwargs)
     opt = torch.optim.Adam(net.parameters(), lr=lr, weight_decay=weight_decay)
 
+    pnet_wrapper = None
+    if physics_mode != "base" and adj_dense is not None and cases is not None:
+        district_scales = torch.tensor(np.mean(cases[:fold.train_index[-1]], axis=0), dtype=torch.float32)
+        pnet_wrapper = pnet.RelaxedPhysicsNet(
+            backbone=net,
+            edge_index=edge_index,
+            adj_dense=adj_dense,
+            district_scales=district_scales,
+            mode=physics_mode,
+            mean=fold.mean,
+            std=fold.std,
+        )
+
     n = len(fold.x_train)
     best_weights, best_val, waited = None, float("inf"), 0
 
@@ -181,7 +193,12 @@ def train_one(
             x, p, y = fold.x_train[idx], fold.p_train[idx], fold.y_train[idx]
             opt.zero_grad()
             out = net(x, edge_index)
-            if head == "gauss":
+            if pnet_wrapper is not None and cases is not None:
+                h_idx = torch.tensor(cases[fold.train_index[idx.numpy()] - 1], dtype=torch.float32)
+                counts_pred = pnet_wrapper.to_counts(out + p)
+                counts_true = torch.tensor(fold.inverse(y.numpy()), dtype=torch.float32)
+                loss, _ = pnet_wrapper.compute_loss(out + p, counts_pred, y, counts_true, h_idx)
+            elif head == "gauss":
                 loss = imp.gaussian_nll(out[..., 0] + p, out[..., 1], y)
             elif head == "nb":
                 mu, alpha = cl.split_nb(out, p * fold.std + fold.mean)
@@ -360,7 +377,7 @@ def score_arm(pred, truth, artifact, **tags) -> dict:
 
 
 def run_fold(arch_name, fold, cases, edge_index, seeds, head, epochs, in_width=WINDOW,
-             verbose=True):
+             verbose=True, physics_mode="base", adj_dense=None):
     """Train every seed on one fold and score all estimator/combination arms."""
     truth_val = fold.inverse(fold.y_val.numpy())
     truth_test = fold.inverse(fold.y_test.numpy())
@@ -374,7 +391,8 @@ def run_fold(arch_name, fold, cases, edge_index, seeds, head, epochs, in_width=W
 
     for seed in seeds:
         t0 = time.time()
-        net = train_one(arch_name, fold, edge_index, seed, head, epochs, in_width)
+        net = train_one(arch_name, fold, edge_index, seed, head, epochs, in_width,
+                        physics_mode=physics_mode, adj_dense=adj_dense, cases=cases)
         m_val, v_val = predict(net, fold, "val", edge_index, head)
         m_test, v_test = predict(net, fold, "test", edge_index, head)
 
@@ -433,6 +451,9 @@ def main() -> int:
                     help="det: Huber on log1p. gauss: Gaussian NLL, enabling the "
                          "heteroscedastic lognorm correction. nb: negative binomial "
                          "on counts, which predicts the mean directly.")
+    ap.add_argument("--physics-mode", choices=("base", "envelope", "spatial", "spatial_log",
+                                               "composite", "composite_log", "outbreak_aware"),
+                    default="base", help="Epidemiological physics loss arm")
     ap.add_argument("--quick", action="store_true")
     ap.add_argument("--out-dir", type=str, default=None)
     ap.add_argument("--tag", type=str, default="", help="Suffix for the output filename")
@@ -454,9 +475,10 @@ def main() -> int:
         in_width = stack.shape[-1] * WINDOW
     src, dst = np.nonzero(adjacency)
     edge_index = torch.tensor(np.stack([src, dst]), dtype=torch.long)
+    adj_dense = torch.tensor(adjacency, dtype=torch.float32)
 
     print(f"origins={origins} test_frac={test_frac} -> {len(folds)} folds, "
-          f"seeds={seeds}, epochs={epochs}, head={args.head}", flush=True)
+          f"seeds={seeds}, epochs={epochs}, head={args.head}, physics={args.physics_mode}", flush=True)
     print(f"features={args.features} -> {len(chan_names)} channels x window {WINDOW} "
           f"= input width {in_width}: {chan_names}", flush=True)
     sizes = [len(f.test_index) for f in folds]
@@ -476,9 +498,10 @@ def main() -> int:
         for fold in folds:
             print(f"  origin {fold.origin} (test n={len(fold.test_index)})", flush=True)
             recs, ens, ens_val = run_fold(arch_name, fold, cases, edge_index, seeds,
-                                          args.head, epochs, in_width)
+                                          args.head, epochs, in_width,
+                                          physics_mode=args.physics_mode, adj_dense=adj_dense)
             for r in recs:
-                r["head"], r["features"] = args.head, args.features
+                r["head"], r["features"], r["physics"] = args.head, args.features, args.physics_mode
             all_records.extend(r for r in recs if r["arch"] != "persistence"
                                or arch_name == args.arch[0])
             ens_by_arch[arch_name][fold.origin] = ens
@@ -499,7 +522,8 @@ def main() -> int:
                 pred_mean = np.mean(stack, axis=0)
                 all_records.append(score_arm(pred_mean, truth, artifact,
                                              arch="+".join(args.arch), origin=fold.origin,
-                                             seed=-1, arm=f"multi_{est}", ens=len(stack)))
+                                             seed=-1, arm=f"multi_{est}", ens=len(stack),
+                                             physics=args.physics_mode))
 
                 # Blend equal multi with persistence:
                 stack_val = [ens_val_by_arch[a][fold.origin][est] for a in args.arch]
@@ -508,26 +532,31 @@ def main() -> int:
                 all_records.append(score_arm(w_b * pred_mean + (1.0 - w_b) * pers_test, truth, artifact,
                                              arch="+".join(args.arch), origin=fold.origin,
                                              seed=-1, arm=f"multi_blend_{est}", ens=len(stack),
-                                             w=[round(float(x), 4) for x in w_b]))
+                                             w=[round(float(x), 4) for x in w_b],
+                                             physics=args.physics_mode))
 
                 # Simplex-optimal weights across models (fit on validation):
                 w_opt = fit_multi_weights(stack_val, truth_val)
                 pred_opt = apply_weights(stack, w_opt)
                 all_records.append(score_arm(pred_opt, truth, artifact,
                                              arch="+".join(args.arch), origin=fold.origin,
-                                             seed=-1, arm=f"multi_opt_{est}", ens=len(stack)))
+                                             seed=-1, arm=f"multi_opt_{est}", ens=len(stack),
+                                             physics=args.physics_mode))
 
                 # Super-ensemble: simplex-optimal across models + persistence:
                 w_super = fit_multi_weights(stack_val + [pers_val], truth_val)
                 pred_super = apply_weights(stack + [pers_test], w_super)
                 all_records.append(score_arm(pred_super, truth, artifact,
                                              arch="+".join(args.arch), origin=fold.origin,
-                                             seed=-1, arm=f"multi_super_{est}", ens=len(stack) + 1))
+                                             seed=-1, arm=f"multi_super_{est}", ens=len(stack) + 1,
+                                             physics=args.physics_mode))
 
     tag = args.tag or "_".join(args.arch)
     suffix = "" if args.head == "det" else f"_{args.head}"
     if args.features != "cases":
         suffix += f"_{args.features}"
+    if args.physics_mode != "base":
+        suffix += f"_{args.physics_mode}"
     out = out_dir / f"beat_{tag}{suffix}.json"
     out.write_text(json.dumps(all_records, indent=2), encoding="utf-8")
     print(f"\nwrote {len(all_records)} records -> {out}", flush=True)

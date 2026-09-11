@@ -53,6 +53,7 @@ TRACKED_KERNELS = [
     # Super-Ensemble Wave
     "beat-floor-super-ensemble",
     "beat-floor-dual-champion-ensemble",
+    "beat-floor-physics-super-ensemble",
 ]
 
 def get_status(api: KaggleApi, name: str) -> dict:

@@ -1,0 +1,13 @@
+{
+  "id": "tharushaperera16/beat-floor-dual-champion-ensemble",
+  "title": "Beat floor dual champion ensemble",
+  "code_file": "beat_floor_dual_ensemble.ipynb",
+  "language": "python",
+  "kernel_type": "notebook",
+  "is_private": true,
+  "enable_gpu": false,
+  "enable_internet": true,
+  "dataset_sources": [],
+  "competition_sources": [],
+  "kernel_sources": []
+}

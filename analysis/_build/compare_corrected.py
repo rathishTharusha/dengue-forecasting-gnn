@@ -91,7 +91,11 @@ def main() -> int:
             print(f"  {arch:7s} now {got:.3f}  earlier {ref:.3f}  diff {got - ref:+.3f}")
 
     if args.out:
-        Path(args.out).write_text(stand.round(3).to_markdown(index=False), encoding="utf-8")
+        try:
+            content = stand.round(3).to_markdown(index=False)
+        except ImportError:
+            content = stand.round(3).to_string(index=False)
+        Path(args.out).write_text(content, encoding="utf-8")
         print(f"\nwrote {args.out}")
     return 0
 

@@ -1,0 +1,31 @@
+  dataset   arch     arm  n_origins  runs   RMSE  floor  vs_floor  wins
+ original A3TGCN    base          3     9 29.022 29.521    -0.499     2
+reordered A3TGCN    base          3     9 30.652 31.089    -0.436     3
+  rebuilt A3TGCN    base          3     9 35.151 36.016    -0.865     3
+ original A3TGCN spatial          3     9 29.034 29.521    -0.487     2
+reordered A3TGCN spatial          3     9 30.742 31.089    -0.347     3
+  rebuilt A3TGCN spatial          3     9 35.122 36.016    -0.894     3
+ original  AAGCN    base          3     9 29.966 29.521     0.445     2
+reordered  AAGCN    base          3     9 31.702 31.089     0.614     1
+  rebuilt  AAGCN    base          3     9 35.284 36.016    -0.732     2
+ original  AAGCN spatial          3     9 30.193 29.521     0.672     2
+reordered  AAGCN spatial          3     9 32.423 31.089     1.335     1
+  rebuilt  AAGCN spatial          3     9 35.509 36.016    -0.506     2
+ original ASTGCN    base          3     9 29.449 29.521    -0.072     2
+reordered ASTGCN    base          3     9 30.857 31.089    -0.231     2
+  rebuilt ASTGCN    base          3     9 34.837 36.016    -1.179     3
+ original ASTGCN spatial          3     9 29.627 29.521     0.106     2
+reordered ASTGCN spatial          3     9 30.811 31.089    -0.277     1
+  rebuilt ASTGCN spatial          3     9 34.904 36.016    -1.112     3
+ original  DCRNN    base          3     9 31.323 29.521     1.802     1
+reordered  DCRNN    base          3     9 32.855 31.089     1.766     0
+  rebuilt  DCRNN    base          3     9 36.994 36.016     0.979     0
+ original  DCRNN spatial          3     9 32.911 29.521     3.390     1
+reordered  DCRNN spatial          3     9 33.208 31.089     2.119     1
+  rebuilt  DCRNN spatial          3     9 37.266 36.016     1.250     0
+ original  STGAT    base          3     9 29.517 29.521    -0.004     1
+reordered  STGAT    base          3     9 31.168 31.089     0.079     1
+  rebuilt  STGAT    base          3     9 36.092 36.016     0.077     0
+ original  STGAT spatial          3     9 29.435 29.521    -0.086     2
+reordered  STGAT spatial          3     9 31.156 31.089     0.068     1
+  rebuilt  STGAT spatial          3     9 36.051 36.016     0.035     2

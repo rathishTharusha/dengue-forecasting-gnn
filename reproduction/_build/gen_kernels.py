@@ -187,6 +187,9 @@ if __name__ == "__main__":
     # The array's rows turned out not to be in date order (docs/ARRAY_AUDIT.md).
     # Same training loop on the original and both corrected case series.
     import cells_corrected
+    import cells_s5
 
     for arch in cells_corrected.ARCHITECTURES:
         write_kernel(f"Corrected benchmark {arch}", cells_corrected.build(arch))
+
+    write_kernel("SEIR GNN Stage S5 benchmark", cells_s5.build())

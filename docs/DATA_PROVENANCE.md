@@ -27,7 +27,18 @@ python analysis/_build/source_manifest.py --check
 | **Index page** | https://www.epid.gov.lk/weekly-epidemiological-report |
 | **File pattern** | `https://www.epid.gov.lk/storage/post/pdfs/<file>`, e.g. [vol_48_no_27-english.pdf](https://www.epid.gov.lk/storage/post/pdfs/vol_48_no_27-english.pdf) |
 | **Machine-readable table used** | `datasets/output_Dengue Fever.csv` (parsed from those PDFs; in the shared Drive) |
-| **Verification** | `verify_case_source.py` downloads the official PDF for each report and compares printed row A district by district. Results: `analysis/results/source_verification/` |
+| **Verification** | `verify_case_source.py --all` downloads the official PDF for every report and compares printed row A district by district. **Result (2026-09-14): all 553 source files match exactly, 14,341 of 14,341 division values.** Results: `analysis/results/source_verification/wer_all_verification.json` (with each PDF's SHA-256) |
+
+Notes from the full check:
+- Three January 2024 reports (Vol 51 No 02–04) were re-uploaded by the Epidemiology
+  Unit under new file names; their old links return 404. The new links are in
+  `REUPLOADED` in the script and in the results file.
+- Table 1 appears in two layouts over the years (diseases as rows, or turned 90°
+  with divisions as rows). The script detects the layout from the table's
+  structure, never from agreement with the data.
+- In 16 reports the printed national cumulative total (row B) does not equal the sum
+  of the printed divisions. That is an inconsistency inside the PDFs; the district
+  values, which are what we use, match.
 
 **Manual check (5 minutes):**
 1. Open any report from the index page, e.g. Vol 44 No 34 (2017).

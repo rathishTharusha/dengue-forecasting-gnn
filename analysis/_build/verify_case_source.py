@@ -38,6 +38,14 @@ PDF_DIR = REPO / "data" / "raw" / "wer"
 OUT = REPO / "analysis" / "results" / "source_verification"
 BASE_URL = "https://www.epid.gov.lk/storage/post/pdfs/"
 
+#: Reports whose original link now returns 404 because the Epidemiology Unit
+#: re-uploaded them under a new name (found on the WER index page, 2026-09-14).
+REUPLOADED = {
+    "en_65b8d4365985a_Vol_51_no_02-english.pdf": "en_65fc755050a91_Vol_51_no_02-english.pdf",
+    "en_65c3284dbe388_Vol_51_no_03-english.pdf": "en_65fc71dbe22ce_Vol_51_no_03-english.pdf",
+    "en_65c24c8b0418e_Vol_51_no_04-english.pdf": "en_65fc6756ec7d6_Vol_51_no_04-english.pdf",
+}
+
 #: Table 1 header spellings -> graph district keys.
 HEADER_TO_GRAPH = {"Anuradhapur": "Anuradhapura", "Monaragala": "Moneragala",
                    "Kalmune": "Kalmunai", "NuwaraEliya": "NuwaraEliya", "Nuwara Eliya": "NuwaraEliya"}
@@ -77,6 +85,8 @@ def read_table1(pdf: Path) -> dict | None:
             continue
         title = next((b[4].strip().replace("\n", " ") for b in page.get_text("blocks")
                       if "Table 1" in b[4]), "")
+        if _is_column_layout(text):
+            return _read_column_layout(text, title)
         for table in page.find_tables().tables:
             grid = table.extract()
             header = next((r for r in grid if r and str(r[0] or "").strip().startswith("RDHS")), None)
@@ -110,6 +120,52 @@ def read_table1(pdf: Path) -> dict | None:
     return None
 
 
+def _table_start(lines: list[str]) -> int:
+    """The Table 1 title line; some reports print the title on the next page."""
+    return next((i for i, x in enumerate(lines) if x.startswith("Table 1")), 0)
+
+
+def _is_column_layout(text: str) -> bool:
+    """Some reports print Table 1 turned 90 degrees: divisions as rows, diseases as columns.
+
+    Told apart by structure, never by agreement with the parsed table: in that layout
+    the disease names (the column header) come before the first division name.
+    """
+    lines = [x.strip() for x in text.split("\n")]
+    table = lines[_table_start(lines):]
+    first_disease = next((i for i, x in enumerate(table) if x.startswith("Dysentery")), None)
+    first_division = next((i for i, x in enumerate(table) if x == "Colombo"), None)
+    return (first_disease is not None and first_division is not None
+            and first_disease < first_division)
+
+
+def _read_column_layout(text: str, title: str) -> dict | None:
+    """Dengue is the first disease column, so a division's first two numbers are A and B."""
+    lines = [x.strip() for x in text.split("\n") if x.strip()]
+    lines = lines[_table_start(lines):]
+    header = lines[: next(i for i, x in enumerate(lines) if x == "Colombo")]
+    first = next((i for i, x in enumerate(header) if x.startswith("Dengue")), None)
+    if first is None or any(x.startswith(("Dysentery", "Encephal", "Enteric"))
+                            for x in header[:first]):
+        return None                     # Dengue is not the first disease column
+    a, b = {}, {}
+    for i in range(len(header), len(lines) - 3):
+        tok = lines[i]
+        if not re.fullmatch(r"[A-Z][A-Za-z .-]*", tok):
+            continue
+        j = i + 1
+        if re.fullmatch(r"[a-z]{1,3}", lines[j]):   # a name wrapped in its cell: "NuwaraEliy" "a"
+            tok, j = tok + lines[j], j + 1
+        nums = lines[j], lines[j + 1]
+        if not all(re.fullmatch(r"\d[\d,]*", n) for n in nums):
+            continue
+        name = HEADER_TO_GRAPH.get(tok, tok)
+        a[name], b[name] = (int(n.replace(",", "")) for n in nums)
+        if _canon(tok) == "srilan":
+            break
+    return {"title": title, "A": a, "B": b} if len(a) >= 25 else None
+
+
 def dump_values(raw: pd.DataFrame, name: str) -> dict:
     sub = raw[raw["Source File"].astype(str).str.endswith(name)]
     label = sub["Location Name"].astype(str).str.replace("-", "").str.replace(" ", "")
@@ -125,7 +181,9 @@ def _canon(label: str) -> str:
     aliases = {"paha": "gampaha", "monaragala": "moneragala", "kalmune": "kalmunai",
                "kalmunei": "kalmunai", "srilanka": "srilanka", "94srilanka": "srilanka"}
     k = aliases.get(k, k)
-    return k[:6]
+    # Some PDFs lose one of a doubled letter in text extraction ("Gale", "Jafna").
+    # Collapsing doubles on both sides keeps all 26 divisions distinct.
+    return re.sub(r"(.)\1", r"\1", k)[:6]
 
 
 def compare(parsed: dict, dump: dict) -> dict:
@@ -175,6 +233,10 @@ def main() -> int:
     for name in chosen:
         pdf = download(name)
         rec = {"file": name, "url": BASE_URL + name}
+        if pdf is None and name in REUPLOADED:
+            pdf = download(REUPLOADED[name])
+            rec["url"] = BASE_URL + REUPLOADED[name]
+            rec["note"] = "original link now 404; the site re-uploaded the report under this name"
         if pdf is None:
             rec["status"] = "unreachable"
         else:
@@ -186,8 +248,11 @@ def main() -> int:
                 cmp = compare(parsed, dump_values(raw, name))
                 rec.update(title=parsed["title"], **cmp)
                 b = parsed.get("B") or {}
-                rec["row_B_consistent"] = (sum(v for k, v in b.items() if k != "SRILANKA")
-                                           == b.get("SRILANKA")) if b else None
+                total = next((v for k, v in b.items() if _canon(k) == "srilan"), None)
+                parts = [v for k, v in b.items() if _canon(k) != "srilan"]
+                rec["row_B_consistent"] = (sum(parts) == total
+                                           if b and total is not None and None not in parts
+                                           else None)
                 rec["status"] = ("exact" if not cmp["mismatched"] and not cmp["missing"]
                                  else "differs" if cmp["mismatched"] else "incomplete")
         results.append(rec)

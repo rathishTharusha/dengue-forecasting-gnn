@@ -65,7 +65,7 @@ training loop**, so the data is the only thing that changes:
 
 Frozen protocol unchanged: 3 origins x {SEEDS} seeds, window 3 -> horizon 3,
 pooled RMSE. The artifact is located by report, not by row 395, and windows
-whose target is an interpolated week are excluded. Arms: `base` and `spatial`.
+whose input or target touches a week with no source report are dropped (nothing is filled). Arms: `base` and `spatial`.
 
 `original` should reproduce the earlier numbers; if it does not, stop and compare.
 """

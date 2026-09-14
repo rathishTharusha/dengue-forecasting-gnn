@@ -190,7 +190,7 @@ them.
 | Dataset | Weeks | Span | What it isolates |
 |---|---|---|---|
 | `reordered` | 451 | the benchmark's own rows, in true order, duplicate removed | the effect of **ordering** alone |
-| `rebuilt` | 559 | every source report, 2013-W26 → 2024-W10, 7 interpolated weeks flagged | the corrected dataset going forward |
+| `rebuilt` | 559 | every source report, 2013-W26 → 2024-W10; the 7 weeks with no report stay missing (NaN) | the corrected dataset going forward |
 
 Time is keyed by report volume and number, not the dump's parsed date. **All 451
 `reordered` weeks match `rebuilt` exactly**, so the array's values are the
@@ -218,14 +218,14 @@ Found while building it:
 
 ### The persistence floor moves
 
-Same code, frozen protocol, artifact located by report, windows with interpolated
+Same code, frozen protocol, artifact located by report, windows touching a missing
 targets excluded:
 
 | Dataset | RMSE (all windows) | RMSE (artifact-free) |
 |---|---:|---:|
 | `original` | 44.795 | **29.521** (reproduces the paper) |
 | `reordered` | 48.265 | **31.089** |
-| `rebuilt` | **35.849** | **35.849** (no artifact left to exclude) |
+| `rebuilt` | **36.016** | **36.016** (no artifact left to exclude) |
 
 The test periods themselves change. In `reordered` the artifact moves from the
 0.85 fold to the 0.70 fold. In `rebuilt` it's gone, and the last fold covers
@@ -240,8 +240,11 @@ for row** with `rebuilt`:
 | File | What | Source |
 |---|---|---|
 | `rebuilt_climate_era5.npy` (559, 25, 6) | temperature mean/min/max, precipitation, relative humidity, soil moisture | ERA5 via Open-Meteo, one interior point per district. Jaffna included. No lags applied. |
-| `modis_ndvi_weekly_by_district.csv` | NDVI per district per rebuilt week | MOD13Q1 v061 (250 m, 16-day) via ORNL's public subset service, ±5 km box around each district's interior point, interpolated to week centres |
-| `rebuilt_population.npy` (559, 25) | persons per district per week | DCS mid-year estimates 2014–2024; 2013 from the census projection |
-| `data/external/district_census_2012.csv` | 2012 census totals, over-60 counts and share | 2012 Census at GN level via HDX (WFP/OCHA) |
+| `modis_ndvi_weekly_by_district.csv` | NDVI per district per rebuilt week | MOD13Q1 v061 (250 m, 16-day) via ORNL's public subset service, ±5 km box around each district's interior point; **as-of** — each week holds the latest composite already released before it began (16-day window + 16-day release delay), never interpolated |
+| `rebuilt_population.npy` (559, 25) | persons per district per week | **previous year's official figure**: 2013–14 the 2012 Census count (DCS district reports), year Y ≥ 2015 the DCS mid-year estimate for Y−1 (`rebuilt_population_sources.csv`) |
+| `data/external/district_census_2012.csv` | over-60 share (a ratio only) | 2012 Census at GN level via HDX (WFP/OCHA); projections dropped. Official district totals: `census_2012_dcs_district_totals.csv` |
 
 Lags belong in the model, applied causally, not baked into the data.
+`analysis/lib/corrected_data.py` enforces them (cases 1 week, climate 2, NDVI and
+population already as-of) and `tests/test_no_future_leakage.py` checks it. Sources
+and manual re-download steps: `docs/DATA_PROVENANCE.md`.

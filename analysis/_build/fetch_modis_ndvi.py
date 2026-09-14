@@ -21,11 +21,16 @@ A box of +/- ``KM`` km around the same interior point per district used for ERA5
 averaging valid land pixels (fill values and water are excluded). A box is a
 local sample, not a district mean, and is recorded as such.
 
-Weekly alignment
-----------------
-Composite values are placed at the centre of their 16-day window and linearly
-interpolated to the centre of each report week. No lag is applied: lags belong in
-the model.
+Weekly alignment -- as-of, never interpolated
+--------------------------------------------
+Each report week takes the **latest composite that was already available when the
+week began**: its 16-day window must have ended, plus ``AVAILABILITY_DAYS`` for
+processing and release, before the week's first day. Nothing is interpolated.
+Interpolating between composites would both invent values and read the *next*
+composite, which lies in the future relative to the week.
+
+``AVAILABILITY_DAYS`` is an assumption, not a measured release latency, and is set
+conservatively to one full composite period (16 days).
 
 Run::
 
@@ -143,23 +148,37 @@ def composites() -> pd.DataFrame:
     return pd.DataFrame(recs).drop_duplicates(["district", "date"])
 
 
+#: Days after a composite's 16-day window ends before it counts as available.
+#: Conservative assumption (one composite period); not a measured release latency.
+AVAILABILITY_DAYS = 16
+
+
 def weekly() -> pd.DataFrame:
+    """Latest already-available composite for each district and report week."""
     comp = composites()
-    comp["centre"] = pd.to_datetime(comp["date"]) + pd.Timedelta(days=8)
+    comp["period_start"] = pd.to_datetime(comp["date"])
+    comp["available_from"] = comp["period_start"] + pd.Timedelta(days=16 + AVAILABILITY_DAYS)
     index = pd.read_csv(INDEX, parse_dates=["week_start"])
-    mid = index["week_start"] + pd.Timedelta(days=3, hours=12)
     rows = []
     for name, g in comp.groupby("district"):
-        g = g.sort_values("centre")
-        x = g["centre"].astype("int64").to_numpy()
-        vals = np.interp(mid.astype("int64").to_numpy(), x, g["ndvi"].to_numpy())
-        for r, v in zip(index.itertuples(index=False), vals, strict=True):
+        g = g.sort_values("available_from").reset_index(drop=True)
+        avail = g["available_from"].to_numpy()
+        for r in index.itertuples(index=False):
+            k = int(np.searchsorted(avail, np.datetime64(r.week_start), side="right")) - 1
+            if k < 0:
+                raise SystemExit(f"{name}: no composite available before {r.week_start.date()}")
             rows.append({"row": r.row, "year": r.year, "week_no": r.week_no,
-                         "week_start": r.week_start.date().isoformat(), "district": name, "ndvi": float(v)})
+                         "week_start": r.week_start.date().isoformat(), "district": name,
+                         "ndvi": float(g.loc[k, "ndvi"]),
+                         "composite_start": g.loc[k, "period_start"].date().isoformat(),
+                         "composite_available_from": g.loc[k, "available_from"].date().isoformat()})
     out = pd.DataFrame(rows).sort_values(["row", "district"])
+    if (pd.to_datetime(out["composite_available_from"]) > pd.to_datetime(out["week_start"])).any():
+        raise AssertionError("a week uses a composite not yet available")
     OUT.mkdir(parents=True, exist_ok=True)
     out.to_csv(OUT / "modis_ndvi_weekly_by_district.csv", index=False)
-    comp.drop(columns="centre").to_csv(OUT / "modis_ndvi_composites_by_district.csv", index=False)
+    comp.drop(columns=["period_start", "available_from"]).to_csv(
+        OUT / "modis_ndvi_composites_by_district.csv", index=False)
     return out
 
 

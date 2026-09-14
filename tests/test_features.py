@@ -75,7 +75,7 @@ def test_precipitation_zeros_are_left_alone():
 @pytest.mark.skipif(not HAS_DATA, reason="processed array not present")
 def test_no_impossible_values_survive_on_the_real_array():
     """The whole point: no 0 K temperatures reach the model."""
-    _, stack, _, names = features.load_multivariate(NPY, ADJ, "climate")
+    _, stack, _, names = features.load_multivariate(NPY, ADJ, "climate", allow_misaligned=True)
     for i, name in enumerate(names):
         if name.endswith("_missing") or name in ("cases",):
             continue
@@ -100,7 +100,7 @@ def test_fold_normalisation_uses_training_weeks_only():
     """A covariate arm that leaks is worse than no covariate arm."""
     pytest.importorskip("torch")
     sys.path.insert(0, str(REPO / "analysis" / "lib"))
-    cases, stack, _, _ = features.load_multivariate(NPY, ADJ, "causal")
+    cases, stack, _, _ = features.load_multivariate(NPY, ADJ, "causal", allow_misaligned=True)
     folds = features.build_folds_mv(cases, stack, window=3, horizon=3, origins=(0.7,))
     fold = folds[0]
 
@@ -119,3 +119,12 @@ def test_fold_normalisation_uses_training_weeks_only():
     assert np.allclose(fold.x_train.numpy(), again.x_train.numpy()), (
         "training inputs changed when only test-period values moved -- normalisation leaks"
     )
+
+
+@pytest.mark.skipif(not HAS_DATA, reason="processed array not present")
+def test_misaligned_climate_channels_are_refused_by_default():
+    """The array's climate is on another timeline, and channels 6-10 hold future values."""
+    with pytest.raises(features.MisalignedCovariatesError, match="future"):
+        features.load_multivariate(NPY, ADJ, "causal")
+    _, stack, _, _ = features.load_multivariate(NPY, ADJ, "cases")
+    assert stack.shape[-1] == 1

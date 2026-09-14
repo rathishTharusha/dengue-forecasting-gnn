@@ -10,18 +10,18 @@ Outputs
 -------
 ``data/corrected/rebuilt_climate_era5.npy``   (weeks, 25, 6), channel names in the JSON sidecar
 ``data/corrected/rebuilt_population.npy``     (weeks, 25) persons, for the SEIR denominator
-``data/external/district_census_2012.csv``    2012 census totals, over-60 counts, 2013 projection
+``data/external/district_census_2012.csv``    2012 census counts and over-60 counts (no projections)
 
 Sources
 -------
 * Climate: ERA5 via Open-Meteo, one interior point per district
   (``fetch_era5_climate.py``). Jaffna is included; the original GLDAS pipeline had
   no grid cell inside it.
-* Population 2014-2024: Department of Census and Statistics mid-year estimates
-  (``data/external/district_population.csv``, 2018 onward provisional).
-* Population 2013 and the census fields: 2012 Census of Population and Housing
-  at GN-division level, with WFP/OCHA projections from the census district growth
-  rates, published on HDX: https://data.humdata.org/dataset/sri-lanka-census-of-population-and-housing-2012
+* Population: Department of Census and Statistics mid-year estimates
+  (``data/external/district_population.csv``, 2018 onward provisional), each week
+  using the figure for the previous year -- see :func:`population`.
+* Population before 2015 and the census fields: 2012 Census of Population and
+  Housing, GN-division counts (projections in the same file are not used), on HDX: https://data.humdata.org/dataset/sri-lanka-census-of-population-and-housing-2012
   (source field ``DCS LKA``).
 
 Run::
@@ -56,13 +56,16 @@ def names() -> list[str]:
 def census() -> pd.DataFrame:
     df = pd.read_excel(HDX)
     df["district"] = df["DISTRICT_N"].astype(str).str.strip().replace(HDX_ALIAS)
+    # Counts only. The workbook also carries WFP/OCHA projections (PPROJ_*); those
+    # are modelled, not enumerated, so they are deliberately not used.
     out = df.groupby("district").agg(
         census_2012=("TOT_POP", "sum"), over60_2012=("OVER60", "sum"),
-        projection_2013=("PPROJ_13", "sum"), gn_divisions=("GND_C", "count")).reindex(names())
+        gn_divisions=("GND_C", "count")).reindex(names())
     if out.isna().any().any():
         raise SystemExit(f"census districts missing: {out.index[out.isna().any(axis=1)].tolist()}")
     out["over60_share_2012"] = out.over60_2012 / out.census_2012
-    out["source"] = "DCS Census 2012 via HDX (WFP/OCHA); projection_2013 from census growth rates"
+    out["source"] = ("DCS Census 2012 GN-level counts via HDX; use only the over-60 SHARE -- "
+                     "these GN sums run 0.1-0.7% below the official district totals")
     return out.reset_index()
 
 
@@ -77,15 +80,40 @@ def climate(index: pd.DataFrame) -> np.ndarray:
     return cube
 
 
-def population(index: pd.DataFrame, cen: pd.DataFrame) -> np.ndarray:
-    """Persons per district per week: the mid-year estimate for the report's year."""
+def population(index: pd.DataFrame, cen: pd.DataFrame) -> tuple[np.ndarray, pd.DataFrame]:
+    """Persons per district per week, using only figures published for an EARLIER year.
+
+    A mid-year estimate for year Y is compiled after year Y, so using it for weeks
+    inside Y is future information. Each week in year Y therefore takes the latest
+    official figure for a year strictly before Y:
+
+    * 2013 and 2014 weeks -> the 2012 Census count (the DCS table starts at 2014);
+    * weeks in Y >= 2015  -> the DCS mid-year estimate for Y - 1.
+
+    No projection is used anywhere. Returns the array and a per-year table of which
+    figure each year used, so the choice is auditable.
+    """
     dcs = pd.read_csv(EXTERNAL / "district_population.csv")
     dcs = dcs[dcs.district != "Sri Lanka"].pivot(index="year", columns="district",
                                                  values="population_thousands") * 1000
-    dcs.loc[2013] = cen.set_index("district")["projection_2013"]
-    dcs = dcs.sort_index()[names()]
-    years = index["year"].clip(upper=int(dcs.index.max()))
-    return dcs.loc[years].to_numpy(dtype=np.float64)
+    # Official DCS district totals (build_census_2012.py), not the HDX GN-level sum,
+    # which falls 93,076 short of the national census total.
+    census = pd.read_csv(EXTERNAL / "census_2012_dcs_district_totals.csv").set_index(
+        "district")["population_2012"]
+    chosen, used = {}, []
+    for year in sorted(index["year"].unique()):
+        earlier = [y for y in dcs.index if y < year]
+        if earlier:
+            ref = max(earlier)
+            chosen[year] = dcs.loc[ref, names()]
+            used.append({"weeks_in_year": int(year), "figure": f"DCS mid-year estimate {ref}",
+                         "provisional": bool(ref >= 2018)})
+        else:
+            chosen[year] = census[names()]
+            used.append({"weeks_in_year": int(year), "figure": "Census 2012 count (DCS district reports)",
+                         "provisional": False})
+    pop = np.stack([chosen[y].to_numpy(dtype=np.float64) for y in index["year"]])
+    return pop, pd.DataFrame(used)
 
 
 def main() -> int:
@@ -104,8 +132,9 @@ def main() -> int:
         "source": "ERA5 (Hersbach et al. 2023, doi:10.24381/cds.adbb2d47) via Open-Meteo, CC BY 4.0",
     }, indent=2), encoding="utf-8")
 
-    pop = population(index, cen)
+    pop, used = population(index, cen)
     np.save(CORRECTED / "rebuilt_population.npy", pop)
+    used.to_csv(CORRECTED / "rebuilt_population_sources.csv", index=False)
 
     print(f"census: {len(cen)} districts, national 2012 total {int(cen.census_2012.sum()):,}")
     print(f"climate: {cube.shape}, temperature {cube[..., 0].min():.1f}-{cube[..., 0].max():.1f} degC, "

@@ -13,7 +13,8 @@ builds two corrected case series. Neither modifies the original array.
 ``rebuilt``
     Every weekly report in the source on a regular grid of report numbers, from
     the first (2013, no. 26) to the last (2024, no. 10). Reports missing from the
-    source are filled by log-space interpolation and flagged, so evaluation can
+    source are left **missing** (NaN) and flagged -- never filled, because a filled
+    value is generated data and interpolation borrows the following week -- so evaluation can
     refuse to score against them. This is the corrected dataset going forward.
 
 Both are **cases only**, shape ``(weeks, 25, 1)``. The climate channels are left
@@ -210,8 +211,9 @@ def build_rebuilt(table: pd.DataFrame, nat: pd.DataFrame,
     wide = wide.reindex(columns=names)
     observed = wide.notna().all(axis=1)
 
-    # Fill whole missing reports in log space, per district, and flag them.
-    filled = np.expm1(np.log1p(wide).interpolate(limit_direction="both"))
+    # Missing reports stay missing. Interpolating would both invent values and
+    # leak the following week's report into the gap.
+    filled = wide
     dates = report_dates(table).reindex(wide.index)
     dates = dates.interpolate() if dates.isna().any() else dates
     if dates.isna().any():
@@ -226,7 +228,7 @@ def build_rebuilt(table: pd.DataFrame, nat: pd.DataFrame,
         "year": [k[0] for k in wide.index],
         "week_no": [k[1] for k in wide.index],
         "week_start": pd.to_datetime(dates.to_numpy()).date,
-        "status": [("corrected" if k in corrected_keys else "observed") if obs else "imputed"
+        "status": [("corrected" if k in corrected_keys else "observed") if obs else "missing"
                    for k, obs in zip(wide.index, observed.to_numpy(), strict=True)],
         # A corrected report is no longer an artifact; only an uncorrected one is.
         "is_artifact": [k == ARTIFACT_REPORT and k not in corrected_keys for k in wide.index],
@@ -295,7 +297,7 @@ def main() -> int:
     summary = {
         "rebuilt": {"weeks": int(len(rindex)), "first": f"{rindex.year.iloc[0]}-W{rindex.week_no.iloc[0]}",
                     "last": f"{rindex.year.iloc[-1]}-W{rindex.week_no.iloc[-1]}",
-                    "imputed_weeks": int((rindex.status == "imputed").sum()),
+                    "missing_weeks": int((rindex.status == "missing").sum()),
                     "corrected_weeks": int((rindex.status == "corrected").sum()),
                     "artifact_row": (int(rindex.index[rindex.is_artifact][0])
                                      if rindex.is_artifact.any() else None),

@@ -1,5 +1,12 @@
 # SEIR-GNN — external data and where it came from
 
+> **Superseded for use by [`DATA_PROVENANCE.md`](DATA_PROVENANCE.md)**, which gives manual
+> re-download and verification steps for every source, and the no-future-information
+> rules. This file is the history of how each source was found. Since it was written:
+> nothing is interpolated any more; population uses the previous year's official
+> figure (2012 Census district reports for 2013–14, not HDX projections); NDVI is
+> as-of; the 2022–23 seroprevalence survey is validation-only.
+
 Phase 1 of the SEIR-GNN plan: the inputs a compartmental model needs that the
 processed array does not carry. Every number here traces to a named public
 source. Nothing is estimated or back-filled without saying so.
@@ -32,7 +39,7 @@ Population and Housing 2012.
 2012 census district totals would close the gap. They exist on
 [statistics.gov.lk](https://www.statistics.gov.lk/) and
 [HDX](https://data.humdata.org/dataset/sri-lanka-census-of-population-and-housing-2012),
-but weren't retrieved here.
+but weren't retrieved here. *(Closed later: official DCS 2012 district reports, see `DATA_PROVENANCE.md` §2.)*
 
 ---
 
@@ -130,8 +137,8 @@ Full values and one source key per value are in `seir_parameters.json`.
 - Nine districts, ages 10–20, 2022–23: **24.8% overall**, from **14.2% in Badulla**
   to **54.3% in Trincomalee** (n=5,207) —
   [Jeewandara et al., J Med Virol 2024](https://doi.org/10.1002/jmv.29394). The
-  per-district table for the other seven districts is in the paper. The
-  publisher and medRxiv both block automated access, so it wasn't retrieved.
+  per-district table was later transcribed (third round, below). **Validation only**: it was
+  collected in 2022–23, so it cannot initialise a model of earlier years.
 
 IgG does not tell us which serotype someone is immune to. The model needs
 **susceptibility to the circulating serotype**. These figures give an upper bound
@@ -175,7 +182,8 @@ are committed.
 | **2012 Census at GN-division level, with 2013–2022 projections** | [HDX: Sri Lanka Population and Housing Census 2012](https://data.humdata.org/dataset/sri-lanka-census-of-population-and-housing-2012) (source DCS; projections by WFP/OCHA) | 2013 population (closes the 2014-only gap); over-60 share, which Liu et al. used as a covariate |
 
 The census projections agree with the official DCS 2014 figures to within ±3.5%
-for every district.
+for every district. **They are no longer used** (modelled, not counted); only the
+over-60 share is taken from this workbook.
 
 ---
 

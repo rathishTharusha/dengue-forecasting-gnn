@@ -51,7 +51,7 @@ def test_scattered_gaps_are_interpolated_along_time():
 def test_a_fully_missing_district_is_filled_from_its_neighbours():
     """Interpolation along time cannot reach a district with no data at all."""
     raw = np.ones((10, 3, 11)) * 300.0
-    raw[:, 0, 0] = 0.0                       # district 0 entirely absent
+    raw[:, 0, 0] = 0.0  # district 0 entirely absent
     raw[:, 1, 0] = 280.0
     raw[:, 2, 0] = 320.0
     filled, missing = features.impute_missing(raw, neighbours={0: [1], 1: [0], 2: []})

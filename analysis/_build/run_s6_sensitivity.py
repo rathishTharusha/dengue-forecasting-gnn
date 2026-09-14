@@ -126,9 +126,13 @@ def run_s6_arm(job_kwargs: dict) -> dict:
         lam_seq = lam.unsqueeze(-1).repeat(1, 1, 3)
 
         if state_assimilation:
-            # Rescale E0 and I0 so day 0 expected reported cases equal observed c1
-            # st0 layout: [S, E, I, R]
-            pass
+            # Rescale I0 to match observed c1 exactly under recovery rate gamma
+            c1_obs = tr_y[:, :, 0] # (B, N)
+            i0_assim = torch.clamp(c1_obs / (gamma * rho * pop_t.squeeze(-1)), 1e-6, 0.5)
+            st0 = st0.clone()
+            st0[..., 2] = i0_assim
+            # Rebalance S and R
+            st0[..., 0] = torch.clamp(1.0 - st0[..., 1] - st0[..., 2] - st0[..., 3], 0.01, 1.0)
 
         _, inc = seir_sim.simulate_weeks(st0, lam_seq, omega=omega, gamma=gamma, substeps=7)
         y_pred = inc * rho * pop_t

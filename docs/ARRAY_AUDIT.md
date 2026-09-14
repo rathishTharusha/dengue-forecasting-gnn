@@ -130,10 +130,18 @@ at **12–13 weeks later** (precipitation r = 0.567 at +13 weeks, 0.549 at +12,
 0.241 at +14; canopy r = 0.604 at +12). The zero-lag channels (temperature,
 humidity, soil moisture) match best at zero, which confirms the test itself.
 
-**What that means:** on the climate's own timeline, these channels carry
-rainfall from about three months in the future, not the past. NDVI (documented
-lag 17) can't be tested against ERA5 but went through the same shift. The
-corrected covariates below don't reuse any of these channels.
+**NDVI shows the same reversal.** Against MODIS NDVI (below), the array's
+`minNdvi` channel correlates **−0.146 at the documented shift** (17 weeks
+earlier) and **+0.249 at 17 weeks later**. Every positive correlation sits on the
+later side, on a broad plateau from about 9 to 18 weeks. The direction is clear;
+the exact size isn't sharply identified, which is expected for a slow-moving
+index measured by a different product (VIIRS minimum over cells vs a MODIS box
+mean).
+
+**What that means:** on the climate's own timeline, the lagged channels carry
+rainfall, canopy interception and vegetation from roughly three to four months
+in the future, not the past. The corrected covariates below don't reuse any of
+them.
 
 ---
 
@@ -158,8 +166,8 @@ corrected covariates below don't reuse any of these channels.
 
 - **How much any of this changes existing results.** Persistence is measured
   (below). Model results are running on Kaggle.
-- **NDVI's true lag.** No bot-accessible dated NDVI source was found; see
-  `docs/SEIR_DATA_SOURCES.md` for manual steps.
+- **The exact NDVI shift.** The direction is established (finding 7); the size
+  is only bracketed, at 9–18 weeks.
 
 ## Decisions for the team
 
@@ -232,6 +240,7 @@ for row** with `rebuilt`:
 | File | What | Source |
 |---|---|---|
 | `rebuilt_climate_era5.npy` (559, 25, 6) | temperature mean/min/max, precipitation, relative humidity, soil moisture | ERA5 via Open-Meteo, one interior point per district. Jaffna included. No lags applied. |
+| `modis_ndvi_weekly_by_district.csv` | NDVI per district per rebuilt week | MOD13Q1 v061 (250 m, 16-day) via ORNL's public subset service, ±5 km box around each district's interior point, interpolated to week centres |
 | `rebuilt_population.npy` (559, 25) | persons per district per week | DCS mid-year estimates 2014–2024; 2013 from the census projection |
 | `data/external/district_census_2012.csv` | 2012 census totals, over-60 counts and share | 2012 Census at GN level via HDX (WFP/OCHA) |
 

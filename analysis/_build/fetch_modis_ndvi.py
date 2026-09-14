@@ -163,14 +163,53 @@ def weekly() -> pd.DataFrame:
     return out
 
 
+def validate() -> list[tuple[int, float]]:
+    """Which shift of MODIS NDVI best explains the processed array's ``minNdvi`` channel?
+
+    ``docs/DATA.md`` says channel 10 is NDVI lagged 17 weeks, i.e. row k holds NDVI
+    from 17 weeks earlier. ``docs/ARRAY_AUDIT.md`` dates the array's climate rows
+    (row k = week of 2021-01-01 + 7(k - 398) days) and found the 12-week "lags"
+    pointing the wrong way. This tests the NDVI channel the same way: correlate
+    district-demeaned anomalies at every shift and report the best.
+
+    Positive = row k holds NDVI from that many weeks **earlier** (the documented
+    direction); negative = from that many weeks **later**.
+    """
+    comp = composites()
+    comp["centre"] = pd.to_datetime(comp["date"]) + pd.Timedelta(days=8)
+    names = sorted(json.loads((REPO / "notebooks" / "baseline" / "sri_lanka_adj_list.json")
+                              .read_text(encoding="utf-8")))
+    arr = np.load(REPO / "notebooks" / "baseline" / "sri_lanka_2013-2022_shifted.npy",
+                  allow_pickle=True).astype(float)
+    dates = pd.Timestamp("2021-01-01") + pd.to_timedelta((np.arange(arr.shape[0]) - 398) * 7, unit="D")
+    mid = dates + pd.Timedelta(days=3, hours=12)
+    keep = [n for n in names if n in set(comp.district)]
+    x = arr[:, [names.index(n) for n in keep], 10]
+    x = x - x.mean(0)
+    series = {n: g.sort_values("centre") for n, g in comp.groupby("district")}
+    scores = []
+    for lag in range(-30, 31):
+        t = (mid - pd.Timedelta(weeks=lag)).astype("int64").to_numpy()
+        e = np.column_stack([np.interp(t, series[n]["centre"].astype("int64").to_numpy(),
+                                       series[n]["ndvi"].to_numpy()) for n in keep])
+        e = e - e.mean(0)
+        scores.append((lag, float(np.corrcoef(x.ravel(), e.ravel())[0, 1])))
+    return sorted(scores, key=lambda s: -s[1])
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("step", choices=["fetch", "weekly"])
+    ap.add_argument("step", choices=["fetch", "weekly", "validate"])
     args = ap.parse_args()
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     if args.step == "fetch":
         fetch()
+    elif args.step == "validate":
+        top = validate()[:5]
+        print("best shifts for array minNdvi vs MODIS NDVI (positive = weeks earlier, as documented):")
+        for lag, r in top:
+            print(f"  {lag:+3d} weeks  r = {r:.3f}")
     else:
         out = weekly()
         print(f"wrote {len(out)} rows, {out.district.nunique()} districts, "

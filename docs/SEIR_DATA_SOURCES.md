@@ -179,7 +179,16 @@ for every district.
 
 ---
 
-## Needs you — could not be fetched automatically
+## Obtained in the third round, without logins
+
+| Dataset | How | Notes |
+|---|---|---|
+| **Seroprevalence, all nine districts, three age groups** (Jeewandara et al.) | medRxiv's own API serves the preprint's JATS XML; Table 1 is an image, read and transcribed | Every row and column sum checked against the table's totals. The source contradicts itself twice: Jaffna says 31.3% overall but its age groups imply 36.1%; Trincomalee says 54.3% but implies 56.5%. Both are recorded. → `data/external/seroprevalence_nine_districts.csv` |
+| **MODIS NDVI, 25 districts, 2012-09 → 2024-03** | [ORNL DAAC MODIS/VIIRS subset web service](https://modis.ornl.gov/data/modis_webservice.html) (MOD13Q1 v061, [Didan 2021](https://doi.org/10.5067/MODIS/MOD13Q1.061)), no login | ±5 km around each district's interior point; at least 84% of pixels valid in every composite. → `data/external/modis_ndvi_*_by_district.csv` |
+
+The manual steps below are kept for reference but **are no longer needed**.
+
+## Formerly needed manual steps (superseded)
 
 ### 1. Seroprevalence for the other seven of nine districts (recommended)
 The table in Jeewandara et al. 2024 gives measured immunity per district. The

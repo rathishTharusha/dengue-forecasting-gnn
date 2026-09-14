@@ -126,14 +126,14 @@
   "seed": -1,
   "weeks": 559,
   "test_windows": 78,
-  "artifact_windows": 6,
+  "artifact_windows": 0,
   "imputed_weeks": 7,
-  "RMSE": 64.75334345386001,
-  "MAE": 16.914044436944856,
+  "RMSE": 22.68952696185402,
+  "MAE": 10.057292300192719,
   "n_windows": 78,
-  "n_artifact": 6,
-  "RMSE_clean": 23.301770745991796,
-  "MAE_clean": 10.466140732616186
+  "n_artifact": 0,
+  "RMSE_clean": 22.68952696185402,
+  "MAE_clean": 10.057292300192719
  },
  {
   "dataset": "rebuilt",

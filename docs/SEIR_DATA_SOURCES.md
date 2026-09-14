@@ -162,11 +162,65 @@ parameter, not a constant.**
 
 ---
 
-## Not yet sourced
-- **2012 census district totals** (to cover 2013).
-- **Per-district seroprevalence** for the seven remaining districts in Jeewandara
-  et al. 2024.
-- **Mobility.** Liu et al. used a radiation model built from population and
-  district locations. District boundaries are available from
-  [HDX](https://data.humdata.org/). It's only needed if we move beyond the
-  adjacency graph.
+## Obtained in the second round
+
+Raw downloads go in `data/raw/`, which is git-ignored. Only derived, small tables
+are committed.
+
+| Dataset | Source | Used for |
+|---|---|---|
+| One week of raw GLDAS, GPM and NDVI files, plus GADM 4.1 district boundaries | [Authors' repository](https://github.com/MLOpenSourceOpenScience/disease_modeling_MLOS2) (sparse clone) | Dating the array's climate: exact match at row 398 |
+| **ERA5 daily climate, 25 districts, 2013-01-01 → 2024-03-31** | [Open-Meteo historical API](https://open-meteo.com/en/docs/historical-weather-api) (ERA5, [Hersbach et al. 2023](https://doi.org/10.24381/cds.adbb2d47), CC BY 4.0) | The corrected climate covariates, and the independent check (r = 0.947) |
+| WER Vol 48 No 01 and No 02 PDFs | [Epidemiology Unit](https://www.epid.gov.lk/weekly-epidemiological-report) | Proving the week-395 formula error, and correcting it |
+| **2012 Census at GN-division level, with 2013–2022 projections** | [HDX: Sri Lanka Population and Housing Census 2012](https://data.humdata.org/dataset/sri-lanka-census-of-population-and-housing-2012) (source DCS; projections by WFP/OCHA) | 2013 population (closes the 2014-only gap); over-60 share, which Liu et al. used as a covariate |
+
+The census projections agree with the official DCS 2014 figures to within ±3.5%
+for every district.
+
+---
+
+## Needs you — could not be fetched automatically
+
+### 1. Seroprevalence for the other seven of nine districts (recommended)
+The table in Jeewandara et al. 2024 gives measured immunity per district. The
+publisher and medRxiv both return 403 to automated requests.
+
+1. Open **[doi.org/10.1002/jmv.29394](https://doi.org/10.1002/jmv.29394)** through
+   the university library login, if it provides Wiley access. If not, use the
+   preprint **[medRxiv 2023.04.23.23288986](https://www.medrxiv.org/content/10.1101/2023.04.23.23288986v1.full.pdf)**,
+   which downloads fine from a normal browser.
+2. Find the table of seroprevalence by district. Badulla 14.2% and Trincomalee
+   54.3% are already known, so you'll recognise it.
+3. Save it as `data/external/seroprevalence_nine_districts.csv` with these
+   columns:
+   ```
+   district,n_tested,n_seropositive,seroprevalence,age_range,sampling_period
+   ```
+   Use the graph's spellings (`NuwaraEliya`, `Moneragala`). Copy only the
+   numbers, not the PDF.
+4. Tell me it's there, and I'll wire it into `seir_parameters.json` as initial
+   immunity.
+
+### 2. A dated NDVI record (optional; needed to match Liu et al.)
+Liu et al. found mean NDVI among the most important drivers. ERA5 has no
+vegetation index, and the array's NDVI channel has the suspect shift described in
+`docs/ARRAY_AUDIT.md` (finding 7). NASA's tools need a free login, which I can't
+create.
+
+1. Create a free **[NASA Earthdata account](https://urs.earthdata.nasa.gov/users/new)**.
+2. Open **[AppEEARS](https://appeears.earthdatacloud.nasa.gov/)** → *Extract* →
+   *Area*.
+3. Upload the district boundaries:
+   `data/raw/disease_modeling_MLOS2/Data/Countries/gadm41_LKA_1.json` (after
+   running the sparse clone in this doc).
+4. Dates **2013-01-01 → 2024-03-31**. Product **MOD13A2.061** (MODIS Terra
+   vegetation indices, 16-day, 1 km). Layer **`_1_km_16_days_NDVI`**.
+5. Output format **NetCDF-4**, projection **Geographic**. Submit, and wait for the
+   email (usually under an hour).
+6. Download everything into `data/raw/ndvi_modis/`. I'll do the district
+   aggregation and weekly alignment.
+
+### Not needed yet
+- **Mobility.** Liu et al. estimated it with a radiation model from population and
+  district locations, and both are now in the repo, so it can be computed rather
+  than downloaded.

@@ -74,7 +74,10 @@ def load(dataset: str):
         return cases, adjacency, imp.ARTIFACT_WEEK, np.array([], dtype=int)
     arr = np.load(CORRECTED / f"{dataset}_cases.npy")
     index = pd.read_csv(CORRECTED / f"{dataset}_index.csv")
-    artifact = int(index.index[index["is_artifact"]][0])
+    # `rebuilt` repairs the artifact report from the published PDF, so it may have
+    # none left; a row far outside the series then flags no window.
+    flagged = index.index[index["is_artifact"]]
+    artifact = int(flagged[0]) if len(flagged) else -10**6
     imputed = index.index[index["status"].eq("imputed")].to_numpy()
     return arr[..., 0].astype(np.float64), adjacency, artifact, imputed
 

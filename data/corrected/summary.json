@@ -4,7 +4,8 @@
     "first": "2013-W26",
     "last": "2024-W10",
     "imputed_weeks": 7,
-    "artifact_row": 393,
+    "corrected_weeks": 1,
+    "artifact_row": null,
     "national_total_check": {
       "reports_checked": 552,
       "exact": 432,
@@ -18,6 +19,6 @@
   },
   "reordered_vs_rebuilt": {
     "shared_weeks": 451,
-    "value_mismatches": 0
+    "value_mismatches": 1
   }
 }

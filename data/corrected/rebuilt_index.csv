@@ -392,7 +392,7 @@ row,year,week_no,week_start,status,is_artifact
 390,2020,51,2020-12-05,observed,False
 391,2020,52,2020-12-12,observed,False
 392,2021,1,2020-12-19,observed,False
-393,2021,2,2020-12-26,observed,True
+393,2021,2,2020-12-26,corrected,False
 394,2021,3,2021-01-02,observed,False
 395,2021,4,2021-01-09,observed,False
 396,2021,5,2021-01-16,observed,False

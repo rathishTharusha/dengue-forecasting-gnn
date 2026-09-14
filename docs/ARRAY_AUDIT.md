@@ -87,10 +87,53 @@ Rows 3–47, the 2023 reports, sit inside the training set of all three folds of
 frozen protocol. The test periods are 2018-03 → 2019-07, 2019-07 → 2020-10 and
 2020-11 → 2022-03, so **every model trained on data from after its test period.**
 
-### 5. The week-395 spike is dated — confirmed
-It's the report for the week starting **2020-12-26** (Volume 48, no. 2), at the
-turn of the year. That fits the backlog explanation. The date is certain; the
-cause is still an interpretation.
+### 5. The week-395 spike is a formula error in the published report — confirmed
+![](../analysis/results/array_audit/6_wer_vol48_no02_dengue_rows.png)
+
+It comes from [WER Vol 48 No 02](https://www.epid.gov.lk/storage/post/pdfs/vol_48_no_02-english_1.pdf),
+covering 26 Dec 2020 – 01 Jan 2021. That PDF's Dengue table has two rows: **A**,
+cases this week, and **B**, cumulative for the year. The printed A row is broken:
+
+- **15 of its 24 inner cells equal the sum of the two before them**: 18, 18, 36,
+  54, 90, 144, 234, 378, 612, 990, … That's a formula dragged across a row.
+- Its districts sum to 7,165, Kalmunai reads 752, and its national cell reads 35.
+- Row B is consistent: its districts plus Kalmunai sum to **exactly 351**, its
+  own national total.
+- **No other report among the 552 shows the pattern in more than 3 cells.**
+
+Because this is the first week of the year, cumulative equals weekly, so row B
+*is* the correct weekly count. **The spike is not an administrative backlog.** It's
+a spreadsheet error in one published table, and it can be corrected from the same
+table. The paper's current wording ("administrative reporting backlog") needs
+changing.
+
+### 6. The climate channels are now absolutely dated — confirmed two ways
+- **Exact match to raw satellite data.** The authors' repository includes one
+  week of raw GLDAS files (1–8 Jan 2021). Replicating their aggregation (weekly
+  per-cell means, cells inside each GADM district, dropping any cell with a
+  missing variable) matches **array row 398** to within 0.069 K, with a
+  district-pattern correlation of 0.998. The neighbouring rows are 4–12 times
+  worse. The replication also gives Jaffna zero grid cells, which explains its
+  all-zero columns.
+- **Independent reanalysis.** Array temperature against ERA5 (below) gives
+  **r = 0.947 at exactly zero shift**, falling to 0.875 at ±1 week. Against the
+  dates the case rows claim, the same comparison gives r = 0.443.
+
+So **climate row k is the week starting 2021-01-01 + 7(k − 398) days**: a
+contiguous weekly series from **17 May 2013 to 25 Feb 2022**. The climate was in
+order all along; the case column is what was displaced.
+
+### 7. The "lagged" climate channels are shifted the wrong way — confirmed
+`docs/DATA.md` says precipitation and canopy interception are lagged 12 weeks, so
+row k should hold values from 12 weeks **earlier**. Against ERA5 they match best
+at **12–13 weeks later** (precipitation r = 0.567 at +13 weeks, 0.549 at +12,
+0.241 at +14; canopy r = 0.604 at +12). The zero-lag channels (temperature,
+humidity, soil moisture) match best at zero, which confirms the test itself.
+
+**What that means:** on the climate's own timeline, these channels carry
+rainfall from about three months in the future, not the past. NDVI (documented
+lag 17) can't be tested against ERA5 but went through the same shift. The
+corrected covariates below don't reuse any of these channels.
 
 ---
 
@@ -115,8 +158,8 @@ cause is still an interpretation.
 
 - **How much any of this changes existing results.** Persistence is measured
   (below). Model results are running on Kaggle.
-- **The absolute weather-to-case offset.** Pinning it down needs the satellite
-  files' own timestamps, which aren't in the authors' repository.
+- **NDVI's true lag.** No bot-accessible dated NDVI source was found; see
+  `docs/SEIR_DATA_SOURCES.md` for manual steps.
 
 ## Decisions for the team
 
@@ -158,10 +201,12 @@ Found while building it:
   Unit's own national total in **432 of 552 reports**. In the rest, the parsed
   national figure is typically a tenth of the district sum, which looks like a
   parsing loss in that one field.
-- **The week-395 report looks misparsed, not only backlogged.** Every field in it
-  is anomalous: districts sum to 7,165 (neighbouring weeks are ~400), Kalmunai
-  shows 752 (normally ~30), and the national total shows 35. This is likely but
-  not confirmed; checking would need the original PDF (Vol 48 no. 02).
+- **The week-395 report is corrected in `rebuilt` only** (finding 5), using row B
+  from the published PDF (`data/external/report_corrections.json`, which records
+  both rows and the evidence). `reordered` keeps the original values, because
+  it exists to isolate ordering.
+- **Report numbers aren't exactly epidemiological weeks.** Vol 48 No 02 is "1st
+  Week". The sequence is unbroken, so ordering is unaffected.
 
 ### The persistence floor moves
 
@@ -172,15 +217,22 @@ targets excluded:
 |---|---:|---:|
 | `original` | 44.795 | **29.521** (reproduces the paper) |
 | `reordered` | 48.265 | **31.089** |
-| `rebuilt` | 49.870 | **36.053** |
+| `rebuilt` | **35.849** | **35.849** (no artifact left to exclude) |
 
-The test periods themselves change. The artifact moves from the 0.85 fold to the
-0.70 fold, and `rebuilt`'s last fold covers 2022–2024, including the large 2023
-epidemic. **Model results on the corrected data are pending** (Kaggle kernels
-`corrected-benchmark-*`, compared with `compare_corrected.py`).
+The test periods themselves change. In `reordered` the artifact moves from the
+0.85 fold to the 0.70 fold. In `rebuilt` it's gone, and the last fold covers
+2022–2024, including the large 2023 epidemic. **Model results on the corrected
+data are pending** (Kaggle kernels `corrected-benchmark-*`, compared with
+`compare_corrected.py`).
 
-### Climate is not corrected yet
-Both corrected datasets are **cases only**. The climate channels' calendar dates
-still aren't established. The authors' repository contains one week of GLDAS,
-GPM and NDVI files (1–8 January 2021), which could anchor the climate timeline by
-exact match. That hasn't been done.
+### Corrected covariates
+`analysis/_build/build_corrected_covariates.py` builds covariates aligned **row
+for row** with `rebuilt`:
+
+| File | What | Source |
+|---|---|---|
+| `rebuilt_climate_era5.npy` (559, 25, 6) | temperature mean/min/max, precipitation, relative humidity, soil moisture | ERA5 via Open-Meteo, one interior point per district. Jaffna included. No lags applied. |
+| `rebuilt_population.npy` (559, 25) | persons per district per week | DCS mid-year estimates 2014–2024; 2013 from the census projection |
+| `data/external/district_census_2012.csv` | 2012 census totals, over-60 counts and share | 2012 Census at GN level via HDX (WFP/OCHA) |
+
+Lags belong in the model, applied causally, not baked into the data.

@@ -21,8 +21,15 @@ out on purpose: their dates are not yet established, and a covariate block that
 silently reused the old row order would reintroduce the misalignment this fixes.
 
 Time is keyed by the report's own **volume and number**, not the dump's parsed
-date. Volume N is year 1973 + N and report number N is epidemiological week N.
-The parsed date is wrong for a handful of reports; the volume is not.
+date. Volume N is year 1973 + N, and reports are numbered consecutively within a
+volume. The number is not always the epidemiological week -- Vol 48 No 02 covers
+"26 Dec 2020 - 01 Jan 2021 (1st Week)" -- but the sequence is what orders the
+series, and it is unbroken. The parsed date is wrong for a handful of reports.
+
+The ``rebuilt`` series also applies **verified corrections** to published reports
+(``data/external/report_corrections.json``). There is one: the week-395 spike is
+a spreadsheet formula error in the published table, not a reporting backlog.
+See :func:`extract_week1_correction`.
 
 District labels follow the authors' ``Configs/disease_config.json``, including its
 exclusion of the Kalmunai health division. Kalmunai lies inside Ampara, so the
@@ -57,6 +64,63 @@ OUT = REPO / "data" / "corrected"
 #: The week-395 reporting spike, keyed by report rather than by row: its row
 #: index is different in every dataset.
 ARTIFACT_REPORT = (2021, 2)
+
+#: Verified corrections to published reports, applied to ``rebuilt`` only.
+CORRECTIONS = REPO / "data" / "external" / "report_corrections.json"
+
+#: RDHS column order of Table 1 in the Weekly Epidemiological Report.
+WER_COLUMNS = ["Colombo", "Gampaha", "Kalutara", "Kandy", "Matale", "NuwaraEliya", "Galle",
+               "Hambantota", "Matara", "Jaffna", "Kilinochchi", "Mannar", "Vavuniya",
+               "Mullaitivu", "Batticaloa", "Ampara", "Trincomalee", "Kurunegala", "Puttalam",
+               "Anuradhapura", "Polonnaruwa", "Badulla", "Moneragala", "Ratnapura", "Kegalle",
+               "Kalmunai", "SRILANKA"]
+
+
+def extract_week1_correction(pdf: Path) -> dict:
+    """Recover the true weekly counts for WER Vol 48 No 02 from its own table.
+
+    The published Dengue row **A** (cases this week) in this report is a
+    spreadsheet formula error: 15 of its 24 inner cells equal the sum of the two
+    cells before them (18, 18, 36, 54, 90, 144, 234, ...), its districts sum to
+    7,165, and its national cell reads 35. No other report in the 552 shows the
+    pattern in more than 3 cells. Row **B** (cumulative for the year) is
+    consistent -- its districts plus Kalmunai sum exactly to its national total
+    of 351 -- and because this is the first week of the year, cumulative equals
+    weekly. So row B *is* the weekly count.
+
+    Requires the PDF: https://www.epid.gov.lk/storage/post/pdfs/vol_48_no_02-english_1.pdf
+    """
+    import pymupdf
+
+    page = pymupdf.open(pdf)[2]
+    grid = page.find_tables().tables[0].extract()
+    header = next(r for r in grid if r and r[0] == "RDHS")
+    i = next(k for k, r in enumerate(grid) if r and r[0] and str(r[0]).startswith("Dengue"))
+    if str(grid[i][1]) != "B" or str(grid[i + 1][1]) != "A":
+        raise SystemExit("unexpected row layout in the Dengue block")
+    labels = [str(c) for c in header[2:]]
+    if len(labels) != len(WER_COLUMNS):
+        raise SystemExit(f"unexpected column count {len(labels)}")
+    b = [int(x) for x in grid[i][2:]]
+    a = [int(x) for x in grid[i + 1][2:]]
+    districts_b = sum(b[:25])
+    if districts_b + b[25] != b[26]:
+        raise SystemExit("row B does not sum to its national total; refusing to use it")
+    formula_cells = sum(1 for k in range(2, 26) if abs(a[k] - (a[k - 1] + a[k - 2])) <= 1)
+    return {
+        "report": {"year": 2021, "volume": 48, "number": 2,
+                   "covers": "26 Dec 2020 - 01 Jan 2021 (1st week)"},
+        "source": "https://www.epid.gov.lk/storage/post/pdfs/vol_48_no_02-english_1.pdf",
+        "published_row_A": dict(zip(WER_COLUMNS, a, strict=True)),
+        "published_row_B": dict(zip(WER_COLUMNS, b, strict=True)),
+        "replacement": dict(zip(WER_COLUMNS[:25], b[:25], strict=True)),
+        "evidence": {"row_A_formula_cells": formula_cells,
+                     "row_A_district_sum": sum(a[:25]), "row_A_national": a[26],
+                     "row_B_district_sum_plus_kalmunai": districts_b + b[25],
+                     "row_B_national": b[26]},
+        "reason": "Row A is a spreadsheet formula error; row B is year-to-date, which "
+                  "equals the weekly count in the first week of the year.",
+    }
 
 
 def load_reports(raw_csv: Path) -> tuple[pd.DataFrame, pd.DataFrame]:
@@ -119,8 +183,17 @@ def report_dates(table: pd.DataFrame) -> pd.Series:
     return fixed
 
 
-def build_rebuilt(table: pd.DataFrame, nat: pd.DataFrame) -> tuple[np.ndarray, pd.DataFrame]:
+def build_rebuilt(table: pd.DataFrame, nat: pd.DataFrame,
+                  corrections: list[dict] | None = None) -> tuple[np.ndarray, pd.DataFrame]:
     names = bsi.district_names()
+    corrected_keys = set()
+    table = table.copy()
+    for fix in corrections or []:
+        key = (fix["report"]["year"], fix["report"]["number"])
+        mask = (table.year == key[0]) & (table.week_no == key[1])
+        for district, value in fix["replacement"].items():
+            table.loc[mask & (table.district == district), "cases"] = value
+        corrected_keys.add(key)
     last_no = table.groupby("year")["week_no"].max()
     first_year, last_year = int(table.year.min()), int(table.year.max())
     first_no = int(table.loc[table.year == first_year, "week_no"].min())
@@ -153,8 +226,10 @@ def build_rebuilt(table: pd.DataFrame, nat: pd.DataFrame) -> tuple[np.ndarray, p
         "year": [k[0] for k in wide.index],
         "week_no": [k[1] for k in wide.index],
         "week_start": pd.to_datetime(dates.to_numpy()).date,
-        "status": np.where(observed.to_numpy(), "observed", "imputed"),
-        "is_artifact": [k == ARTIFACT_REPORT for k in wide.index],
+        "status": [("corrected" if k in corrected_keys else "observed") if obs else "imputed"
+                   for k, obs in zip(wide.index, observed.to_numpy(), strict=True)],
+        # A corrected report is no longer an artifact; only an uncorrected one is.
+        "is_artifact": [k == ARTIFACT_REPORT and k not in corrected_keys for k in wide.index],
     })
 
     # Integrity: districts + Kalmunai must equal the Epidemiology Unit's own total.
@@ -191,12 +266,19 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--raw", required=True, type=Path)
+    ap.add_argument("--wer-pdf", type=Path, default=None,
+                    help="WER Vol 48 No 02 PDF; regenerates data/external/report_corrections.json")
     args = ap.parse_args()
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     OUT.mkdir(parents=True, exist_ok=True)
 
+    if args.wer_pdf:
+        CORRECTIONS.write_text(json.dumps([extract_week1_correction(args.wer_pdf)], indent=2),
+                               encoding="utf-8")
+    corrections = json.loads(CORRECTIONS.read_text(encoding="utf-8")) if CORRECTIONS.exists() else []
+
     table, nat = load_reports(args.raw)
-    rebuilt, rindex = build_rebuilt(table, nat)
+    rebuilt, rindex = build_rebuilt(table, nat, corrections)
     reordered, oindex = build_reordered()
 
     np.save(OUT / "rebuilt_cases.npy", rebuilt)
@@ -214,7 +296,9 @@ def main() -> int:
         "rebuilt": {"weeks": int(len(rindex)), "first": f"{rindex.year.iloc[0]}-W{rindex.week_no.iloc[0]}",
                     "last": f"{rindex.year.iloc[-1]}-W{rindex.week_no.iloc[-1]}",
                     "imputed_weeks": int((rindex.status == "imputed").sum()),
-                    "artifact_row": int(rindex.index[rindex.is_artifact][0]),
+                    "corrected_weeks": int((rindex.status == "corrected").sum()),
+                    "artifact_row": (int(rindex.index[rindex.is_artifact][0])
+                                     if rindex.is_artifact.any() else None),
                     "national_total_check": rindex.attrs["national_check"]},
         "reordered": {"weeks": int(len(oindex)), "artifact_row": int(oindex.index[oindex.is_artifact][0]),
                       "rows_dropped_from_original": 459 - int(len(oindex))},

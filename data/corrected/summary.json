@@ -1,0 +1,23 @@
+{
+  "rebuilt": {
+    "weeks": 559,
+    "first": "2013-W26",
+    "last": "2024-W10",
+    "imputed_weeks": 7,
+    "artifact_row": 393,
+    "national_total_check": {
+      "reports_checked": 552,
+      "exact": 432,
+      "max_abs_gap": 9161.0
+    }
+  },
+  "reordered": {
+    "weeks": 451,
+    "artifact_row": 341,
+    "rows_dropped_from_original": 8
+  },
+  "reordered_vs_rebuilt": {
+    "shared_weeks": 451,
+    "value_mismatches": 0
+  }
+}

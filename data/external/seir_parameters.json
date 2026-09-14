@@ -1,0 +1,92 @@
+{
+  "_about": "Epidemiological inputs for the SEIR-GNN, each with its source. Values are copied from the cited publications, not estimated here. See docs/SEIR_DATA_SOURCES.md for context and caveats.",
+
+  "stage_durations_days": {
+    "intrinsic_incubation": {
+      "mean": 5.9, "range_95": [3.4, 10.0],
+      "use": "human E -> I; omega = 1/mean",
+      "source": "chan2012"
+    },
+    "human_infectious_period": {
+      "range": [2.0, 7.0],
+      "phaijoo_gurung_value": 3.04,
+      "use": "human I -> R; gamma = 1/value",
+      "note": "Phaijoo & Gurung's gamma_h = 0.328833/day gives 3.04 d; Yi et al. cite WHO's 2-7 d and sample 1/gamma ~ N(4.5, 1.25). Liu et al. use 7 d (gamma = 1/week).",
+      "source": ["phaijoo2018", "yi2021", "liu2025"]
+    },
+    "extrinsic_incubation": {
+      "mean_at_25C": 15.0, "range_95_at_25C": [5.0, 33.0],
+      "mean_at_30C": 6.5, "range_95_at_30C": [2.4, 15.0],
+      "use": "vector E -> I, only for the SEIR-SEI arm",
+      "source": "chan2012"
+    }
+  },
+
+  "seroprevalence_any_serotype_igg": [
+    {"place": "Colombo MC ward 33", "years": "2008-2009", "ages": "<12", "n": 797,
+     "value": 0.514, "force_of_infection_per_year": 0.141, "foi_ci_95": [0.127, 0.156],
+     "source": "tam2013"},
+    {"place": "suburban Colombo district", "years": "2013-2014", "ages": "<=16", "n": 608,
+     "value": 0.507, "source": "colombo_sero2015"},
+    {"place": "suburban Colombo district", "years": "2013-2014", "ages": ">16", "n": 1081,
+     "value": 0.908, "source": "colombo_sero2015"},
+    {"place": "suburban Colombo district", "years": "2013-2014", "ages": "all", "n": 1689,
+     "value": 0.682, "source": "colombo_sero2015"},
+    {"place": "nine districts (one per province)", "years": "2022-09 to 2023-03", "ages": "10-20",
+     "n": 5207, "value": 0.248, "district_range": {"Badulla": 0.142, "Trincomalee": 0.543},
+     "note": "Per-district table for the other seven districts is in the paper; not retrieved (publisher blocks automated access).",
+     "source": "jeewandara2024"}
+  ],
+
+  "seroconversion_per_year": {
+    "children_6_17": {"2003": 0.015, "2013": 0.039, "2017": 0.041},
+    "whole_population": {"2013": 0.0076, "2017": 0.0091},
+    "source": "epi_review2021"
+  },
+
+  "ascertainment_evidence": {
+    "_note": "No single Sri Lanka-wide expansion factor exists in the sources found. The evidence spans roughly an order of magnitude, so ascertainment must be a sensitivity parameter, not a fixed constant.",
+    "items": [
+      {"what": "inapparent : apparent infections, paediatric cohort, Colombo 2008-2010",
+       "value": "40 : 27", "implied_infections_per_apparent": 2.48, "source": "colombo_cohort2015"},
+      {"what": "primary infections per notified case, children <12, Colombo 2008-2009",
+       "value": 30, "source": "tam2013"},
+      {"what": "global infections per apparent infection (390M / 96M)",
+       "value": 4.06, "source": "bhatt2013"},
+      {"what": "reported-to-true multiplier used by the SEIR-LSTM paper this model extends",
+       "value": 11, "source": "liu2025"},
+      {"what": "Southeast Asia expansion factor, symptomatic cases per reported case, 2001-2010 (Sri Lanka NOT included)",
+       "value": 7.6, "range_95": [7.0, 8.8], "source": "undurraga2013"}
+    ]
+  },
+
+  "serotype_timeline": [
+    {"period": "2003-2012", "event": "DENV-1 dominant in periodic epidemics; DENV-2/DENV-3 background transmission 2003-2006", "source": "tissera2020"},
+    {"period": "2009", "event": "new DENV-1 genotype emerges", "source": "epi_review2021"},
+    {"period": "2009 to mid-2016", "event": "DENV-2 and DENV-3 not detected", "source": "epi_review2021"},
+    {"period": "late 2016 to 2017", "event": "DENV-2 cosmopolitan genotype, new to Sri Lanka; 39 of 44 positives Dec 2016-Dec 2017 were DENV-2", "source": "tissera2020"},
+    {"period": "late 2019 to 2020", "event": "DENV-3 re-emergence", "source": "epi_review2021"}
+  ],
+
+  "annual_reported_cases": {
+    "2012": 35476, "2017": 186101, "2018": 51659, "2019": 105049,
+    "note": "2017 had 440 deaths; Colombo incidence 1,419 per 100,000, Nuwara Eliya 118 per 100,000.",
+    "source": ["epi_review2021", "tissera2020"]
+  },
+
+  "sources": {
+    "chan2012": "Chan M, Johansson MA. The incubation periods of dengue viruses. PLoS ONE 2012;7(11):e50972. doi:10.1371/journal.pone.0050972",
+    "phaijoo2018": "Phaijoo GR, Gurung DB. Sensitivity analysis of SEIR-SEI model of dengue disease. GAMS J Math Math Biosci 2018;6(a):41-50.",
+    "yi2021": "Yi C, et al. SEIR-SEI-EnKF: a new model for estimating and forecasting dengue outbreak dynamics. IEEE Access 2021;9. doi:10.1109/ACCESS.2021.3129997",
+    "liu2025": "Liu Y, Fransson P, Heidecke J, Liyanage P, Wallin J, Rocklov J. An explainable covariate compartmental model for predicting the spatio-temporal patterns of dengue in Sri Lanka. PLoS Comput Biol 2025;21(9):e1013540. doi:10.1371/journal.pcbi.1013540",
+    "tam2013": "Estimates of dengue force of infection in children in Colombo, Sri Lanka. PLoS Negl Trop Dis 2013. doi:10.1371/journal.pntd.0002259 (PMC3674987)",
+    "colombo_sero2015": "Change in dengue and Japanese encephalitis seroprevalence rates in Sri Lanka. PLoS ONE 2015. doi:10.1371/journal.pone.0144799 (PMC4687926)",
+    "jeewandara2024": "Jeewandara C, et al. The burden of dengue in children and risk factors of transmission in nine districts in Sri Lanka. J Med Virol 2024. doi:10.1002/jmv.29394 (preprint medRxiv 10.1101/2023.04.23.23288986)",
+    "epi_review2021": "Changing epidemiology of dengue in Sri Lanka - challenges for the future. PLoS Negl Trop Dis 2021. doi:10.1371/journal.pntd.0009624",
+    "colombo_cohort2015": "Preexisting neutralizing antibody responses distinguish clinically inapparent and apparent dengue virus infections in a Sri Lankan pediatric cohort. J Infect Dis 2015. PMC4375390",
+    "bhatt2013": "Bhatt S, Gething PW, Brady OJ, et al. The global distribution and burden of dengue. Nature 2013;496(7446):504-507. doi:10.1038/nature12060",
+    "undurraga2013": "Undurraga EA, Halasa YA, Shepard DS. Use of expansion factors to estimate the burden of dengue in Southeast Asia: a systematic analysis. PLoS Negl Trop Dis 2013;7(2):e2056. doi:10.1371/journal.pntd.0002056",
+    "tissera2020": "Severe dengue epidemic, Sri Lanka, 2017. Emerg Infect Dis 2020;26(4). doi:10.3201/eid2604.190435",
+    "dcs2024": "Department of Census and Statistics, Sri Lanka (source: Registrar General's Department). Mid-year Population Estimates by District & Sex, 2014-2024. https://www.statistics.gov.lk/Resource/en/Population/Vital_Statistics/Mid-year_population_by_district_and_sex_2024.pdf"
+  }
+}

@@ -183,3 +183,10 @@ if __name__ == "__main__":
     # Run this one FIRST: a --quick smoke of every configuration, so a shape
     # error in a wide multivariate input costs minutes instead of hours.
     write_kernel("Beat floor preflight", cells_beat.build_preflight())
+
+    # The array's rows turned out not to be in date order (docs/ARRAY_AUDIT.md).
+    # Same training loop on the original and both corrected case series.
+    import cells_corrected
+
+    for arch in cells_corrected.ARCHITECTURES:
+        write_kernel(f"Corrected benchmark {arch}", cells_corrected.build(arch))

@@ -1,0 +1,13 @@
+{
+  "id": "tharushaperera16/corrected-benchmark-stgat",
+  "title": "Corrected benchmark STGAT",
+  "code_file": "corrected_benchmark_stgat.ipynb",
+  "language": "python",
+  "kernel_type": "notebook",
+  "is_private": true,
+  "enable_gpu": false,
+  "enable_internet": true,
+  "dataset_sources": [],
+  "competition_sources": [],
+  "kernel_sources": []
+}

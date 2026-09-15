@@ -188,8 +188,11 @@ if __name__ == "__main__":
     # Same training loop on the original and both corrected case series.
     import cells_corrected
     import cells_s5
+    import cells_master
 
     for arch in cells_corrected.ARCHITECTURES:
         write_kernel(f"Corrected benchmark {arch}", cells_corrected.build(arch))
 
     write_kernel("SEIR GNN Stage S5 benchmark", cells_s5.build())
+    write_kernel("SEIR GNN full reproducible workflow", cells_master.build_master_notebook())
+

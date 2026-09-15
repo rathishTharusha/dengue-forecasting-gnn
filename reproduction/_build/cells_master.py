@@ -147,13 +147,15 @@ if s5_out.exists():
     df_s5 = pd.DataFrame(json.loads(s5_out.read_text(encoding="utf-8")))
     s5_summary = df_s5.groupby(["arch", "input_level", "coupling", "head_type"])[["val_RMSE", "test_RMSE"]].mean().reset_index()
     s5_summary = s5_summary.sort_values("val_RMSE")
-    print("\n=== Stage S5 SEIR-GNN Leaderboard ===")
+    print("")
+    print("=== Stage S5 SEIR-GNN Leaderboard ===")
     print(s5_summary.round(3).to_string(index=False))
 
 s9_out = PROJ / "analysis" / "results" / "seir_gnn" / "s9_confirmatory" / "s9_confirmatory_results.json"
 if s9_out.exists():
     s9_res = json.loads(s9_out.read_text(encoding="utf-8"))
-    print("\n=== Stage S9 Confirmatory Hypothesis Results ===")
+    print("")
+    print("=== Stage S9 Confirmatory Hypothesis Results ===")
     print(pd.DataFrame(s9_res.get("family_hypothesis_tests")).to_string(index=False))
 '''
 

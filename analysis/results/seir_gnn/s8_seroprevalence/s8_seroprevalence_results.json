@@ -1,0 +1,70 @@
+{
+  "spearman_rho": 0.25,
+  "p_value": 0.5165,
+  "district_comparison": [
+    {
+      "district": "Batticaloa",
+      "model_implied_frac": 0.4331,
+      "survey_seroprevalence": 0.31,
+      "error": 0.1231,
+      "sign": "+"
+    },
+    {
+      "district": "Colombo",
+      "model_implied_frac": 0.4844,
+      "survey_seroprevalence": 0.682,
+      "error": -0.1976,
+      "sign": "-"
+    },
+    {
+      "district": "Galle",
+      "model_implied_frac": 0.1851,
+      "survey_seroprevalence": 0.42,
+      "error": -0.2349,
+      "sign": "-"
+    },
+    {
+      "district": "Gampaha",
+      "model_implied_frac": 0.2928,
+      "survey_seroprevalence": 0.54,
+      "error": -0.2472,
+      "sign": "-"
+    },
+    {
+      "district": "Jaffna",
+      "model_implied_frac": 0.4991,
+      "survey_seroprevalence": 0.38,
+      "error": 0.1191,
+      "sign": "+"
+    },
+    {
+      "district": "Kalutara",
+      "model_implied_frac": 0.2702,
+      "survey_seroprevalence": 0.49,
+      "error": -0.2198,
+      "sign": "-"
+    },
+    {
+      "district": "Kandy",
+      "model_implied_frac": 0.2908,
+      "survey_seroprevalence": 0.45,
+      "error": -0.1592,
+      "sign": "-"
+    },
+    {
+      "district": "Kurunegala",
+      "model_implied_frac": 0.1628,
+      "survey_seroprevalence": 0.35,
+      "error": -0.1872,
+      "sign": "-"
+    },
+    {
+      "district": "Ratnapura",
+      "model_implied_frac": 0.2072,
+      "survey_seroprevalence": 0.32,
+      "error": -0.1128,
+      "sign": "-"
+    }
+  ],
+  "note": "Descriptive comparison between model implied cumulative infection (2013-2022) and lifetime survey seroprevalence."
+}

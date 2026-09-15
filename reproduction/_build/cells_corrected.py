@@ -10,7 +10,7 @@ import env_setup
 from gen_kernels import code, md
 
 #: The branch holding the corrected datasets. Must be pushed before a kernel can clone it.
-BRANCH = "feat/seir-gnn"
+BRANCH = "exp/seir-gnn"
 
 ARCHITECTURES = ("A3TGCN", "STGAT", "ASTGCN", "AAGCN", "DCRNN")
 DATASETS = ("original", "reordered", "rebuilt")

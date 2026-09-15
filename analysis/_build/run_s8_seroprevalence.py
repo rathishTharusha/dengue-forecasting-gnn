@@ -38,7 +38,7 @@ def main():
 
     # 9-district survey seroprevalence values (example reported rates / survey reference values)
     # District indices and names from corrected_data
-    districts = cd.DISTRICTS
+    districts = data.names
 
     # Calculate cumulative reported cases up to week 480 (approx Dec 2022)
     cum_cases_2022 = np.nansum(cases[:480], axis=0)

@@ -1,11 +1,11 @@
 {
-  "id": "tharushaperera16/seir-gnn-stage-s5-benchmark",
+  "id": "YOUR-KAGGLE-USERNAME/seir-gnn-stage-s5-benchmark",
   "title": "SEIR GNN Stage S5 benchmark",
   "code_file": "seir_gnn_stage_s5_benchmark.ipynb",
   "language": "python",
   "kernel_type": "notebook",
   "is_private": true,
-  "enable_gpu": true,
+  "enable_gpu": false,
   "enable_internet": true,
   "dataset_sources": [],
   "competition_sources": [],

@@ -23,10 +23,6 @@ _INIT_CODE = '''import sys
 import subprocess
 from pathlib import Path
 
-VENV_SITE = Path("/tmp/repro/venv311/lib/python3.11/site-packages")
-if VENV_SITE.exists() and str(VENV_SITE) not in sys.path:
-    sys.path.insert(0, str(VENV_SITE))
-
 PROJ = Path("/tmp/repro/project") if Path("/tmp/repro/project").exists() else (Path(".").resolve().parent if Path(".").resolve().name in ("notebooks", "kernels", "seir-gnn-full-reproducible-workflow") else Path(".").resolve())
 sys.path.insert(0, str(PROJ / "analysis" / "lib"))
 sys.path.insert(0, str(PROJ / "analysis" / "_build"))

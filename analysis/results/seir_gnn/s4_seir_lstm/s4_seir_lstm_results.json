@@ -4,12 +4,12 @@
     "lambda_max": 1.0,
     "loss_type": "MSE_log1p",
     "origin": 0.55,
-    "seed": 2,
-    "val_RMSE": 48.301605224609375,
-    "val_MAE": 25.951980590820312,
-    "test_RMSE": 88.39805603027344,
-    "test_MAE": 37.36158752441406,
-    "elapsed": 25.876
+    "seed": 0,
+    "val_RMSE": 2549.106689453125,
+    "val_MAE": 2039.8111572265625,
+    "test_RMSE": 2093.79443359375,
+    "test_MAE": 1615.4224853515625,
+    "elapsed": 77.72
   },
   {
     "formulation": "F-win",
@@ -17,47 +17,35 @@
     "loss_type": "MSE_log1p",
     "origin": 0.55,
     "seed": 1,
-    "val_RMSE": 48.54826736450195,
-    "val_MAE": 26.29499626159668,
-    "test_RMSE": 89.04658508300781,
-    "test_MAE": 36.98628616333008,
-    "elapsed": 27.572
+    "val_RMSE": 2190.459228515625,
+    "val_MAE": 1739.2811279296875,
+    "test_RMSE": 1818.1260986328125,
+    "test_MAE": 1392.1163330078125,
+    "elapsed": 90.75
   },
   {
     "formulation": "F-win",
     "lambda_max": 1.0,
     "loss_type": "MSE_log1p",
     "origin": 0.55,
-    "seed": 0,
-    "val_RMSE": 48.59973907470703,
-    "val_MAE": 26.188186645507812,
-    "test_RMSE": 89.13046264648438,
-    "test_MAE": 36.9388427734375,
-    "elapsed": 29.905
-  },
-  {
-    "formulation": "F-win",
-    "lambda_max": 1.0,
-    "loss_type": "MSE_log1p",
-    "origin": 0.7,
-    "seed": 0,
-    "val_RMSE": 21.350439071655273,
-    "val_MAE": 9.362980842590332,
-    "test_RMSE": 29.30563735961914,
-    "test_MAE": 14.574000358581543,
-    "elapsed": 31.51
-  },
-  {
-    "formulation": "F-win",
-    "lambda_max": 1.0,
-    "loss_type": "MSE_log1p",
-    "origin": 0.7,
     "seed": 2,
-    "val_RMSE": 21.338911056518555,
-    "val_MAE": 9.361713409423828,
-    "test_RMSE": 29.287092208862305,
-    "test_MAE": 14.562469482421875,
-    "elapsed": 26.32
+    "val_RMSE": 2444.25048828125,
+    "val_MAE": 1950.78515625,
+    "test_RMSE": 2046.7568359375,
+    "test_MAE": 1579.8211669921875,
+    "elapsed": 88.9
+  },
+  {
+    "formulation": "F-win",
+    "lambda_max": 1.0,
+    "loss_type": "MSE_log1p",
+    "origin": 0.7,
+    "seed": 0,
+    "val_RMSE": 1968.8333740234375,
+    "val_MAE": 1493.4906005859375,
+    "test_RMSE": 1971.138671875,
+    "test_MAE": 1485.5079345703125,
+    "elapsed": 149.28
   },
   {
     "formulation": "F-win",
@@ -65,11 +53,23 @@
     "loss_type": "MSE_log1p",
     "origin": 0.7,
     "seed": 1,
-    "val_RMSE": 21.255020141601562,
-    "val_MAE": 9.23770809173584,
-    "test_RMSE": 29.176881790161133,
-    "test_MAE": 14.435293197631836,
-    "elapsed": 29.203
+    "val_RMSE": 1719.5863037109375,
+    "val_MAE": 1295.5450439453125,
+    "test_RMSE": 1711.2532958984375,
+    "test_MAE": 1280.6375732421875,
+    "elapsed": 77.2
+  },
+  {
+    "formulation": "F-win",
+    "lambda_max": 1.0,
+    "loss_type": "MSE_log1p",
+    "origin": 0.7,
+    "seed": 2,
+    "val_RMSE": 1933.4906005859375,
+    "val_MAE": 1468.823974609375,
+    "test_RMSE": 1898.07080078125,
+    "test_MAE": 1430.311767578125,
+    "elapsed": 42.48
   },
   {
     "formulation": "F-win",
@@ -77,11 +77,11 @@
     "loss_type": "MSE_log1p",
     "origin": 0.85,
     "seed": 0,
-    "val_RMSE": 28.977081298828125,
-    "val_MAE": 19.163299560546875,
-    "test_RMSE": 75.47664642333984,
-    "test_MAE": 37.43015670776367,
-    "elapsed": 28.425
+    "val_RMSE": 1937.745849609375,
+    "val_MAE": 1449.7728271484375,
+    "test_RMSE": 1728.5208740234375,
+    "test_MAE": 1214.1702880859375,
+    "elapsed": 49.84
   },
   {
     "formulation": "F-win",
@@ -89,11 +89,11 @@
     "loss_type": "MSE_log1p",
     "origin": 0.85,
     "seed": 1,
-    "val_RMSE": 28.04388999938965,
-    "val_MAE": 18.198524475097656,
-    "test_RMSE": 74.75922393798828,
-    "test_MAE": 36.528358459472656,
-    "elapsed": 27.68
+    "val_RMSE": 1676.939453125,
+    "val_MAE": 1244.71533203125,
+    "test_RMSE": 1502.41943359375,
+    "test_MAE": 1047.163818359375,
+    "elapsed": 49.81
   },
   {
     "formulation": "F-win",
@@ -101,11 +101,11 @@
     "loss_type": "MSE_log1p",
     "origin": 0.85,
     "seed": 2,
-    "val_RMSE": 28.899677276611328,
-    "val_MAE": 19.165193557739258,
-    "test_RMSE": 75.41500854492188,
-    "test_MAE": 37.35915756225586,
-    "elapsed": 14.336
+    "val_RMSE": 1858.451416015625,
+    "val_MAE": 1389.4613037109375,
+    "test_RMSE": 1670.4747314453125,
+    "test_MAE": 1174.061767578125,
+    "elapsed": 49.91
   },
   {
     "formulation": "F-win",
@@ -113,11 +113,11 @@
     "loss_type": "SMAPE",
     "origin": 0.55,
     "seed": 0,
-    "val_RMSE": 44.9866943359375,
-    "val_MAE": 21.693504333496094,
-    "test_RMSE": 86.45618438720703,
-    "test_MAE": 35.22425079345703,
-    "elapsed": 13.353
+    "val_RMSE": 2572.614990234375,
+    "val_MAE": 2058.572509765625,
+    "test_RMSE": 2109.59228515625,
+    "test_MAE": 1627.43310546875,
+    "elapsed": 27.16
   },
   {
     "formulation": "F-win",
@@ -125,11 +125,11 @@
     "loss_type": "SMAPE",
     "origin": 0.55,
     "seed": 1,
-    "val_RMSE": 44.9952507019043,
-    "val_MAE": 21.769018173217773,
-    "test_RMSE": 86.47900390625,
-    "test_MAE": 35.37898254394531,
-    "elapsed": 12.265
+    "val_RMSE": 2214.556640625,
+    "val_MAE": 1758.7669677734375,
+    "test_RMSE": 1828.367919921875,
+    "test_MAE": 1399.775146484375,
+    "elapsed": 29.64
   },
   {
     "formulation": "F-win",
@@ -137,11 +137,11 @@
     "loss_type": "SMAPE",
     "origin": 0.55,
     "seed": 2,
-    "val_RMSE": 45.0023193359375,
-    "val_MAE": 21.79185676574707,
-    "test_RMSE": 86.49723815917969,
-    "test_MAE": 35.42005157470703,
-    "elapsed": 12.088
+    "val_RMSE": 2474.682861328125,
+    "val_MAE": 1974.7080078125,
+    "test_RMSE": 2059.2783203125,
+    "test_MAE": 1588.5919189453125,
+    "elapsed": 30.86
   },
   {
     "formulation": "F-win",
@@ -149,11 +149,11 @@
     "loss_type": "SMAPE",
     "origin": 0.7,
     "seed": 0,
-    "val_RMSE": 20.175498962402344,
-    "val_MAE": 9.795472145080566,
-    "test_RMSE": 27.646072387695312,
-    "test_MAE": 13.52932071685791,
-    "elapsed": 13.413
+    "val_RMSE": 1983.6044921875,
+    "val_MAE": 1504.2828369140625,
+    "test_RMSE": 1982.9173583984375,
+    "test_MAE": 1492.8438720703125,
+    "elapsed": 39.28
   },
   {
     "formulation": "F-win",
@@ -161,11 +161,11 @@
     "loss_type": "SMAPE",
     "origin": 0.7,
     "seed": 1,
-    "val_RMSE": 20.15354347229004,
-    "val_MAE": 9.780288696289062,
-    "test_RMSE": 27.61439323425293,
-    "test_MAE": 13.4879789352417,
-    "elapsed": 13.27
+    "val_RMSE": 1733.5205078125,
+    "val_MAE": 1306.686279296875,
+    "test_RMSE": 1722.9080810546875,
+    "test_MAE": 1289.2586669921875,
+    "elapsed": 38.19
   },
   {
     "formulation": "F-win",
@@ -173,11 +173,11 @@
     "loss_type": "SMAPE",
     "origin": 0.7,
     "seed": 2,
-    "val_RMSE": 20.14655876159668,
-    "val_MAE": 9.766606330871582,
-    "test_RMSE": 27.61720848083496,
-    "test_MAE": 13.49067211151123,
-    "elapsed": 13.591
+    "val_RMSE": 1944.7113037109375,
+    "val_MAE": 1475.5294189453125,
+    "test_RMSE": 1917.8494873046875,
+    "test_MAE": 1443.331298828125,
+    "elapsed": 38.54
   },
   {
     "formulation": "F-win",
@@ -185,23 +185,11 @@
     "loss_type": "SMAPE",
     "origin": 0.85,
     "seed": 0,
-    "val_RMSE": 25.956100463867188,
-    "val_MAE": 17.018264770507812,
-    "test_RMSE": 73.80891418457031,
-    "test_MAE": 35.01226806640625,
-    "elapsed": 14.368
-  },
-  {
-    "formulation": "F-win",
-    "lambda_max": 1.0,
-    "loss_type": "SMAPE",
-    "origin": 0.85,
-    "seed": 2,
-    "val_RMSE": 25.909605026245117,
-    "val_MAE": 17.069868087768555,
-    "test_RMSE": 73.78936004638672,
-    "test_MAE": 35.03510665893555,
-    "elapsed": 14.845
+    "val_RMSE": 1955.0025634765625,
+    "val_MAE": 1461.18701171875,
+    "test_RMSE": 1743.5771484375,
+    "test_MAE": 1222.169677734375,
+    "elapsed": 45.98
   },
   {
     "formulation": "F-win",
@@ -209,11 +197,23 @@
     "loss_type": "SMAPE",
     "origin": 0.85,
     "seed": 1,
-    "val_RMSE": 25.852487564086914,
-    "val_MAE": 16.879756927490234,
-    "test_RMSE": 73.56288146972656,
-    "test_MAE": 34.740081787109375,
-    "elapsed": 15.108
+    "val_RMSE": 1695.97265625,
+    "val_MAE": 1258.8074951171875,
+    "test_RMSE": 1515.236328125,
+    "test_MAE": 1055.3621826171875,
+    "elapsed": 45.2
+  },
+  {
+    "formulation": "F-win",
+    "lambda_max": 1.0,
+    "loss_type": "SMAPE",
+    "origin": 0.85,
+    "seed": 2,
+    "val_RMSE": 1884.792236328125,
+    "val_MAE": 1407.7843017578125,
+    "test_RMSE": 1688.98095703125,
+    "test_MAE": 1184.0284423828125,
+    "elapsed": 45.36
   },
   {
     "formulation": "F-win",
@@ -221,11 +221,11 @@
     "loss_type": "MSE_log1p",
     "origin": 0.55,
     "seed": 0,
-    "val_RMSE": 48.602073669433594,
-    "val_MAE": 26.18939208984375,
-    "test_RMSE": 89.13339233398438,
-    "test_MAE": 36.953697204589844,
-    "elapsed": 13.328
+    "val_RMSE": 3448.96044921875,
+    "val_MAE": 2812.522705078125,
+    "test_RMSE": 2867.884521484375,
+    "test_MAE": 2256.69677734375,
+    "elapsed": 27.77
   },
   {
     "formulation": "F-win",
@@ -233,11 +233,11 @@
     "loss_type": "MSE_log1p",
     "origin": 0.55,
     "seed": 1,
-    "val_RMSE": 48.59896469116211,
-    "val_MAE": 26.194107055664062,
-    "test_RMSE": 89.1285629272461,
-    "test_MAE": 36.938865661621094,
-    "elapsed": 13.029
+    "val_RMSE": 3143.60546875,
+    "val_MAE": 2550.04541015625,
+    "test_RMSE": 2626.46728515625,
+    "test_MAE": 2054.223388671875,
+    "elapsed": 27.11
   },
   {
     "formulation": "F-win",
@@ -245,11 +245,11 @@
     "loss_type": "MSE_log1p",
     "origin": 0.55,
     "seed": 2,
-    "val_RMSE": 48.582550048828125,
-    "val_MAE": 26.26653289794922,
-    "test_RMSE": 89.10167694091797,
-    "test_MAE": 36.907127380371094,
-    "elapsed": 11.722
+    "val_RMSE": 3366.777099609375,
+    "val_MAE": 2741.204345703125,
+    "test_RMSE": 2831.099365234375,
+    "test_MAE": 2228.0556640625,
+    "elapsed": 29.59
   },
   {
     "formulation": "F-win",
@@ -257,11 +257,11 @@
     "loss_type": "MSE_log1p",
     "origin": 0.7,
     "seed": 0,
-    "val_RMSE": 21.350740432739258,
-    "val_MAE": 9.36413288116455,
-    "test_RMSE": 29.30632209777832,
-    "test_MAE": 14.577919006347656,
-    "elapsed": 14.251
+    "val_RMSE": 2691.09912109375,
+    "val_MAE": 2081.739013671875,
+    "test_RMSE": 2669.027587890625,
+    "test_MAE": 2048.658447265625,
+    "elapsed": 36.89
   },
   {
     "formulation": "F-win",
@@ -269,11 +269,11 @@
     "loss_type": "MSE_log1p",
     "origin": 0.7,
     "seed": 1,
-    "val_RMSE": 21.349435806274414,
-    "val_MAE": 9.360501289367676,
-    "test_RMSE": 29.303321838378906,
-    "test_MAE": 14.570282936096191,
-    "elapsed": 13.591
+    "val_RMSE": 2473.31298828125,
+    "val_MAE": 1902.8077392578125,
+    "test_RMSE": 2449.079833984375,
+    "test_MAE": 1870.382568359375,
+    "elapsed": 35.31
   },
   {
     "formulation": "F-win",
@@ -281,11 +281,11 @@
     "loss_type": "MSE_log1p",
     "origin": 0.7,
     "seed": 2,
-    "val_RMSE": 21.34774398803711,
-    "val_MAE": 9.362285614013672,
-    "test_RMSE": 29.30136489868164,
-    "test_MAE": 14.571066856384277,
-    "elapsed": 12.983
+    "val_RMSE": 2663.3671875,
+    "val_MAE": 2061.87841796875,
+    "test_RMSE": 2611.422119140625,
+    "test_MAE": 2004.35400390625,
+    "elapsed": 38.19
   },
   {
     "formulation": "F-win",
@@ -293,11 +293,35 @@
     "loss_type": "MSE_log1p",
     "origin": 0.85,
     "seed": 0,
-    "val_RMSE": 28.980871200561523,
-    "val_MAE": 19.176822662353516,
-    "test_RMSE": 75.4790267944336,
-    "test_MAE": 37.44590759277344,
-    "elapsed": 15.11
+    "val_RMSE": 2623.744873046875,
+    "val_MAE": 2000.109375,
+    "test_RMSE": 2353.574462890625,
+    "test_MAE": 1688.342529296875,
+    "elapsed": 43.65
+  },
+  {
+    "formulation": "F-win",
+    "lambda_max": 2.0,
+    "loss_type": "MSE_log1p",
+    "origin": 0.85,
+    "seed": 1,
+    "val_RMSE": 2403.625,
+    "val_MAE": 1822.1055908203125,
+    "test_RMSE": 2159.722412109375,
+    "test_MAE": 1540.6207275390625,
+    "elapsed": 43.2
+  },
+  {
+    "formulation": "F-win",
+    "lambda_max": 2.0,
+    "loss_type": "MSE_log1p",
+    "origin": 0.85,
+    "seed": 2,
+    "val_RMSE": 2560.843017578125,
+    "val_MAE": 1951.4071044921875,
+    "test_RMSE": 2307.93701171875,
+    "test_MAE": 1656.1353759765625,
+    "elapsed": 46.64
   },
   {
     "formulation": "F-win",
@@ -305,35 +329,11 @@
     "loss_type": "SMAPE",
     "origin": 0.55,
     "seed": 0,
-    "val_RMSE": 45.074405670166016,
-    "val_MAE": 21.771331787109375,
-    "test_RMSE": 86.58349609375,
-    "test_MAE": 35.33071517944336,
-    "elapsed": 13.002
-  },
-  {
-    "formulation": "F-win",
-    "lambda_max": 2.0,
-    "loss_type": "MSE_log1p",
-    "origin": 0.85,
-    "seed": 2,
-    "val_RMSE": 28.958282470703125,
-    "val_MAE": 19.159297943115234,
-    "test_RMSE": 75.45914459228516,
-    "test_MAE": 37.4005126953125,
-    "elapsed": 13.737
-  },
-  {
-    "formulation": "F-win",
-    "lambda_max": 2.0,
-    "loss_type": "MSE_log1p",
-    "origin": 0.85,
-    "seed": 1,
-    "val_RMSE": 28.974515914916992,
-    "val_MAE": 19.153749465942383,
-    "test_RMSE": 75.47378540039062,
-    "test_MAE": 37.42405700683594,
-    "elapsed": 14.865
+    "val_RMSE": 3468.628173828125,
+    "val_MAE": 2828.426025390625,
+    "test_RMSE": 2882.779296875,
+    "test_MAE": 2268.638671875,
+    "elapsed": 27.4
   },
   {
     "formulation": "F-win",
@@ -341,11 +341,11 @@
     "loss_type": "SMAPE",
     "origin": 0.55,
     "seed": 1,
-    "val_RMSE": 45.10826110839844,
-    "val_MAE": 21.82146453857422,
-    "test_RMSE": 86.61421203613281,
-    "test_MAE": 35.38814926147461,
-    "elapsed": 12.154
+    "val_RMSE": 3167.904541015625,
+    "val_MAE": 2570.379150390625,
+    "test_RMSE": 2639.219482421875,
+    "test_MAE": 2064.65625,
+    "elapsed": 26.9
   },
   {
     "formulation": "F-win",
@@ -353,11 +353,11 @@
     "loss_type": "SMAPE",
     "origin": 0.55,
     "seed": 2,
-    "val_RMSE": 45.06312561035156,
-    "val_MAE": 21.85838508605957,
-    "test_RMSE": 86.64374542236328,
-    "test_MAE": 35.54170227050781,
-    "elapsed": 12.177
+    "val_RMSE": 3393.3271484375,
+    "val_MAE": 2762.3359375,
+    "test_RMSE": 2842.419921875,
+    "test_MAE": 2236.138671875,
+    "elapsed": 28.18
   },
   {
     "formulation": "F-win",
@@ -365,11 +365,11 @@
     "loss_type": "SMAPE",
     "origin": 0.7,
     "seed": 0,
-    "val_RMSE": 20.215646743774414,
-    "val_MAE": 9.911086082458496,
-    "test_RMSE": 27.644702911376953,
-    "test_MAE": 13.563313484191895,
-    "elapsed": 13.089
+    "val_RMSE": 2706.869384765625,
+    "val_MAE": 2093.874755859375,
+    "test_RMSE": 2680.113037109375,
+    "test_MAE": 2055.826904296875,
+    "elapsed": 37.05
   },
   {
     "formulation": "F-win",
@@ -377,11 +377,11 @@
     "loss_type": "SMAPE",
     "origin": 0.7,
     "seed": 1,
-    "val_RMSE": 20.10863494873047,
-    "val_MAE": 9.830572128295898,
-    "test_RMSE": 27.552406311035156,
-    "test_MAE": 13.523361206054688,
-    "elapsed": 13.005
+    "val_RMSE": 2492.62841796875,
+    "val_MAE": 1919.2166748046875,
+    "test_RMSE": 2461.4296875,
+    "test_MAE": 1880.097412109375,
+    "elapsed": 36.73
   },
   {
     "formulation": "F-win",
@@ -389,11 +389,11 @@
     "loss_type": "SMAPE",
     "origin": 0.7,
     "seed": 2,
-    "val_RMSE": 20.22005271911621,
-    "val_MAE": 9.984199523925781,
-    "test_RMSE": 27.60218048095703,
-    "test_MAE": 13.544586181640625,
-    "elapsed": 14.207
+    "val_RMSE": 2675.490478515625,
+    "val_MAE": 2069.90478515625,
+    "test_RMSE": 2629.385498046875,
+    "test_MAE": 2016.42431640625,
+    "elapsed": 37.27
   },
   {
     "formulation": "F-win",
@@ -401,11 +401,11 @@
     "loss_type": "SMAPE",
     "origin": 0.85,
     "seed": 0,
-    "val_RMSE": 25.933494567871094,
-    "val_MAE": 17.078550338745117,
-    "test_RMSE": 73.81794738769531,
-    "test_MAE": 35.06963348388672,
-    "elapsed": 15.043
+    "val_RMSE": 2636.6044921875,
+    "val_MAE": 2008.8382568359375,
+    "test_RMSE": 2366.276611328125,
+    "test_MAE": 1695.4638671875,
+    "elapsed": 45.08
   },
   {
     "formulation": "F-win",
@@ -413,11 +413,11 @@
     "loss_type": "SMAPE",
     "origin": 0.85,
     "seed": 1,
-    "val_RMSE": 25.87032699584961,
-    "val_MAE": 16.898672103881836,
-    "test_RMSE": 73.60184478759766,
-    "test_MAE": 34.76036071777344,
-    "elapsed": 14.972
+    "val_RMSE": 2422.4306640625,
+    "val_MAE": 1836.9796142578125,
+    "test_RMSE": 2174.114990234375,
+    "test_MAE": 1550.5804443359375,
+    "elapsed": 43.96
   },
   {
     "formulation": "F-win",
@@ -425,11 +425,11 @@
     "loss_type": "SMAPE",
     "origin": 0.85,
     "seed": 2,
-    "val_RMSE": 26.03269386291504,
-    "val_MAE": 17.194955825805664,
-    "test_RMSE": 73.9036865234375,
-    "test_MAE": 35.22658157348633,
-    "elapsed": 14.859
+    "val_RMSE": 2583.713134765625,
+    "val_MAE": 1967.572021484375,
+    "test_RMSE": 2325.05224609375,
+    "test_MAE": 1665.645751953125,
+    "elapsed": 46.63
   },
   {
     "formulation": "F-win",
@@ -437,11 +437,11 @@
     "loss_type": "MSE_log1p",
     "origin": 0.55,
     "seed": 0,
-    "val_RMSE": 48.60438537597656,
-    "val_MAE": 26.198898315429688,
-    "test_RMSE": 89.13541412353516,
-    "test_MAE": 36.96220779418945,
-    "elapsed": 11.502
+    "val_RMSE": 4036.856689453125,
+    "val_MAE": 3288.479248046875,
+    "test_RMSE": 3387.669189453125,
+    "test_MAE": 2669.852783203125,
+    "elapsed": 27.91
   },
   {
     "formulation": "F-win",
@@ -449,11 +449,11 @@
     "loss_type": "MSE_log1p",
     "origin": 0.55,
     "seed": 1,
-    "val_RMSE": 48.60329818725586,
-    "val_MAE": 26.200504302978516,
-    "test_RMSE": 89.13300323486328,
-    "test_MAE": 36.95075988769531,
-    "elapsed": 11.592
+    "val_RMSE": 3859.88916015625,
+    "val_MAE": 3156.176513671875,
+    "test_RMSE": 3243.275146484375,
+    "test_MAE": 2561.544677734375,
+    "elapsed": 26.89
   },
   {
     "formulation": "F-win",
@@ -461,11 +461,11 @@
     "loss_type": "MSE_log1p",
     "origin": 0.55,
     "seed": 2,
-    "val_RMSE": 48.60225296020508,
-    "val_MAE": 26.18863868713379,
-    "test_RMSE": 89.13317108154297,
-    "test_MAE": 36.95431137084961,
-    "elapsed": 11.299
+    "val_RMSE": 3992.05029296875,
+    "val_MAE": 3256.361083984375,
+    "test_RMSE": 3367.25634765625,
+    "test_MAE": 2656.601318359375,
+    "elapsed": 27.69
   },
   {
     "formulation": "F-win",
@@ -473,11 +473,11 @@
     "loss_type": "MSE_log1p",
     "origin": 0.7,
     "seed": 0,
-    "val_RMSE": 21.35161018371582,
-    "val_MAE": 9.362485885620117,
-    "test_RMSE": 29.307636260986328,
-    "test_MAE": 14.579758644104004,
-    "elapsed": 12.747
+    "val_RMSE": 3175.0654296875,
+    "val_MAE": 2460.1318359375,
+    "test_RMSE": 3125.385498046875,
+    "test_MAE": 2396.939697265625,
+    "elapsed": 39.25
   },
   {
     "formulation": "F-win",
@@ -485,11 +485,11 @@
     "loss_type": "MSE_log1p",
     "origin": 0.7,
     "seed": 1,
-    "val_RMSE": 21.350933074951172,
-    "val_MAE": 9.361846923828125,
-    "test_RMSE": 29.30625343322754,
-    "test_MAE": 14.576045989990234,
-    "elapsed": 14.715
+    "val_RMSE": 3045.487548828125,
+    "val_MAE": 2364.960205078125,
+    "test_RMSE": 2998.94873046875,
+    "test_MAE": 2307.57861328125,
+    "elapsed": 35.7
   },
   {
     "formulation": "F-win",
@@ -497,11 +497,11 @@
     "loss_type": "MSE_log1p",
     "origin": 0.7,
     "seed": 2,
-    "val_RMSE": 21.351112365722656,
-    "val_MAE": 9.366137504577637,
-    "test_RMSE": 29.306358337402344,
-    "test_MAE": 14.577567100524902,
-    "elapsed": 14.362
+    "val_RMSE": 3159.4267578125,
+    "val_MAE": 2450.70556640625,
+    "test_RMSE": 3094.142822265625,
+    "test_MAE": 2377.109375,
+    "elapsed": 36.51
   },
   {
     "formulation": "F-win",
@@ -509,11 +509,11 @@
     "loss_type": "MSE_log1p",
     "origin": 0.85,
     "seed": 0,
-    "val_RMSE": 28.980087280273438,
-    "val_MAE": 19.179553985595703,
-    "test_RMSE": 75.4844970703125,
-    "test_MAE": 37.4852180480957,
-    "elapsed": 15.308
+    "val_RMSE": 3071.221435546875,
+    "val_MAE": 2339.076904296875,
+    "test_RMSE": 2768.094970703125,
+    "test_MAE": 1987.31494140625,
+    "elapsed": 48.1
   },
   {
     "formulation": "F-win",
@@ -521,11 +521,11 @@
     "loss_type": "MSE_log1p",
     "origin": 0.85,
     "seed": 1,
-    "val_RMSE": 28.727941513061523,
-    "val_MAE": 19.04758644104004,
-    "test_RMSE": 75.33300018310547,
-    "test_MAE": 37.305606842041016,
-    "elapsed": 15.23
+    "val_RMSE": 2945.351318359375,
+    "val_MAE": 2250.4931640625,
+    "test_RMSE": 2654.60888671875,
+    "test_MAE": 1911.2342529296875,
+    "elapsed": 49.0
   },
   {
     "formulation": "F-win",
@@ -533,11 +533,11 @@
     "loss_type": "MSE_log1p",
     "origin": 0.85,
     "seed": 2,
-    "val_RMSE": 28.97589111328125,
-    "val_MAE": 19.176725387573242,
-    "test_RMSE": 75.46953582763672,
-    "test_MAE": 37.4234504699707,
-    "elapsed": 13.169
+    "val_RMSE": 3036.65380859375,
+    "val_MAE": 2317.0185546875,
+    "test_RMSE": 2742.896484375,
+    "test_MAE": 1972.6312255859375,
+    "elapsed": 48.68
   },
   {
     "formulation": "F-win",
@@ -545,11 +545,11 @@
     "loss_type": "SMAPE",
     "origin": 0.55,
     "seed": 0,
-    "val_RMSE": 44.98072052001953,
-    "val_MAE": 21.825510025024414,
-    "test_RMSE": 86.52715301513672,
-    "test_MAE": 35.41995620727539,
-    "elapsed": 12.177
+    "val_RMSE": 4051.806884765625,
+    "val_MAE": 3299.27294921875,
+    "test_RMSE": 3402.88330078125,
+    "test_MAE": 2680.73388671875,
+    "elapsed": 31.42
   },
   {
     "formulation": "F-win",
@@ -557,11 +557,11 @@
     "loss_type": "SMAPE",
     "origin": 0.55,
     "seed": 1,
-    "val_RMSE": 45.09061813354492,
-    "val_MAE": 21.855266571044922,
-    "test_RMSE": 86.683349609375,
-    "test_MAE": 35.493595123291016,
-    "elapsed": 12.111
+    "val_RMSE": 3875.28125,
+    "val_MAE": 3167.90478515625,
+    "test_RMSE": 3251.021484375,
+    "test_MAE": 2567.344482421875,
+    "elapsed": 29.23
   },
   {
     "formulation": "F-win",
@@ -569,11 +569,11 @@
     "loss_type": "SMAPE",
     "origin": 0.55,
     "seed": 2,
-    "val_RMSE": 45.11914825439453,
-    "val_MAE": 21.805274963378906,
-    "test_RMSE": 86.61919403076172,
-    "test_MAE": 35.28318405151367,
-    "elapsed": 12.215
+    "val_RMSE": 4015.507568359375,
+    "val_MAE": 3272.112548828125,
+    "test_RMSE": 3377.445556640625,
+    "test_MAE": 2662.225830078125,
+    "elapsed": 28.51
   },
   {
     "formulation": "F-win",
@@ -581,11 +581,11 @@
     "loss_type": "SMAPE",
     "origin": 0.7,
     "seed": 0,
-    "val_RMSE": 20.209728240966797,
-    "val_MAE": 9.896424293518066,
-    "test_RMSE": 27.655508041381836,
-    "test_MAE": 13.539610862731934,
-    "elapsed": 13.676
+    "val_RMSE": 3195.046875,
+    "val_MAE": 2473.87744140625,
+    "test_RMSE": 3135.996337890625,
+    "test_MAE": 2403.097412109375,
+    "elapsed": 37.09
   },
   {
     "formulation": "F-win",
@@ -593,11 +593,11 @@
     "loss_type": "SMAPE",
     "origin": 0.7,
     "seed": 1,
-    "val_RMSE": 20.183521270751953,
-    "val_MAE": 9.72635269165039,
-    "test_RMSE": 27.697608947753906,
-    "test_MAE": 13.495044708251953,
-    "elapsed": 13.914
+    "val_RMSE": 3062.47607421875,
+    "val_MAE": 2379.030517578125,
+    "test_RMSE": 3008.106689453125,
+    "test_MAE": 2314.694580078125,
+    "elapsed": 37.77
   },
   {
     "formulation": "F-win",
@@ -605,11 +605,11 @@
     "loss_type": "SMAPE",
     "origin": 0.7,
     "seed": 2,
-    "val_RMSE": 20.295610427856445,
-    "val_MAE": 10.033501625061035,
-    "test_RMSE": 27.681379318237305,
-    "test_MAE": 13.59669017791748,
-    "elapsed": 14.319
+    "val_RMSE": 3175.8203125,
+    "val_MAE": 2461.231201171875,
+    "test_RMSE": 3112.03271484375,
+    "test_MAE": 2388.01611328125,
+    "elapsed": 37.86
   },
   {
     "formulation": "F-win",
@@ -617,11 +617,11 @@
     "loss_type": "SMAPE",
     "origin": 0.85,
     "seed": 0,
-    "val_RMSE": 25.76837730407715,
-    "val_MAE": 17.011247634887695,
-    "test_RMSE": 73.69001770019531,
-    "test_MAE": 34.91024398803711,
-    "elapsed": 14.581
+    "val_RMSE": 3081.405517578125,
+    "val_MAE": 2345.146728515625,
+    "test_RMSE": 2781.240478515625,
+    "test_MAE": 1994.440673828125,
+    "elapsed": 46.54
   },
   {
     "formulation": "F-win",
@@ -629,11 +629,11 @@
     "loss_type": "SMAPE",
     "origin": 0.85,
     "seed": 1,
-    "val_RMSE": 25.960323333740234,
-    "val_MAE": 17.126100540161133,
-    "test_RMSE": 73.84842681884766,
-    "test_MAE": 35.143409729003906,
-    "elapsed": 11.857
+    "val_RMSE": 2957.195556640625,
+    "val_MAE": 2259.57275390625,
+    "test_RMSE": 2665.739990234375,
+    "test_MAE": 1919.0592041015625,
+    "elapsed": 46.77
   },
   {
     "formulation": "F-win",
@@ -641,10 +641,10 @@
     "loss_type": "SMAPE",
     "origin": 0.85,
     "seed": 2,
-    "val_RMSE": 25.988956451416016,
-    "val_MAE": 17.200193405151367,
-    "test_RMSE": 73.87934875488281,
-    "test_MAE": 35.17401885986328,
-    "elapsed": 11.252
+    "val_RMSE": 3054.508056640625,
+    "val_MAE": 2327.86279296875,
+    "test_RMSE": 2758.128173828125,
+    "test_MAE": 1980.5113525390625,
+    "elapsed": 46.26
   }
 ]

@@ -47,7 +47,8 @@ print(f"Districts ({len(data.names)}): {', '.join(data.names)}")
 df_cases = pd.DataFrame(data.cases, columns=data.names, index=data.week_start)
 stats = df_cases.describe().T[["mean", "std", "min", "50%", "max"]]
 stats["missing_weeks"] = np.isnan(data.cases).sum(axis=0)
-print("\n=== District Case Statistics ===")
+print("")
+print("=== District Case Statistics ===")
 print(stats.round(2))
 '''
 
@@ -339,7 +340,8 @@ for i in range(len(models)):
 plt.tight_layout()
 plt.show()
 
-print("\n=== Master Verification Completed Successfully ===")
+print("")
+print("=== Master Verification Completed Successfully ===")
 '''
 
 

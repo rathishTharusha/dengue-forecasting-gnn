@@ -28,10 +28,10 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-REPO = Path(".").resolve().parent if Path(".").resolve().name in ("notebooks", "kernels", "seir-gnn-full-reproducible-workflow") else Path(".").resolve()
-sys.path.insert(0, str(REPO / "analysis" / "lib"))
-sys.path.insert(0, str(REPO / "analysis" / "_build"))
-sys.path.insert(0, str(REPO / "src"))
+PROJ = Path("/tmp/repro/project") if Path("/tmp/repro/project").exists() else (Path(".").resolve().parent if Path(".").resolve().name in ("notebooks", "kernels", "seir-gnn-full-reproducible-workflow") else Path(".").resolve())
+sys.path.insert(0, str(PROJ / "analysis" / "lib"))
+sys.path.insert(0, str(PROJ / "analysis" / "_build"))
+sys.path.insert(0, str(PROJ / "src"))
 
 import corrected_data as cd
 import reproduced as arch

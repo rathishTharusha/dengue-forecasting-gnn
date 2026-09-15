@@ -1,11 +1,11 @@
 {
-  "id": "YOUR-KAGGLE-USERNAME/seir-gnn-full-reproducible-workflow",
+  "id": "tharushaperera16/seir-gnn-full-reproducible-workflow",
   "title": "SEIR GNN full reproducible workflow",
   "code_file": "seir_gnn_full_reproducible_workflow.ipynb",
   "language": "python",
   "kernel_type": "notebook",
   "is_private": true,
-  "enable_gpu": false,
+  "enable_gpu": true,
   "enable_internet": true,
   "dataset_sources": [],
   "competition_sources": [],

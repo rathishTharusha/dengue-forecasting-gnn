@@ -1,7 +1,16 @@
 """Unit tests for the SEIR-LSTM model and simulator interface."""
 
-import torch
-from seir_lstm import SEIRLSTMHead, step_seir_window
+import sys
+from pathlib import Path
+
+import pytest
+
+torch = pytest.importorskip("torch")
+
+REPO = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(REPO / "analysis" / "lib"))
+
+from seir_lstm import SEIRLSTMHead, step_seir_window  # noqa: E402
 
 
 def test_seir_lstm_head_dimensions():

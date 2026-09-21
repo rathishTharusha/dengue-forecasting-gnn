@@ -15,8 +15,9 @@ from copy import deepcopy
 from pathlib import Path
 
 import numpy as np
-import pandas as pd
 import pytest
+
+pd = pytest.importorskip("pandas")
 
 REPO = Path(__file__).resolve().parent.parent
 _SPEC = importlib.util.spec_from_file_location(

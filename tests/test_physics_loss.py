@@ -1,9 +1,9 @@
-"""Tests for the biological envelope and spatial physics loss functions."""
-
 import sys
 from pathlib import Path
 
-import torch
+import pytest
+
+torch = pytest.importorskip("torch")
 
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO / "analysis" / "lib"))

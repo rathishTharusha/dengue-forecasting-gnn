@@ -1,8 +1,6 @@
 """Unit tests for the SEIR-LSTM model and simulator interface."""
 
-import pytest
 import torch
-
 from seir_lstm import SEIRLSTMHead, step_seir_window
 
 

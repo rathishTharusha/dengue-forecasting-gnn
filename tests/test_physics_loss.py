@@ -1,9 +1,9 @@
-"""Tests for the biological envelope and spatial physics loss functions."""
-
 import sys
 from pathlib import Path
 
-import torch
+import pytest
+
+torch = pytest.importorskip("torch")
 
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO / "analysis" / "lib"))
@@ -95,13 +95,17 @@ def test_log_smoothness_does_not_concentrate_on_outbreaks():
     """
     adj = torch.tensor([[1.0, 1.0], [1.0, 1.0]])
     scales = torch.tensor([100.0, 100.0])
-    quiet = torch.tensor([[[200.0], [100.0]]])       # 2x vs 1x baseline
-    outbreak = torch.tensor([[[2000.0], [100.0]]])   # 20x vs 1x baseline
+    quiet = torch.tensor([[[200.0], [100.0]]])  # 2x vs 1x baseline
+    outbreak = torch.tensor([[[2000.0], [100.0]]])  # 20x vs 1x baseline
 
-    ratio_conc = (ploss.normalized_smoothness_loss(outbreak, adj, scales)
-                  / ploss.normalized_smoothness_loss(quiet, adj, scales)).item()
-    log_conc = (ploss.log_smoothness_loss(outbreak, adj, scales)
-                / ploss.log_smoothness_loss(quiet, adj, scales)).item()
+    ratio_conc = (
+        ploss.normalized_smoothness_loss(outbreak, adj, scales)
+        / ploss.normalized_smoothness_loss(quiet, adj, scales)
+    ).item()
+    log_conc = (
+        ploss.log_smoothness_loss(outbreak, adj, scales)
+        / ploss.log_smoothness_loss(quiet, adj, scales)
+    ).item()
     assert ratio_conc > 100.0, "ratio form should blow up on the outbreak week"
     assert log_conc < ratio_conc / 10.0, (
         f"log concentration {log_conc:.1f} should be an order of magnitude below "

@@ -1,0 +1,2 @@
+
+'charmap' codec can't encode characters in position 1300-1339: character maps to <undefined>

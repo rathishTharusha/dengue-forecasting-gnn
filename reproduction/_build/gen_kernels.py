@@ -30,7 +30,7 @@ KERNELS_DIR = ROOT / "kaggle" / "kernels"
 NOTEBOOKS_DIR = ROOT / "notebooks"
 
 #: Placeholder until `setup_kaggle.py --init-metadata` writes the real username.
-USERNAME_PLACEHOLDER = "YOUR-KAGGLE-USERNAME"
+USERNAME_PLACEHOLDER = "tharushaperera16"
 
 
 def slugify(title: str) -> str:
@@ -90,12 +90,11 @@ def notebook(cells: list[dict]) -> dict:
     }
 
 
-def kernel_metadata(slug: str, title: str, notebook_name: str) -> dict:
+def kernel_metadata(slug: str, title: str, notebook_name: str, enable_gpu: bool = False) -> dict:
     """Kaggle kernel settings.
 
-    ``enable_gpu`` is False deliberately: the paper states the models were
-    trained on a CPU (§II.D). ``enable_internet`` is required because the
-    notebook clones the authors' repository and installs pinned wheels.
+    ``enable_gpu`` can be enabled for GPU-accelerated master runs.
+    ``enable_internet`` is required because the notebook clones the repository.
     """
     return {
         "id": f"{USERNAME_PLACEHOLDER}/{slug}",
@@ -104,7 +103,7 @@ def kernel_metadata(slug: str, title: str, notebook_name: str) -> dict:
         "language": "python",
         "kernel_type": "notebook",
         "is_private": True,
-        "enable_gpu": False,
+        "enable_gpu": enable_gpu,
         "enable_internet": True,
         "dataset_sources": [],
         "competition_sources": [],
@@ -112,7 +111,7 @@ def kernel_metadata(slug: str, title: str, notebook_name: str) -> dict:
     }
 
 
-def write_kernel(title: str, cells: list[dict]) -> None:
+def write_kernel(title: str, cells: list[dict], enable_gpu: bool = False) -> None:
     """Emit one kernel directory plus a readable copy under notebooks/.
 
     The directory name, the notebook filename and the Kaggle id all derive from
@@ -126,7 +125,7 @@ def write_kernel(title: str, cells: list[dict]) -> None:
     kernel_dir.mkdir(parents=True, exist_ok=True)
     (kernel_dir / name).write_text(payload, encoding="utf-8")
     (kernel_dir / "kernel-metadata.json").write_text(
-        json.dumps(kernel_metadata(slug, title, name), indent=2) + "\n", encoding="utf-8"
+        json.dumps(kernel_metadata(slug, title, name, enable_gpu=enable_gpu), indent=2) + "\n", encoding="utf-8"
     )
 
     NOTEBOOKS_DIR.mkdir(parents=True, exist_ok=True)
@@ -183,3 +182,16 @@ if __name__ == "__main__":
     # Run this one FIRST: a --quick smoke of every configuration, so a shape
     # error in a wide multivariate input costs minutes instead of hours.
     write_kernel("Beat floor preflight", cells_beat.build_preflight())
+
+    # The array's rows turned out not to be in date order (docs/ARRAY_AUDIT.md).
+    # Same training loop on the original and both corrected case series.
+    import cells_corrected
+    import cells_s5
+    import cells_master
+
+    for arch in cells_corrected.ARCHITECTURES:
+        write_kernel(f"Corrected benchmark {arch}", cells_corrected.build(arch))
+
+    write_kernel("SEIR GNN Stage S5 benchmark", cells_s5.build())
+    write_kernel("SEIR GNN full reproducible workflow", cells_master.build_master_notebook(), enable_gpu=True)
+

@@ -1,0 +1,13 @@
+{
+  "id": "tharushaperera16/corrected-benchmark-aagcn",
+  "title": "Corrected benchmark AAGCN",
+  "code_file": "corrected_benchmark_aagcn.ipynb",
+  "language": "python",
+  "kernel_type": "notebook",
+  "is_private": true,
+  "enable_gpu": false,
+  "enable_internet": true,
+  "dataset_sources": [],
+  "competition_sources": [],
+  "kernel_sources": []
+}

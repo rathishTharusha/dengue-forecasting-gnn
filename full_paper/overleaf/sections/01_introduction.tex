@@ -1,0 +1,56 @@
+%=============================================================================
+% INTRODUCTION
+%=============================================================================
+\section{Introduction}
+\label{sec:intro}
+
+\cA{Dengue is the fastest-spreading mosquito-borne viral disease globally, and Sri
+Lanka faces recurring severe epidemics: the 2017 outbreak alone recorded over
+186{,}000 cases and 440 deaths~\cite{tissera2020severe}. Roughly three weeks
+separate infection from clinical diagnosis, so district-level forecasts issued
+$H=3$ weeks ahead carry actionable lead time for pre-positioning clinical capacity
+and intensifying vector control.}
+
+\cB{Three properties shape the task. Transmission is spatially coupled, which
+motivates a graph; the panel is small (25 districts, 459 weeks) so parameters are
+cheap to overfit; and the target is severely heavy-tailed (skewness 8.6, the top
+1\% of district-weeks holding 18.3\% of cases), which makes squared error a
+measurement of a few dozen windows.}
+
+\cC{A fourth property is easy to miss and dominates the rest: weekly incidence is
+strongly autocorrelated. Cases at $t-1$ explain $r^2=0.85$ of cases at $t$. Any
+model is therefore competing against a naive persistence forecast
+$\hat{y}_{t+h}=y_t$ that is already close to optimal, and a benchmark that omits
+that baseline cannot tell whether its architecture contributed anything. Weng
+et al.~\cite{weng2024graph}, the reference benchmark for this dataset, omit it.}
+
+\cD{We proposed three stackable contributions to an ST-GNN baseline: (a) a
+physics-informed loss from an SEIR--SEI compartmental model, as
+$\mathcal{L}_{\mathrm{data}} + \lambda_p\mathcal{L}_{\mathrm{phys}} +
+\lambda_c\mathcal{L}_{\mathrm{cons}} + \lambda_s\mathcal{L}_{\mathrm{smooth}}$;
+(b) GAN augmentation; and (c) a learned adaptive graph. This paper reports (a) and
+(c); (b) is left to the full study. Establishing what the baseline actually
+\emph{was} turned out to be the harder problem, and it reframes the target. Cases
+at $t-1$ explain $r^2=0.85$ of cases at $t$, so \emph{how many} is close to
+answered before a model starts; \emph{when}---which district crosses an alert
+threshold, and roughly when---is not. That is the question early warning actually
+asks, and it is where we find the mechanism earns its place.}
+
+\noindent\textbf{Contributions.}
+\begin{itemize}\itemsep1pt
+  \item \textbf{Exact reproduction.} Five published ST-GNNs to within 7.3\%
+        across twenty comparisons; the reported column is training-inclusive and
+        per-window averaged, and naive persistence beats every model in it
+        (\S\ref{sec:repro}).
+  \item \textbf{An artifact-aware protocol.} A 19$\times$ reporting backlog at
+        week~395 occupies one fold's test split, carries $\sim$90\% of its squared
+        error and inverts fold difficulty; we score every arm and the baseline
+        with and without it (\S\ref{sec:setup}).
+  \item \textbf{A null result, stated as one.} Over 3 origins $\times$ 3 seeds, no
+        architecture and no increment differs from its own baseline at $p<0.05$
+        against an artifact-free floor of 29.52 (\S\ref{sec:results}).
+  \item \textbf{Why the mechanistic prior cannot help, and where it can.}
+        $R_t$ is 26\% predictable, implying a 1.90$\times$ error per step
+        (\S\ref{sec:physics}); the same quantity is the largest single contributor
+        to ranking outbreaks three weeks ahead (\S\ref{sec:constraint}).
+\end{itemize}

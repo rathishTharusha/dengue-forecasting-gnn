@@ -1,0 +1,26 @@
+{
+  "shape": [
+    559,
+    25,
+    6
+  ],
+  "channels": [
+    "temperature_2m_mean",
+    "temperature_2m_min",
+    "temperature_2m_max",
+    "precipitation_sum",
+    "relative_humidity_2m_mean",
+    "soil_moisture_0_to_7cm_mean"
+  ],
+  "units": [
+    "degC",
+    "degC",
+    "degC",
+    "mm/week",
+    "%",
+    "m3/m3"
+  ],
+  "aggregation": "7-day mean from week_start (precipitation: 7-day total)",
+  "lag": "none -- each row is the same calendar week as the cases; apply lags in the model",
+  "source": "ERA5 (Hersbach et al. 2023, doi:10.24381/cds.adbb2d47) via Open-Meteo, CC BY 4.0"
+}

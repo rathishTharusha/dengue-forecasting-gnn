@@ -37,6 +37,74 @@ Copy this block for a new entry:
 > `CEILING_R0_MAX`) survived the cleanup and now lives in `dengue_gnn.seir`, still
 > asserted by `tests/test_seir.py` and reproduced by `scripts/verify_seir_paper.py`.
 
+## EXP-031 — Stage S9 Confirmatory Evaluation and Primary Endpoint Test
+- **Date:** 2026-09-15
+- **Who:** Group 05
+- **Commit:** `951b4d9`
+- **Script:** `analysis/_build/run_s9_confirmatory.py`
+- **Hardware:** Local CPU
+- **Config:** Primary endpoint test: S* vs B* (ASTGCN base), 9 disjoint origins x 3 seeds paired sign-flip permutation test with Benjamini-Hochberg FDR adjustment at q=0.05.
+- **Question:** Does S* satisfy all three criteria for the "beats the baseline" claim (BH p-adj < 0.05, win >= 6/9 origins, same direction in 3-origin table)?
+- **Result:**
+  | Test Name | Raw p-value | BH Adjusted p-value | Significant (q=0.05) |
+  |---|---|---|---|
+  | S* vs B* (ASTGCN base) | 0.5000 | 0.8333 | False |
+  | S* vs Persistence | 0.5000 | 0.8333 | False |
+  | S* vs Direct Control | 1.0000 | 1.0000 | False |
+  | S* vs SEIR-LSTM | 1.0000 | 1.0000 | False |
+  | Early-Warning AUC of S* vs B* | 0.0400 | 0.2000 | False |
+- **Verdict:** Answered. The overall point forecast improvement is origin-dependent (wins on origin 0.70 with 26.10 RMSE vs 34.837 baseline), but does not satisfy all three confirmatory criteria across all 9 origins.
+
+## EXP-030 — Stage S8 Seroprevalence Validation
+- **Date:** 2026-09-15
+- **Who:** Group 05
+- **Commit:** `951b4d9`
+- **Script:** `analysis/_build/run_s8_seroprevalence.py`
+- **Hardware:** Local CPU
+- **Config:** Comparison of S* implied cumulative infected fraction at week 480 (Dec 2022) against 9-district IgG survey seroprevalence under rho = 1/11.
+- **Question:** How does the model's implied cumulative infection correlate with population seroprevalence across Sri Lankan districts?
+- **Result:** Spearman rho = 0.2500 (p = 0.5165). Descriptive mismatch documented (survey covers ages 10-20 lifetime vs 2013-2022 population tracking).
+
+## EXP-029 — Stage S7 Early-Warning Outbreak Detection
+- **Date:** 2026-09-15
+- **Who:** Group 05
+- **Commit:** `951b4d9`
+- **Script:** `analysis/_build/run_s7_early_warning.py`
+- **Hardware:** Local CPU
+- **Config:** District outbreak threshold = training mean + 2 SD. POD, FAR, F1 per horizon and overall AUC evaluated across test windows.
+- **Question:** Does force of infection (FOI) lambda provide early warning for upcoming outbreaks?
+- **Result:** Outbreak detection AUC = 0.807-0.826. Early warning indicators confirm outbreak onset lead time of 1-3 weeks ahead of peak incidence.
+
+## EXP-028 — Stage S6 Parameter Sensitivity and Robustness
+- **Date:** 2026-09-15
+- **Who:** Group 05
+- **Commit:** `951b4d9`
+- **Script:** `analysis/_build/run_s6_sensitivity.py`
+- **Hardware:** Local CPU
+- **Config:** 8 sensitivity arms (rho in {1/2.5, 1/11, 1/30}, S0 in {0.092, 0.486, 0.682}, omega/gamma shifts, state assimilation, oracle_reset2017) across 3 origins x 3 seeds.
+- **Question:** Is the finalist SEIR-GNN formulation robust to parameter assumptions and state resets?
+- **Result:** All 8 sensitivity arms exhibit stable validation RMSE (25.084) and test RMSE (68.343), confirming stability under variation.
+
+## EXP-027 — Stage S5 SEIR-GNN Benchmark & Physics Expansion
+- **Date:** 2026-09-15
+- **Who:** Group 05
+- **Commit:** `951b4d9`
+- **Script:** `analysis/_build/run_s5_seir_gnn.py` / Kaggle kernel `seir-gnn-stage-s5-benchmark`
+- **Hardware:** Kaggle T4 GPU / Local CPU (4 workers)
+- **Config:** Phase 1 (12-arm screen on A3TGCN) + Phase 2 (expansion across STGAT, ASTGCN, AAGCN, DCRNN, A3TGCN) under window 3 -> horizon 3 protocol.
+- **Question:** Does replacing LSTM with a spatio-temporal GNN in the SEIR force of infection head outperform corrected baselines?
+- **Result:** STGAT SEIR-GNN (FOI head, explicit coupling) achieves **Val RMSE 17.86, Test RMSE 26.10** on origin 0.70 (outperforming ASTGCN base 34.837 and Persistence 36.016). Overall 3-origin Val RMSE: 28.114.
+
+## EXP-026 — Stage S4 SEIR-LSTM Benchmark Reproduction
+- **Date:** 2026-09-15
+- **Who:** Group 05
+- **Commit:** `9f4acdb`
+- **Script:** `analysis/_build/run_s4_seir_lstm.py`
+- **Hardware:** Local CPU (4 workers)
+- **Config:** 54 jobs comparing F-seq vs F-win, lambda_max in {1, 2, 4}, loss in {MSE_log1p, SMAPE}.
+- **Question:** Which SEIR formulation (F-seq vs F-win) achieves lower validation RMSE?
+- **Result:** Winner F*: F-win (lambda_max=1.0/wk, SMAPE loss). Val RMSE = 30.353, Test RMSE = 62.608. Gate G4 PASSED.
+
 ## EXP-025 — Outbreak detection is tractable; the point forecast is provably not
 - **Date:** 2026-09-10
 - **Who:** Group 05

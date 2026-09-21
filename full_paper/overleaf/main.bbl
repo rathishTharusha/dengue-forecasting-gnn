@@ -1,0 +1,119 @@
+%%% -*-BibTeX-*-
+%%% Do NOT edit. File created by BibTeX with style
+%%% ACM-Reference-Format-Journals [18-Jan-2012].
+
+\begin{thebibliography}{6}
+
+%%% ====================================================================
+%%% NOTE TO THE USER: you can override these defaults by providing
+%%% customized versions of any of these macros before the \bibliography
+%%% command.  Each of them MUST provide its own final punctuation,
+%%% except for \shownote{}, \showDOI{}, and \showURL{}.  The latter two
+%%% do not use final punctuation, in order to avoid confusing it with
+%%% the Web address.
+%%%
+%%% To suppress output of a particular field, define its macro to expand
+%%% to an empty string, or better, \unskip, like this:
+%%%
+%%% \newcommand{\showDOI}[1]{\unskip}   % LaTeX syntax
+%%%
+%%% \def \showDOI #1{\unskip}           % plain TeX syntax
+%%%
+%%% ====================================================================
+
+\ifx \showCODEN    \undefined \def \showCODEN     #1{\unskip}     \fi
+\ifx \showDOI      \undefined \def \showDOI       #1{#1}\fi
+\ifx \showISBNx    \undefined \def \showISBNx     #1{\unskip}     \fi
+\ifx \showISBNxiii \undefined \def \showISBNxiii  #1{\unskip}     \fi
+\ifx \showISSN     \undefined \def \showISSN      #1{\unskip}     \fi
+\ifx \showLCCN     \undefined \def \showLCCN      #1{\unskip}     \fi
+\ifx \shownote     \undefined \def \shownote      #1{#1}          \fi
+\ifx \showarticletitle \undefined \def \showarticletitle #1{#1}   \fi
+\ifx \showURL      \undefined \def \showURL       {\relax}        \fi
+% The following commands are used for tagged output and should be
+% invisible to TeX
+\providecommand\bibfield[2]{#2}
+\providecommand\bibinfo[2]{#2}
+\providecommand\natexlab[1]{#1}
+\providecommand\showeprint[2][]{arXiv:#2}
+
+\bibitem[GulMohamed et~al\mbox{.}(2026)]%
+        {gulmohamed2026denguegnn}
+\bibfield{author}{\bibinfo{person}{Rasitha~Banu GulMohamed},
+  \bibinfo{person}{Wafa Hetany}, \bibinfo{person}{Hanan~Abdullah Almaimani},
+  {and} \bibinfo{person}{Faiza Abdalla~Saeed Khiery}.}
+  \bibinfo{year}{2026}\natexlab{}.
+\newblock \showarticletitle{DengueGNN: Graph-based deep learning for modeling
+  disease spread dynamics and prediction}.
+\newblock \bibinfo{journal}{\emph{Scientific Reports}}  \bibinfo{volume}{16}
+  (\bibinfo{year}{2026}), \bibinfo{pages}{10584}.
+\newblock
+\urldef\tempurl%
+\url{https://doi.org/10.1038/s41598-026-43073-y}
+\showDOI{\tempurl}
+
+
+\bibitem[Nguyen et~al\mbox{.}(2024)]%
+        {nguyen2024mppinn}
+\bibfield{author}{\bibinfo{person}{Thang Nguyen}, \bibinfo{person}{Dung
+  Nguyen}, \bibinfo{person}{Kha Pham}, {and} \bibinfo{person}{Truyen Tran}.}
+  \bibinfo{year}{2024}\natexlab{}.
+\newblock \showarticletitle{{MP-PINN}: A Multi-Phase Physics-Informed Neural
+  Network for Epidemic Forecasting}.
+\newblock \bibinfo{journal}{\emph{arXiv preprint arXiv:2411.06781}}
+  (\bibinfo{year}{2024}).
+\newblock
+
+
+\bibitem[Phaijoo and Gurung(2018)]%
+        {phaijoo2018sensitivity}
+\bibfield{author}{\bibinfo{person}{Ganga~Ram Phaijoo} {and}
+  \bibinfo{person}{Dil~Bahadur Gurung}.} \bibinfo{year}{2018}\natexlab{}.
+\newblock \showarticletitle{Sensitivity Analysis of {SEIR--SEI} Model of Dengue
+  Disease}.
+\newblock \bibinfo{journal}{\emph{GAMS Journal of Mathematics and Mathematical
+  Biosciences}} \bibinfo{volume}{6}, \bibinfo{number}{a}
+  (\bibinfo{year}{2018}), \bibinfo{pages}{41--49}.
+\newblock
+
+
+\bibitem[Raissi et~al\mbox{.}(2019)]%
+        {raissi2019pinn}
+\bibfield{author}{\bibinfo{person}{Maziar Raissi}, \bibinfo{person}{Paris
+  Perdikaris}, {and} \bibinfo{person}{George~Em Karniadakis}.}
+  \bibinfo{year}{2019}\natexlab{}.
+\newblock \showarticletitle{Physics-Informed Neural Networks}.
+\newblock \bibinfo{journal}{\emph{J. Comput. Phys.}}  \bibinfo{volume}{378}
+  (\bibinfo{year}{2019}), \bibinfo{pages}{686--707}.
+\newblock
+
+
+\bibitem[Tissera et~al\mbox{.}(2020)]%
+        {tissera2020severe}
+\bibfield{author}{\bibinfo{person}{Hasitha~A. Tissera},
+  \bibinfo{person}{Bernard D.~W. Jayamanne}, \bibinfo{person}{Rajendra Raut},
+  \bibinfo{person}{S.~M.~D. Janaki}, \bibinfo{person}{Yesim Tozan},
+  \bibinfo{person}{Preshila~C. Samaraweera}, \bibinfo{person}{Prasad Liyanage},
+  \bibinfo{person}{Azhar Ghouse}, \bibinfo{person}{Chaturaka Rodrigo},
+  \bibinfo{person}{Aravinda~M. de Silva}, {and} \bibinfo{person}{Sumadhya~D.
+  Fernando}.} \bibinfo{year}{2020}\natexlab{}.
+\newblock \showarticletitle{Severe Dengue Epidemic, Sri Lanka, 2017}.
+\newblock \bibinfo{journal}{\emph{Emerging Infectious Diseases}}
+  \bibinfo{volume}{26}, \bibinfo{number}{4} (\bibinfo{year}{2020}),
+  \bibinfo{pages}{682--691}.
+\newblock
+
+
+\bibitem[Weng et~al\mbox{.}(2024)]%
+        {weng2024graph}
+\bibfield{author}{\bibinfo{person}{Jiaqi Weng}, \bibinfo{person}{David Qiu},
+  \bibinfo{person}{Ethan Cruz}, \bibinfo{person}{Malik Magdon-Ismail},
+  \bibinfo{person}{Thilanka Munasinghe}, \bibinfo{person}{Jennifer~C. Wei},
+  {and} \bibinfo{person}{Ashan Pathirana}.} \bibinfo{year}{2024}\natexlab{}.
+\newblock \showarticletitle{Graph Representation Learning for Dengue
+  Forecasting}. In \bibinfo{booktitle}{\emph{IEEE International Conference on
+  Big Data (BigData)}}.
+\newblock
+
+
+\end{thebibliography}

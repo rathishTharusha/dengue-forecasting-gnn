@@ -211,22 +211,27 @@ def gaussian_nll(mu: torch.Tensor, log_var: torch.Tensor, target: torch.Tensor) 
     return torch.mean(0.5 * (log_var + (target - mu) ** 2 / torch.exp(log_var)))
 
 
-def artifact_windows(window_index: np.ndarray, window: int, horizon: int) -> np.ndarray:
-    """Flag windows whose input or target overlaps the week-395 artifact.
+def artifact_windows(window_index: np.ndarray, window: int, horizon: int,
+                     week: int = ARTIFACT_WEEK) -> np.ndarray:
+    """Flag windows whose input or target overlaps the reporting artifact.
 
     Args:
         window_index: Time index ``i`` of each window; its target spans
             ``[i, i + horizon)`` and its input ``[i - window, i)``.
         window: Input length.
         horizon: Output length.
+        week: Row index of the artifact. Defaults to 395, its row in the original
+            array. The corrected datasets in ``data/corrected/`` place the same
+            report (2021, no. 2) at a different row, so they must pass it
+            explicitly -- see ``docs/ARRAY_AUDIT.md``.
 
     Returns:
-        Boolean array, ``True`` where the window touches week 395.
+        Boolean array, ``True`` where the window touches the artifact week.
 
     Use it to report a fold twice -- all windows, and artifact-free -- rather than
     to drop anything. Under this project's rolling-origin protocol these windows
-    appear only in the origin-0.85 **test** split, so they cannot be trained on
-    and cannot be masked away from training.
+    appear only in the origin-0.85 **test** split of the original array, so they
+    cannot be trained on and cannot be masked away from training.
     """
     idx = np.asarray(window_index)
-    return (idx - window <= ARTIFACT_WEEK) & (idx + horizon > ARTIFACT_WEEK)
+    return (idx - window <= week) & (idx + horizon > week)

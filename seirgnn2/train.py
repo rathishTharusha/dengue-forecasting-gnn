@@ -14,13 +14,23 @@ import numpy as np
 import torch
 from torch import nn
 
+import count_loss as cl
+
 import core
 import models
 
-LOSSES = ("mse_z", "huber_z", "mse_raw", "smape")
+LOSSES = ("mse_z", "huber_z", "mse_raw", "smape", "nb")
 
 
-def _loss(kind: str, pred_z: torch.Tensor, batch: dict, mean: float, std: float) -> torch.Tensor:
+def _loss(kind: str, pred_z: torch.Tensor, batch: dict, mean: float, std: float,
+          disp: torch.Tensor | None = None) -> torch.Tensor:
+    if kind == "nb":
+        # The head already emits the count scale; the likelihood makes that
+        # quantity the conditional *mean*, which is what RMSE scores. No
+        # smearing correction, because there is no retransformation left to bias.
+        mu = torch.expm1(torch.clamp(pred_z * std + mean, -1.0, cl.LOG_MU_MAX)).clamp_min(1e-6)
+        alpha = cl.ALPHA_MIN + (cl.ALPHA_MAX - cl.ALPHA_MIN) * torch.sigmoid(disp)
+        return cl.nb_nll(mu, alpha, batch["y_raw"])
     if kind == "mse_z":
         return nn.functional.mse_loss(pred_z, batch["y_z"])
     if kind == "huber_z":
@@ -41,7 +51,8 @@ def run_fold(data, fold: core.Fold, *, backbone: str, head: str, loss: str = "ms
              seed: int = 0, hidden: int = 64, layers: int = 2, dropout: float = 0.1,
              lr: float = 3e-3, weight_decay: float = 1e-4, epochs: int = 300,
              batch_size: int = 32, patience: int = 40, edge=None, fixed=None,
-             lam_param: str = "sigmoid", state_fit: bool = False) -> dict:
+             lam_param: str = "sigmoid", state_fit: bool = False,
+             state_seed: str = "lagged", dist: str = "point") -> dict:
     """Train one (fold, seed) and return its test scores plus the raw predictions."""
     torch.manual_seed(seed)
     np.random.seed(seed)
@@ -54,13 +65,14 @@ def run_fold(data, fold: core.Fold, *, backbone: str, head: str, loss: str = "ms
         cum[s] = torch.tensor(np.stack([cases[:i].sum(0) for i in pack["idx"]]), dtype=torch.float32)
 
     needs_state = head in ("foi", "foi_res")
-    state = {s: models.seir_state(packs[s]["x_raw"], packs[s]["pop"], cum[s]) if needs_state else None
+    state = {s: models.seir_state(packs[s]["x_raw"], packs[s]["pop"], cum[s],
+                                  mode=state_seed) if needs_state else None
              for s in packs}
 
     net = models.Net(packs["train"]["x"].shape[-1], packs["train"]["x"].shape[1],
                      horizon=core.HORIZON, hidden=hidden, backbone=backbone, head=head,
                      layers=layers, dropout=dropout, lam_param=lam_param, state_fit=state_fit,
-                     window=core.WINDOW, edge_index=edge)
+                     window=core.WINDOW, edge_index=edge, dist=dist)
     opt = torch.optim.Adam(net.parameters(), lr=lr, weight_decay=weight_decay)
     sched = torch.optim.lr_scheduler.CosineAnnealingLR(opt, T_max=epochs)
     stopper = core.EarlyStop(net, patience=patience)
@@ -68,7 +80,7 @@ def run_fold(data, fold: core.Fold, *, backbone: str, head: str, loss: str = "ms
     def predict(split: str) -> torch.Tensor:
         pack = packs[split]
         return net(pack["x"], fixed, pack["p_z"], state[split], pack["pop"], fold.mean,
-                   fold.std, edge)
+                   fold.std, edge)[0]
 
     n = len(packs["train"]["idx"])
     ran, halted = 0, False
@@ -80,9 +92,9 @@ def run_fold(data, fold: core.Fold, *, backbone: str, head: str, loss: str = "ms
             batch = {k: v[sl] for k, v in pack.items() if k != "idx"}
             st = state["train"][sl] if needs_state else None
             opt.zero_grad()
-            pred = net(batch["x"], fixed, batch["p_z"], st, batch["pop"], fold.mean,
-                       fold.std, edge)
-            out = _loss(loss, pred, batch, fold.mean, fold.std)
+            pred, disp = net(batch["x"], fixed, batch["p_z"], st, batch["pop"], fold.mean,
+                             fold.std, edge)
+            out = _loss(loss, pred, batch, fold.mean, fold.std, disp)
             out.backward()
             torch.nn.utils.clip_grad_norm_(net.parameters(), 5.0)
             opt.step()
@@ -105,6 +117,6 @@ def run_fold(data, fold: core.Fold, *, backbone: str, head: str, loss: str = "ms
     out.update(val_RMSE=core.rmse(vpred, packs["val"]["y_raw"].numpy()),
                origin=fold.origin, seed=seed, backbone=backbone, head=head, loss=loss,
                climate=use_climate, ndvi=use_ndvi, season=use_season,
-               lam_param=lam_param, state_fit=state_fit,
+               lam_param=lam_param, state_fit=state_fit, state_seed=state_seed, dist=dist,
                epochs_ran=ran, best_epoch=ran - stopper.waited, stopped_early=halted)
     return out, pred, truth

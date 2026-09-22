@@ -69,3 +69,21 @@ def converge(epochs: int = 3000) -> list[dict]:
                           state_fit=head.startswith("foi"),
                           lr=lr, epochs=epochs, patience=200))
     return out
+
+
+def real(epochs: int = 300) -> list[dict]:
+    """The comparison the paper needs: six encoders, one harness, one protocol.
+
+    Every published architecture plus Liu et al.'s LSTM, each behind the direct
+    head and behind the force-of-infection head. ``direct`` is what the five GNN
+    papers do; ``foi`` is the proposal. ``LSTM + foi`` is SEIR-LSTM. Because all
+    of them share folds, loss, early stopping and metric here, the differences
+    are attributable to the encoder and the head and to nothing else -- which was
+    never true of the S4 vs S5 comparison in the paper.
+    """
+    out = []
+    for bb in ("LSTM", "STGAT", "A3TGCN", "ASTGCN", "AAGCN", "DCRNN"):
+        for head in ("direct", "foi", "foi_res"):
+            out.append(_c(f"{bb}+{head}", backbone=bb, head=head, loss="mse_z",
+                          lam_param="log", state_fit=True, epochs=epochs))
+    return out

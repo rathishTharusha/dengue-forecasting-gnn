@@ -1,0 +1,110 @@
+"""Mini-batch training loop, scored on raw counts in the frozen protocol.
+
+The loss operates in fold-scaled log1p space, the metric on raw counts, and
+early stopping watches the metric -- so a run is selected on the quantity it is
+reported by. The original implementation took one full-batch gradient step per
+epoch (about 60 steps total) and minimised SMAPE while being scored by RMSE;
+SMAPE is dominated by districts averaging 2-5 cases a week, RMSE by Colombo and
+Gampaha at 226 and 136, so the objective pulled away from the metric.
+"""
+
+from __future__ import annotations
+
+import numpy as np
+import torch
+from torch import nn
+
+import core
+import models
+
+LOSSES = ("mse_z", "huber_z", "mse_raw", "smape")
+
+
+def _loss(kind: str, pred_z: torch.Tensor, batch: dict, mean: float, std: float) -> torch.Tensor:
+    if kind == "mse_z":
+        return nn.functional.mse_loss(pred_z, batch["y_z"])
+    if kind == "huber_z":
+        return nn.functional.huber_loss(pred_z, batch["y_z"], delta=1.0)
+    counts = torch.expm1(torch.clamp(pred_z * std + mean, -1.0, 12.0))
+    if kind == "mse_raw":
+        return nn.functional.mse_loss(counts, batch["y_raw"])
+    denom = (counts.abs() + batch["y_raw"].abs() + 1e-5) / 2.0
+    return ((counts - batch["y_raw"]).abs() / denom).mean()
+
+
+def to_counts(pred_z: torch.Tensor, mean: float, std: float) -> np.ndarray:
+    return torch.expm1(torch.clamp(pred_z * std + mean, -1.0, 12.0)).clamp_min(0.0).detach().numpy()
+
+
+def run_fold(data, fold: core.Fold, *, backbone: str, head: str, loss: str = "mse_z",
+             use_climate: bool = False, use_ndvi: bool = False, use_season: bool = False,
+             seed: int = 0, hidden: int = 64, layers: int = 2, dropout: float = 0.1,
+             lr: float = 3e-3, weight_decay: float = 1e-4, epochs: int = 300,
+             batch_size: int = 32, patience: int = 40, edge=None, fixed=None,
+             lam_param: str = "sigmoid", state_fit: bool = False) -> dict:
+    """Train one (fold, seed) and return its test scores plus the raw predictions."""
+    torch.manual_seed(seed)
+    np.random.seed(seed)
+
+    packs = {s: core.build_tensors(data, fold, s, use_climate, use_ndvi, use_season)
+             for s in ("train", "val", "test")}
+    cum = {}
+    for s, pack in packs.items():
+        cases = np.nan_to_num(data.cases)
+        cum[s] = torch.tensor(np.stack([cases[:i].sum(0) for i in pack["idx"]]), dtype=torch.float32)
+
+    needs_state = head in ("foi", "foi_res")
+    state = {s: models.seir_state(packs[s]["x_raw"], packs[s]["pop"], cum[s]) if needs_state else None
+             for s in packs}
+
+    net = models.Net(packs["train"]["x"].shape[-1], packs["train"]["x"].shape[1],
+                     horizon=core.HORIZON, hidden=hidden, backbone=backbone, head=head,
+                     layers=layers, dropout=dropout, lam_param=lam_param, state_fit=state_fit,
+                     window=core.WINDOW, edge_index=edge)
+    opt = torch.optim.Adam(net.parameters(), lr=lr, weight_decay=weight_decay)
+    sched = torch.optim.lr_scheduler.CosineAnnealingLR(opt, T_max=epochs)
+    stopper = core.EarlyStop(net, patience=patience)
+
+    def predict(split: str) -> torch.Tensor:
+        pack = packs[split]
+        return net(pack["x"], fixed, pack["p_z"], state[split], pack["pop"], fold.mean,
+                   fold.std, edge)
+
+    n = len(packs["train"]["idx"])
+    ran, halted = 0, False
+    for ep in range(epochs):
+        ran = ep + 1
+        net.train()
+        for sl in torch.randperm(n).split(batch_size):
+            pack = packs["train"]
+            batch = {k: v[sl] for k, v in pack.items() if k != "idx"}
+            st = state["train"][sl] if needs_state else None
+            opt.zero_grad()
+            pred = net(batch["x"], fixed, batch["p_z"], st, batch["pop"], fold.mean,
+                       fold.std, edge)
+            out = _loss(loss, pred, batch, fold.mean, fold.std)
+            out.backward()
+            torch.nn.utils.clip_grad_norm_(net.parameters(), 5.0)
+            opt.step()
+        sched.step()
+        net.eval()
+        with torch.no_grad():
+            v = core.rmse(to_counts(predict("val"), fold.mean, fold.std),
+                          packs["val"]["y_raw"].numpy())
+        if stopper.step(v):
+            halted = True
+            break
+
+    stopper.restore()
+    net.eval()
+    with torch.no_grad():
+        pred = to_counts(predict("test"), fold.mean, fold.std)
+        vpred = to_counts(predict("val"), fold.mean, fold.std)
+    truth = packs["test"]["y_raw"].numpy()
+    out = core.score(pred, truth)
+    out.update(val_RMSE=core.rmse(vpred, packs["val"]["y_raw"].numpy()),
+               origin=fold.origin, seed=seed, backbone=backbone, head=head, loss=loss,
+               climate=use_climate, ndvi=use_ndvi, season=use_season,
+               lam_param=lam_param, state_fit=state_fit,
+               epochs_ran=ran, best_epoch=ran - stopper.waited, stopped_early=halted)
+    return out, pred, truth

@@ -87,3 +87,26 @@ def real(epochs: int = 300) -> list[dict]:
             out.append(_c(f"{bb}+{head}", backbone=bb, head=head, loss="mse_z",
                           lam_param="log", state_fit=True, epochs=epochs))
     return out
+
+
+def combo(epochs: int = 400) -> list[dict]:
+    """Stack the levers that individually moved the metric.
+
+    The six-encoder grid says architecture buys little: the spread from best to
+    worst *working* encoder is 0.15 val RMSE, while the seasonal feature alone
+    was worth 0.88 in the screen. So the search moves off architecture and onto
+    what is fed in and what is optimised. AAGCN and ASTGCN carry the two best
+    encoders forward, LSTM stays as Liu et al.'s control, and every cell is
+    crossed with the feature set, the output distribution and the head.
+    """
+    out = []
+    for bb in ("AAGCN", "ASTGCN", "LSTM"):
+        for feats, tag in (({"use_season": True}, "season"),
+                           ({"use_season": True, "use_climate": True,
+                             "use_ndvi": True}, "all")):
+            for dist, loss in (("point", "mse_z"), ("nb", "nb")):
+                for head in ("direct", "foi_res"):
+                    out.append(_c(f"{bb}+{head} {tag} {dist}", backbone=bb, head=head,
+                                  loss=loss, dist=dist, lam_param="log", state_fit=True,
+                                  epochs=epochs, **feats))
+    return out

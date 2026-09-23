@@ -37,6 +37,134 @@ Copy this block for a new entry:
 > `CEILING_R0_MAX`) survived the cleanup and now lives in `dengue_gnn.seir`, still
 > asserted by `tests/test_seir.py` and reproduced by `scripts/verify_seir_paper.py`.
 
+## EXP-035 — Combination grid: first significant wins over persistence
+- **Date:** 2026-09-23
+- **Who:** Group 05
+- **Commit:** `fc8ab6b`
+- **Script:** `seirgnn2/sweep.py combo` -> `seirgnn2/results/combo.json` (219 rows)
+- **Hardware:** Local CPU, 6 workers
+- **Config:** backbone in (AAGCN, ASTGCN, LSTM) x feats in (season, season+climate+ndvi)
+  x dist in (point/mse_z, nb/nb) x head in (direct, foi_res); lam_param=log, state_fit=True,
+  epochs=400, patience=40; frozen protocol, 3 origins x 3 seeds. Selection on validation (R6).
+- **Question:** Stacking the levers that individually moved the metric, does anything beat
+  persistence, and does the graph beat Liu et al's LSTM?
+- **Result:** validation RMSE, mean over 9 units; paired sign-flip at the origin_seed unit.
+
+  | arm | val | test | vs persistence | wins | p_adj |
+  |---|---|---|---|---|---|
+  | AAGCN+direct season nb | 15.66 | 37.55 | -2.20 | 9/9 | 0.010 |
+  | AAGCN+direct all nb | 15.71 | 37.73 | -2.15 | 8/9 | 0.023 |
+  | LSTM+direct season nb | 15.80 | 35.70 | -2.06 | 9/9 | 0.010 |
+  | ASTGCN+direct season nb | 15.92 | 36.41 | -1.93 | 9/9 | 0.010 |
+  | ASTGCN+foi_res season nb | 16.65 | 35.26 | -1.21 | - | - |
+  | LSTM+foi_res season nb | 17.27 | 34.97 | -0.59 | - | - |
+  | persistence | 17.86 | 36.02 | - | - | - |
+
+  Head-to-head, matched on everything but the encoder:
+  - **physics head:** ASTGCN+foi_res vs LSTM+foi_res = **-0.62, 9/9, p_adj = 0.009**
+  - **direct head:** AAGCN+direct vs LSTM+direct = -0.14, 5/9, p_adj = 0.315 (n.s.)
+  - **NB vs MSE**, matched pair: -0.41, 9/9, p_adj = 0.013
+
+- **Verdict:** answered, provisionally. First arms in this project to beat persistence
+  significantly. The graph beats the LSTM **only** in the physics formulation, not the direct
+  one -- consistent with spatial coupling mattering for a transmission quantity and not for
+  case regression.
+- **Notes:** Two caveats travel with these numbers and must not be dropped. (1) Validation and
+  test disagree at this spread: LSTM+foi_res is *ahead* on test (34.97 vs 35.26) and the best
+  validation arm is *worse than persistence* on test (37.55 vs 36.02). (2) Three origins cannot
+  reach p < 0.05 at the origin pairing unit; all p-values above are origin_seed, i.e. run-to-run
+  stability, not a claim about the series. Both require the 9-origin confirmatory grid (S9)
+  before anything is claimed in paper text.
+
+## EXP-034 — Six encoders in one harness: SEIR-GNN vs SEIR-LSTM, controlled
+- **Date:** 2026-09-23
+- **Who:** Group 05
+- **Commit:** `fc8ab6b`
+- **Script:** `seirgnn2/sweep.py real` -> `seirgnn2/results/real.json` (165 rows)
+- **Hardware:** Local CPU, 6 workers, 71 min
+- **Config:** backbone in (LSTM, STGAT, A3TGCN, ASTGCN, AAGCN, DCRNN) x head in
+  (direct, foi, foi_res); loss=mse_z, lam_param=log, state_fit=True, epochs=300.
+- **Question:** The proposal is Liu et al's SEIR-LSTM with the LSTM replaced by a real
+  spatio-temporal GNN. Earlier seirgnn2 grids used a single dense matmul as the backbone -- and
+  its `gat` mode was a literal alias for `gcn` -- so they could not answer it. With the five
+  published architectures in place, does the physics head work, and does the graph beat the LSTM?
+- **Result:**
+
+  | arm | val | test | best epoch |
+  |---|---|---|---|
+  | AAGCN+direct | 16.76 | 35.59 | 65 |
+  | ASTGCN+direct | 16.84 | 35.39 | 50 |
+  | LSTM+direct | 16.91 | 35.10 | 93 |
+  | AAGCN+foi_res | 17.44 | 35.78 | 24 |
+  | persistence | 17.86 | 36.02 | - |
+  | STGAT+direct | 23.32 | 60.82 | 24 |
+  | AAGCN+foi | 23.69 | 50.06 | 66 |
+  | LSTM+foi | 24.32 | 50.25 | 97 |
+  | A3TGCN+direct | 28.63 | 60.40 | 28 |
+  | DCRNN+direct | 34.89 | 73.74 | 5 |
+
+  AAGCN+foi vs LSTM+foi: -0.62, 6/9, p_adj = 0.178 (n.s.).
+  AAGCN+direct vs LSTM+direct: -0.14, 6/9, p_adj = 0.149 (n.s.).
+- **Verdict:** answered. Real architectures improve the bare `foi` head only from 24.59 to
+  23.69 -- it still loses to the direct head by ~7 RMSE. The conclusion drawn on the toy
+  backbone survives the backbone change. All 162 runs stopped early (best epoch 5-108 of 300),
+  so undertraining is not the explanation at this budget.
+- **Notes:** An 8-epoch smoke test on origin 0.70 alone suggested the opposite and was wrong --
+  origin 0.70 is the easiest fold (persistence 11.72 there against 17.86 averaged), so a single
+  origin must never be compared against a multi-origin mean. Recorded because it nearly became
+  a reported finding.
+
+## EXP-033 — Is the physics head undertrained? (convergence)
+- **Date:** 2026-09-22
+- **Who:** Group 05
+- **Commit:** `fc8ab6b`
+- **Script:** `seirgnn2/sweep.py converge` -> `seirgnn2/results/converge.json` (75 rows)
+- **Hardware:** Local CPU, 6 workers
+- **Config:** head in (direct, residual, foi, foi_res) x lr in (3e-3, 1e-3); epochs=3000,
+  patience=200 -- 10x the epochs and 5x the patience of the screen. foi arms carry both
+  candidate repairs (lam_param=log, state_fit=True).
+- **Question:** Graph networks routed through a simulator may need more steps than a direct
+  regressor. Is the physics head's deficit an optimisation budget problem?
+- **Result:** residual 16.72 / direct 16.73 / foi_res 17.47 / foi 24.59 (best epoch 196 / 92 /
+  21 / 65). **All 72 runs stopped early; none approached the 3000 cap.** The physics head
+  converges *earliest* of any arm and sits flat for 200 epochs. 10x budget bought it 0.04.
+  Halving the learning rate made it worse.
+- **Verdict:** answered, for this backbone. Undertraining is not the explanation.
+- **Notes:** Does not speak to the published architectures, which have more capacity -- that is
+  what EXP-034 tests. `train.py` now records `best_epoch` / `epochs_ran` / `stopped_early` on
+  every row so this question is answerable from any future grid without a special run.
+
+## EXP-032 — Why the force-of-infection head fails (diagnosis, no training)
+- **Date:** 2026-09-22
+- **Who:** Group 05
+- **Commit:** `fc8ab6b`
+- **Script:** `seirgnn2/diagnose_foi.py`, `seirgnn2/diagnose_seed.py`
+- **Hardware:** Local CPU
+- **Question:** The `foi` head scores val RMSE 26.89 against 16.8 for every other head and 17.9
+  for persistence. Which part of the path is responsible?
+- **Method:** The simulator's weekly incidence is monotone in lambda, so it can be inverted by
+  bisection for the lambda that reproduces each true count exactly. Four separable causes were
+  measured rather than argued: reach, the susceptible pool, learnability, saturation.
+- **Result:** consistent across all three origins.
+  - **Reach.** The lambda=0 floor already overshoots **14-16%** of targets: E0 = cases[t-2]/rho
+    and half of E matures within the week, so with transmission switched off the simulator still
+    emits more than truth. 39% of cells need lambda pinned at 0. Backbone-independent.
+  - **Susceptible pool.** *Not* the cause. Only 2.5% of cells hit the S clamp; holding S at s0
+    changes nothing. This was the obvious hypothesis and it is wrong.
+  - **Learnability.** log lambda* has r2 = 0.216 / 0.254 / 0.259 from log cases[t-1] across the
+    three origins; the direct target has r2 = 0.806 / 0.824 / 0.824. The project's own R_t
+    finding (26% predictable) reappearing inside the head.
+  - **Saturation.** Real but **not binding**: sigmoid starts 809-1012x above the inverted median
+    and 57% of cells need |raw| > 6 where the gradient is 150x below maximum, yet
+    lam_param="log" (centred on the measured median) changed val RMSE by 0.01. Verified the flag
+    engages -- lambda at init differs 830x and outputs differ.
+  - **Matched-capacity cost.** Same 2-parameter rule, same inputs, same objective, fitted on
+    count MSE: through SEIR 70.62 / 72.92 / 66.84, predicting directly 55.22 / 51.72 / 47.44.
+    +28% to +41%. A statement about 2-parameter capacity, not a ceiling for all models.
+  - **Seeding.** `decon` (residence-time stocks, the dimensionally correct reading) is the
+    *worst* of the three: 19.4% unreachable vs 14.9%, r2 0.068 vs 0.243. `lagged` stays default.
+- **Verdict:** answered. The deficit is structural, not a tuning bug.
+
 ## EXP-031 — Stage S9 Confirmatory Evaluation and Primary Endpoint Test
 - **Date:** 2026-09-15
 - **Who:** Group 05

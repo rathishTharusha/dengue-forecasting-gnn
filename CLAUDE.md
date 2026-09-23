@@ -37,8 +37,10 @@ Torch is available locally (CPU-only: torch 2.13, PyG 2.8). Kaggle credentials a
 ### Running experiments
 
 ```bash
-# Newest harness (seirgnn2) — screening grid, CPU, ~3 min for 135 runs on 6 workers
-python seirgnn2/sweep.py screen --workers 6 --epochs 300
+# Newest harness (seirgnn2) — see seirgnn2/README.md, which is the guide to all of it
+python seirgnn2/sweep.py screen --workers 6 --epochs 300   # 135 runs, ~3 min, 6 workers
+python seirgnn2/stats.py screen                            # paired tests on any grid
+python seirgnn2/backbones.py                               # smoke-test all six encoders
 
 # Analysis one-shots: no training, seconds each, each writes analysis/results/<name>.json
 python analysis/_build/renewal_feasibility.py
@@ -126,17 +128,29 @@ ablation table mean anything.
 
 ### Model space (`seirgnn2/models.py`)
 
-`HEADS = ("direct", "residual", "foi", "foi_res")` × `BACKBONES = ("none", "gcn", "gat",
-"adaptive", "hybrid")`. `foi` routes the prediction through a force-of-infection physics decoder
-against SEIR state reconstructed by `seir_state()`; `none` removes message passing entirely and
-is the control that shows whether the graph earns its place (so far: it does not, ~0.5 RMSE,
-p ≈ 0.49).
+A run is `(backbone, head, loss, dist, features, seeding)`, each varied independently so any
+difference is attributable:
+
+- `HEADS = ("direct", "residual", "foi", "foi_res")` — `foi` routes through a force-of-infection
+  decoder against SEIR state from `seir_state()`; `foi_res` gates it onto the persistence anchor.
+- `BACKBONES` — the toy controls `("none", "gcn", "gat", "adaptive", "hybrid")` **plus** the five
+  published architectures and Liu et al.'s LSTM via `backbones.py`. Note `gat` is a literal alias
+  for `gcn` in the toy set and is *not* an attention model; the real ones come from
+  `analysis/lib/reproduced.py`.
+- `DISTS = ("point", "nb")` — the negative-binomial likelihood is the largest single controlled
+  gain measured (−0.41, 9/9, p_adj = 0.013), because squared error on `log1p` scored by RMSE is
+  biased low by construction.
+- `SEEDS = ("lagged", "recent", "decon")` — initial-state seeding, which sets the physics head's
+  reachable floor.
+
+`none` is the control showing whether the graph earns its place. It does not: `gcn` beats it by
+0.07, and across the *working* published encoders the whole spread is 0.15 RMSE.
 
 ## Working conventions
 
 - **Branch per piece of work**; never commit to `main`. Prefixes `feat/ exp/ fix/ docs/`.
-  Current work is on `exp/seir-gnn`. Per `docs/SEIR_GNN_EXPERIMENT_PLAN.md` R8: **commit, never
-  push** — the user pushes before a Kaggle kernel needs new code.
+  Current work is on `exp/seir-gnn-v2`. Per `docs/SEIR_GNN_EXPERIMENT_PLAN.md` R8: **commit,
+  never push** unless the user asks — they push before a Kaggle kernel needs new code.
 - **Every run whose numbers might reach the report** gets an `EXP-NNN` entry in
   `docs/EXPERIMENT_LOG.md` (append-only, newest at top) with commit SHA, full config, seeds,
   origins and the *unrounded* table. The template is at the top of that file.
@@ -149,21 +163,27 @@ p ≈ 0.49).
 
 ## Current state and a known defect
 
-`full_paper/` is a standalone distribution package (LaTeX source, data, reference PDFs,
-`reproduce_full_paper.ipynb`). Its Stage S5 leaderboard
+**`full_paper/`'s Stage S5 numbers are not citable.** Its leaderboard
 (`full_paper/outputs/csv/stage_s5_leaderboard.csv`) and
-`full_paper/overleaf/sections/05_results.tex` report the SEIR-GNN FOI head as a win.
+`full_paper/overleaf/sections/05_results.tex` report the SEIR-GNN FOI head as a win, but
+`analysis/_build/run_s5_seir_gnn.py` had four defects: one gradient step per epoch (~60 total),
+a SMAPE objective scored by RMSE, a force of infection held constant across the horizon, and
+`nn.Linear(in_dim, 1)` collapsing every covariate before the backbone. Do not propagate any
+S5-derived number into new text.
 
-**`seirgnn2/core.py` opens by documenting four defects in the script that produced those S5
-numbers** (`analysis/_build/run_s5_seir_gnn.py`): one gradient step per epoch (~60 steps total),
-a SMAPE objective scored by RMSE, a force of infection held constant across the horizon, and all
-input channels collapsed to a single scalar before the backbone. `seirgnn2/` is the corrected
-re-run. Its first screening pass (`seirgnn2/results/screen.json`, 138 rows) puts the `foi` head
-**last** (val RMSE 26.89 vs persistence 17.86), which contradicts the S5 claim.
+`seirgnn2/` is the corrected re-run and **`seirgnn2/README.md` is the guide to it** — the
+protocol, how to run a grid, the headline results, and a table of every lever already tried with
+its measured effect. Read that before designing a SEIR-GNN experiment; most of the obvious ideas
+have now been run and several are negative.
 
-Treat any S5-derived number as provisional until the `seirgnn2` re-run replaces it, and do not
-propagate S5 numbers into new text. `seirgnn2/sweep.py` references a `stats.py` for paired tests
-that does not exist yet, and `grids.py` currently defines only `screen()`.
+The short version as of EXP-032..035: the bare `foi` head loses to `direct` by ~7 RMSE and that
+survives swapping in the real architectures; the deficit is structural (the λ=0 floor is
+unreachable for 14–16% of targets, and λ is only r² ≈ 0.25 predictable against 0.82 for the
+direct target), not an optimisation-budget problem. The best stacked arm beats persistence by
+−2.20 (9/9, p_adj = 0.010), and the graph beats Liu et al.'s LSTM **only** in the physics
+formulation (−0.62, 9/9, p_adj = 0.009), not the direct one. Two caveats travel with those
+numbers: validation and test disagree at this spread, and three origins cannot reach
+significance at the honest pairing unit.
 
 One more inconsistency worth knowing: `seirgnn2/core.py::seasonal_features` justifies its
 week-of-year features by citing "EDA finding F9", but **F9 was retracted** (see

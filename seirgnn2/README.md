@@ -1,0 +1,183 @@
+# seirgnn2 — the leakage-controlled SEIR-GNN harness
+
+The re-run of Stage S5. Everything here exists because
+`analysis/_build/run_s5_seir_gnn.py` — the script behind the paper's S5
+leaderboard — had four defects that together make its numbers uninformative
+about whether physics-informed graph networks work on this series:
+
+| defect in `run_s5_seir_gnn.py` | why it invalidates the number |
+|---|---|
+| one full-batch gradient step per epoch (~60 total) | nothing converged |
+| SMAPE objective, RMSE metric | SMAPE is dominated by districts averaging 2–5 cases/week, RMSE by Colombo (226) and Gampaha (136) — the objective pulled away from the metric |
+| force of infection constant across the horizon | one scalar repeated three times; the 3-week structure was never modelled |
+| `nn.Linear(in_dim, 1)` before the backbone | every covariate collapsed to a scalar before the graph saw it, which is why its input-level factor moved results by <1% |
+
+**Do not cite any S5-derived number.** Use the tables below.
+
+---
+
+## Running it
+
+```bash
+python seirgnn2/sweep.py <grid> --workers 6 --epochs 300   # writes results/<grid>.json
+python seirgnn2/stats.py <grid>                            # paired tests vs persistence
+python seirgnn2/stats.py <grid> --ref "LSTM+foi_res season nb" --metric val_RMSE
+
+python seirgnn2/backbones.py      # build + forward-pass every encoder (~10 s)
+python seirgnn2/diagnose_foi.py   # why the physics head behaves as it does
+python seirgnn2/diagnose_seed.py  # which initial-state seeding is reachable
+```
+
+Grids live in `grids.py`, one function each: `screen`, `foi`, `converge`, `real`,
+`combo`. A sweep runs every config × 3 origins × 3 seeds and writes **one row per
+(config, origin, seed), never pre-aggregated** — that is what makes the paired
+tests possible, and the repo's logging convention asks for exactly it.
+
+Everything runs on local CPU. The whole `screen` grid is 135 runs in ~3 minutes;
+`real` (162 runs, includes DCRNN at 825k params) took 71 minutes.
+
+### Dependencies
+
+`torch_geometric_temporal` imports `SparseTensor` from `torch_sparse` in exactly
+one module (`nn/recurrent/evolvegcno.py`), which has no wheel for torch 2.13 and
+needs a source build. EvolveGCN is not one of the five architectures and is never
+constructed, so `backbones.install_shim()` supplies the symbol from
+`torch_geometric.typing`. This is why the pinned torch 2.1.2 stack in
+`reproduction/` is **not** needed here.
+
+```bash
+pip install --no-deps torch-geometric-temporal
+```
+
+---
+
+## The protocol
+
+Frozen, from `docs/SEIR_GNN_EXPERIMENT_PLAN.md` R5, implemented in
+`core.py::build_folds`: rolling origins 0.55 / 0.70 / 0.85, seeds 0/1/2, window
+3 → horizon 3, normalisation from training weeks only, early stopping on
+validation, metrics on raw counts pooled over windows.
+
+**Selection is on validation RMSE only (R6).** Test is written to disk and not
+compared until a config is frozen. Every table below is ordered by validation.
+
+### Two pairing units, and why `stats.py` prints both
+
+- **`origin`** — seeds averaged, one difference per forecast origin. The origin
+  is the only thing resampled from the data, so this is the unit a claim about
+  the series rests on. With 3 origins an exact sign-flip test **cannot return a
+  two-sided p below 0.25**. `stats.py` prints that floor so a 3-origin grid can
+  never be misread as significant.
+- **`origin_seed`** — 9 units, floor 0.004, but the three seeds inside an origin
+  share their data and are replicates of *initialisation only*. A p-value here
+  is a statement about run-to-run stability, not about the series.
+
+Everything reported below is `origin_seed` unless stated. **Nothing here is
+significant at the `origin` unit and nothing can be until the 9-origin
+confirmatory grid (plan S9) is run.**
+
+---
+
+## What has been tried, and the answer
+
+The point of this table is that nobody repeats these.
+
+### Levers that worked
+
+| lever | effect on val RMSE | evidence |
+|---|---|---|
+| **Negative-binomial likelihood** (`dist="nb"`) | **−0.41**, 9/9, p_adj = 0.013 | `combo.json`. The largest single controlled gain in the whole study — bigger than any architecture difference. Squared error on `log1p` scored by RMSE is biased low by construction: `expm1` of a log-space mean is the conditional *median*, RMSE is minimised by the *mean*. `error_diagnosis.json` measures that bias at −12.92 on outbreak windows. NB2's `mu` **is** the mean. |
+| **Seasonal features** (`use_season`) | −0.88 vs no features | `screen.json`. Largest input-side effect. See the caveat on F9 below. |
+| Best stacked arm vs persistence | **−2.20**, 9/9, p_adj = 0.010 | `combo.json`, AAGCN + direct + season + NB: **15.66** vs persistence 17.86 |
+
+### Levers that did not work
+
+| lever | result | evidence |
+|---|---|---|
+| **The graph itself** | `gcn` beats `none` (no message passing) by **0.07** | `screen.json`. Consistent with the project's earlier finding. 25 independent series do as well as the graph. |
+| **Architecture choice** | spread across *working* encoders is **0.15** | `real.json`. AAGCN 16.76, ASTGCN 16.84, LSTM 16.91. STGAT (23.32), A3TGCN (28.63) and DCRNN (34.89) are far worse on the direct head. |
+| **λ re-parameterisation** (`lam_param="log"`) | **0.01** | `foi.json`. Measured saturation is real — sigmoid starts 809× above the inverted median and 57% of cells need \|raw\| > 6 — but it is **not binding**; the optimiser traverses the flat region. |
+| **More training** | every one of 72 runs stopped early at 3000 epochs / patience 200; best epoch 21–225 | `converge.json`. 10× budget bought the physics head 0.04. Halving the LR made it worse. |
+| **Residence-time state seeding** (`state_seed="decon"`) | *worse*: 19.4% of targets unreachable vs 14.9%, λ learnability r² 0.068 vs 0.243 | `diagnose_seed.py`. The dimensionally-correct seeding is the worst of the three. `lagged` stays the default. |
+| **Learnable E₀ scale + ρ** (`state_fit=True`) | −2.2 on the physics head, still 8 RMSE behind direct | `foi.json` |
+
+### Structural facts about the physics head
+
+Measured by `diagnose_foi.py`, which inverts the simulator by bisection for the
+λ that reproduces each true count exactly. These are **backbone-independent** —
+they sit downstream of the encoder, so A3TGCN inherits them unchanged.
+
+- **The λ=0 floor overshoots 14–16% of targets.** `E₀ = cases[t−2]/ρ` and half of
+  E matures within the week, so with transmission switched *entirely off* the
+  simulator still emits more cases than truth. Those cells are unreachable at any
+  network output. 39% of cells need λ pinned at 0.
+- **λ is much less learnable than the direct target.** log λ* has r² = 0.22–0.26
+  from case history; the direct target has r² = 0.81–0.82. This is the project's
+  own published R_t result (26% predictable) reappearing inside the head.
+- **Susceptible depletion is *not* the problem** — only 2.5% of cells hit the
+  S clamp, and holding S at `s0` changes nothing. This was the obvious
+  hypothesis and it is wrong.
+- Routing a matched 2-parameter rule through SEIR rather than predicting directly
+  costs **+28% to +41% RMSE** across the three origins. That is a statement about
+  2-parameter capacity, not a ceiling for all models.
+
+---
+
+## Headline results
+
+`combo.json`, 219 rows, selection on validation.
+
+| arm | val | test |
+|---|---|---|
+| AAGCN + direct, season, NB | **15.66** | 37.55 |
+| LSTM + direct, season, NB | 15.80 | 35.70 |
+| ASTGCN + foi_res, season, NB | 16.65 | 35.26 |
+| LSTM + foi_res, season, NB | 17.27 | 34.97 |
+| persistence | 17.86 | 36.02 |
+
+### The two comparisons the paper needs
+
+**SEIR-GNN vs SEIR-LSTM, physics head, matched on everything else:**
+ASTGCN+foi_res 16.65 vs LSTM+foi_res 17.27 → **−0.62, 9/9, p_adj = 0.009**.
+
+**Same graph, direct head:** AAGCN 15.66 vs LSTM 15.80 → −0.14, 5/9,
+p_adj = 0.315. **Not significant.**
+
+So what the graph adds appears specific to estimating the force of infection —
+a transmission quantity where spatial coupling is mechanistically plausible —
+and absent when regressing cases directly. The null case is what makes the
+positive one worth reporting.
+
+### Two caveats that travel with these numbers
+
+1. **Validation and test disagree at this spread.** LSTM+foi_res is *ahead* of
+   ASTGCN+foi_res on test (34.97 vs 35.26), and the best validation arm is
+   *worse than persistence* on test (37.55 vs 36.02). A −0.62 validation win
+   that reverses on test is not yet a result.
+2. **Three origins cannot reach significance at the `origin` unit.**
+
+Both point at the 9-origin confirmatory grid before anything is claimed.
+
+---
+
+## Files
+
+| file | what it is |
+|---|---|
+| `core.py` | folds, tensor building under `cd.LAGS`, scoring, early stopping |
+| `models.py` | `Net`: encoder → head. `HEADS`, `BACKBONES`, `SEEDS`, `DISTS`, `LAM_PARAMS` |
+| `backbones.py` | the five published architectures + Liu et al.'s LSTM, reusing `analysis/lib/reproduced.py` |
+| `train.py` | one `(fold, seed)` run; losses incl. NB; records `best_epoch` / `epochs_ran` / `stopped_early` |
+| `sweep.py` | run a grid across origins × seeds, one row each |
+| `stats.py` | paired sign-flip permutation tests, both pairing units, BH-FDR |
+| `grids.py` | the grids, one function each |
+| `diagnose_foi.py` | why the physics head behaves as it does — reach, seeding, learnability, saturation, ceiling |
+| `diagnose_seed.py` | scores the three initial-state seedings without training |
+
+### A note on the seasonal feature's rationale
+
+`core.py::seasonal_features` cites "EDA finding F9" for its week-of-year
+features. **F9 was retracted** — `analysis/README.md` and `docs/EXPERIMENT_LOG.md`
+record shape r = −0.065, 0/25 districts significant. The feature is nonetheless
+the largest input-side effect measured here, so what needs fixing is the cited
+rationale, not the feature. Do not repeat the retracted claim in paper text.

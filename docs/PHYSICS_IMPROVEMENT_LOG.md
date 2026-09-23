@@ -138,6 +138,41 @@ screen concluded the physics did not help.
 The graph network on top of it is worth nothing measurable. The value is in the
 mechanism, not the architecture.
 
+## Why the corrected model still cannot beat persistence
+
+Two measurements answer this, and they agree.
+
+**1. The forecast converges onto persistence by itself.** Correlation between
+the corrected physics forecast and last-value-carried-forward, on the test
+windows:
+
+| origin | corr(physics, persistence) | mean absolute gap | mean weekly cases | physics RMSE | persistence RMSE |
+|---|---|---|---|---|---|
+| 0.55 | 0.994 | 5.5 | 51.9 | 38.68 | 38.95 |
+| 0.70 | 0.968 | 2.9 | 19.0 | 21.40 | 22.40 |
+| 0.85 | 0.983 | 6.6 | 50.5 | 44.79 | 46.69 |
+
+The model is not ignoring the physics; the physics, trained on squared error,
+*discovers* that the conditional mean of next week is approximately this week.
+It then applies a correction of about 12-15% of the level, and that correction
+is worth roughly 1-2 RMSE. That is the whole margin available.
+
+**2. Blending with persistence changes nothing.** A learned convex weight
+`w * persistence + (1 - w) * physics`, fitted on training data only, settles at
+w = 0.53-0.66 and scores 34.67 against 34.63 unblended. Blending two forecasts
+that agree to r = 0.98 cannot help.
+
+This is the same conclusion EXP-024 reached from the other direction - the
+slope of predicted log-growth on true log-growth is 0.002 - now confirmed for a
+correctly specified mechanistic model. To beat persistence one has to predict
+the *change*, and the change is not predictable from cases, climate or NDVI at
+this horizon.
+
+It also rules out one family of fixes: combining architectures, ensembling, or
+mixing in components from other papers cannot help, because every one of those
+models collapses onto the same persistence-like forecast. Only new information,
+a longer horizon, or a different target can move this.
+
 ## Replication on a second dataset (`reordered`)
 
 A different week list (451 weeks against 559), different folds, no

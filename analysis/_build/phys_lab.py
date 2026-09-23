@@ -67,6 +67,7 @@ BASE = {
     "seasonal": False,          # harmonic seasonal term on beta
     "mod_clamp": 2.0,           # how far the network may modulate log beta
     "learn_state": False,       # learn the E and I stock scale factors
+    "blend": "none",            # none | learned : w*persistence + (1-w)*physics
     "epochs": 100,
     "lr": 0.003,
     "hidden": 0,                # >0 widens the input projection (proj=mlp)
@@ -196,6 +197,9 @@ VARIANTS: dict[str, dict] = {
     "v2_direct": {"loss": "mse", "norm": "train_only", "epochs": 400, "head": "direct"},
     "v2_direct_orig_norm": {"loss": "mse", "epochs": 400, "head": "direct"},
     "his_direct": {"head": "direct"},
+    # --- round 14: blend the physics forecast with persistence ------------
+    "blend_const": {"state": "flow", "loss": "mse", "depletion": 0.0, "learn_rho": True, "learn_rates": True, "learn_state": True, "horizon_lam": "per_week", "norm": "train_only", "epochs": 400, "head": "const", "blend": "learned"},
+    "blend_mass": {"state": "flow", "loss": "mse", "depletion": 0.0, "learn_rho": True, "learn_rates": True, "learn_state": True, "horizon_lam": "per_week", "norm": "train_only", "epochs": 400, "head": "mass", "blend": "learned"},
     # --- training budget (applied to baseline too, for fairness) -----------
     "epochs400_baseline": {"epochs": 400},
     "epochs400_best": {"state": "flow", "loss": "mse", "epochs": 400},
@@ -256,6 +260,9 @@ class PhysGNN(nn.Module):
             self.alpha = nn.Parameter(torch.tensor(0.05))
         if cfg["learn_rho"]:
             self.log_rho_adj = nn.Parameter(torch.zeros(()))
+        if cfg["blend"] == "learned":
+            # starts at w = 0.5, learned on TRAINING data only
+            self.blend_w = nn.Parameter(torch.zeros(()))
         if cfg["learn_rates"]:
             # softplus(raw) = rate; start exactly at the configured values
             self.raw_omega = nn.Parameter(torch.tensor(math.log(math.expm1(cfg["omega"]))))
@@ -367,6 +374,7 @@ def make_batch(cfg, cases, population, feat_t, idx, phase_all=None):
     s = np.clip(s0v - cfg["depletion"] * cum / (rho * pop), 0.01, 1.0)
     r = np.clip(1.0 - s - e0 - i0, 0.0, 1.0)
     st0 = torch.tensor(np.stack([s, e0, i0, r], -1), dtype=torch.float32)
+    persist = torch.tensor(np.repeat(c1[:, :, None], 3, axis=2), dtype=torch.float32)
     raw = (torch.tensor(s, dtype=torch.float32),
            torch.tensor(onset1, dtype=torch.float32),
            torch.tensor(onset2, dtype=torch.float32))
@@ -374,7 +382,7 @@ def make_batch(cfg, cases, population, feat_t, idx, phase_all=None):
     if phase_all is not None:
         ph = torch.tensor(np.stack([phase_all[i: i + 3] for i in idx]), dtype=torch.float32)
     return (feat_t[idx], st0, torch.tensor(pop, dtype=torch.float32).unsqueeze(-1),
-            torch.tensor(y, dtype=torch.float32), ph, raw)
+            torch.tensor(y, dtype=torch.float32), ph, raw, persist)
 
 
 # --------------------------------------------------------------- dynamics --
@@ -466,6 +474,9 @@ def run_job(job: dict) -> dict:
         y = inc * cfg["rho"] * b[2]
         if cfg["learn_rho"]:
             y = y * torch.exp(model.log_rho_adj.clamp(-2.0, 2.0))
+        if cfg["blend"] == "learned":
+            w = torch.sigmoid(model.blend_w)
+            y = w * b[6] + (1.0 - w) * y
         return y
 
     best, best_w, waited = float("inf"), None, 0
@@ -502,6 +513,8 @@ def run_job(job: dict) -> dict:
         }
         if cfg["learn_rho"]:
             rec["learned_rho_mult"] = float(torch.exp(model.log_rho_adj.clamp(-2, 2)))
+        if cfg["blend"] == "learned":
+            rec["blend_w_persistence"] = float(torch.sigmoid(model.blend_w))
         if cfg["learn_state"]:
             rec["learned_e_scale"] = float(torch.exp(model.log_e_scale.clamp(-1, 3)))
             rec["learned_i_scale"] = float(torch.exp(model.log_i_scale.clamp(-1, 3)))

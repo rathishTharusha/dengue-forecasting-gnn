@@ -143,3 +143,7 @@ ehthumbs.db
 # Google Drive conflict copies
 *conflicted copy*
 *(1).ipynb
+
+# Reference PDFs downloaded for the literature review (copyrighted; manifest.csv has the URLs).
+literature/pdfs/
+seirgnn2/results/*.pkl

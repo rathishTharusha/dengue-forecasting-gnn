@@ -192,6 +192,10 @@ VARIANTS: dict[str, dict] = {
     "ls_const": {"state": "flow", "loss": "mse", "depletion": 0.0, "learn_rho": True, "learn_rates": True, "horizon_lam": "per_week", "norm": "train_only", "epochs": 400, "head": "const", "learn_state": True},
     "ls_mass": {"state": "flow", "loss": "mse", "depletion": 0.0, "learn_rho": True, "learn_rates": True, "horizon_lam": "per_week", "norm": "train_only", "epochs": 400, "head": "mass", "learn_state": True},
     "ls_mod02": {"state": "flow", "loss": "mse", "depletion": 0.0, "learn_rho": True, "learn_rates": True, "horizon_lam": "per_week", "norm": "train_only", "epochs": 400, "head": "mod", "mod_clamp": 0.2, "learn_state": True},
+    # --- round 13: no-physics control under the v2 recipe -----------------
+    "v2_direct": {"loss": "mse", "norm": "train_only", "epochs": 400, "head": "direct"},
+    "v2_direct_orig_norm": {"loss": "mse", "epochs": 400, "head": "direct"},
+    "his_direct": {"head": "direct"},
     # --- training budget (applied to baseline too, for fairness) -----------
     "epochs400_baseline": {"epochs": 400},
     "epochs400_best": {"state": "flow", "loss": "mse", "epochs": 400},
@@ -263,6 +267,10 @@ class PhysGNN(nn.Module):
             return beta
         harm = (self.season[0] * torch.sin(phase) + self.season[1] * torch.cos(phase))
         return beta * torch.exp(harm.clamp(-2.0, 2.0)).unsqueeze(1)
+
+    def direct(self, x: torch.Tensor) -> torch.Tensor:
+        """No physics: the encoder predicts normalised log1p cases itself."""
+        return self.backbone(self.in_proj(x).squeeze(-1), self.edge_index)
 
     def raw(self, x: torch.Tensor) -> torch.Tensor:
         """Encoder output -> (B, N, n_out) pre-activation."""
@@ -439,6 +447,9 @@ def run_job(job: dict) -> dict:
     lo, hi = 0.02, 0.45   # keep learned rates epidemiologically sane (per day)
 
     def fwd(b):
+        if cfg["head"] == "direct":
+            z = model.direct(b[0]) * job["std"] + job["mean"]
+            return torch.expm1(torch.clamp(z, -1.0, 12.0))
         st = b[1]
         if cfg["learn_state"]:
             s_, o1, o2 = b[5]
@@ -599,7 +610,7 @@ def main() -> int:
                              "cases": cases, "features": feats,
                              "population": data.population,
                              "edge_index": edge_index, "adj_dense": adjacency,
-                             "phase": phase_all})
+                             "phase": phase_all, "mean": fold.mean, "std": fold.std})
 
     print(f"{len(jobs)} jobs / {args.workers} workers : {', '.join(args.variant)}", flush=True)
     t0 = time.time()

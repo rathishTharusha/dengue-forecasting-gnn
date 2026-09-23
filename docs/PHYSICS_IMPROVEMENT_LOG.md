@@ -87,6 +87,57 @@ than architectural.
   human movement, school terms, vector surveillance - rather than more climate.
 - Joint training across districts with partial pooling of beta.
 
+## Does the SEIR layer earn its place?
+
+The decisive control: the **same encoder, same loss, same normalisation, same
+400-epoch budget**, with the SEIR simulator removed and the network predicting
+log1p cases directly. Only the physics differs.
+
+9 disjoint origins x 3 seeds, `rebuilt`:
+
+| | val RMSE | test RMSE | test MAE |
+|---|---|---|---|
+| **with SEIR** | **26.15** | **30.04** | **14.88** |
+| same network, no SEIR | 38.23 | 49.45 | 26.27 |
+| persistence | - | 28.54 | 13.94 |
+
+Paired, clustered by origin: **-19.41 RMSE, better on 8 of 9 origins,
+p = 0.0078** - a **39% lower error** from the physics alone.
+
+Per origin:
+
+| origin | with SEIR | no SEIR | persistence |
+|---|---|---|---|
+| 0.50 | 19.9 | 31.4 | 20.3 |
+| 0.55 | 46.8 | 93.3 | 45.5 |
+| 0.60 | 67.5 | 122.8 | 48.7 |
+| 0.65 | 11.3 | 25.1 | 11.3 |
+| 0.70 | 15.1 | 33.6 | 15.7 |
+| 0.75 | 28.2 | 27.9 | 29.5 |
+| 0.80 | 20.2 | 25.1 | 22.0 |
+| 0.85 | 30.0 | 31.8 | 31.0 |
+| 0.90 | 31.4 | 54.1 | 32.9 |
+
+**Why the physics helps.** The no-physics arm scores 38.23 on validation and
+49.45 on test - it fits the periods it has seen and extrapolates badly.
+The SEIR layer removes that freedom: a forecast has to be produced by moving
+people between compartments, starting from the state implied by observed cases,
+conserving the population. The model cannot emit an arbitrary number, so it
+degrades far more gracefully on periods it has never seen.
+
+**Why the *original* physics hurt instead.** In the code as it stood, the
+mechanism was mis-specified in four ways at once, and a wrong mechanism is a
+hard constraint pointing the wrong way. It was structurally incapable of
+predicting more than about half the observed cases, and after ten years of
+susceptible subtraction it had almost nobody left to infect - so it could not
+represent an outbreak at all. That is why the `direct` control beat it on
+validation (25.82 against 28.16) in the original Stage-S5 screen, and why the
+screen concluded the physics did not help.
+
+**The distinction that matters.** Correct physics is worth 39% of the error.
+The graph network on top of it is worth nothing measurable. The value is in the
+mechanism, not the architecture.
+
 ## Replication on a second dataset (`reordered`)
 
 A different week list (451 weeks against 559), different folds, no

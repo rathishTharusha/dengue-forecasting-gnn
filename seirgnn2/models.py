@@ -33,7 +33,7 @@ import backbones  # noqa: E402
 import seir_sim  # noqa: E402
 
 HEADS = ("direct", "residual", "foi", "foi_res")
-BACKBONES = ("none", "gcn", "gat", "adaptive", "hybrid", *backbones.REAL)
+BACKBONES = ("none", "gcn", "gat", "adaptive", "hybrid", "linear", *backbones.REAL)
 LAM_PARAMS = ("sigmoid", "log")
 SEEDS = ("lagged", "recent", "decon")
 
@@ -45,6 +45,10 @@ SEEDS = ("lagged", "recent", "decon")
 #: ``mu`` **is** the mean, so the point forecast needs no retransformation. It
 #: is orthogonal to the head: the physics path can emit an NB mean too.
 DISTS = ("point", "nb")
+
+#: Input normalisation: the fold statistics as before, or reversible instance
+#: normalisation per district-window (see ``Net``).
+NORMS = ("fold", "revin_mean", "revin")
 
 #: log of the median force of infection that reproduces the observed counts when
 #: the simulator is inverted -- see ``diagnose_foi.py`` section 3. Used to centre
@@ -89,6 +93,22 @@ class Net(nn.Module):
     used ``nn.Linear(in_dim, 1)``, collapsing every covariate channel to one
     scalar before the graph ever saw it, which is why its input-level factor
     moved results by less than 1% RMSE.
+
+    Remedies from ``docs/REMEDIES_PLAN.md``, each off by default so every
+    earlier grid reproduces unchanged:
+
+    ``norm``      ``fold`` (as before) or reversible instance normalisation --
+                  ``revin_mean`` subtracts each district-window's mean log level
+                  and adds it back on the output, ``revin`` also divides by the
+                  window's spread with a learned affine (Kim et al. 2022).
+    ``node_emb``  a learned identity per district joined at the head
+                  (spatial identity, Shao et al. 2022).
+    ``linear``    backbone that passes the inputs straight to a linear head: with
+                  ``dist="nb"`` and ``node_emb`` this is a negative-binomial GLM
+                  with district effects.
+    ``aux_phys``  the SEIR decoder as an auxiliary head trained alongside a
+                  direct forecast, rather than as the forecast itself
+                  (Rodriguez et al. 2023). Its weight in the loss is this value.
     """
 
     def __init__(self, in_dim: int, n_nodes: int, horizon: int = 3, hidden: int = 64,
@@ -96,11 +116,16 @@ class Net(nn.Module):
                  dropout: float = 0.1, lambda_max: float = 1.0 / 7.0, rho: float = 1.0 / 11.0,
                  lam_param: str = "sigmoid", state_fit: bool = False,
                  window: int = 3, edge_index: torch.Tensor | None = None,
-                 dist: str = "point"):
+                 dist: str = "point", norm: str = "fold", node_emb: int = 0,
+                 aux_phys: float = 0.0):
         super().__init__()
+        if norm not in NORMS:
+            raise ValueError(f"unknown norm {norm!r}; expected one of {NORMS}")
+        if (norm != "fold" or aux_phys) and head != "direct":
+            raise ValueError("norm and aux_phys are defined for the direct head only")
         self.head, self.horizon, self.lambda_max, self.rho = head, horizon, lambda_max, rho
         self.lam_param, self.state_fit, self.backbone = lam_param, state_fit, backbone
-        self.dist = dist
+        self.dist, self.norm, self.window, self.aux_phys = dist, norm, window, aux_phys
         if backbone in backbones.REAL:
             # A published architecture supplies the representation; the toy
             # encoder is bypassed entirely rather than stacked underneath it.
@@ -108,16 +133,25 @@ class Net(nn.Module):
                                        hidden, edge_index)
             self.in_proj, self.graph = None, nn.ModuleList()
             feat = self.real.out_dim
+        elif backbone == "linear":
+            self.real, self.in_proj, self.graph = None, None, nn.ModuleList()
+            feat = in_dim
         else:
             self.real = None
             self.in_proj = nn.Sequential(nn.Linear(in_dim, hidden), nn.ReLU(), nn.Dropout(dropout))
             self.graph = nn.ModuleList(GraphLayer(hidden, n_nodes, backbone) for _ in range(layers))
             feat = hidden
+        self.node_emb = (nn.Parameter(torch.randn(n_nodes, node_emb) * 0.1)
+                         if node_emb else None)
+        feat += node_emb
+        if norm == "revin":
+            self.rev_gamma = nn.Parameter(torch.ones(1))
+            self.rev_beta = nn.Parameter(torch.zeros(1))
         self.drop = nn.Dropout(dropout)
-        out_dim = horizon
-        self.out = nn.Linear(feat, out_dim)
+        self.out = nn.Linear(feat, horizon)
         self.disp = nn.Linear(feat, horizon) if dist == "nb" else None
-        if head in ("foi", "foi_res"):
+        self.out_phys = nn.Linear(feat, horizon) if aux_phys else None
+        if head in ("foi", "foi_res") or aux_phys:
             self.alpha = nn.Parameter(torch.tensor(-2.0))   # gate, through sigmoid
             self.beta = nn.Parameter(torch.tensor(0.0))     # log-scale spatial import weight
             # ``diagnose_foi.py`` inverts the simulator for the lambda that
@@ -134,37 +168,34 @@ class Net(nn.Module):
             self.e_scale = nn.Parameter(torch.tensor(0.0))
             self.rho_scale = nn.Parameter(torch.tensor(0.0))
 
+    def _instance_stats(self, x: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
+        """Mean and spread of each district-window's case channels, ``(B, N, 1)``.
+
+        The spread is floored: three weekly points can be nearly equal, and
+        dividing by a spread of ~0 would turn noise into a large input.
+        """
+        cases = x[..., : self.window]
+        m = cases.mean(-1, keepdim=True)
+        s = torch.sqrt(cases.var(-1, unbiased=False, keepdim=True) + 0.01)
+        return m, s
+
     def encode(self, x: torch.Tensor, fixed: torch.Tensor,
                edge: torch.Tensor | None = None) -> torch.Tensor:
         if self.real is not None:
-            return self.drop(self.real(x, edge))
-        h = self.in_proj(x)
-        for layer in self.graph:
-            h = h + self.drop(layer(h, fixed))
+            h = self.drop(self.real(x, edge))
+        elif self.backbone == "linear":
+            h = x
+        else:
+            h = self.in_proj(x)
+            for layer in self.graph:
+                h = h + self.drop(layer(h, fixed))
+        if self.node_emb is not None:
+            h = torch.cat([h, self.node_emb.expand(h.shape[0], -1, -1)], dim=-1)
         return h
 
-    def forward(self, x: torch.Tensor, fixed: torch.Tensor, p_z: torch.Tensor,
-                st0: torch.Tensor | None = None, pop: torch.Tensor | None = None,
-                mean: float = 0.0, std: float = 1.0,
-                edge: torch.Tensor | None = None) -> tuple[torch.Tensor, torch.Tensor | None]:
-        """``(pred_z, raw_dispersion)`` -- fold-scaled log1p predictions ``(B, N, H)``.
-
-        Keeping every head in one output space is what lets a single loss and a
-        single metric compare them; the physics heads convert their raw-count
-        incidence back into that space before returning. The second element is
-        ``None`` unless ``dist == "nb"``, in which case it carries the
-        unconstrained dispersion logit the likelihood needs.
-        """
-        h = self.encode(x, fixed, edge)
-        raw = self.out(h)
-        disp = self.disp(h) if self.disp is not None else None
-
-        if self.head == "direct":
-            return raw, disp
-        if self.head == "residual":
-            return p_z + raw, disp
-
-        # Physics heads: raw -> per-week force of infection -> SEIR incidence.
+    def _physics(self, raw: torch.Tensor, st0: torch.Tensor, pop: torch.Tensor,
+                 mean: float, std: float) -> torch.Tensor:
+        """Head output -> per-week force of infection -> SEIR incidence, in fold-z log1p."""
         if self.lam_param == "log":
             lam = torch.exp((raw + self.lam_bias).clamp(-25.0, LOG_LAMBDA_MAX))
         else:
@@ -184,11 +215,47 @@ class Net(nn.Module):
         _, inc = seir_sim.simulate_weeks(st0, lam, omega=0.7 / 7.0, gamma=1.0 / 7.0, substeps=7)
         rho = self.rho * torch.exp(self.rho_scale) if self.state_fit else self.rho
         counts = (inc * rho * pop.unsqueeze(-1)).clamp_min(0.0)
-        phys_z = (torch.log1p(counts) - mean) / std
+        return (torch.log1p(counts) - mean) / std
+
+    def forward(self, x: torch.Tensor, fixed: torch.Tensor, p_z: torch.Tensor,
+                st0: torch.Tensor | None = None, pop: torch.Tensor | None = None,
+                mean: float = 0.0, std: float = 1.0, edge: torch.Tensor | None = None,
+                ) -> tuple[torch.Tensor, torch.Tensor | None, torch.Tensor | None]:
+        """``(pred_z, raw_dispersion, aux_z)`` -- fold-scaled log1p ``(B, N, H)``.
+
+        Keeping every head in one output space is what lets a single loss and a
+        single metric compare them; the physics heads convert their raw-count
+        incidence back into that space before returning. ``raw_dispersion`` is
+        ``None`` unless ``dist == "nb"``; ``aux_z`` is the auxiliary SEIR
+        forecast when ``aux_phys`` is set, and ``None`` otherwise.
+        """
+        if self.norm != "fold":
+            m, s = self._instance_stats(x)
+            cases = x[..., : self.window] - m
+            if self.norm == "revin":
+                cases = cases / s * self.rev_gamma + self.rev_beta
+            x = torch.cat([cases, x[..., self.window :]], dim=-1)
+
+        h = self.encode(x, fixed, edge)
+        raw = self.out(h)
+        disp = self.disp(h) if self.disp is not None else None
+        aux = (self._physics(self.out_phys(h), st0, pop, mean, std)
+               if self.out_phys is not None else None)
+
+        if self.head == "direct":
+            if self.norm == "revin_mean":
+                raw = raw + m
+            elif self.norm == "revin":
+                gamma = self.rev_gamma.abs() + 1e-3
+                raw = (raw - self.rev_beta) / gamma * s + m
+            return raw, disp, aux
+        if self.head == "residual":
+            return p_z + raw, disp, aux
+        phys_z = self._physics(raw, st0, pop, mean, std)
         if self.head == "foi":
-            return phys_z, disp
+            return phys_z, disp, aux
         gate = torch.sigmoid(self.alpha)
-        return p_z + gate * (phys_z - p_z), disp
+        return p_z + gate * (phys_z - p_z), disp, aux
 
 
 def seir_state(cases_raw: torch.Tensor, pop: torch.Tensor, cum: torch.Tensor,

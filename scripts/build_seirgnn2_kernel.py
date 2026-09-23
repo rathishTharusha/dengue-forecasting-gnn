@@ -28,7 +28,6 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
 KERNELS = REPO / "reproduction" / "kaggle" / "kernels"
-BRANCH = "exp/seir-gnn-v2"
 USER = "tharushaperera16"
 
 
@@ -41,7 +40,8 @@ def _cell(kind: str, text: str) -> dict:
     return cell
 
 
-def notebook(grid: str, sha: str, workers: int, epochs: int) -> dict:
+def notebook(grid: str, sha: str, workers: int, epochs: int, branch: str,
+             keep: bool, ensembles: list[list[str]]) -> dict:
     setup = f"""
 # Shell work goes through subprocess, not IPython magics: `tools/check_notebooks.py`
 # parses every committed notebook as Python and runs in CI, so `!` and `%` cells
@@ -62,7 +62,7 @@ REPO_URL = "https://github.com/rathishTharusha/dengue-forecasting-gnn.git"
 # Pinned to the commit this kernel was generated from, so the result is traceable.
 SHA = "{sha}"
 if not Path("repo").exists():
-    sh("git", "clone", "--quiet", "--branch", "{BRANCH}", REPO_URL, "repo")
+    sh("git", "clone", "--quiet", "--branch", "{branch}", REPO_URL, "repo")
 os.chdir("repo")
 sh("git", "checkout", "--quiet", SHA)
 sh("git", "log", "--oneline", "-1")
@@ -95,25 +95,36 @@ out = subprocess.run([sys.executable, "seirgnn2/backbones.py"],
 print(out.stdout or out.stderr)
 assert "FAIL" not in out.stdout, "an encoder failed to build -- fix before running the grid"
 """
+    keep_flag = ', "--keep"' if keep else ""
     run = f"""
 # Workers, not GPU: every architecture here is small and the grid is many short
 # runs, so process-level parallelism over CPU cores beats one GPU stream. Set
 # enable_gpu in kernel-metadata.json if a future grid actually needs it.
-sh(sys.executable, "seirgnn2/sweep.py", "{grid}", "--workers", "{workers}", "--epochs", "{epochs}")
+sh(sys.executable, "seirgnn2/sweep.py", "{grid}", "--workers", "{workers}", "--epochs", "{epochs}"{keep_flag})
 """
     collect = f"""
 import json, shutil
-src = "seirgnn2/results/{grid}.json"
-shutil.copy(src, "/kaggle/working/{grid}.json")
-rows = json.load(open(src))
-print(f"{{len(rows)}} rows -> /kaggle/working/{grid}.json")
+from pathlib import Path
+for f in sorted(Path("seirgnn2/results").glob("{grid}*")):
+    shutil.copy(f, Path("/kaggle/working") / f.name)
+    print("saved", f.name, f.stat().st_size, "bytes")
 """
+    ens_lines = "\n".join(
+        f'sh(sys.executable, "seirgnn2/ensemble.py", "{grid}", ' + ", ".join(f'"{m}"' for m in e) + ")"
+        for e in ensembles)
+    stats_grid = f"{grid}+ens" if ensembles else grid
     stats = f"""
+# Ensembles are pre-registered with equal weights (docs/REMEDIES_PLAN.md, R5):
+# nothing about them is fitted, so they are computed here rather than chosen.
+{ens_lines}
+sh(sys.executable, "seirgnn2/stats.py", "{stats_grid}", "--ref", "B", "--metric", "val_RMSE")
+sh(sys.executable, "seirgnn2/stats.py", "{stats_grid}", "--ref", "persistence", "--metric", "val_RMSE")
+""" if ensembles else f"""
 sh(sys.executable, "seirgnn2/stats.py", "{grid}")
 """
     cells = [
         _cell("markdown", f"# seirgnn2 — `{grid}`\n\n"
-                          f"Branch `{BRANCH}` at `{sha}`. Selection is on validation "
+                          f"Branch `{branch}` at `{sha}`. Selection is on validation "
                           f"only (plan R6); test numbers are written but not compared "
                           f"until a config is frozen."),
         _cell("code", setup), _cell("code", deps),
@@ -139,10 +150,18 @@ def main() -> None:
     ap.add_argument("--workers", type=int, default=4)
     ap.add_argument("--epochs", type=int, default=400)
     ap.add_argument("--gpu", action="store_true", help="request a GPU (off by default)")
+    ap.add_argument("--branch", default=None, help="branch to clone (default: current)")
+    ap.add_argument("--keep", action="store_true", help="save every run's forecasts")
     args = ap.parse_args()
 
-    sha = subprocess.run(["git", "-C", str(REPO), "rev-parse", "HEAD"],
-                         capture_output=True, text=True, check=True).stdout.strip()
+    git = lambda *a: subprocess.run(["git", "-C", str(REPO), *a], capture_output=True,  # noqa: E731
+                                    text=True, check=True).stdout.strip()
+    sha = git("rev-parse", "HEAD")
+    branch = args.branch or git("rev-parse", "--abbrev-ref", "HEAD")
+    import sys
+    sys.path.insert(0, str(REPO / "seirgnn2"))
+    import grids
+    ensembles = grids.ENSEMBLES.get(args.grid, []) if args.keep else []
     slug = f"seirgnn2-{args.grid}"
     out = KERNELS / slug
     out.mkdir(parents=True, exist_ok=True)
@@ -161,13 +180,13 @@ def main() -> None:
         "kernel_sources": [],
     }, indent=2) + "\n", encoding="utf-8")
 
-    nb = notebook(args.grid, sha, args.workers, args.epochs)
+    nb = notebook(args.grid, sha, args.workers, args.epochs, branch, args.keep, ensembles)
     (out / f"{slug.replace('-', '_')}.ipynb").write_text(
         json.dumps(nb, indent=1) + "\n", encoding="utf-8")
 
     print(f"wrote {out}")
-    print(f"  branch {BRANCH} @ {sha[:7]}  grid={args.grid} "
-          f"workers={args.workers} epochs={args.epochs} gpu={args.gpu}")
+    print(f"  branch {branch} @ {sha[:7]}  grid={args.grid} workers={args.workers} "
+          f"epochs={args.epochs} gpu={args.gpu} keep={args.keep} ensembles={len(ensembles)}")
     print(f"\n  kaggle kernels push -p {out.relative_to(REPO)}")
     print(f"  kaggle kernels status {USER}/{slug}")
     print(f"  kaggle kernels output {USER}/{slug} -p seirgnn2/results")

@@ -33,9 +33,10 @@ def _origins(spec: dict) -> tuple[tuple[float, ...], float]:
     return core.ORIGINS, core.TEST_FRAC
 
 
-def _job(spec: dict) -> dict:
+def _job(spec: dict, keep: bool = False):
     import torch
 
+    import knn
     import train
     torch.set_num_threads(1)
     data = cd.load()
@@ -47,11 +48,15 @@ def _job(spec: dict) -> dict:
     fold = next(f for f in folds if f.origin == spec["origin"])
     edge, fixed = core.adjacency(data.names)
     t0 = time.time()
-    row, _, _ = train.run_fold(data, fold, seed=spec["seed"], edge=edge, fixed=fixed, **cfg)
+    # k-NN analogue forecasting (remedy R4b) has no network to train, but it
+    # honours the same folds, row schema and --keep contract.
+    runner = knn.run_fold if cfg.get("backbone") == "knn" else train.run_fold
+    res = runner(data, fold, seed=spec["seed"], edge=edge, fixed=fixed, keep=keep, **cfg)
+    row, extra = (res[0], res[1]) if keep else (res[0], None)
     row["name"] = spec["name"]
     row["origins"] = spec.get("origins", "three")
     row["elapsed"] = round(time.time() - t0, 1)
-    return row
+    return row, extra
 
 
 def persistence_rows(windows: tuple[int, ...] = (core.WINDOW,),
@@ -80,19 +85,29 @@ def persistence_rows(windows: tuple[int, ...] = (core.WINDOW,),
     return rows
 
 
-def run(configs: list[dict], out_name: str, workers: int = 6) -> list[dict]:
+def run(configs: list[dict], out_name: str, workers: int = 6, keep: bool = False) -> list[dict]:
+    """Run every config over its origins x seeds.
+
+    With ``keep`` every run's forecasts for train / val / test are also written
+    to ``results/<grid>_preds.pkl`` keyed by ``(name, origin, seed)``, so
+    ensembles (remedy R5) and forecast-level diagnoses can be built afterwards
+    without retraining.
+    """
     jobs = [dict(c, origin=o, seed=s) for c in configs
             for o, s in itertools.product(_origins(c)[0], SEEDS)]
     print(f"{len(configs)} configs -> {len(jobs)} runs on {workers} workers", flush=True)
     windows = tuple(sorted({c.get("window", core.WINDOW) for c in configs}))
     osets = tuple(sorted({c.get("origins", "three") for c in configs}))
     rows, done, t0 = persistence_rows(windows, osets), 0, time.time()
+    preds = {}
     with ProcessPoolExecutor(max_workers=workers) as pool:
-        futures = [pool.submit(_job, j) for j in jobs]
+        futures = [pool.submit(_job, j, keep) for j in jobs]
         for fut in as_completed(futures):
             try:
-                row = fut.result()
+                row, extra = fut.result()
                 rows.append(row)
+                if keep:
+                    preds[(row["name"], row["origin"], row["seed"])] = extra
                 done += 1
                 print(f"[{done:3d}/{len(jobs)}] {row['name']:26s} o{row['origin']} s{row['seed']} "
                       f"val {row['val_RMSE']:7.2f} test {row['RMSE']:7.2f} ({row['elapsed']}s)",
@@ -104,6 +119,11 @@ def run(configs: list[dict], out_name: str, workers: int = 6) -> list[dict]:
     path = OUT / f"{out_name}.json"
     path.write_text(json.dumps(rows, indent=1), encoding="utf-8")
     print(f"\nwrote {path} ({len(rows)} rows) in {time.time() - t0:.0f}s", flush=True)
+    if keep:
+        import pickle
+        pp = OUT / f"{out_name}_preds.pkl"
+        pp.write_bytes(pickle.dumps(preds))
+        print(f"wrote {pp} ({len(preds)} runs)", flush=True)
     return rows
 
 
@@ -112,6 +132,7 @@ if __name__ == "__main__":
     ap.add_argument("grid")
     ap.add_argument("--workers", type=int, default=6)
     ap.add_argument("--epochs", type=int, default=300)
+    ap.add_argument("--keep", action="store_true", help="also save every run's forecasts")
     args = ap.parse_args()
     import grids
-    run(getattr(grids, args.grid)(args.epochs), args.grid, args.workers)
+    run(getattr(grids, args.grid)(args.epochs), args.grid, args.workers, args.keep)

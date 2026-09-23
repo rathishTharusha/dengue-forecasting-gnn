@@ -156,3 +156,39 @@ def confirm(epochs: int = 400) -> list[dict]:
                use_season=True, lam_param="log", state_fit=True,
                origins="nine", epochs=epochs)
             for bb, head in arms]
+
+
+def remedies(epochs: int = 400) -> list[dict]:
+    """The pre-registered remedies from docs/REMEDIES_PLAN.md, screened on the frozen three origins.
+
+    ``B`` is the best configuration found so far and the control every remedy is
+    paired against. Each remedy changes exactly one thing relative to it, except
+    R3 and R4a, which are different model families by design. ``SEIR-LSTM`` is
+    Liu et al.'s encoder behind the same physics head, loss and folds, kept so
+    the proposal's comparison is always in view. Run with ``--keep`` so R5 can
+    be formed afterwards by ``ensemble.py``.
+    """
+    base = dict(head="direct", loss="nb", dist="nb", use_season=True, epochs=epochs)
+    phys = dict(lam_param="log", state_fit=True)
+    return [
+        _c("B", backbone="AAGCN", **base),
+        _c("R1a revin_mean", backbone="AAGCN", norm="revin_mean", **base),
+        _c("R1b revin", backbone="AAGCN", norm="revin", **base),
+        _c("R2 node_emb", backbone="AAGCN", node_emb=16, **base),
+        _c("R3 stid", backbone="none", node_emb=16, **base),
+        _c("R4a nbglm", backbone="linear", node_emb=8, **base),
+        _c("R4b knn", backbone="knn"),
+        _c("R6 aux_phys 0.1", backbone="AAGCN", aux_phys=0.1, **base, **phys),
+        _c("R6 aux_phys 0.3", backbone="AAGCN", aux_phys=0.3, **base, **phys),
+        _c("SEIR-LSTM", backbone="LSTM", head="foi_res", loss="nb", dist="nb",
+           use_season=True, epochs=epochs, **phys),
+    ]
+
+
+#: Pre-registered equal-weight ensembles per grid (docs/REMEDIES_PLAN.md, R5).
+#: Fixed before the grid runs; ``build_seirgnn2_kernel.py --keep`` computes them.
+ENSEMBLES = {
+    "remedies": [["B", "R4b knn"],
+                 ["B", "R4a nbglm"],
+                 ["B", "R4a nbglm", "R4b knn"]],
+}

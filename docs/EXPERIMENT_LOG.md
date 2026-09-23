@@ -37,6 +37,52 @@ Copy this block for a new entry:
 > `CEILING_R0_MAX`) survived the cleanup and now lives in `dengue_gnn.seir`, still
 > asserted by `tests/test_seir.py` and reproduced by `scripts/verify_seir_paper.py`.
 
+## EXP-039 — What caps the architectures: diagnosis on their forecasts
+- **Date:** 2026-09-23
+- **Who:** Group 05
+- **Commit:** `7e983ae` (code `seirgnn2/diagnose_arch.py`, committed before this entry)
+- **Script:** `python seirgnn2/diagnose_arch.py collect` then `analyse`;
+  output `seirgnn2/results/diagnose_arch.txt`
+- **Hardware:** Local CPU, 6 workers
+- **Config:** STGAT, A3TGCN, ASTGCN, AAGCN and the LSTM encoder (DCRNN dropped for cost
+  and rank), each in two configurations: `native` (direct head, mse on log1p, no
+  covariates — as published) and `best` (NB likelihood + seasonal features); SEIR-LSTM as
+  `LSTM+foi` (native) and `LSTM+foi_res` (best). Frozen three origins x seeds 0/1/2,
+  300 epochs. **Every number below is on validation windows** — diagnosing on test and then
+  designing around it would spend the held-out set.
+- **Question:** Every earlier grid kept one RMSE per run. What do the forecasts actually get
+  wrong, and is it the architecture or the information?
+- **Result (best configuration unless stated):**
+  1. *Skill vs persistence by horizon:* ASTGCN / AAGCN / LSTM +0.10 to +0.16, **rising**
+     with horizon; STGAT (-0.25 / -0.12 / -0.01) and A3TGCN (-0.72 / -0.54 / -0.37) are
+     worse than persistence at every horizon.
+  2. *Responsiveness:* slope of predicted on realised log-growth 0.28-0.31 for the working
+     three; predicted growth varies ~0.6x as much as real growth.
+  3. *Bias by regime:* under-predict rising weeks by 11-13 cases, over-predict falling
+     weeks by 10-11 — a lag. 80-83% of squared error sits in weeks that moved. Outbreak
+     cells under-predicted by 17-23 (native: 22-25, worse than persistence's 15).
+  4. *Direction:* ~70% correct; with NB + season rises are called up 87-88% of the time but
+     falls called down only 52-54% — the mean-targeting likelihood tilts toward growth.
+  5. *Concentration:* the top 5% of cells carry ~60% of squared error.
+  6. **Residual correlation between ASTGCN, AAGCN and the LSTM: 0.976-0.991.** They are the
+     same forecaster to within noise. The mean of all five direct encoders scores 16.73
+     against 15.85 for AAGCN alone.
+  7. *Spatial structure left:* residual correlation +0.17 between neighbours, +0.12 between
+     any two districts — a national common component plus a small neighbour excess.
+  8. **A linear model on the same inputs recovers only 4-6% of the working models' residual
+     variance out of sample** (fit on train residuals, scored on validation). For STGAT and
+     A3TGCN it recovers 47-62%: those two are underfitting, not capped.
+- **Verdict:** answered. The working architectures have converged to the same function and
+  exhausted the linearly available information in their inputs; what remains is a lag on
+  moves and shrinkage on outbreaks, which squared-error-type objectives produce on a
+  near-random-walk target. STGAT and A3TGCN are limited by their wiring (a national
+  bottleneck; no state carried across weeks), not by the data. Further encoder work on the
+  same inputs is not expected to pay; this motivates `docs/REMEDIES_PLAN.md`.
+- **Notes:** Two new facts about the data came out of this. Origin 0.40's validation window
+  contains the 2017 DENV-2 epidemic, peaking at 5.4x anything in that fold's training data —
+  the catastrophic fold in EXP-038. And 2020-2022 ran at 5-10% of the historical peak. The
+  series changes regime, while every model normalises with one statistic per fold.
+
 ## EXP-038 — Confirmatory stage, nine disjoint origins (replaces S9)
 - **Date:** 2026-09-23
 - **Who:** Group 05

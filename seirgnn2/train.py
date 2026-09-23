@@ -53,6 +53,7 @@ def run_fold(data, fold: core.Fold, *, backbone: str, head: str, loss: str = "ms
              batch_size: int = 32, patience: int = 40, edge=None, fixed=None,
              lam_param: str = "sigmoid", state_fit: bool = False,
              state_seed: str = "lagged", dist: str = "point",
+             norm: str = "fold", node_emb: int = 0, aux_phys: float = 0.0,
              keep: bool = False) -> dict:
     """Train one (fold, seed) and return its test scores plus the raw predictions."""
     torch.manual_seed(seed)
@@ -65,7 +66,7 @@ def run_fold(data, fold: core.Fold, *, backbone: str, head: str, loss: str = "ms
         cases = np.nan_to_num(data.cases)
         cum[s] = torch.tensor(np.stack([cases[:i].sum(0) for i in pack["idx"]]), dtype=torch.float32)
 
-    needs_state = head in ("foi", "foi_res")
+    needs_state = head in ("foi", "foi_res") or aux_phys > 0
     state = {s: models.seir_state(packs[s]["x_raw"], packs[s]["pop"], cum[s],
                                   mode=state_seed) if needs_state else None
              for s in packs}
@@ -73,7 +74,8 @@ def run_fold(data, fold: core.Fold, *, backbone: str, head: str, loss: str = "ms
     net = models.Net(packs["train"]["x"].shape[-1], packs["train"]["x"].shape[1],
                      horizon=core.HORIZON, hidden=hidden, backbone=backbone, head=head,
                      layers=layers, dropout=dropout, lam_param=lam_param, state_fit=state_fit,
-                     window=fold.window, edge_index=edge, dist=dist)
+                     window=fold.window, edge_index=edge, dist=dist, norm=norm,
+                     node_emb=node_emb, aux_phys=aux_phys)
     opt = torch.optim.Adam(net.parameters(), lr=lr, weight_decay=weight_decay)
     sched = torch.optim.lr_scheduler.CosineAnnealingLR(opt, T_max=epochs)
     stopper = core.EarlyStop(net, patience=patience)
@@ -93,9 +95,14 @@ def run_fold(data, fold: core.Fold, *, backbone: str, head: str, loss: str = "ms
             batch = {k: v[sl] for k, v in pack.items() if k != "idx"}
             st = state["train"][sl] if needs_state else None
             opt.zero_grad()
-            pred, disp = net(batch["x"], fixed, batch["p_z"], st, batch["pop"], fold.mean,
-                             fold.std, edge)
+            pred, disp, aux = net(batch["x"], fixed, batch["p_z"], st, batch["pop"],
+                                  fold.mean, fold.std, edge)
             out = _loss(loss, pred, batch, fold.mean, fold.std, disp)
+            if aux is not None:
+                # The SEIR head is a constraint on the shared representation,
+                # not the forecast: fitted in the same fold-z space, with a
+                # squared error so its weight means the same for every loss.
+                out = out + aux_phys * nn.functional.mse_loss(aux, batch["y_z"])
             out.backward()
             torch.nn.utils.clip_grad_norm_(net.parameters(), 5.0)
             opt.step()
@@ -119,6 +126,7 @@ def run_fold(data, fold: core.Fold, *, backbone: str, head: str, loss: str = "ms
                origin=fold.origin, seed=seed, backbone=backbone, head=head, loss=loss,
                climate=use_climate, ndvi=use_ndvi, season=use_season,
                lam_param=lam_param, state_fit=state_fit, state_seed=state_seed, dist=dist,
+               norm=norm, node_emb=node_emb, aux_phys=aux_phys,
                epochs_ran=ran, best_epoch=ran - stopper.waited, stopped_early=halted)
     if keep:
         # Everything a post-hoc diagnosis needs, per split: the forecast, the

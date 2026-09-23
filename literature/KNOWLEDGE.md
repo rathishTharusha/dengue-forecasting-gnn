@@ -8,10 +8,11 @@ about it, and whether we have tested that remedy.
 **The PDFs** are third-party copyrighted works and are git-ignored, like
 `papers/`. Rebuild the folder with `python literature/fetch_papers.py`, which
 downloads every row of `manifest.csv`, checks each file really is a PDF, and
-writes sizes and hashes to `fetch_log.csv`. Three publishers refuse automated
-downloads and need fetching by hand from the URL in the manifest:
-`kim2022revin` (OpenReview), `johansson2019dengue` (PNAS / PMC6883829) and
-`cramer2022ensemble` (OSTI; the connection drops mid-download).
+writes sizes and hashes to `fetch_log.csv`. 31 of 32 fetch automatically.
+`kim2022revin` needs fetching by hand — OpenReview refuses automated requests.
+Europe PMC and OSTI sometimes refuse or drop a request and succeed on a retry;
+the script deletes any file lacking the PDF end-of-file trailer, so a truncated
+download is never kept.
 
 Our own measurements quoted below come from `seirgnn2/results/diagnose_arch.txt`
 (EXP-039): validation windows only, frozen three origins, seeds averaged. Test
@@ -171,8 +172,10 @@ in the manifest for completeness.
 - **Literature.** SpatialEpiBench failure mode 1: *"poor outbreak anticipation."*
   Ding et al. (2019): deep models trained on squared error systematically miss
   extreme events; they propose an extreme-value loss and a memory module.
-  Johansson et al. (2019): the dengue challenge's teams did well late in the
-  season and badly early — i.e. once the outbreak was visible, not before.
+  Johansson et al. (2019), 16 teams forecasting dengue in Peru and Puerto Rico:
+  *"early season skill was low, and skill was generally lowest for high
+  incidence seasons, those for which forecasts would be most valuable."* The
+  same failure, in dengue, from a different continent.
 - **Ours.** On outbreak cells the working models under-predict by 22–25 cases
   natively (persistence: 15) and 17–23 with NB + season. The top 5% of cells
   carry ~60% of all squared error.
@@ -217,8 +220,11 @@ in the manifest for completeness.
 ### W9. The working models make the same mistakes
 - **Literature.** Every multi-team forecasting evaluation — the dengue challenge
   (Johansson et al. 2019), the COVID-19 Forecast Hub (Cramer et al. 2022) —
-  finds the ensemble most consistently accurate. Ensembles work because
-  component errors differ.
+  finds the ensemble most consistently accurate. Cramer et al. are precise
+  about *how*: the ensemble was the only model in the top half for over 75% of
+  its forecasts, *"although it made the single best forecast less frequently
+  than any other model."* It wins on consistency, not on being best — and that
+  only happens because component errors differ.
 - **Ours.** ASTGCN, AAGCN and the LSTM have **residual correlations of
   0.98–0.99**. They are, to within noise, the same forecaster. Averaging them
   cannot help, and it doesn't: the mean of the five direct encoders scores
@@ -322,8 +328,8 @@ Pre-registered as `docs/REMEDIES_PLAN.md`; results logged as EXP-040 onward.
 | liu2024gnnreview | epidemic | Taxonomy of GNNs in epidemic modelling; hybrid family |
 | rodriguez2022datacentric | epidemic | Survey of data-centric epidemic forecasting |
 | lyu2026spatialepibench | epidemic | 11 datasets: most models lose to last-value; adjacency of limited use |
-| johansson2019dengue | evaluation | 16 teams, Peru & Puerto Rico dengue: ensembles help; early season is hard (manual fetch) |
-| cramer2022ensemble | evaluation | COVID Forecast Hub: only the ensemble beat the baseline everywhere (manual fetch) |
+| johansson2019dengue | evaluation | 16 teams, Peru & Puerto Rico dengue: skill lowest in high-incidence seasons; ensembles help |
+| cramer2022ensemble | evaluation | COVID Forecast Hub: ensemble most consistent, rarely the single best; 2/3 of models beat naive |
 | bracher2021wis | evaluation | Weighted interval score for probabilistic epidemic forecasts |
 | dengue_nn_review2025 | evaluation | 62 studies: mostly shallow nets; inconsistent horizons and evaluation |
 | benjarattanaporn2026nma | evaluation | Network meta-analysis: k-NN, VAR, Kalman, GLM top dengue RMSE; all beat naive |

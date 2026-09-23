@@ -37,7 +37,9 @@ python seirgnn2/diagnose_seed.py  # which initial-state seeding is reachable
 ```
 
 Grids live in `grids.py`, one function each: `screen`, `foi`, `converge`, `real`,
-`combo`. A sweep runs every config × 3 origins × 3 seeds and writes **one row per
+`combo`, `window`, `confirm`, `remedies`. `--keep` also saves every run's forecasts to
+`results/<grid>_preds.pkl` (git-ignored), which `ensemble.py` and forecast-level
+diagnoses read. A sweep runs every config × 3 origins × 3 seeds and writes **one row per
 (config, origin, seed), never pre-aggregated** — that is what makes the paired
 tests possible, and the repo's logging convention asks for exactly it.
 
@@ -73,6 +75,21 @@ agreeing to within 0.11 RMSE and persistence identical to the decimal. CPU
 workers, not GPU — these architectures are small and the grid is many short runs.
 
 ---
+
+### Remedy switches (`models.Net`, all off by default)
+
+Added for `docs/REMEDIES_PLAN.md`; with every switch off, runs reproduce earlier
+grids **bit for bit** — verified against `screen.json` — provided torch runs
+single-threaded, as `sweep.py` and the Kaggle kernel both enforce. Multi-threaded
+reductions change the last digits, which compound over 300 epochs.
+
+| option | values | what it does |
+|---|---|---|
+| `norm` | `fold`, `revin_mean`, `revin` | reversible instance normalisation per district-window (Kim et al. 2022); direct head only |
+| `node_emb` | int | learned identity per district, joined at the head (Shao et al. 2022) |
+| `backbone="linear"` | — | inputs straight to a linear head; with `dist="nb"` + `node_emb` it is a negative-binomial GLM |
+| `aux_phys` | float | SEIR force-of-infection head as an auxiliary loss, forecast stays direct (Rodríguez et al. 2023) |
+| `backbone="knn"` | — | analogue forecasting in `knn.py`; no training |
 
 ## The protocol
 
@@ -227,6 +244,9 @@ Both point at the 9-origin confirmatory grid before anything is claimed.
 | `grids.py` | the grids, one function each |
 | `diagnose_foi.py` | why the physics head behaves as it does — reach, seeding, learnability, saturation, ceiling |
 | `diagnose_seed.py` | scores the three initial-state seedings without training |
+| `diagnose_arch.py` | retrains the remaining architectures keeping every forecast, then measures how they are wrong (EXP-039) |
+| `knn.py` | k-nearest-neighbour analogue forecaster (remedy R4b); strict analogue library, leakage-tested |
+| `ensemble.py` | equal-weight ensembles from `sweep.py --keep` forecasts (remedy R5) |
 
 ### A note on the seasonal feature's rationale
 

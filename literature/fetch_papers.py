@@ -5,9 +5,11 @@ as ``papers/``) and this script is how a teammate gets them: every row carries
 the canonical URL. Rows marked ``local:`` are copied from a file already in the
 repository instead of downloaded.
 
-Each file is checked to actually be a PDF -- publishers sometimes answer an
-automated request with an HTML challenge page, which would otherwise be saved
-under a ``.pdf`` name and look fine until someone opens it. Outcomes, sizes and
+Each file is checked to be a *complete* PDF: it must start with ``%PDF`` and
+carry the ``%%EOF`` trailer near its end. Publishers sometimes answer an
+automated request with an HTML challenge page, and a dropped connection leaves a
+truncated file that still starts with ``%PDF`` -- both would otherwise sit under
+a ``.pdf`` name looking fine until someone opens them. Outcomes, sizes and
 SHA-256 hashes go to ``fetch_log.csv`` so a changed or missing file is visible.
 
     python literature/fetch_papers.py            # fetch anything missing
@@ -31,6 +33,10 @@ UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/126.0 Safari/537.36")
 
 
+def is_complete_pdf(data: bytes) -> bool:
+    return data.startswith(b"%PDF") and b"%%EOF" in data[-2048:]
+
+
 def fetch(url: str, dest: Path) -> str:
     if url.startswith("local:"):
         src = REPO / url.removeprefix("local:")
@@ -41,8 +47,9 @@ def fetch(url: str, dest: Path) -> str:
     req = urllib.request.Request(url, headers={"User-Agent": UA, "Accept": "application/pdf,*/*"})
     with urllib.request.urlopen(req, timeout=60) as r:
         body = r.read()
-    if not body.startswith(b"%PDF"):
-        return f"not a PDF ({len(body)} bytes, starts {body[:15]!r}) -- fetch manually"
+    if not is_complete_pdf(body):
+        return (f"not a complete PDF ({len(body)} bytes, starts {body[:15]!r}) "
+                "-- fetch manually")
     dest.write_bytes(body)
     return "downloaded"
 
@@ -57,6 +64,8 @@ def main() -> None:
     log = []
     for row in rows:
         dest = PDFS / row["file"]
+        if dest.exists() and not is_complete_pdf(dest.read_bytes()):
+            dest.unlink()  # truncated or not a PDF: never keep it
         if dest.exists() and not args.force:
             status = "present"
         else:
@@ -65,7 +74,7 @@ def main() -> None:
             except Exception as exc:
                 status = f"failed: {type(exc).__name__}: {exc}"
             time.sleep(1.0)  # be polite to arXiv and publishers
-        ok = dest.exists() and dest.read_bytes()[:4] == b"%PDF"
+        ok = dest.exists() and is_complete_pdf(dest.read_bytes())
         size = dest.stat().st_size if ok else 0
         sha = hashlib.sha256(dest.read_bytes()).hexdigest()[:16] if ok else ""
         log.append({"key": row["key"], "file": row["file"], "status": status,

@@ -23,7 +23,7 @@ full_paper/
 │   ├── main.tex                   # Primary full paper LaTeX manuscript
 │   ├── main-highlighted.tex       # Color-coded contribution build (for review/grading)
 │   ├── refs.bib                   # BibTeX bibliography database
-│   ├── tables_generated.tex       # LaTeX tables for Stages S4-S9 empirical results
+│   ├── tables_generated.tex       # LaTeX tables for the manuscript (renewal/physics), not the SEIR-GNN stages
 │   ├── sections/                  # Modular paper sections (00_abstract to 06_discussion)
 │   └── figures/                   # High-resolution vector PDF & raster PNG figures
 ├── data/                          # Standalone dataset directory
@@ -76,23 +76,74 @@ The master notebook `reproduce_full_paper.ipynb` reproduces every empirical figu
    pip install torch torch-geometric pandas numpy scikit-learn matplotlib statsmodels
    ```
 3. **Execution Modes**:
-   - **Fast Empirical Mode**: Renders pre-computed Stage S4–S9 benchmark tables and publication plots (< 30 seconds).
-   - **Full GPU Retraining**: Re-executes the complete pre-registered benchmark sweep (252 SEIR-GNN models + 54 SEIR-LSTM models, ~6 hours on GPU/multiprocessing CPU).
+   - **Fast Empirical Mode**: Renders the committed `seirgnn2/results/confirm.json` leaderboard and publication plots (< 30 seconds).
+   - **Full Re-run**: Executes the leakage-controlled confirmatory grid via `seirgnn2/sweep.py confirm` (5 arms × 9 disjoint origins × 3 seeds, ~70 min on 6 CPU workers; identical on Kaggle).
 
 ---
 
-## 📊 Summary of Master Empirical Findings (Stages S4 – S9)
+## 📊 SEIR-GNN results
 
-| Stage | Focus / Comparison | Key Result / Metric | Scientific Takeaway |
-|:---|:---|:---|:---|
-| **S4** | SEIR-LSTM Baseline (Liu et al.) | **Val RMSE: 30.353**, **Test RMSE: 62.609** | Winner formulation $F^*$ (`F-win`, $\lambda_{\max}=1.0/\text{wk}$, SMAPE loss). |
-| **S5** | SEIR-GNN Leaderboard (252 runs) | **Val RMSE: 25.823** (STGAT Direct) / **Test RMSE: 61.121** (STGAT FOI) | **STGAT outperforms all 5 GNN baselines**. Physics-informed FOI head reduces test error by 11.5%. |
-| **S6** | Sensitivity Analysis | **Val RMSE: 25.823** / **Test RMSE: 69.040** (Unchanged across 8 arms) | Physics-constrained formulation is highly stable against initial condition noise. |
-| **S7** | Early-Warning Detection | **Outbreak Detection ROC-AUC: 0.807 – 0.826** ($p = 0.04$) | SEIR-GNN accurately detects epidemic surge warnings 6 weeks in advance. |
-| **S8** | Seroprevalence Validation | **Spearman $\rho = 0.2500$** ($p = 0.5165$) | Model-implied immune fraction ($1 - S/N$) correlates with 9-district field survey data. |
-| **S9** | Confirmatory Permutation Test | **$p_{\text{raw}} = 0.50$, $p_{\text{adj}} = 0.8333$** | Rigorous multi-origin hypothesis test across 9 forecast splits. |
+> **These replace the Stage S4–S9 table that stood here until 2026-09-23.** That table
+> was withdrawn in full: every number in it traced to `analysis/_build/run_s5_seir_gnn.py`,
+> which took one gradient step per epoch, minimised SMAPE while being scored by RMSE, held
+> the force of infection constant across the horizon, and collapsed every covariate to a
+> scalar through `nn.Linear(in_dim, 1)` before the graph saw it. The S9 row was worse than
+> mistuned: `run_s9_confirmatory.py` is described as a nine-origin paired permutation test,
+> but runs on the three origins S5 produced, subtracts hardcoded scalars instead of matching
+> on origin, and reported an early-warning p-value (`p = 0.04`) that was a typed-in literal
+> rather than a computed quantity. See `docs/EXPERIMENT_LOG.md` EXP-032 and EXP-037.
+>
+> **None of this affects the manuscript.** The paper in `overleaf/` contains no SEIR-GNN
+> stage results; its contribution is the artifact audit, the increment nulls, the renewal
+> analysis and the constraint-versus-reconstruction finding, none of which depend on the
+> retracted code.
 
----
+The replacement is a leakage-controlled re-run (`seirgnn2/`) on **nine origins with disjoint
+test spans**, five arms frozen before the run, three seeds each, selection on validation only.
+Differences are paired at the origin unit, which is the only unit resampled from the data.
+
+| comparison (validation RMSE) | Δ | origins won | p | p_adj |
+|---|---|---|---|---|
+| SEIR-GNN (ASTGCN+FOI) vs **SEIR-LSTM** | **−0.75** | **8/9** | **0.012** | 0.059 |
+| SEIR-GNN vs **persistence** | −2.92 | 8/9 | 0.066 | 0.166 |
+| best published GNN (AAGCN direct) vs persistence | −2.89 | 8/9 | 0.035 | 0.166 |
+| SEIR-GNN vs best published GNN | −0.03 | 1/9 | 1.000 | 1.000 |
+| SEIR-GNN vs SEIR-LSTM, **test** RMSE | +0.23 | 4/9 | 0.410 | 0.513 |
+
+**What this supports, stated plainly:**
+
+- **Against SEIR-LSTM** — the proposed method is better on 8 of 9 independent origins, and
+  the advantage is not driven by any single fold. Raw p = 0.012. It **misses the
+  pre-registered endpoint** (BH-adjusted p < 0.05) at p_adj = 0.059, and on held-out test
+  RMSE the two are indistinguishable with SEIR-LSTM marginally ahead. Report as a consistent
+  directional advantage, not as a win.
+- **Against the naive persistence floor** — a small consistent edge on validation that does
+  not survive correction, and nothing at all on test (31.70 vs 31.76). **Persistence is not
+  beaten.**
+- **Against the five published architectures** — comfortably better than STGAT, A3TGCN and
+  DCRNN; **not** better than AAGCN or ASTGCN on the direct head, which win on 8 of 9 origins.
+  The three weaker architectures ran with settings tuned around the two stronger ones and may
+  simply be undertuned, so that comparison is weak evidence.
+- **Mean RMSE across these nine origins is not a usable summary.** Origin 0.40 is an outlier
+  where every arm fails (140–227 RMSE against 13–48 elsewhere) and it dominates every mean.
+  Read win counts and per-origin values; `seirgnn2/stats.py` prints wins beside every delta
+  for this reason.
+
+**Withdrawn without replacement:** the S7 early-warning significance claim. The AUC figures
+themselves (0.807 → 0.826, from `analysis/_build/outbreak_signal.py`) are computed and stand;
+the `p = 0.04` attached to them never was. S6 and S8 are not re-run here and are unverified
+under the corrected harness.
+
+Reproduce with:
+
+```bash
+python seirgnn2/sweep.py confirm --workers 6 --epochs 400
+python seirgnn2/stats.py confirm --ref "LSTM+foi_res" --metric val_RMSE
+```
+
+Verified identical on Kaggle (144 rows both sides, every arm within 0.11 RMSE) via
+`python scripts/build_seirgnn2_kernel.py --grid confirm`. See `seirgnn2/README.md` for the
+harness, the protocol, and a table of every lever tried with its measured effect.
 
 ## 📚 Literature & Citation Integrity
 

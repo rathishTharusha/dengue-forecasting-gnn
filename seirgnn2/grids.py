@@ -188,6 +188,8 @@ def remedies(epochs: int = 400) -> list[dict]:
 #: Pre-registered equal-weight ensembles per grid (docs/REMEDIES_PLAN.md, R5).
 #: Fixed before the grid runs; ``build_seirgnn2_kernel.py --keep`` computes them.
 ENSEMBLES = {
+    "physics": [],
+    "physics9": [],
     "arch": [],
     "augment": [],
     "climate": [],
@@ -280,3 +282,33 @@ def arch(epochs: int = 400) -> list[dict]:
         _c("A6 combined", head_mlp=64, dseason=True, global_ctx=True, node_emb=16,
            clim_blocks=BLOCKS_3, **base),
     ]
+
+
+def _physics_arms(epochs: int) -> dict[str, dict]:
+    base = dict(backbone="AAGCN", head="direct", loss="nb", dist="nb", use_season=True,
+                epochs=epochs)
+    phys = dict(loss="nb", dist="nb", use_season=True, lam_param="log", state_fit=True,
+                epochs=epochs)
+    return {
+        "P0 B": base,
+        "P1 spatial penalty (ratio)": dict(base, spatial=0.001, spatial_kind="ratio"),
+        "P2 spatial penalty (log)": dict(base, spatial=0.05, spatial_kind="log"),
+        "P3 gated SEIR-GNN": dict(phys, backbone="AAGCN", head="foi_res"),
+        "P4 metapopulation SEIR-GNN": dict(phys, backbone="AAGCN", head="foi_meta"),
+        "P5 metapop + spatial + district season": dict(phys, backbone="AAGCN", head="foi_meta",
+                                                       spatial=0.001, spatial_kind="ratio",
+                                                       dseason=True),
+        "P6 SEIR-LSTM": dict(phys, backbone="LSTM", head="foi_res"),
+    }
+
+
+def physics(epochs: int = 400) -> list[dict]:
+    """docs/PHYSICS_GNN_PLAN.md, screening on the frozen three origins."""
+    return [_c(name, **cfg) for name, cfg in _physics_arms(epochs).items()]
+
+
+def physics9(epochs: int = 400) -> list[dict]:
+    """docs/PHYSICS_GNN_PLAN.md, the nine-origin confirmation of SEIR-GNN against SEIR-LSTM."""
+    keep = ("P0 B", "P3 gated SEIR-GNN", "P4 metapopulation SEIR-GNN", "P6 SEIR-LSTM")
+    arms = _physics_arms(epochs)
+    return [_c(name, origins="nine", **arms[name]) for name in keep]

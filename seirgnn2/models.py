@@ -17,6 +17,14 @@ Heads
 ``foi_res``   the same, but the simulator's incidence is blended onto the
               persistence anchor with a learned gate, so the physics supplies
               the *departure* from persistence rather than the whole signal.
+``foi_meta``  metapopulation SEIR (docs/PHYSICS_GNN_PLAN.md, P4): the encoder
+              predicts each district's weekly transmission rate beta_i(t), and
+              the simulator recomputes the force of infection every day as
+              beta_i * sum_j C_ij I_j, with C a learned row-stochastic coupling
+              initialised to the border graph -- districts are coupled inside
+              the dynamics, as in MepoGNN and CausalGNN, instead of through an
+              import term on the initial state. Gated onto persistence like
+              ``foi_res``.
 """
 
 from __future__ import annotations
@@ -32,7 +40,7 @@ sys.path.insert(0, str(REPO / "analysis" / "lib"))
 import backbones  # noqa: E402
 import seir_sim  # noqa: E402
 
-HEADS = ("direct", "residual", "foi", "foi_res")
+HEADS = ("direct", "residual", "foi", "foi_res", "foi_meta")
 BACKBONES = ("none", "gcn", "gat", "adaptive", "hybrid", "linear", *backbones.REAL)
 LAM_PARAMS = ("sigmoid", "log")
 SEEDS = ("lagged", "recent", "decon")
@@ -59,6 +67,7 @@ N_SEASON = 4
 #: the ``log`` parameterisation so training starts at the data's own scale.
 LAM_LOG0 = -9.36
 LOG_LAMBDA_MAX = -1.95  # log(1/7), the original bound, kept as a hard clamp
+META_LOG_BETA0 = -0.69  # log(0.5/day): the foi_meta transmission-rate centre at initialisation
 
 
 class GraphLayer(nn.Module):
@@ -139,8 +148,10 @@ class Net(nn.Module):
             raise ValueError(f"unknown norm {norm!r}; expected one of {NORMS}")
         if (norm != "fold" or aux_phys) and head != "direct":
             raise ValueError("norm and aux_phys are defined for the direct head only")
-        if (head_mlp or dseason or global_ctx) and head not in ("direct", "residual"):
-            raise ValueError("head_mlp, dseason and global_ctx are defined for direct/residual heads")
+        if (head_mlp or global_ctx) and head not in ("direct", "residual"):
+            raise ValueError("head_mlp and global_ctx are defined for direct/residual heads")
+        if dseason and head not in ("direct", "residual", "foi_meta"):
+            raise ValueError("dseason is defined for direct, residual and foi_meta heads")
         self.head, self.horizon, self.lambda_max, self.rho = head, horizon, lambda_max, rho
         self.lam_param, self.state_fit, self.backbone = lam_param, state_fit, backbone
         self.dist, self.norm, self.window, self.aux_phys = dist, norm, window, aux_phys
@@ -174,7 +185,7 @@ class Net(nn.Module):
                     if head_mlp else nn.Linear(feat, horizon))
         self.disp = nn.Linear(feat, horizon) if dist == "nb" else None
         self.out_phys = nn.Linear(feat, horizon) if aux_phys else None
-        if head in ("foi", "foi_res") or aux_phys:
+        if head in ("foi", "foi_res", "foi_meta") or aux_phys:
             self.alpha = nn.Parameter(torch.tensor(-2.0))   # gate, through sigmoid
             self.beta = nn.Parameter(torch.tensor(0.0))     # log-scale spatial import weight
             # ``diagnose_foi.py`` inverts the simulator for the lambda that
@@ -192,6 +203,11 @@ class Net(nn.Module):
             self.rho_scale = nn.Parameter(torch.tensor(0.0))
         self.dseason = (nn.Parameter(torch.zeros(n_nodes, N_SEASON, horizon))
                         if dseason else None)
+        if head == "foi_meta":
+            # beta ~ lambda / I: the inverted median lambda (~9e-5/day) over a typical
+            # infectious fraction (~2e-4) puts beta near 0.5/day at initialisation.
+            self.beta_bias = nn.Parameter(torch.tensor(float(META_LOG_BETA0)))
+            self.c_logit = nn.Parameter(torch.zeros(n_nodes, n_nodes))
 
     def _instance_stats(self, x: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
         """Mean and spread of each district-window's case channels, ``(B, N, 1)``.
@@ -244,6 +260,26 @@ class Net(nn.Module):
         counts = (inc * rho * pop.unsqueeze(-1)).clamp_min(0.0)
         return (torch.log1p(counts) - mean) / std
 
+    def _meta_physics(self, raw: torch.Tensor, st0: torch.Tensor, pop: torch.Tensor,
+                      mean: float, std: float, fixed: torch.Tensor) -> torch.Tensor:
+        """Metapopulation SEIR: daily force of infection beta_i * sum_j C_ij I_j.
+
+        C starts as the row-normalised border graph with self-loops; log of it is
+        the prior and ``c_logit`` a learned correction, so pairs with no shared
+        border start at ~0 weight (log 1e-9) but can be learned if the data want it.
+        """
+        beta = torch.exp((raw + self.beta_bias).clamp(-12.0, 2.0))               # (B,N,H) per day
+        if self.state_fit and st0 is not None:
+            s, e, i, r = st0.unbind(-1)
+            scaled = e * torch.sigmoid(self.e_scale) * 2.0
+            st0 = torch.stack([s, scaled, i, (r + e - scaled).clamp_min(0.0)], dim=-1)
+        coupling = torch.softmax(torch.log(fixed.clamp_min(1e-9)) + self.c_logit, dim=-1)
+        _, inc, _ = seir_sim.simulate_closed_loop(st0, beta, omega=0.7 / 7.0, gamma=1.0 / 7.0,
+                                                  substeps=7, coupling=coupling)
+        rho = self.rho * torch.exp(self.rho_scale) if self.state_fit else self.rho
+        counts = (inc * rho * pop.unsqueeze(-1)).clamp_min(0.0)
+        return (torch.log1p(counts) - mean) / std
+
     def forward(self, x: torch.Tensor, fixed: torch.Tensor, p_z: torch.Tensor,
                 st0: torch.Tensor | None = None, pop: torch.Tensor | None = None,
                 mean: float = 0.0, std: float = 1.0, edge: torch.Tensor | None = None,
@@ -281,6 +317,10 @@ class Net(nn.Module):
             return raw, disp, aux
         if self.head == "residual":
             return p_z + raw, disp, aux
+        if self.head == "foi_meta":
+            phys_z = self._meta_physics(raw, st0, pop, mean, std, fixed)
+            gate = torch.sigmoid(self.alpha)
+            return p_z + gate * (phys_z - p_z), disp, aux
         phys_z = self._physics(raw, st0, pop, mean, std)
         if self.head == "foi":
             return phys_z, disp, aux

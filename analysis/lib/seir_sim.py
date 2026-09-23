@@ -134,7 +134,9 @@ def simulate_closed_loop(state0: torch.Tensor, beta: torch.Tensor, omega: float,
         for _ in range(substeps):
             prevalence = state[..., 2] / state.sum(-1).clamp_min(1.0)
             if coupling is not None:
-                prevalence = coupling @ prevalence
+                # sum_j C_ij p_j. Written as p @ C^T so a leading batch axis works;
+                # identical to the earlier ``coupling @ prevalence`` for one sample.
+                prevalence = prevalence @ coupling.T
             lam = beta[..., w] * prevalence
             state, onset = _step(state, lam, omega, gamma, dt)
             total = total + onset

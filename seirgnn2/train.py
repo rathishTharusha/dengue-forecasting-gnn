@@ -19,6 +19,7 @@ from torch import nn
 import count_loss as cl
 
 import augment as aug
+import physics_loss as ploss
 import core
 import models
 
@@ -84,6 +85,7 @@ def run_fold(data, fold: core.Fold, *, backbone: str, head: str, loss: str = "ms
              train_frac: float = 1.0, augment: str = "none",
              clim_blocks=(), clim_anom: bool = False, case_window: int | None = None,
              head_mlp: int = 0, dseason: bool = False, global_ctx: bool = False,
+             spatial: float = 0.0, spatial_kind: str = "ratio",
              keep: bool = False) -> dict:
     """Train one (fold, seed) and return its test scores plus the raw predictions."""
     torch.manual_seed(seed)
@@ -121,7 +123,7 @@ def run_fold(data, fold: core.Fold, *, backbone: str, head: str, loss: str = "ms
 
     if dseason and not use_season:
         raise ValueError("dseason reads the seasonal features, so use_season must be on")
-    needs_state = head in ("foi", "foi_res") or aux_phys > 0
+    needs_state = head in ("foi", "foi_res", "foi_meta") or aux_phys > 0
     if augment not in AUGMENTS:
         raise ValueError(f"unknown augment {augment!r}; expected one of {AUGMENTS}")
     if augment != "none" and needs_state:
@@ -177,6 +179,17 @@ def run_fold(data, fold: core.Fold, *, backbone: str, head: str, loss: str = "ms
         opt = torch.optim.Adam(net.parameters(), lr=lr, weight_decay=weight_decay)
         sched = torch.optim.lr_scheduler.CosineAnnealingLR(opt, T_max=epochs)
 
+    if spatial:
+        # docs/PHYSICS_GNN_PLAN.md P1/P2: the manuscript's spatial physics penalty --
+        # relative incidence (prediction / district's training-mean cases) should
+        # not jump across a shared border. Binary border adjacency, no self-loops,
+        # scales from training weeks only, exactly as run_physics_experiments.py.
+        adj_bin = ((fixed > 0) & ~torch.eye(fixed.shape[0], dtype=torch.bool)).float()
+        scales = torch.tensor(np.nanmean(data.cases[: int(fold.idx["train"].max())], axis=0),
+                              dtype=torch.float32)
+        pen_fn = {"ratio": ploss.normalized_smoothness_loss,
+                  "log": ploss.log_smoothness_loss}[spatial_kind]
+
     jit = torch.Generator().manual_seed(2000 + seed)
     n = len(packs["train"]["idx"])
     ran, halted = 0, False
@@ -193,6 +206,9 @@ def run_fold(data, fold: core.Fold, *, backbone: str, head: str, loss: str = "ms
             pred, disp, aux = net(batch["x"], fixed, batch["p_z"], st, batch["pop"],
                                   fold.mean, fold.std, edge)
             out = _loss(loss, pred, batch, fold.mean, fold.std, disp)
+            if spatial:
+                counts = torch.expm1(torch.clamp(pred * fold.std + fold.mean, -1.0, 12.0))
+                out = out + spatial * pen_fn(counts.clamp_min(0.0), adj_bin, scales)
             if aux is not None:
                 # The SEIR head is a constraint on the shared representation,
                 # not the forecast: fitted in the same fold-z space, with a
@@ -225,6 +241,7 @@ def run_fold(data, fold: core.Fold, *, backbone: str, head: str, loss: str = "ms
                augment=augment, clim_blocks=[list(b) for b in clim_blocks],
                clim_anom=clim_anom, case_window=case_window or fold.window,
                head_mlp=head_mlp, dseason=dseason, global_ctx=global_ctx,
+               spatial=spatial, spatial_kind=spatial_kind,
                n_train=len(fold.idx["train"]), n_val=len(fold.idx["val"]),
                n_test=len(fold.idx["test"]),
                epochs_ran=ran, best_epoch=ran - stopper.waited, stopped_early=halted)

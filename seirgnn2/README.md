@@ -54,8 +54,23 @@ constructed, so `backbones.install_shim()` supplies the symbol from
 `reproduction/` is **not** needed here.
 
 ```bash
-pip install --no-deps torch-geometric-temporal
+pip install torch-geometric                      # with deps: PyG itself is required
+pip install --no-deps torch-geometric-temporal   # without: torch-sparse would build from source
 ```
+
+Both are needed. Installing only the second one skips `torch_geometric`, and on a
+machine that does not already have it every graph arm then dies inside its worker
+while the LSTM arms run fine — the grid comes back short with no obvious error.
+That cost one Kaggle kernel (EXP-038 note 4), so `backbones.check()` is now a
+hard gate in the kernel.
+
+### Kaggle
+
+`python scripts/build_seirgnn2_kernel.py --grid <grid>` generates a kernel that
+clones the pushed branch at a pinned SHA, so nothing drifts between local and
+remote. **Verified**: the `confirm` grid returns 144 rows on both, with every arm
+agreeing to within 0.11 RMSE and persistence identical to the decimal. CPU
+workers, not GPU — these architectures are small and the grid is many short runs.
 
 ---
 

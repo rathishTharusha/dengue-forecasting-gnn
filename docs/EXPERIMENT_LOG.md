@@ -37,6 +37,68 @@ Copy this block for a new entry:
 > `CEILING_R0_MAX`) survived the cleanup and now lives in `dengue_gnn.seir`, still
 > asserted by `tests/test_seir.py` and reproduced by `scripts/verify_seir_paper.py`.
 
+## EXP-038 — Confirmatory stage, nine disjoint origins (replaces S9)
+- **Date:** 2026-09-23
+- **Who:** Group 05
+- **Commit:** `2215ae8`
+- **Script:** `seirgnn2/sweep.py confirm` -> `seirgnn2/results/confirm.json` (144 rows)
+- **Hardware:** Local CPU, 6 workers. Also pushed as Kaggle kernel `seirgnn2-confirm`.
+- **Config:** five finalists frozen out of `combo` before this ran -- AAGCN+direct,
+  LSTM+direct, ASTGCN+foi_res, LSTM+foi_res, ASTGCN+direct; loss=nb, dist=nb,
+  use_season=True, lam_param=log, state_fit=True, window=3, epochs=400.
+  `core.ORIGINS_9` = nine origins with **disjoint** test spans (verified zero overlap between
+  any pair), tiling 0.40 -> 1.00 with span 1/15. Three seeds each.
+- **Question:** The pre-registered endpoint. Does the proposed SEIR-GNN beat Liu et al.'s
+  SEIR-LSTM, and does anything beat persistence, on a protocol where the origin unit can
+  actually reach significance?
+- **Result:** validation RMSE. **The origin unit is the one that matters here** (n = 9,
+  attainable floor 0.004); origin_seed (n = 27) is reported second as stability.
+
+  | arm | val | test |
+  |---|---|---|
+  | ASTGCN+foi_res | 38.30 | 31.70 |
+  | AAGCN+direct | 38.32 | 33.93 |
+  | LSTM+foi_res | 39.05 | 31.47 |
+  | LSTM+direct | 39.27 | 34.97 |
+  | persistence | 41.21 | 31.76 |
+  | ASTGCN+direct | 46.29 | 36.79 |
+
+  Paired at the **origin** unit:
+
+  | comparison | delta | wins | p | p_adj |
+  |---|---|---|---|---|
+  | ASTGCN+foi_res vs LSTM+foi_res | **-0.75** | **8/9** | **0.012** | 0.059 |
+  | AAGCN+direct vs LSTM+direct | -0.95 | 7/9 | 0.531 | 0.885 |
+  | ASTGCN+foi_res vs persistence | -2.92 | 8/9 | 0.066 | 0.166 |
+  | AAGCN+direct vs persistence | -2.89 | 8/9 | 0.035 | 0.166 |
+
+  At origin_seed, ASTGCN+foi_res vs LSTM+foi_res is -0.75, **24/27**, p_adj = 0.000.
+
+- **Verdict:** **The primary endpoint is not met.** The pre-registered criteria were BH
+  p-adj < 0.05, a win on >= 6/9 origins, and the same direction as the 3-origin table.
+  SEIR-GNN vs SEIR-LSTM satisfies two of three: 8/9 origins and the same direction (-0.62 in
+  EXP-035), but p_adj = 0.059 against a 0.05 bar. Raw p = 0.012; the gap is the multiplicity
+  correction across the four comparisons. Report as a consistent directional advantage that
+  does not clear the pre-registered significance bar -- **not** as "SEIR-GNN beats SEIR-LSTM".
+- **Notes:**
+  1. **Absolute levels are not comparable to the 3-origin grids.** Persistence is 41.21 here
+     against 17.86 on the frozen three, because the nine origins reach back to 0.40 and include
+     much harder periods. Never pool or pair across origin sets; `sweep.run` keys persistence
+     rows by (window, origin-set) to make that mechanical.
+  2. **Test is below validation here** (31.70 vs 38.30), inverted relative to the 3-origin
+     grids. Different weeks, nothing more -- but it is why val/test divergence on three origins
+     should not have been read as a warning sign about the model.
+  3. **The strongest single signal in this run is a variance one.** ASTGCN+direct is the worst
+     arm at 46.29 with sd 25.77 across origins, while the *same encoder* behind the physics
+     head is the best at 38.30 with sd 4.27. The force-of-infection layer is acting as a
+     stabiliser on an encoder that is otherwise unstable on this series. That is a cleaner and
+     better-evidenced claim than the point-accuracy one, and it is what EXP-035's null direct
+     result already hinted at.
+  4. Kaggle kernel v1 of this grid returned 63 rows instead of 144 and had to be discarded:
+     `pip install --no-deps torch-geometric-temporal` also skips torch_geometric, which Kaggle
+     does not ship, so every graph arm died in its worker while the LSTM arms ran. v2 installs
+     torch_geometric properly and asserts on `backbones.check()` before the grid starts.
+
 ## EXP-037 — Audit: run_s9_confirmatory.py does not compute what S9 claims
 - **Date:** 2026-09-23
 - **Who:** Group 05

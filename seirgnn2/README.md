@@ -80,9 +80,10 @@ compared until a config is frozen. Every table below is ordered by validation.
   share their data and are replicates of *initialisation only*. A p-value here
   is a statement about run-to-run stability, not about the series.
 
-Everything reported below is `origin_seed` unless stated. **Nothing here is
-significant at the `origin` unit and nothing can be until the 9-origin
-confirmatory grid (plan S9) is run.**
+Everything in the screening tables is `origin_seed`; nothing there can be
+significant at the `origin` unit with only three origins. The **confirmatory**
+grid (`grids.confirm`, `core.ORIGINS_9`) runs nine origins with disjoint test
+spans and reaches a floor of 0.004 — that is the one to quote. See EXP-038.
 
 ---
 
@@ -157,7 +158,30 @@ a transmission quantity where spatial coupling is mechanistically plausible —
 and absent when regressing cases directly. The null case is what makes the
 positive one worth reporting.
 
-### Two caveats that travel with these numbers
+### Confirmatory result (EXP-038) — nine disjoint origins, the origin unit
+
+| comparison | delta | wins | p | p_adj |
+|---|---|---|---|---|
+| ASTGCN+foi_res vs LSTM+foi_res | **−0.75** | **8/9** | **0.012** | 0.059 |
+| AAGCN+direct vs LSTM+direct | −0.95 | 7/9 | 0.531 | 0.885 |
+| ASTGCN+foi_res vs persistence | −2.92 | 8/9 | 0.066 | 0.166 |
+
+**The pre-registered endpoint is not met.** The criteria were p_adj < 0.05, ≥6/9
+origins, and the same direction as the 3-origin table. SEIR-GNN vs SEIR-LSTM
+meets two of three; p_adj = 0.059 against a 0.05 bar (raw p = 0.012, the gap
+being multiplicity correction). Report as a consistent directional advantage that
+does not clear the bar — **not** as "SEIR-GNN beats SEIR-LSTM".
+
+The strongest signal in that run is about **variance**, not point accuracy:
+ASTGCN+direct is the worst arm (46.29, sd 25.77 across origins) while the *same
+encoder* behind the physics head is the best (38.30, sd 4.27). The
+force-of-infection layer stabilises an encoder that is otherwise erratic on this
+series. That is the better-evidenced claim.
+
+Absolute levels on the nine origins are much higher (persistence 41.21 vs 17.86)
+because they reach back to 0.40. **Never pool or pair across origin sets.**
+
+### Two caveats that travel with the screening numbers
 
 1. **Validation and test disagree at this spread.** LSTM+foi_res is *ahead* of
    ASTGCN+foi_res on test (34.97 vs 35.26), and the best validation arm is

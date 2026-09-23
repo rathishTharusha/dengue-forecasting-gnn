@@ -26,7 +26,21 @@ sys.path.insert(0, str(REPO / "analysis" / "lib"))
 import corrected_data as cd  # noqa: E402
 
 WINDOW, HORIZON = 3, 3
+
+#: The frozen protocol's three rolling origins (plan R5). Their test spans
+#: overlap, which is fine for screening but means the three are not independent
+#: replicates -- see ORIGINS_9.
 ORIGINS = (0.55, 0.70, 0.85)
+TEST_FRAC = 0.15
+
+#: The confirmatory protocol (plan S9): nine origins whose test spans are
+#: **disjoint**, so each contributes an independent observation to the paired
+#: test. Disjointness forces the narrower span: nine windows of 0.15 would cover
+#: 135% of the series, so the span is 1/15 and the nine tests tile 0.40 -> 1.00
+#: exactly once. Three origins can never clear p = 0.25 on an exact sign-flip
+#: test; nine reach a floor of 0.004.
+ORIGINS_9 = tuple(round(0.40 + k / 15.0, 4) for k in range(9))
+TEST_FRAC_9 = 1.0 / 15.0
 
 
 @dataclass
@@ -38,7 +52,9 @@ class Fold:
     window: int = WINDOW
 
 
-def build_folds(cases: np.ndarray, missing: np.ndarray, window: int = WINDOW) -> list[Fold]:
+def build_folds(cases: np.ndarray, missing: np.ndarray, window: int = WINDOW,
+                origins: tuple[float, ...] = ORIGINS,
+                test_frac: float = TEST_FRAC) -> list[Fold]:
     """The frozen protocol's split boundaries, computed on the full window list.
 
     Boundaries come from ``len(ids)`` before any missing-week filtering, so a
@@ -49,7 +65,9 @@ def build_folds(cases: np.ndarray, missing: np.ndarray, window: int = WINDOW) ->
     deviation under plan R5 and must be logged. It changes the fold boundaries
     (a longer window consumes more of the series before the first forecastable
     week), so arms at different windows are **not** paired against each other --
-    each window is its own experiment with its own persistence baseline.
+    each window is its own experiment with its own persistence baseline. The same
+    applies to ``origins`` / ``test_frac``: the confirmatory nine evaluate
+    different weeks than the frozen three, so the two are never pooled or paired.
     """
     bad = {int(m) for m in np.where(missing)[0]}
     ids = list(range(window, cases.shape[0] - HORIZON))
@@ -58,9 +76,9 @@ def build_folds(cases: np.ndarray, missing: np.ndarray, window: int = WINDOW) ->
         return not any(t in bad for t in range(i - window, i + HORIZON))
 
     folds = []
-    for origin in ORIGINS:
+    for origin in origins:
         cut = int(origin * len(ids))
-        end = int(min(origin + 0.15, 1.0) * len(ids))
+        end = int(min(origin + test_frac, 1.0) * len(ids))
         tr = [i for i in ids[: cut - 30] if clean(i)]
         va = [i for i in ids[cut - 30 : cut] if clean(i)]
         te = [i for i in ids[cut:end] if clean(i)]

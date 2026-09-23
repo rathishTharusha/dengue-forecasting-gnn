@@ -132,3 +132,27 @@ def window(epochs: int = 400) -> list[dict]:
                           dist="nb", use_season=True, lam_param="log", state_fit=True,
                           window=w, epochs=epochs))
     return out
+
+
+def confirm(epochs: int = 400) -> list[dict]:
+    """The confirmatory stage (plan S9), on nine origins with disjoint test spans.
+
+    Three origins cannot clear p = 0.25 on an exact sign-flip test, so nothing in
+    the screening grids is significant at the pairing unit that matters. Nine
+    disjoint origins take the floor to 0.004.
+
+    The finalists are the survivors of `combo`, frozen before this runs: the best
+    direct arm, the best physics arm, and the matched LSTM control for each, plus
+    the physics arm's own encoder on the direct head so that "the graph helps
+    only through the physics" has its control.
+
+    Note this replaces `analysis/_build/run_s9_confirmatory.py`, which claims nine
+    origins but runs on three and subtracts hardcoded scalars instead of pairing
+    (EXP-037).
+    """
+    arms = (("AAGCN", "direct"), ("LSTM", "direct"),
+            ("ASTGCN", "foi_res"), ("LSTM", "foi_res"), ("ASTGCN", "direct"))
+    return [_c(f"{bb}+{head}", backbone=bb, head=head, loss="nb", dist="nb",
+               use_season=True, lam_param="log", state_fit=True,
+               origins="nine", epochs=epochs)
+            for bb, head in arms]

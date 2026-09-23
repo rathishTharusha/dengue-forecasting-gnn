@@ -26,52 +26,67 @@ OUT = Path(__file__).resolve().parent / "results"
 SEEDS = (0, 1, 2)
 
 
+def _origins(spec: dict) -> tuple[tuple[float, ...], float]:
+    """Which origin set a config runs on -- the frozen three or the confirmatory nine."""
+    if spec.get("origins") == "nine":
+        return core.ORIGINS_9, core.TEST_FRAC_9
+    return core.ORIGINS, core.TEST_FRAC
+
+
 def _job(spec: dict) -> dict:
     import torch
 
     import train
     torch.set_num_threads(1)
     data = cd.load()
-    cfg = {k: v for k, v in spec.items() if k not in ("origin", "seed", "name", "window")}
-    folds = core.build_folds(data.cases, data.missing, spec.get("window", core.WINDOW))
+    cfg = {k: v for k, v in spec.items()
+           if k not in ("origin", "seed", "name", "window", "origins")}
+    origins, test_frac = _origins(spec)
+    folds = core.build_folds(data.cases, data.missing, spec.get("window", core.WINDOW),
+                             origins, test_frac)
     fold = next(f for f in folds if f.origin == spec["origin"])
     edge, fixed = core.adjacency(data.names)
     t0 = time.time()
     row, _, _ = train.run_fold(data, fold, seed=spec["seed"], edge=edge, fixed=fixed, **cfg)
     row["name"] = spec["name"]
+    row["origins"] = spec.get("origins", "three")
     row["elapsed"] = round(time.time() - t0, 1)
     return row
 
 
-def persistence_rows(windows: tuple[int, ...] = (core.WINDOW,)) -> list[dict]:
-    """One persistence row per (window, origin).
+def persistence_rows(windows: tuple[int, ...] = (core.WINDOW,),
+                     origin_sets: tuple[str, ...] = ("three",)) -> list[dict]:
+    """One persistence row per (window, origin-set, origin).
 
-    A longer window shifts the fold boundaries, so each window needs its own
-    baseline; pairing an arm against the wrong one would compare across
-    different evaluation windows.
+    A longer window shifts the fold boundaries and the confirmatory nine evaluate
+    different weeks than the frozen three, so each combination needs its own
+    baseline; pairing an arm against the wrong one compares across different
+    evaluation windows.
     """
     data = cd.load()
     rows = []
-    for w, fold in [(w, f) for w in windows
-                    for f in core.build_folds(data.cases, data.missing, w)]:
+    combos = [(w, o, f) for w in windows for o in origin_sets
+              for f in core.build_folds(data.cases, data.missing, w,
+                                        *_origins({"origins": o}))]
+    for w, oset, fold in combos:
         pack = core.build_tensors(data, fold, "test", False, False, False)
         val = core.build_tensors(data, fold, "val", False, False, False)
         row = core.score(pack["p_raw"].numpy(), pack["y_raw"].numpy())
         name = "persistence" if w == core.WINDOW else f"persistence w={w}"
         row.update(name=name, backbone="-", head="-", loss="-", origin=fold.origin,
-                   seed=-1, window=w,
+                   seed=-1, window=w, origins=oset,
                    val_RMSE=core.rmse(val["p_raw"].numpy(), val["y_raw"].numpy()))
         rows.append(row)
     return rows
 
 
 def run(configs: list[dict], out_name: str, workers: int = 6) -> list[dict]:
-    jobs = [dict(c, origin=o, seed=s) for c, (o, s)
-            in itertools.product(configs, itertools.product(core.ORIGINS, SEEDS))]
-    print(f"{len(configs)} configs x {len(core.ORIGINS)} origins x {len(SEEDS)} seeds "
-          f"= {len(jobs)} runs on {workers} workers", flush=True)
+    jobs = [dict(c, origin=o, seed=s) for c in configs
+            for o, s in itertools.product(_origins(c)[0], SEEDS)]
+    print(f"{len(configs)} configs -> {len(jobs)} runs on {workers} workers", flush=True)
     windows = tuple(sorted({c.get("window", core.WINDOW) for c in configs}))
-    rows, done, t0 = persistence_rows(windows), 0, time.time()
+    osets = tuple(sorted({c.get("origins", "three") for c in configs}))
+    rows, done, t0 = persistence_rows(windows, osets), 0, time.time()
     with ProcessPoolExecutor(max_workers=workers) as pool:
         futures = [pool.submit(_job, j) for j in jobs]
         for fut in as_completed(futures):

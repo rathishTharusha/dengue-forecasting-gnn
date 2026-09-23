@@ -76,3 +76,13 @@ mechanism, and the prediction is still that they will not reach 7/9, because
 EXP-040 found the remaining error unpredictable from the inputs whatever the
 training set. G4 will reduce outbreak under-prediction and raise RMSE. If G3
 is adopted, the prediction was wrong and that is the more interesting outcome.
+
+## Outcome (added after the run — see EXP-042)
+
+No arm met the adoption rule; B stands, and no confirmatory run is made. One
+deviation was made before the run and is logged: the SEIR simulator as specified
+produced targets ~10x the real scale, so calibrated versions were added and the
+pre-registered ones kept. The written prediction held. The GAN made outbreak
+forecasts worse (bias −36.1 vs −33.0) because its synthetic data lacks the
+tail; the simulator helped on neither side of its calibration; and every arm
+that trained reasonably made errors correlated 0.95–0.98 with B's.

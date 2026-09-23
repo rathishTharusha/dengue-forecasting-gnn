@@ -435,4 +435,17 @@ targets carry more weight without synthesising any data.
 | SEIR-simulated epidemics | the only arm with a mechanism | covers regimes absent from training, as in Osthus / DEFSI |
 | outbreak reweighting | better outbreak bias, likely worse RMSE | reweighting is not new information |
 
-Pre-registered as `docs/AUGMENTATION_PLAN.md`; results as EXP-042.
+Pre-registered as `docs/AUGMENTATION_PLAN.md`. **Result (EXP-042): none adopted.**
+
+| arm | outcome on validation vs B |
+|---|---|
+| TimeGAN mixed in | **worse**: +0.53, lost 8/9; outbreak bias worse (−36.1 vs −33.0) — the tail collapse, measured |
+| TimeGAN only (fidelity) | +1.90; still slightly beats persistence — the bulk is learned, the tail is not |
+| jitter / scaling | −0.05, 6/9, n.s. |
+| SEIR simulator, pretraining | −0.01 (as specified) and −0.06, 4/9 (calibrated): harmless, no gain |
+| SEIR simulator, mixed in | +11.09 (as specified, ~10x scale) and +0.45 (calibrated): harmful |
+| LDS reweighting | +0.26; outbreak bias improves only −33.0 → −31.9 |
+
+Every arm that trains reasonably makes errors correlated 0.95–0.98 with B's.
+Synthetic training data — adversarial or mechanistic — does not reach the error
+that remains, which EXP-040 and EXP-041 had already located in the data.

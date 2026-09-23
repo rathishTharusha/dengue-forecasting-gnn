@@ -145,6 +145,9 @@ The point of this table is that nobody repeats these.
 
 | **Literature remedies** (RevIN, district identity, STID, NB-GLM, k-NN, ensembles, SEIR as auxiliary constraint) | **none adopted**; best is the SEIR auxiliary at −0.04, 6/9, n.s. RevIN significantly *worse* (+1.27, 0/9) | `remedies+ens.json`, EXP-040. Even k-NN (no network, no training) has residual correlation 0.92 with the best model — the limit is the data, so ensembles have nothing to average |
 
+| **More real data** (25 → 100% of training windows) | flat: 15.85 → 15.66, nothing past 75% | `curve.json`, EXP-041. The model is neither data-starved nor overfitting |
+| **Synthetic training data** (TimeGAN, SEIR-simulated epidemics, jitter, LDS) | **none adopted**; TimeGAN significantly *worse* (+0.53, 1/9) and worsens outbreak bias | `augment.json`, EXP-042. TimeGAN loses the tail (max 882 vs real 2,631). Also tried in EXP-010 on legacy data, same verdict |
+
 ### Structural facts about the physics head
 
 Measured by `diagnose_foi.py`, which inverts the simulator by bisection for the

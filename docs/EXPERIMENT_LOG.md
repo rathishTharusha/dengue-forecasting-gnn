@@ -37,6 +37,70 @@ Copy this block for a new entry:
 > `CEILING_R0_MAX`) survived the cleanup and now lives in `dengue_gnn.seir`, still
 > asserted by `tests/test_seir.py` and reproduced by `scripts/verify_seir_paper.py`.
 
+## EXP-042 — Synthetic training data (GAN and SEIR simulator): none adopted
+- **Date:** 2026-09-23
+- **Who:** Group 05
+- **Commit:** `e44c1cd` (code); plan `docs/AUGMENTATION_PLAN.md` committed earlier at `22c2ec9`
+- **Script:** Kaggle kernel `seirgnn2-augment` (v1) = `sweep.py augment --keep --epochs 400
+  --workers 4`; results `seirgnn2/results/augment.json` (84 rows, complete), forecasts in
+  `augment_preds.pkl` (git-ignored).
+- **Hardware:** Kaggle CPU, 4 workers.
+- **Config:** as pre-registered. Every arm is B (AAGCN, direct, NB, season) with one
+  change; synthetic data in **training sets only**, generators fitted to or seeded from the
+  fold's analogue-safe training windows (leakage-tested). Frozen three origins x seeds
+  0/1/2. **Deviation, logged before the run:** the fidelity check showed the pre-registered
+  SEIR simulator producing targets ~10x the real mean (its lambda centre was the median over
+  non-zero inverted cells, and 39% are pinned at zero). Calibrated versions (G3c/G3d), fitted
+  to training growth only, were added; the pre-registered versions (G3a/G3b) were kept.
+- **Question:** If the models are short of data, can generated training data -- from a GAN,
+  as proposed, or from a mechanistic simulator, as the epidemic literature supports -- move
+  the best model?
+- **Fidelity (before any forecaster trained; origin 0.70, training targets):** real mean 50.7
+  / p99 542 / max 2,631. TimeGAN 41.0 / 431 / **882** -- the bulk reproduced, the tail lost.
+  SEIR as pre-registered 549 / 7,482 / 40,491. SEIR calibrated 21.5 / 99 / 273 (step
+  multiplier at the grid's lower bound).
+- **Result:** validation RMSE paired against G0 at the origin_seed unit; horizon-3 and
+  outbreak bias (cells above each fold's validation 97.5th percentile) on validation; test
+  for the record only.
+
+  | arm | val | vs G0 | wins | p_adj | val h3 | outbreak bias | resid corr G0 | test |
+  |---|---|---|---|---|---|---|---|---|
+  | G3d SEIR pretrain, calibrated | 15.58 | -0.06 | 4/9 | 0.457 | 17.60 | -34.61 | 0.967 | 37.81 |
+  | G1 jitter / scaling | 15.60 | -0.05 | 6/9 | 0.281 | 17.56 | -34.22 | 0.983 | 37.59 |
+  | G3b SEIR pretrain, pre-registered | 15.64 | -0.01 | 6/9 | 0.918 | 17.61 | -33.61 | 0.959 | 38.17 |
+  | **G0 B** | **15.65** | — | — | — | 17.60 | -32.99 | 1.000 | 37.55 |
+  | G4 LDS reweighting | 15.91 | +0.26 | 2/9 | 0.056 | 17.94 | -31.92 | 0.984 | 37.64 |
+  | G3c SEIR mixed, calibrated | 16.10 | +0.45 | 2/9 | 0.056 | 18.22 | -31.78 | 0.958 | 37.15 |
+  | G2 TimeGAN mixed | 16.18 | +0.53 | 1/9 | 0.056 | 18.36 | -36.08 | 0.947 | 37.53 |
+  | G2t TimeGAN only (TSTR) | 17.55 | +1.90 | 1/9 | 0.035 | 19.70 | -39.61 | 0.866 | 41.23 |
+  | persistence | 17.86 | +2.21 | — | — | — | — | — | 36.02 |
+  | G3a SEIR mixed, pre-registered | 26.74 | +11.09 | 0/9 | 0.035 | 36.24 | -32.10 | 0.576 | 54.34 |
+
+- **Verdict:** answered, negative. **No arm meets the adoption rule** (>= 7/9 wins with mean
+  delta < 0). The prediction written in the plan held for every arm except one detail: LDS
+  reweighting improved outbreak bias only from -32.99 to -31.92 while raising RMSE.
+- **Notes:**
+  1. **The GAN made outbreak forecasts worse**, not better: outbreak bias -36.08 against
+     -32.99. Its synthetic data reproduces ordinary weeks and drops outbreaks (max 882 against
+     2,631), so mixing it in teaches the model that outbreaks are rarer than they are -- the
+     tail collapse Shumailov et al. (Nature 2024) describe. EXP-010 (legacy data) reached the
+     same verdict on the GAN.
+  2. **The GAN is not useless as a generator.** A model trained on TimeGAN data alone scores
+     17.55 -- slightly better than persistence (17.86) though well short of real data (15.65).
+     It learned the bulk dynamics; what it lacks is the part that matters.
+  3. **Simulated epidemics did not help either, on either side of the calibration.** The
+     explosive version (targets ~10x real) wrecks mixed training (+11.09) and is harmless as
+     pretraining (-0.01); the tame version is harmless as pretraining (-0.06, 4/9) and hurts
+     when mixed (+0.45). Pretraining is harmless in both cases because training on real data
+     afterwards overwrites it.
+  4. **The same errors again.** Every arm that trains reasonably has residual correlation
+     0.947-0.984 with B -- the models end up making the same mistakes whatever training data
+     they see. Only the broken arm (G3a, 0.576) errs differently, because it errs everywhere.
+     Together with EXP-040 (model families) and EXP-041 (training-set size), this closes the
+     question from three directions: the remaining error is not reachable from these inputs
+     by any architecture, model family, training-set size or synthetic training data tested.
+  5. As in EXP-040, test scores are recorded and not used to choose anything.
+
 ## EXP-041 — Learning curve: more data of the same kind does not help
 - **Date:** 2026-09-23
 - **Who:** Group 05

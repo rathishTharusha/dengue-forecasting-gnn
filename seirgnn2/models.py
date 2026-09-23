@@ -50,6 +50,10 @@ DISTS = ("point", "nb")
 #: normalisation per district-window (see ``Net``).
 NORMS = ("fold", "revin_mean", "revin")
 
+#: Seasonal features are the last four input channels whenever ``use_season`` is on
+#: (``core.build_tensors`` appends them last); ``dseason`` reads them from there.
+N_SEASON = 4
+
 #: log of the median force of infection that reproduces the observed counts when
 #: the simulator is inverted -- see ``diagnose_foi.py`` section 3. Used to centre
 #: the ``log`` parameterisation so training starts at the data's own scale.
@@ -109,6 +113,17 @@ class Net(nn.Module):
     ``aux_phys``  the SEIR decoder as an auxiliary head trained alongside a
                   direct forecast, rather than as the forecast itself
                   (Rodriguez et al. 2023). Its weight in the loss is this value.
+
+    Architecture arms of ``docs/ARCH_PLAN.md``, also off by default:
+
+    ``head_mlp``    hidden width of a 2-layer MLP output head in place of the single
+                    linear layer shared by all districts, so exogenous inputs that
+                    bypass the encoder can act nonlinearly.
+    ``dseason``     a learned (district x 4 Fourier terms x horizon) table added to
+                    the output, initialised to zero: a separate seasonal curve per
+                    district, which a shared linear head cannot express.
+    ``global_ctx``  each district's encoding is concatenated with the mean encoding
+                    over all districts -- a virtual node carrying the national picture.
     """
 
     def __init__(self, in_dim: int, n_nodes: int, horizon: int = 3, hidden: int = 64,
@@ -117,15 +132,19 @@ class Net(nn.Module):
                  lam_param: str = "sigmoid", state_fit: bool = False,
                  window: int = 3, edge_index: torch.Tensor | None = None,
                  dist: str = "point", norm: str = "fold", node_emb: int = 0,
-                 aux_phys: float = 0.0):
+                 aux_phys: float = 0.0, head_mlp: int = 0, dseason: bool = False,
+                 global_ctx: bool = False):
         super().__init__()
         if norm not in NORMS:
             raise ValueError(f"unknown norm {norm!r}; expected one of {NORMS}")
         if (norm != "fold" or aux_phys) and head != "direct":
             raise ValueError("norm and aux_phys are defined for the direct head only")
+        if (head_mlp or dseason or global_ctx) and head not in ("direct", "residual"):
+            raise ValueError("head_mlp, dseason and global_ctx are defined for direct/residual heads")
         self.head, self.horizon, self.lambda_max, self.rho = head, horizon, lambda_max, rho
         self.lam_param, self.state_fit, self.backbone = lam_param, state_fit, backbone
         self.dist, self.norm, self.window, self.aux_phys = dist, norm, window, aux_phys
+        self.global_ctx = global_ctx
         if backbone in backbones.REAL:
             # A published architecture supplies the representation; the toy
             # encoder is bypassed entirely rather than stacked underneath it.
@@ -141,6 +160,8 @@ class Net(nn.Module):
             self.in_proj = nn.Sequential(nn.Linear(in_dim, hidden), nn.ReLU(), nn.Dropout(dropout))
             self.graph = nn.ModuleList(GraphLayer(hidden, n_nodes, backbone) for _ in range(layers))
             feat = hidden
+        if global_ctx:
+            feat *= 2
         self.node_emb = (nn.Parameter(torch.randn(n_nodes, node_emb) * 0.1)
                          if node_emb else None)
         feat += node_emb
@@ -148,7 +169,9 @@ class Net(nn.Module):
             self.rev_gamma = nn.Parameter(torch.ones(1))
             self.rev_beta = nn.Parameter(torch.zeros(1))
         self.drop = nn.Dropout(dropout)
-        self.out = nn.Linear(feat, horizon)
+        self.out = (nn.Sequential(nn.Linear(feat, head_mlp), nn.ReLU(), nn.Dropout(dropout),
+                                  nn.Linear(head_mlp, horizon))
+                    if head_mlp else nn.Linear(feat, horizon))
         self.disp = nn.Linear(feat, horizon) if dist == "nb" else None
         self.out_phys = nn.Linear(feat, horizon) if aux_phys else None
         if head in ("foi", "foi_res") or aux_phys:
@@ -167,6 +190,8 @@ class Net(nn.Module):
             # let the fit lower that floor rather than fight it.
             self.e_scale = nn.Parameter(torch.tensor(0.0))
             self.rho_scale = nn.Parameter(torch.tensor(0.0))
+        self.dseason = (nn.Parameter(torch.zeros(n_nodes, N_SEASON, horizon))
+                        if dseason else None)
 
     def _instance_stats(self, x: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
         """Mean and spread of each district-window's case channels, ``(B, N, 1)``.
@@ -189,6 +214,8 @@ class Net(nn.Module):
             h = self.in_proj(x)
             for layer in self.graph:
                 h = h + self.drop(layer(h, fixed))
+        if self.global_ctx:
+            h = torch.cat([h, h.mean(1, keepdim=True).expand_as(h)], dim=-1)
         if self.node_emb is not None:
             h = torch.cat([h, self.node_emb.expand(h.shape[0], -1, -1)], dim=-1)
         return h
@@ -229,6 +256,7 @@ class Net(nn.Module):
         ``None`` unless ``dist == "nb"``; ``aux_z`` is the auxiliary SEIR
         forecast when ``aux_phys`` is set, and ``None`` otherwise.
         """
+        season = x[..., -N_SEASON:] if self.dseason is not None else None
         if self.norm != "fold":
             m, s = self._instance_stats(x)
             cases = x[..., : self.window] - m
@@ -238,6 +266,8 @@ class Net(nn.Module):
 
         h = self.encode(x, fixed, edge)
         raw = self.out(h)
+        if self.dseason is not None:
+            raw = raw + torch.einsum("bnk,nkh->bnh", season, self.dseason)
         disp = self.disp(h) if self.disp is not None else None
         aux = (self._physics(self.out_phys(h), st0, pop, mean, std)
                if self.out_phys is not None else None)

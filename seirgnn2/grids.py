@@ -188,6 +188,7 @@ def remedies(epochs: int = 400) -> list[dict]:
 #: Pre-registered equal-weight ensembles per grid (docs/REMEDIES_PLAN.md, R5).
 #: Fixed before the grid runs; ``build_seirgnn2_kernel.py --keep`` computes them.
 ENSEMBLES = {
+    "arch": [],
     "augment": [],
     "climate": [],
     "remedies": [["B", "R4b knn"],
@@ -257,4 +258,25 @@ def climate(epochs: int = 400) -> list[dict]:
         _c("K5 case window 8 + blocks 2-13", clim_blocks=BLOCKS_3, case_window=8, **base),
         _c("K6 trees + climate 2-13", backbone="gbm", clim_blocks=BLOCKS_3),
         _c("K7 trees, no climate", backbone="gbm"),
+    ]
+
+
+def arch(epochs: int = 400) -> list[dict]:
+    """docs/ARCH_PLAN.md: head, fusion and global-context changes against B (A0).
+
+    Targets the two bottlenecks nothing earlier touched: exogenous inputs fused
+    through one linear layer shared by all districts, and a national common
+    component in the residuals that neighbour message passing cannot supply.
+    """
+    base = dict(backbone="AAGCN", head="direct", loss="nb", dist="nb", use_season=True,
+                epochs=epochs)
+    return [
+        _c("A0 B", **base),
+        _c("A1 residual head + NB", **{**base, "head": "residual"}),
+        _c("A2 district seasonal curves", dseason=True, **base),
+        _c("A3 MLP head", head_mlp=64, **base),
+        _c("A4 MLP head + climate 2-13", head_mlp=64, clim_blocks=BLOCKS_3, **base),
+        _c("A5 global context", global_ctx=True, **base),
+        _c("A6 combined", head_mlp=64, dseason=True, global_ctx=True, node_emb=16,
+           clim_blocks=BLOCKS_3, **base),
     ]

@@ -83,6 +83,7 @@ def run_fold(data, fold: core.Fold, *, backbone: str, head: str, loss: str = "ms
              norm: str = "fold", node_emb: int = 0, aux_phys: float = 0.0,
              train_frac: float = 1.0, augment: str = "none",
              clim_blocks=(), clim_anom: bool = False, case_window: int | None = None,
+             head_mlp: int = 0, dseason: bool = False, global_ctx: bool = False,
              keep: bool = False) -> dict:
     """Train one (fold, seed) and return its test scores plus the raw predictions."""
     torch.manual_seed(seed)
@@ -118,6 +119,8 @@ def run_fold(data, fold: core.Fold, *, backbone: str, head: str, loss: str = "ms
         cases = np.nan_to_num(data.cases)
         cum[s] = torch.tensor(np.stack([cases[:i].sum(0) for i in pack["idx"]]), dtype=torch.float32)
 
+    if dseason and not use_season:
+        raise ValueError("dseason reads the seasonal features, so use_season must be on")
     needs_state = head in ("foi", "foi_res") or aux_phys > 0
     if augment not in AUGMENTS:
         raise ValueError(f"unknown augment {augment!r}; expected one of {AUGMENTS}")
@@ -145,7 +148,8 @@ def run_fold(data, fold: core.Fold, *, backbone: str, head: str, loss: str = "ms
                      horizon=core.HORIZON, hidden=hidden, backbone=backbone, head=head,
                      layers=layers, dropout=dropout, lam_param=lam_param, state_fit=state_fit,
                      window=fold.window, edge_index=edge, dist=dist, norm=norm,
-                     node_emb=node_emb, aux_phys=aux_phys)
+                     node_emb=node_emb, aux_phys=aux_phys, head_mlp=head_mlp,
+                     dseason=dseason, global_ctx=global_ctx)
     opt = torch.optim.Adam(net.parameters(), lr=lr, weight_decay=weight_decay)
     sched = torch.optim.lr_scheduler.CosineAnnealingLR(opt, T_max=epochs)
     stopper = core.EarlyStop(net, patience=patience)
@@ -220,6 +224,7 @@ def run_fold(data, fold: core.Fold, *, backbone: str, head: str, loss: str = "ms
                norm=norm, node_emb=node_emb, aux_phys=aux_phys, train_frac=train_frac,
                augment=augment, clim_blocks=[list(b) for b in clim_blocks],
                clim_anom=clim_anom, case_window=case_window or fold.window,
+               head_mlp=head_mlp, dseason=dseason, global_ctx=global_ctx,
                n_train=len(fold.idx["train"]), n_val=len(fold.idx["val"]),
                n_test=len(fold.idx["test"]),
                epochs_ran=ran, best_epoch=ran - stopper.waited, stopped_early=halted)

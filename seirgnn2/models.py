@@ -33,7 +33,7 @@ import backbones  # noqa: E402
 import seir_sim  # noqa: E402
 
 HEADS = ("direct", "residual", "foi", "foi_res")
-BACKBONES = ("none", "gcn", "gat", "adaptive", "hybrid") + backbones.REAL
+BACKBONES = ("none", "gcn", "gat", "adaptive", "hybrid", *backbones.REAL)
 LAM_PARAMS = ("sigmoid", "log")
 SEEDS = ("lagged", "recent", "decon")
 

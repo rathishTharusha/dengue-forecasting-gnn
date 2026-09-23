@@ -62,7 +62,7 @@ PUBLISHED = ("STGAT", "A3TGCN", "ASTGCN", "DCRNN", "AAGCN")
 #: objective and different folds, so the paper's 23.79 / 62.61 is not comparable
 #: to any SEIR-GNN number. Here both sit behind the same heads, the same loss,
 #: the same folds and the same early stopping, and differ only by the encoder.
-REAL = PUBLISHED + ("LSTM",)
+REAL = (*PUBLISHED, "LSTM")
 
 
 def install_shim() -> None:
@@ -72,7 +72,7 @@ def install_shim() -> None:
     try:
         from torch_geometric.typing import SparseTensor
     except Exception:  # pragma: no cover - only if PyG drops the alias
-        class SparseTensor:  # noqa: D401
+        class SparseTensor:
             """Placeholder; EvolveGCN is never constructed here."""
 
     stub = types.ModuleType("torch_sparse")

@@ -37,6 +37,51 @@ Copy this block for a new entry:
 > `CEILING_R0_MAX`) survived the cleanup and now lives in `dengue_gnn.seir`, still
 > asserted by `tests/test_seir.py` and reproduced by `scripts/verify_seir_paper.py`.
 
+## EXP-044 — Longer climate lags and a longer window: not adopted; the head is the bottleneck
+- **Date:** 2026-09-23
+- **Who:** Group 05
+- **Commit:** `0ea1273` (code); plan `docs/CLIMATE_PLAN.md` committed earlier at `52cff78`
+- **Script:** Kaggle kernel `seirgnn2-climate` (v1) = `sweep.py climate --keep --epochs 400
+  --workers 4`; results `seirgnn2/results/climate.json` (75 rows, complete).
+- **Hardware:** Kaggle CPU, 4 workers.
+- **Config:** as pre-registered; lag blocks fixed by EXP-043 on training data only. K5 keeps
+  the fold boundaries with an 8-week case history (validation 30/30 windows kept; 5 of 75
+  test windows at origin 0.70 dropped because the longer history touches missing weeks).
+  Long-lag arms drop the first few training windows (`core.with_history`).
+- **Question:** Does climate at lags up to 13 or 25 weeks, or a longer case window, help the
+  network -- and does EXP-043's tree gain reproduce on real validation?
+- **Result:** validation RMSE paired against K0 at the origin_seed unit.
+
+  | arm | val | vs K0 | wins | p_adj | val h3 | resid corr K0 | test |
+  |---|---|---|---|---|---|---|---|
+  | **K0 B** | **15.65** | — | — | — | 17.60 | 1.000 | 37.55 |
+  | K1 climate lags 2-4 | 15.74 | +0.09 | 3/9 | 0.461 | 17.67 | 0.967 | 38.38 |
+  | K2 climate blocks 2-13 | 15.77 | +0.13 | 3/9 | 0.461 | 17.79 | 0.936 | 37.60 |
+  | K5 case window 8 + blocks 2-13 | 15.79 | +0.14 | 3/9 | 0.461 | 17.83 | 0.932 | 36.67 |
+  | K3 climate blocks 2-25 | 15.94 | +0.30 | 2/9 | 0.047 | 17.74 | 0.935 | 37.19 |
+  | K4 anomaly blocks 2-25 | 16.26 | +0.62 | 1/9 | 0.031 | 18.16 | 0.916 | 37.43 |
+  | K6 trees + climate 2-13 | 17.45 | +1.81 | 2/9 | 0.047 | 19.96 | 0.800 | 36.14 |
+  | persistence | 17.86 | +2.21 | — | — | — | — | 36.02 |
+  | K7 trees, no climate | 17.94 | +2.29 | 0/9 | 0.031 | 20.78 | 0.787 | 38.96 |
+
+  Trees with vs without climate: **-0.49**, 2/3 origins, p = 0.50 (deterministic model, so
+  only three independent units).
+- **Verdict:** answered for the network, negative: no arm is adopted, and longer lags make
+  it progressively *worse*. The prediction recorded in the plan was wrong about K2 (expected
+  the most likely adoption; it is +0.13, 3/9) and right about everything else: K1 matches
+  K0, K5 does not beat K2, K4 trails K3, the trees trail the network but gain from climate.
+- **Notes:**
+  1. **Why the network cannot use what the trees can.** In B, exogenous inputs bypass the
+     encoder and meet it at a single linear output layer shared by all 25 districts. Climate
+     can therefore act only linearly -- the setting in which EXP-043's ridge found nothing --
+     while the trees' gain came from nonlinearity. The same layer forces one national
+     seasonal curve on every district; a district identity (EXP-040, R2) shifts levels but
+     cannot change the curve's shape. This is an architectural limit on the one signal found
+     so far, and it motivates `docs/ARCH_PLAN.md`.
+  2. The trees' climate gain reproduces in direction on real validation, as predicted, but
+     is not significant with three units.
+  3. Test recorded, not used.
+
 ## EXP-043 — Climate lags and growth, on training data only
 - **Date:** 2026-09-23
 - **Who:** Group 05

@@ -61,3 +61,12 @@ K2 is the most likely arm to be adopted; if it is, the gain will be small
 K2, because longer case windows lowered growth R² in EXP-043. K4 will trail K3.
 K6 will not beat K0 overall — trees fit the persistence baseline worse than the
 network — but K6 will beat K7, reproducing the climate gain on real validation.
+
+## Outcome (added after the run — see EXP-044)
+
+No arm adopted; longer lags make the network progressively worse (K3 +0.30,
+K4 +0.62, both significant). The prediction was wrong about K2 and right about
+the rest. The trees' climate gain reproduced in direction (−0.49, 2/3 origins).
+The likely reason the network cannot use climate is architectural: exogenous
+inputs reach only a linear output layer shared by all districts. Followed up in
+`docs/ARCH_PLAN.md`.

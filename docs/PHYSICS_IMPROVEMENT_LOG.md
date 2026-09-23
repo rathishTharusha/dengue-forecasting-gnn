@@ -210,6 +210,65 @@ any distance, so the conditional mean stays close to the current level however
 far ahead one looks. This closes the horizon as an escape route, with data
 rather than argument.
 
+## Riding on top of persistence
+
+The mechanism's forecast is persistence plus a correction. It beats persistence
+on 7 of 9 origins by small margins and loses on two by large ones, so the
+question is whether the correction can be made safer rather than larger.
+
+Diagnosis first. At origin 0.60 - the collapse after the 2017 DENV-2 epidemic -
+the model over-predicts on 75% of windows, bias +21.4 against persistence's
++10.2. Removing susceptible depletion is right across ten years, because four
+serotypes give no lasting cross-protection, but it is wrong in the months after
+a large epidemic, when that serotype really has burned through its susceptibles.
+
+Three remedies, 9 disjoint origins x 3 seeds, 189 models:
+
+| arm | what it does | val RMSE | test RMSE | test MAE | vs persistence | origins won |
+|---|---|---|---|---|---|---|
+| **damped** | forecast = persistence x (mechanism / persistence)^alpha, alpha learned | **25.73** | **29.15** | 14.27 | +0.61 | 7/9 |
+| capped | deviation from persistence clipped at +- c (learned) | 26.07 | 30.01 | 14.70 | +1.47 | 7/9 |
+| v2 | no combiner | 26.22 | 30.01 | 14.83 | +1.47 | 6/9 |
+| waning 26w | S depleted from the last 26 weeks of infection | 26.34 | 29.61 | 14.66 | +1.06 | 4/9 |
+| waning 52w + capped | both | 26.84 | 29.58 | 14.64 | +1.04 | 4/9 |
+| waning 52w | S depleted from the last 52 weeks | 27.05 | 29.79 | 14.79 | +1.25 | 3/9 |
+| waning 104w | S depleted from the last 104 weeks | 27.72 | 30.66 | 15.16 | +2.12 | 3/9 |
+| persistence | - | - | 28.54 | 13.94 | - | - |
+
+**Damping is a real improvement to our own model**: -0.86 RMSE against v2,
+better on 7 of 9 origins, p = 0.07, and it fixes most of the failure fold
+(64.9 -> 59.7). The learned alpha is 0.27-0.49, meaning the model chooses to
+apply only about a third of its own mechanistic correction.
+
+**Waning immunity does not help.** It improves the fold it was designed for and
+costs more elsewhere, because a memory window long enough to matter after an
+epidemic also depletes S during ordinary years.
+
+**Where the remaining gap lives.** Damped against persistence, per origin:
+
+| origin | damped | persistence | |
+|---|---|---|---|
+| 0.50 | 19.7 | 20.3 | win |
+| 0.55 | 46.6 | 45.5 | loss |
+| 0.60 | 59.7 | 48.7 | **loss, -11.0** |
+| 0.65 | 11.2 | 11.3 | win |
+| 0.70 | 15.1 | 15.7 | win |
+| 0.75 | 27.5 | 29.5 | win |
+| 0.80 | 20.5 | 22.0 | win |
+| 0.85 | 30.3 | 31.0 | win |
+| 0.90 | 31.8 | 32.9 | win |
+
+Seven wins, two losses, and both losses are the windows containing the 2017
+DENV-2 epidemic and its collapse. Everywhere else the mechanism is ahead.
+
+**Why damping cannot cross the line.** As alpha goes to zero the forecast
+becomes persistence exactly, so damping interpolates between the mechanism and
+the baseline and can at best reach it. Fitted on training data the model picks
+alpha ~ 1/3, and the result sits 0.61 RMSE above persistence. The correction is
+worth something in ordinary weeks and costs more than it is worth during the one
+epidemic in the record - which is the same serotype information the inputs do
+not contain.
+
 ## Replication on a second dataset (`reordered`)
 
 A different week list (451 weeks against 559), different folds, no

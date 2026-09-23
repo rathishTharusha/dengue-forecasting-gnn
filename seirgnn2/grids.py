@@ -189,6 +189,7 @@ def remedies(epochs: int = 400) -> list[dict]:
 #: Fixed before the grid runs; ``build_seirgnn2_kernel.py --keep`` computes them.
 ENSEMBLES = {
     "augment": [],
+    "climate": [],
     "remedies": [["B", "R4b knn"],
                  ["B", "R4a nbglm"],
                  ["B", "R4a nbglm", "R4b knn"]],
@@ -230,4 +231,30 @@ def augment(epochs: int = 400) -> list[dict]:
         _c("G3c seir mix calibrated", augment="seir_mix_cal", **base),
         _c("G3d seir pretrain calibrated", augment="seir_pretrain_cal", **base),
         _c("G4 lds reweight", augment="lds", **base),
+    ]
+
+
+#: Lag blocks fixed by EXP-043 (training data only) -- docs/CLIMATE_PLAN.md.
+BLOCKS_3 = ((2, 5), (6, 9), (10, 13))
+BLOCKS_6 = ((2, 5), (6, 9), (10, 13), (14, 17), (18, 21), (22, 25))
+
+
+def climate(epochs: int = 400) -> list[dict]:
+    """docs/CLIMATE_PLAN.md: longer climate lags and a longer case window, against B (K0).
+
+    K5 keeps the fold boundaries and feeds 8 weeks of case history, so it pairs
+    with K0 -- EXP-036 rebuilt the folds instead and could not be paired. K6/K7
+    are the tree model from EXP-043, with and without climate.
+    """
+    base = dict(backbone="AAGCN", head="direct", loss="nb", dist="nb", use_season=True,
+                epochs=epochs)
+    return [
+        _c("K0 B", **base),
+        _c("K1 climate lags 2-4", use_climate=True, **base),
+        _c("K2 climate blocks 2-13", clim_blocks=BLOCKS_3, **base),
+        _c("K3 climate blocks 2-25", clim_blocks=BLOCKS_6, **base),
+        _c("K4 climate anomaly blocks 2-25", clim_blocks=BLOCKS_6, clim_anom=True, **base),
+        _c("K5 case window 8 + blocks 2-13", clim_blocks=BLOCKS_3, case_window=8, **base),
+        _c("K6 trees + climate 2-13", backbone="gbm", clim_blocks=BLOCKS_3),
+        _c("K7 trees, no climate", backbone="gbm"),
     ]

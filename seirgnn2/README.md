@@ -74,6 +74,14 @@ remote. **Verified**: the `confirm` grid returns 144 rows on both, with every ar
 agreeing to within 0.11 RMSE and persistence identical to the decimal. CPU
 workers, not GPU — these architectures are small and the grid is many short runs.
 
+**Pair only within one environment.** Kaggle and local agree on means, not on
+individual runs: the same B configuration at origin 0.70, seed 0 scores 11.4680
+on Kaggle (identically in two separate kernels) and 11.3414 locally (identically
+in two separate local runs). A different torch build and CPU change the last
+digits, which compound over training. Every paired comparison in the log keeps
+its control inside the same grid, so none is affected -- but never pair a Kaggle
+arm with a local control.
+
 ---
 
 ### Remedy switches (`models.Net`, all off by default)
@@ -252,6 +260,8 @@ Both point at the 9-origin confirmatory grid before anything is claimed.
 | `diagnose_arch.py` | retrains the remaining architectures keeping every forecast, then measures how they are wrong (EXP-039) |
 | `knn.py` | k-nearest-neighbour analogue forecaster (remedy R4b); strict analogue library, leakage-tested |
 | `ensemble.py` | equal-weight ensembles from `sweep.py --keep` forecasts (remedy R5) |
+| `climate_lags.py` | which climate lags predict growth, on training data only (EXP-043) |
+| `gbm.py` | gradient-boosted trees on growth, with or without climate lag blocks (EXP-044) |
 | `augment.py` | synthetic training data (EXP-042): TimeGAN, SEIR-simulated epidemics (pre-registered and calibrated), plus LDS weights; training sets only, leakage-tested |
 
 ### A note on the seasonal feature's rationale

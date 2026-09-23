@@ -50,7 +50,8 @@ def _job(spec: dict, keep: bool = False):
     t0 = time.time()
     # k-NN analogue forecasting (remedy R4b) has no network to train, but it
     # honours the same folds, row schema and --keep contract.
-    runner = knn.run_fold if cfg.get("backbone") == "knn" else train.run_fold
+    import gbm
+    runner = {"knn": knn.run_fold, "gbm": gbm.run_fold}.get(cfg.get("backbone"), train.run_fold)
     res = runner(data, fold, seed=spec["seed"], edge=edge, fixed=fixed, keep=keep, **cfg)
     row, extra = (res[0], res[1]) if keep else (res[0], None)
     row["name"] = spec["name"]

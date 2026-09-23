@@ -82,6 +82,7 @@ def run_fold(data, fold: core.Fold, *, backbone: str, head: str, loss: str = "ms
              state_seed: str = "lagged", dist: str = "point",
              norm: str = "fold", node_emb: int = 0, aux_phys: float = 0.0,
              train_frac: float = 1.0, augment: str = "none",
+             clim_blocks=(), clim_anom: bool = False, case_window: int | None = None,
              keep: bool = False) -> dict:
     """Train one (fold, seed) and return its test scores plus the raw predictions."""
     torch.manual_seed(seed)
@@ -96,7 +97,21 @@ def run_fold(data, fold: core.Fold, *, backbone: str, head: str, loss: str = "ms
         sub = np.sort(np.random.default_rng(1000 + seed).choice(tr, keep_n, replace=False))
         fold = dataclasses.replace(fold, idx={**fold.idx, "train": sub})
 
-    packs = {s: core.build_tensors(data, fold, s, use_climate, use_ndvi, use_season)
+    if case_window and case_window != fold.window:
+        # docs/CLIMATE_PLAN.md K5: a longer case history with the fold boundaries
+        # left exactly as they are, so the arm pairs with its control window for
+        # window. (EXP-036 rebuilt the folds instead, which is why its arms could
+        # not be paired.) Windows whose longer history would touch a missing week
+        # or run off the start of the series are dropped.
+        bad = set(np.where(data.missing)[0].tolist())
+        keep_ = lambda ids: np.array([i for i in ids if i - case_window >= 0 and  # noqa: E731
+                                      not any(t in bad for t in range(i - case_window, i))])
+        fold = dataclasses.replace(fold, window=case_window,
+                                   idx={k: keep_(v) for k, v in fold.idx.items()})
+    if clim_blocks:
+        fold = core.with_history(fold, max(b for _, b in clim_blocks))
+    packs = {s: core.build_tensors(data, fold, s, use_climate, use_ndvi, use_season,
+                                   clim_blocks, clim_anom)
              for s in ("train", "val", "test")}
     cum = {}
     for s, pack in packs.items():
@@ -203,7 +218,10 @@ def run_fold(data, fold: core.Fold, *, backbone: str, head: str, loss: str = "ms
                climate=use_climate, ndvi=use_ndvi, season=use_season,
                lam_param=lam_param, state_fit=state_fit, state_seed=state_seed, dist=dist,
                norm=norm, node_emb=node_emb, aux_phys=aux_phys, train_frac=train_frac,
-               augment=augment,
+               augment=augment, clim_blocks=[list(b) for b in clim_blocks],
+               clim_anom=clim_anom, case_window=case_window or fold.window,
+               n_train=len(fold.idx["train"]), n_val=len(fold.idx["val"]),
+               n_test=len(fold.idx["test"]),
                epochs_ran=ran, best_epoch=ran - stopper.waited, stopped_early=halted)
     if keep:
         # Everything a post-hoc diagnosis needs, per split: the forecast, the

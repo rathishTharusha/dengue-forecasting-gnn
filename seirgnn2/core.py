@@ -102,8 +102,57 @@ def seasonal_features(week_start, idx: np.ndarray) -> np.ndarray:
     return np.stack([np.sin(ang), np.cos(ang), np.sin(2 * ang), np.cos(2 * ang)], -1)
 
 
+def with_history(fold: Fold, weeks: int) -> Fold:
+    """The fold with every window lacking ``weeks`` of history before its origin dropped.
+
+    Only the first training windows of the series are ever affected; validation
+    and test origins lie years in.
+    """
+    import dataclasses
+    return dataclasses.replace(fold, idx={k: v[v - weeks >= 0] for k, v in fold.idx.items()})
+
+
+def climate_climatology(data: cd.CorrectedData, fold: Fold) -> np.ndarray:
+    """(T, N, C) week-of-year climate means from weeks no later than lag 2 of any training origin.
+
+    Anomalies subtract this. It is built from weeks up to ``train.max() - 2`` only,
+    so no validation or test origin -- which all lie after the last training
+    origin -- can reach a week closer than the ERA5 release delay through it.
+    """
+    woy = data.week_start.dt.isocalendar().week.to_numpy().astype(int)
+    weeks = np.arange(0, int(fold.idx["train"].max()) - cd.LAGS["climate"] + 1)
+    clim = np.zeros((54,) + data.climate.shape[1:])
+    for w in np.unique(woy[weeks]):
+        clim[w] = np.nanmean(data.climate[weeks[woy[weeks] == w]], axis=0)
+    return clim[woy]
+
+
+def climate_blocks(data: cd.CorrectedData, idx: np.ndarray, blocks, base: np.ndarray) -> np.ndarray:
+    """(K, N, C * len(blocks)) 4-week-style block means of ``base`` at the given lag ranges.
+
+    ``blocks`` is a sequence of inclusive (min_lag, max_lag) pairs, weeks before
+    the forecast origin. Lags below ``cd.LAGS["climate"]`` are refused: ERA5 for
+    those weeks is not published at forecast time.
+    """
+    out = []
+    deepest = max(b for _, b in blocks)
+    if len(idx) and int(np.min(idx)) - deepest < 0:
+        # NumPy would silently wrap a negative index to the END of the series --
+        # reading the test period's climate into early training windows. That
+        # happened once, was caught by tests/test_climate_blocks_leakage.py, and
+        # is refused here; callers drop short-history windows with with_history().
+        raise ValueError(f"window at week {int(np.min(idx))} has no climate at lag {deepest}; "
+                         "drop it with core.with_history() first")
+    for a, b in blocks:
+        if a < cd.LAGS["climate"]:
+            raise ValueError(f"climate lag {a} is below the release delay {cd.LAGS['climate']}")
+        out.append(np.stack([base[idx - lag] for lag in range(a, b + 1)], 0).mean(0))
+    return np.concatenate(out, -1)
+
+
 def build_tensors(data: cd.CorrectedData, fold: Fold, split: str, use_climate: bool,
-                  use_ndvi: bool, use_season: bool) -> dict[str, torch.Tensor]:
+                  use_ndvi: bool, use_season: bool, clim_blocks=(),
+                  clim_anom: bool = False) -> dict[str, torch.Tensor]:
     """Slice one split under ``cd.LAGS`` and z-score with this fold's statistics.
 
     Case history and target are returned both as raw counts and in fold-scaled
@@ -127,6 +176,15 @@ def build_tensors(data: cd.CorrectedData, fold: Fold, split: str, use_climate: b
                                     0, 1) for i in tr])
         m, s = ref.mean((0, 1, 2)), ref.std((0, 1, 2)) + 1e-8
         feats.append(((cl - m) / s).reshape(len(idx), cl.shape[1], -1))
+
+    if clim_blocks:
+        # docs/CLIMATE_PLAN.md: lag-block means of the six ERA5 channels, raw or as
+        # anomalies from a training climatology, standardised on training windows.
+        base = data.climate - climate_climatology(data, fold) if clim_anom else data.climate
+        blk = climate_blocks(data, idx, clim_blocks, base)
+        ref = climate_blocks(data, fold.idx["train"], clim_blocks, base)
+        m, s = ref.mean((0, 1)), ref.std((0, 1)) + 1e-8
+        feats.append((blk - m) / s)
 
     if use_ndvi:
         nd = np.stack([data.ndvi[i - 2 : i + 1].T for i in idx])       # (K,N,3)

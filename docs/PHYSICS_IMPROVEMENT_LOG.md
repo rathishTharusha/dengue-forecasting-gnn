@@ -87,6 +87,43 @@ than architectural.
   human movement, school terms, vector surveillance - rather than more climate.
 - Joint training across districts with partial pooling of beta.
 
+## Replication on a second dataset (`reordered`)
+
+A different week list (451 weeks against 559), different folds, no
+missing-week masking, and the week-395 reporting artifact still present. Only
+the dataset changed; the model, protocol, seeds and metric are identical.
+Scores are given with and without the artifact windows, as
+`adaptive.pooled_scores` does.
+
+| arm | val RMSE | test RMSE | test RMSE (artifact excluded) | test MAE (excluded) |
+|---|---|---|---|---|
+| baseline | 43.95 | 66.78 | 55.70 | 25.00 |
+| **v2** | **26.20** | **44.70** | **30.65** | **14.07** |
+| v2_mech (encoder frozen) | 26.11 | 44.14 | 30.16 | 13.82 |
+| persistence | - | 48.26 | 31.09 | - |
+
+Per origin, artifact windows excluded:
+
+| arm | 0.55 | 0.70 | 0.85 |
+|---|---|---|---|
+| baseline | 93.67 | 20.55 | 52.88 |
+| v2 | 43.55 | 15.82 | 32.59 |
+| v2_mech | 42.24 | 15.79 | 32.46 |
+| persistence | 43.27 | 15.72 | 34.27 |
+
+The persistence floor computed here, 31.09, matches the value published in
+`analysis/results/corrected_benchmark/summary_table.md` (31.089), which
+confirms the metric convention used throughout this log.
+
+**What replicates.** The improvement over the original physics arm: 55.70 ->
+30.65, better on all three origins, the same direction and roughly the same
+size as on `rebuilt`.
+
+**What replicates that we would rather it did not.** `v2` is again only level
+with persistence (30.65 against 31.09, better on 1 of 3 origins), and the
+encoder-frozen control is again indistinguishable from the full model. Both
+conclusions now hold on two datasets.
+
 ## Every variant tried, ranked by validation RMSE
 
 

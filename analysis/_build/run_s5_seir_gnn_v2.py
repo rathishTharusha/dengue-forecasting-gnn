@@ -74,6 +74,7 @@ for _p in (REPO / "analysis" / "lib", REPO / "analysis" / "_build", REPO / "src"
     sys.path.insert(0, str(_p))
 
 import adaptive as base  # noqa: E402
+import improved as imp  # noqa: E402
 import corrected_data as cd  # noqa: E402
 import reproduced as arch_lib  # noqa: E402
 import run_corrected_benchmark as rcb  # noqa: E402
@@ -194,6 +195,43 @@ class SEIRGNNv2(nn.Module):
 
 
 # ------------------------------------------------------------------- data --
+
+def aligned_population(data, dataset: str) -> np.ndarray:
+    """Population rows for a dataset whose week list differs from `rebuilt`.
+
+    Matched on `week_start`, so a district's population always comes from the
+    same calendar week as its cases.
+    """
+    if dataset == "rebuilt":
+        return data.population
+    idx = pd.read_csv(REPO / "data" / "corrected" / f"{dataset}_index.csv",
+                      parse_dates=["week_start"])
+    ref = pd.read_csv(REPO / "data" / "corrected" / "rebuilt_index.csv",
+                      parse_dates=["week_start"])
+    pos = {d: i for i, d in enumerate(ref["week_start"])}
+    rows = []
+    for d in idx["week_start"]:
+        if d in pos:
+            rows.append(pos[d])
+            continue
+        # a couple of weeks differ by a day at the year boundary; population is
+        # annual, so the nearest week carries the same value
+        j = int((ref["week_start"] - d).abs().idxmin())
+        if abs((ref["week_start"][j] - d).days) > 7:
+            raise SystemExit(f"{dataset}: no population row within a week of {d.date()}")
+        rows.append(j)
+    return data.population[rows]
+
+
+def features_from_cases(cases: np.ndarray, fold) -> np.ndarray:
+    """Cases-only inputs for any dataset, scaled with this fold's training stats."""
+    T, N = cases.shape
+    z = (np.log1p(np.nan_to_num(cases, nan=0.0)) - fold.mean) / fold.std
+    f = np.zeros((T, N, WINDOW, 1), dtype=np.float32)
+    for i in range(WINDOW, T):
+        f[i, :, :, 0] = z[i - WINDOW: i].T
+    return f
+
 
 def features_train_only(data, level: str, fold) -> np.ndarray:
     """Inputs scaled with statistics from this fold's training weeks only."""
@@ -355,12 +393,23 @@ def run_job(job: dict) -> dict:
     with torch.no_grad():
         vp, tp = fwd(va), fwd(te)
         omega, gamma = model.rates()
+        # the week-395 reporting backlog: reported with and without, as
+        # analysis/lib/adaptive.pooled_scores does, because neither alone is honest
+        art = imp.artifact_windows(job["test_idx"], WINDOW, HORIZON, week=job["artifact"])
+        keep = torch.tensor(~np.asarray(art, dtype=bool))
+        clean_rmse = (torch.sqrt(torch.mean((tp[keep] - te[3][keep]) ** 2)).item()
+                      if bool(keep.any()) else float("nan"))
+        clean_mae = (torch.mean((tp[keep] - te[3][keep]).abs()).item()
+                     if bool(keep.any()) else float("nan"))
         rec = {
             "arm": job["arm"], "arch": job["arch"], "origin": job["origin"], "seed": seed,
+            "dataset": job["dataset"],
             "val_RMSE": torch.sqrt(torch.mean((vp - va[3]) ** 2)).item(),
             "val_MAE": torch.mean((vp - va[3]).abs()).item(),
             "test_RMSE": torch.sqrt(torch.mean((tp - te[3]) ** 2)).item(),
             "test_MAE": torch.mean((tp - te[3]).abs()).item(),
+            "test_RMSE_clean": clean_rmse, "test_MAE_clean": clean_mae,
+            "n_artifact_windows": int(np.asarray(art).sum()),
             "pred_mean": tp.mean().item(), "truth_mean": te[3].mean().item(),
             "omega_per_day": float(omega), "gamma_per_day": float(gamma),
             "rho_mult": float(torch.exp(model.log_rho_adj.clamp(-2, 2)))
@@ -377,14 +426,20 @@ def run_job(job: dict) -> dict:
     return rec
 
 
-def persistence(cases, folds):
+def persistence(cases, folds, artifact):
     out = {}
     for f in folds:
         idx = np.asarray(f.test_index)
         p = np.stack([np.repeat(cases[i - 1][:, None], HORIZON, axis=1) for i in idx])
         t = np.stack([cases[i: i + HORIZON].T for i in idx])
-        out[f.origin] = {"test_RMSE": float(np.sqrt(np.mean((p - t) ** 2))),
-                         "test_MAE": float(np.mean(np.abs(p - t)))}
+        keep = ~np.asarray(imp.artifact_windows(idx, WINDOW, HORIZON, week=artifact),
+                           dtype=bool)
+        out[f.origin] = {
+            "test_RMSE": float(np.sqrt(np.mean((p - t) ** 2))),
+            "test_MAE": float(np.mean(np.abs(p - t))),
+            "test_RMSE_clean": float(np.sqrt(np.mean((p[keep] - t[keep]) ** 2)))
+            if keep.any() else float("nan"),
+        }
     return out
 
 
@@ -397,13 +452,18 @@ def main() -> int:
                     choices=["cases", "cases+era5", "cases+era5+ndvi"])
     ap.add_argument("--coupling", default="implicit", choices=["implicit", "explicit"])
     ap.add_argument("--protocol", default="3origin", choices=["3origin", "9origin"])
+    ap.add_argument("--dataset", default="rebuilt",
+                    choices=["rebuilt", "reordered", "original"])
     ap.add_argument("--seeds", nargs="*", type=int, default=[0, 1, 2])
     ap.add_argument("--workers", type=int, default=6)
     ap.add_argument("--out", default="s5_v2_results.json")
     args = ap.parse_args()
 
     data = cd.load()
-    cases, adjacency, artifact, missing, _ = rcb.prepare("rebuilt")
+    cases, adjacency, artifact, missing, _ = rcb.prepare(args.dataset)
+    if args.dataset != "rebuilt" and args.inputs != "cases":
+        raise SystemExit("climate and NDVI are only aligned to the rebuilt week list")
+    population = aligned_population(data, args.dataset)
     folds = build_folds(cases, missing, args.protocol)
     src, dst = np.nonzero(adjacency)
     edge_index = np.stack([src, dst])
@@ -413,17 +473,21 @@ def main() -> int:
     for arm in args.arm:
         cfg = ARMS[arm]
         for fold in folds:
-            feats = (rs5.prepare_inputs_by_level(data, args.inputs)
-                     if cfg["norm"] == "orig"
-                     else features_train_only(data, args.inputs, fold))
+            if args.dataset != "rebuilt":
+                feats = features_from_cases(cases, fold)
+            elif cfg["norm"] == "orig":
+                feats = rs5.prepare_inputs_by_level(data, args.inputs)
+            else:
+                feats = features_train_only(data, args.inputs, fold)
             for seed in args.seeds:
                 jobs.append({"arm": arm, "cfg": cfg, "arch": args.arch, "seed": seed,
+                             "dataset": args.dataset, "artifact": artifact,
                              "coupling": args.coupling, "origin": fold.origin,
                              "train_idx": np.asarray(fold.train_index),
                              "val_idx": np.asarray(fold.val_index),
                              "test_idx": np.asarray(fold.test_index),
                              "cases": cases, "features": feats,
-                             "population": data.population,
+                             "population": population,
                              "edge_index": edge_index, "adj_dense": adjacency})
 
     print(f"{len(jobs)} jobs / {args.workers} workers | arms: {', '.join(args.arm)} "
@@ -439,13 +503,19 @@ def main() -> int:
     Path(args.out).write_text(json.dumps(out, indent=2), encoding="utf-8")
     df = pd.DataFrame(out)
     print("\n=== mean over origins x seeds ===")
-    print(df.groupby("arm")[["val_RMSE", "test_RMSE", "test_MAE"]].mean().round(2)
+    print(df.groupby("arm")[["val_RMSE", "test_RMSE", "test_RMSE_clean", "test_MAE",
+                             "test_MAE_clean"]].mean().round(2)
             .sort_values("val_RMSE").to_string())
     print("\n=== test RMSE per origin ===")
     piv = df.groupby(["arm", "origin"])["test_RMSE"].mean().round(2).unstack("origin")
-    ref = persistence(cases, folds)
+    ref = persistence(cases, folds, artifact)
     piv.loc["persistence"] = [round(ref[o]["test_RMSE"], 2) for o in piv.columns]
     print(piv.to_string())
+    piv2 = (df.groupby(["arm", "origin"])["test_RMSE_clean"].mean().round(2)
+            .unstack("origin"))
+    piv2.loc["persistence"] = [round(ref[o]["test_RMSE_clean"], 2) for o in piv2.columns]
+    print("\n=== test RMSE excluding the week-395 artifact windows ===")
+    print(piv2.to_string())
     print(f"\nwrote {args.out} in {(time.time() - t0) / 60:.1f} min")
     return 0
 

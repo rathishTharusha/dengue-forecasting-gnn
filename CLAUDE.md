@@ -185,6 +185,10 @@ formulation (−0.62, 9/9, p_adj = 0.009), not the direct one. Two caveats trave
 numbers: validation and test disagree at this spread, and three origins cannot reach
 significance at the honest pairing unit.
 
+EXP-046/047 (physics-informed structure) added: the spatial penalty and a metapopulation SEIR
+head (`foi_meta`) are not adopted; the gated SEIR-GNN beats SEIR-LSTM in the same direction on
+a second nine-origin run (−0.41, 6/9, p_adj 0.125) and again misses the corrected bar.
+
 One more inconsistency worth knowing: `seirgnn2/core.py::seasonal_features` justifies its
 week-of-year features by citing "EDA finding F9", but **F9 was retracted** (see
 `analysis/README.md` and `docs/EXPERIMENT_LOG.md`: shape r = −0.065, 0/25 districts significant).

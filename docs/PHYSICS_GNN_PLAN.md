@@ -61,3 +61,22 @@ gated heads did in EXP-035. P4 will not beat P3 by much: Moran's I of R is
 0.005, so coupling transmission across borders has little to work with. P3/P4
 will beat P6 on validation, repeating EXP-038, and on the nine-origin test
 the gated SEIR arms will again sit near or below persistence while P0 does not.
+
+## Outcome (added after the run — see EXP-046, EXP-047)
+
+No physics arm is adopted against B. The spatial penalty keeps its sign (−0.06,
+horizon 3 −0.20) but wins 6/9, short of 7/9. The metapopulation SEIR-GNN — the
+structural change this plan was written for — is significantly *worse* than the
+existing gated head on validation (+0.20, p_adj 0.022) and ties SEIR-LSTM on the
+nine-origin test (−0.01, 4/9). Coupling districts inside the dynamics has
+nothing to work with when transmission is not spatially autocorrelated
+(Moran's I of R 0.005).
+
+The one physics result that holds its direction is the **gated SEIR-GNN against
+SEIR-LSTM**: 9/9, p_adj 0.007 on the three-origin validation screen, and −0.41,
+6/9, raw p 0.031, p_adj 0.125 on the nine-origin test — the second nine-origin
+run in which that comparison has raw p < 0.05 and misses the corrected bar
+(EXP-038: −0.75, 8/9, p_adj 0.059, different encoder, same test spans). The S9
+endpoint is not met. On test the gated SEIR-GNN is the best arm of the grid
+(31.06, persistence 31.76, B 33.21) while validation ranks B first — the fifth
+instance of the disagreement recorded in EXP-045 note 4.

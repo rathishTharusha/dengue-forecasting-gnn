@@ -37,6 +37,108 @@ Copy this block for a new entry:
 > `CEILING_R0_MAX`) survived the cleanup and now lives in `dengue_gnn.seir`, still
 > asserted by `tests/test_seir.py` and reproduced by `scripts/verify_seir_paper.py`.
 
+## EXP-047 — Nine-origin confirmation of the physics arms: endpoint not met
+- **Date:** 2026-09-24
+- **Who:** Group 05
+- **Commit:** `269fc29` (code), kernel pinned at `872b091`; plan `docs/PHYSICS_GNN_PLAN.md` at `b114291`
+- **Script:** Kaggle kernel `seirgnn2-physics9` = `sweep.py physics9 --keep --epochs 400
+  --workers 4`; results `seirgnn2/results/physics9.json` (117 rows, complete).
+- **Hardware:** Kaggle CPU, 4 workers.
+- **Config:** P0 (B), P3 (gated SEIR-GNN), P4 (metapopulation SEIR-GNN), P6 (SEIR-LSTM) and
+  persistence on `core.ORIGINS_9` (0.40 + k/15, test fraction 1/15), seeds 0/1/2, 400 epochs.
+- **Question:** the pre-registered S9 endpoint for the physics arms -- test RMSE, family
+  {P4 vs P6, P4 vs P0, P4 vs persistence, P3 vs P6}, BH, p_adj < 0.05 and >= 6/9 origins.
+- **Result:** means over 27 runs (persistence 9), then paired at the origin unit.
+
+  | arm | val | test | test h1 | test h3 |
+  |---|---|---|---|---|
+  | P3 gated SEIR-GNN | 39.0426 | **31.0629** | 24.7098 | 36.4739 |
+  | P4 metapopulation SEIR-GNN | 39.5601 | 31.4677 | 24.7190 | 37.4269 |
+  | P6 SEIR-LSTM | 39.0482 | 31.4750 | 24.9479 | 37.0572 |
+  | persistence | 41.2133 | 31.7619 | 25.9374 | 37.1770 |
+  | P0 B | **38.2904** | 33.2097 | 27.2481 | 38.4276 |
+
+  | comparison (test, origin unit) | delta | wins | p | p_adj | val delta | val wins |
+  |---|---|---|---|---|---|---|
+  | P4 vs P6 SEIR-LSTM | -0.01 | 4/9 | 0.988 | 0.988 | +0.51 | 4/9 |
+  | P4 vs P0 B | -1.74 | 5/9 | 0.266 | 0.531 | +1.27 | 1/9 |
+  | P4 vs persistence | -0.29 | 6/9 | 0.805 | 0.988 | -1.65 | 7/9 |
+  | P3 vs P6 SEIR-LSTM | **-0.41** | 6/9 | **0.031** | 0.125 | -0.01 | 6/9 |
+
+  At the origin_seed unit (27 pairs, reported, not the endpoint): P3 vs P6 -0.41, 18/27,
+  p = 0.0003; P4 vs P6 -0.01, 13/27, p = 0.97.
+- **Verdict:** answered, negative against the pre-registered bar. No comparison reaches
+  p_adj < 0.05.
+- **Notes:**
+  1. **The metapopulation head ties SEIR-LSTM** (-0.01 test, +0.51 val). Coupling
+     districts inside the dynamics adds nothing measurable over the LSTM.
+  2. **The gated SEIR-GNN beats SEIR-LSTM in the same direction a second time.** EXP-038:
+     ASTGCN + foi_res -0.75, 8/9, p 0.012, p_adj 0.059. Here: AAGCN + foi_res -0.41, 6/9,
+     p 0.031, p_adj 0.125. Different encoder, same sign, raw p under 0.05 both times,
+     neither clearing the correction. The two runs share the nine test spans, so they are
+     not independent replications. Report it as a consistent directional advantage.
+  3. **The validation/test disagreement of EXP-045 note 4, a fifth time.** B has the best
+     validation (38.29) and the worst test (33.21, behind persistence 31.76); P3 has the
+     best test (31.06, the only arm below persistence by more than 0.5) with validation 0.75
+     behind B. Nothing was selected on test here.
+  4. Origin 0.40 again dominates the *validation* means (145-157 against 13-49 at the other
+     origins, as in EXP-038); its test span is ordinary (about 25.7 for every arm). Read the
+     win counts, not the mean validation column.
+
+## EXP-046 — Physics-informed GNN screen: spatial penalty, gated and metapopulation SEIR heads
+- **Date:** 2026-09-24
+- **Who:** Group 05
+- **Commit:** `269fc29` (code), kernel pinned at `872b091`; plan `docs/PHYSICS_GNN_PLAN.md` at `b114291`
+- **Script:** Kaggle kernel `seirgnn2-physics` = `sweep.py physics --keep --epochs 400
+  --workers 4`; results `seirgnn2/results/physics.json` (66 rows, complete).
+- **Hardware:** Kaggle CPU, 4 workers.
+- **Config:** as pre-registered. B = AAGCN, direct head, NB, season, window 3; three origins
+  x seeds 0/1/2. P1 spatial penalty ratio form, weight 0.001, binary border adjacency,
+  scales = training-mean cases; P2 log form, 0.05; P3 AAGCN + `foi_res`; P4 AAGCN +
+  `foi_meta` (daily force of infection beta_i * sum_j C_ij I_j, C learned row-stochastic,
+  initialised to the border graph); P5 = P4 + P1 penalty + district seasonal beta; P6 LSTM +
+  `foi_res`. Control P0 reproduces the local B (15.65).
+- **Question:** does a physics-informed structural change improve the best GNN, and does
+  SEIR-GNN beat SEIR-LSTM when the coupling is moved inside the dynamics?
+- **Result:** validation, paired at the origin_seed unit.
+
+  | arm | val | vs P0 | wins | p_adj | test (record only) |
+  |---|---|---|---|---|---|
+  | P1 spatial penalty (ratio) | **15.5863** | -0.06 | 6/9 | 0.447 | 38.0473 |
+  | **P0 B** | 15.6455 | — | — | — | 37.5451 |
+  | P2 spatial penalty (log) | 15.6633 | +0.02 | 6/9 | — | 37.7261 |
+  | P3 gated SEIR-GNN | 17.1043 | +1.46 | 0/9 | — | 34.9226 |
+  | P5 metapop + spatial + district season | 17.1878 | +1.54 | 0/9 | — | 35.3415 |
+  | P6 SEIR-LSTM | 17.2786 | +1.63 | 0/9 | — | 34.9664 |
+  | P4 metapopulation SEIR-GNN | 17.3077 | +1.66 | 0/9 | — | 35.1214 |
+  | persistence | 17.8561 | +2.21 | — | — | 36.0157 |
+
+  | physics comparison (val) | delta | wins | p_adj |
+  |---|---|---|---|
+  | P3 vs P6 SEIR-LSTM | **-0.17** | **9/9** | **0.007** |
+  | P5 vs P6 SEIR-LSTM | -0.09 | 8/9 | 0.016 |
+  | P4 vs P6 SEIR-LSTM | +0.03 | 3/9 | — |
+  | P4 vs P3 (coupling in the dynamics vs import term) | +0.20 | 2/9 | 0.022 |
+  | P5 vs P3 | +0.08 | 2/9 | — |
+
+  P1 lowers validation horizon-3 RMSE by 0.20.
+- **Verdict:** answered. No arm adopted against B (P1 is 6/9, short of 7/9). Among the
+  physics formulations, the gated SEIR-GNN beats SEIR-LSTM 9/9; the metapopulation head is
+  significantly *worse* than the gated one.
+- **Notes:**
+  1. **Predictions against outcome.** P1 adopted with ~-0.05: magnitude right (-0.06),
+     adoption wrong (6/9). P2 null: right. P3/P4 trail P0 by 0.5-1.0: direction right, size
+     wrong (~1.5). P4 not much better than P3: right, it is worse. P3/P4 beat P6: right for
+     P3 (9/9), wrong for P4 (tie).
+  2. **Why metapopulation coupling does not help.** Moran's I of R is 0.005 on this data:
+     transmission is not spatially autocorrelated at district-week resolution, so a learned
+     coupling matrix has nothing to encode, and daily coupled simulation adds optimisation
+     difficulty (best epoch 81 against B's 39) without information.
+  3. **The spatial penalty transfers in sign only.** The manuscript's -0.044 on STGAT was
+     57/60 runs; on B it is -0.06 and 6/9. A likely reading, not tested: B's forecasts
+     already satisfy the smoothness the penalty enforces, so the constraint is mostly slack.
+  4. On test, every SEIR-headed arm again beats B and persistence (EXP-045 note 4).
+
 ## EXP-045 — Architecture changes (head, fusion, district seasonality, global context): none adopted
 - **Date:** 2026-09-23
 - **Who:** Group 05

@@ -37,6 +37,78 @@ Copy this block for a new entry:
 > `CEILING_R0_MAX`) survived the cleanup and now lives in `dengue_gnn.seir`, still
 > asserted by `tests/test_seir.py` and reproduced by `scripts/verify_seir_paper.py`.
 
+## EXP-040 — Remedies from the literature: none adopted
+- **Date:** 2026-09-23
+- **Who:** Group 05
+- **Commit:** `f7786ab` (code; plan `docs/REMEDIES_PLAN.md` committed earlier at `7e983ae`)
+- **Script:** Kaggle kernel `seirgnn2-remedies` (v1) =
+  `sweep.py remedies --keep --epochs 400 --workers 4`, then the three pre-registered
+  ensembles; results `seirgnn2/results/remedies.json`, `remedies+ens.json` (120 rows,
+  complete: 90 runs + 3 persistence + 27 ensemble). Forecasts in `remedies_preds.pkl`
+  (git-ignored, 41 MB).
+- **Hardware:** Kaggle CPU, 4 workers.
+- **Config:** as pre-registered. B = AAGCN, direct head, NB likelihood, seasonal features,
+  window 3. Each remedy changes one thing against B. Frozen three origins x seeds 0/1/2.
+  **One change before the run, validation-only:** k-NN's k grid was widened to 320 after a
+  local smoke run chose k = 80, the old grid's top, on every fold (chosen k on Kaggle:
+  80 / 320 / 160).
+- **Question:** Do the remedies the literature proposes for these architectures' weaknesses
+  move the best model, and does SEIR structure help when used as a constraint instead of a
+  decoder?
+- **Result:** validation RMSE (selection metric), paired against B at the origin_seed unit;
+  test shown for the record only.
+
+  | arm | val | vs B | wins | p_adj | test |
+  |---|---|---|---|---|---|
+  | R6 SEIR auxiliary, w = 0.1 | 15.60 | -0.04 | 6/9 | 0.485 | 37.17 |
+  | ENS[B + NB-GLM + k-NN] | 15.63 | -0.01 | 5/9 | 0.965 | 35.74 |
+  | R6 SEIR auxiliary, w = 0.3 | 15.64 | -0.00 | 6/9 | 0.965 | 38.02 |
+  | **B** | **15.65** | — | — | — | 37.55 |
+  | R2 district identity | 15.71 | +0.06 | 4/9 | 0.785 | 39.73 |
+  | ENS[B + k-NN] | 15.72 | +0.08 | 5/9 | 0.487 | 34.18 |
+  | ENS[B + NB-GLM] | 15.78 | +0.13 | 5/9 | 0.476 | 39.28 |
+  | R3 STID | 16.35 | +0.71 | 2/9 | 0.061 | 36.33 |
+  | R4b k-NN | 16.52 | +0.87 | 0/9 | 0.017 | 34.34 |
+  | R1a RevIN (mean) | 16.60 | +0.96 | 4/9 | 0.237 | 37.69 |
+  | R1b RevIN | 16.92 | +1.27 | 0/9 | 0.017 | 36.74 |
+  | R4a NB-GLM | 16.97 | +1.32 | 1/9 | 0.025 | 42.85 |
+  | SEIR-LSTM | 17.28 | +1.63 | 0/9 | 0.017 | 34.97 |
+  | persistence | 17.86 | +2.21 | — | — | 36.02 |
+
+  **Residual correlation with B** (validation, seeds averaged): SEIR auxiliary 0.995,
+  district identity 0.971, STID 0.946, NB-GLM 0.923, SEIR-LSTM 0.921, **k-NN 0.919**,
+  RevIN 0.908.
+
+- **Verdict:** answered, negative. **No remedy meets the adoption rule** (mean delta < 0,
+  >= 7/9 wins, horizon 3 not raised); the closest, the SEIR auxiliary at w = 0.1, wins 6/9
+  by 0.04 against a between-unit sd of 0.16. The finalist is therefore B unchanged, whose
+  nine-origin confirmation already exists (EXP-038, `AAGCN+direct`): it did not beat
+  persistence or SEIR-LSTM on test. Under the plan no further confirmatory run is made.
+- **Notes:**
+  1. **The information limit is now shown across model families, not just architectures.**
+     k-NN analogue forecasting has no network and no training, yet its errors correlate
+     0.92 with B's; the GLM's 0.92; instance normalisation's 0.91. Methods that share no
+     machinery make the same mistakes, so the mistakes belong to the data -- the part of
+     next week that the past does not contain. It is also why equal-weight ensembles, the
+     most reliable remedy in the forecasting literature, gained nothing: they need members
+     that err differently, and none exist here.
+  2. **The SEIR constraint neither helps nor hurts.** As an auxiliary loss it leaves B's
+     forecasts almost unchanged (residual correlation 0.995). Physics as a *decoder* costs
+     ~7 RMSE (EXP-032/034); physics as a *constraint* costs nothing and buys nothing.
+  3. **Why B beats SEIR-LSTM (-1.63, 9/9 on validation):** mostly the head, not the graph.
+     SEIR-LSTM routes its forecast through the gated SEIR path; the LSTM on the direct head
+     scored 15.80 in EXP-035, within 0.15 of AAGCN. Stated this way in any write-up.
+  4. **Instance normalisation hurt, significantly** (RevIN +1.27, 0/9). Removing each
+     window's level discards information that matters here: high levels mean-revert and low
+     levels grow. This is the over-stationarisation Liu et al. (2022) warn about.
+  5. **Validation and test disagree.** On test, k-NN (34.34) and B + k-NN (34.18) beat
+     persistence (36.02) while B (37.55) does not. Selecting on that would be choosing a
+     model by its test score, which the protocol forbids and which is not done here. What
+     the disagreement does support is that 1-2 RMSE differences among these models are not
+     stable across periods.
+  6. Kaggle reproduces local: B here scores 15.65 against 15.66 for the identical
+     configuration run locally in EXP-035.
+
 ## EXP-039 — What caps the architectures: diagnosis on their forecasts
 - **Date:** 2026-09-23
 - **Who:** Group 05

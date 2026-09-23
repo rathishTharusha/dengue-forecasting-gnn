@@ -294,7 +294,21 @@ daily exponential flows).
 | — | Mobility graph | W2 | MepoGNN, Panagopoulos | Moran's I of R ≈ 0 | **needs data we do not have** |
 | — | Tail-weighted loss | W5 | Ding et al. | top 5% of cells = 60% of SSE | risky for RMSE |
 
-Pre-registered as `docs/REMEDIES_PLAN.md`; results logged as EXP-040 onward.
+Pre-registered as `docs/REMEDIES_PLAN.md`. **Result (EXP-040): none adopted.**
+
+| id | outcome on validation, vs the best model B |
+|---|---|
+| R1 | RevIN **hurt**: +1.27, lost 9/9 (mean-only variant +0.96). Removing each window's level discards information — the over-stationarisation Liu et al. 2022 warn about |
+| R2 | district identity: +0.06, n.s. |
+| R3 | STID: +0.71, lost 7/9 |
+| R4 | NB-GLM +1.32, k-NN +0.87 — both still beat persistence |
+| R5 | ensembles: −0.01 to +0.13, n.s. — no member errs differently enough |
+| R6 | SEIR as auxiliary constraint: −0.04 at w = 0.1, 6/9, n.s. Neither helps nor hurts |
+
+**The finding that matters:** every family — including k-NN, which has no network
+and no training — produces errors correlated 0.91–0.99 with B's. Different
+machinery, same mistakes: the remaining error is in the data. This is also why
+ensembles, the most reliable remedy in this literature, have nothing to work with.
 
 ---
 

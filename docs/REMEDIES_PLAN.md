@@ -61,3 +61,14 @@ to discount a win on reused data. **The only fully clean confirmation is data
 after the series ends (February 2024).** Weekly district counts for 2024–2026
 from the Epidemiology Unit's weekly reports would give that, and would be
 worth more than any further modelling.
+
+## Outcome (added after the run — see EXP-040)
+
+No remedy met the adoption rule. The finalist is B unchanged, whose nine-origin
+confirmation already exists (EXP-038) and did not beat persistence or SEIR-LSTM
+on test, so no further confirmatory run is made. One change was made before the
+run and is logged: the k-NN grid was widened to k = 320 on validation grounds.
+
+The most informative result is not in the adoption table: every model family
+tested — including k-NN, which has no network and no training — makes errors
+correlated 0.91–0.99 with B's. The limit is the data, not the architecture.

@@ -143,6 +143,8 @@ The point of this table is that nobody repeats these.
 | **Learnable E₀ scale + ρ** (`state_fit=True`) | −2.2 on the physics head, still 8 RMSE behind direct | `foi.json` |
 | **Longer input window** (6, 12 vs 3) | **null** — margin over the matched baseline is flat: AAGCN+direct −2.20 / −2.20 / −2.28 | `window.json`, EXP-036. Predicted to be the largest remaining lever; it is not. Absolute RMSE *looks* worse at longer windows, but that is the fold boundaries moving. **Never compare arms across windows on absolute RMSE** — `sweep.run` emits one persistence row per window for this reason. |
 
+| **Literature remedies** (RevIN, district identity, STID, NB-GLM, k-NN, ensembles, SEIR as auxiliary constraint) | **none adopted**; best is the SEIR auxiliary at −0.04, 6/9, n.s. RevIN significantly *worse* (+1.27, 0/9) | `remedies+ens.json`, EXP-040. Even k-NN (no network, no training) has residual correlation 0.92 with the best model — the limit is the data, so ensembles have nothing to average |
+
 ### Structural facts about the physics head
 
 Measured by `diagnose_foi.py`, which inverts the simulator by bisection for the

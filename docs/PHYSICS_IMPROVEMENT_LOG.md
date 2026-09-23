@@ -269,6 +269,45 @@ worth something in ordinary weeks and costs more than it is worth during the one
 epidemic in the record - which is the same serotype information the inputs do
 not contain.
 
+## What would serotype surveillance be worth? An oracle measurement
+
+The remaining losses are the two windows around the 2017 DENV-2 epidemic, and
+the natural explanation is that nothing in the inputs says which serotype is
+circulating. That can be measured without the data: give the model the
+emergence weeks, published years later (week 168, DENV-2, 2016-09; week 328,
+DENV-3, 2019-09), and let immunity to the outgoing serotype stop counting.
+Under rule R4 such an arm is an oracle and is never a forecaster.
+
+9 disjoint origins x 3 seeds, 189 models:
+
+| arm | oracle? | val RMSE | test RMSE | test MAE | vs persistence | origins won |
+|---|---|---|---|---|---|---|
+| damped | no | 25.73 | 29.15 | 14.27 | +0.61 | 7/9 |
+| **waning 52w + damped** | **no** | 25.92 | **28.74** | **14.14** | **+0.20** | 6/9 |
+| oracle w52 + damped | yes | 25.96 | 28.81 | 14.14 | +0.27 | 7/9 |
+| oracle full memory | yes | 26.33 | 29.37 | 14.41 | +0.83 | 6/9 |
+| oracle w52 | yes | 26.94 | 29.59 | 14.74 | +1.05 | 5/9 |
+| persistence | - | - | **28.54** | **13.94** | - | - |
+
+**The oracle is worth nothing.** With the switch dates: 28.81. Without them, the
+same model: 28.74. On the fold it was meant to repair, origin 0.60, the oracle
+scores 57.2 against persistence's 48.7 - the same failure.
+
+So the 2017 epidemic is not unforecastable merely because the serotype switch is
+invisible. Knowing that a new serotype arrived does not tell a model how large
+the epidemic will be or when it will turn, and those are what the error is made
+of.
+
+**Caveat on what was tested.** This oracle is crude: two dates, restarting the
+depletion clock. Real surveillance would give serotype proportions per district
+per week, which carries more than timing. The measurement rules out the timing
+alone, not the full dataset.
+
+**A side effect worth keeping.** Waning immunity, which failed on its own,
+combines well with damping: 28.74 test RMSE and 14.14 MAE, the closest any arm
+in this project has come to the persistence floor (28.54 / 13.94), and
+statistically level with it (+0.20, p = 0.90).
+
 ## Replication on a second dataset (`reordered`)
 
 A different week list (451 weeks against 559), different folds, no

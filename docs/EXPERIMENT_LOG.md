@@ -37,6 +37,76 @@ Copy this block for a new entry:
 > `CEILING_R0_MAX`) survived the cleanup and now lives in `dengue_gnn.seir`, still
 > asserted by `tests/test_seir.py` and reproduced by `scripts/verify_seir_paper.py`.
 
+## EXP-037 — Audit: run_s9_confirmatory.py does not compute what S9 claims
+- **Date:** 2026-09-23
+- **Who:** Group 05
+- **Commit:** `198d2cf`
+- **Script audited:** `analysis/_build/run_s9_confirmatory.py`
+- **Question:** Before re-running the confirmatory stage in the seirgnn2 harness, does the
+  existing S9 do what the paper says it does?
+- **Result:** No, in three separate ways.
+  1. **It is 3 origins, not 9.** `s_star_origin_means` is a `groupby("origin")` over the S5
+     results, and `analysis/results/seir_gnn/s5_seir_gnn/s5_seir_gnn_results.json` has 108 rows
+     across origins [0.55, 0.70, 0.85]. The script's own comment reads
+     `# Simulated 9-origin differences for test (9 disjoint origins)`.
+  2. **The paired test is not paired.** The comparators are hardcoded scalars --
+     `b_star_test_rmse = 34.837`, `persistence_test_rmse = 36.016`,
+     `seir_lstm_test_rmse = 62.608` -- so each "difference" is an origin mean minus one
+     constant. Matching on origin was the entire point of the design; subtracting a constant
+     tests something else.
+  3. **One reported p-value is a typed-in literal:** `p_auc = 0.04  # Simulated AUC difference
+     p-value`. This is the `p = 0.04` behind the package README's "Outbreak Detection ROC-AUC:
+     0.807-0.826 (p = 0.04)".
+
+  With 3 origins an exact sign-flip test cannot return a two-sided p below 0.25, so the reported
+  `p_raw = 0.50` was floor-bound whatever the data said.
+- **Verdict:** answered. **No S9-derived number is citable**, including the early-warning
+  p-value. This is a more serious problem than the S5 defects (EXP-032): S5 was a mistuned
+  experiment, whereas this is a statistical claim that does not correspond to its computation.
+- **Notes:** `seirgnn2/stats.py` does the intended thing -- real pairing on matched
+  (origin, seed), exact sign-flip enumeration, BH-FDR -- and prints the smallest attainable p so
+  a 3-origin grid cannot be read as significant. The 9-origin confirmatory run is feasible; it
+  has to actually be run.
+
+## EXP-036 — Window length is not the lever it looked like (logged R5 deviation)
+- **Date:** 2026-09-23
+- **Who:** Group 05
+- **Commit:** `198d2cf`
+- **Script:** `seirgnn2/sweep.py window` -> `seirgnn2/results/window.json` (117 rows)
+- **Hardware:** Local CPU, 6 workers
+- **Deviation:** plan R5 freezes window 3 -> horizon 3, inherited from the benchmark paper.
+  This run varies the **input window only** over {3, 6, 12}; horizon, origins, seeds,
+  normalisation and metric are unchanged, and the climate/NDVI sub-window stays at 3 weeks so
+  the case history is the single varying factor. Reason for deviating: three weekly points can
+  barely estimate a trend, and the seasonal feature -- the only input-side lever that has moved
+  the metric -- suggests the models are starved of temporal context.
+- **Config:** backbone/head in (AAGCN+direct, LSTM+direct, ASTGCN+foi_res, LSTM+foi_res);
+  loss=nb, dist=nb, use_season=True, lam_param=log, state_fit=True, epochs=400.
+- **Question:** Does a longer input window help?
+- **Result:** **No.** In absolute validation RMSE every arm looks worse as the window grows --
+  AAGCN+direct 15.66 / 15.86 / 16.29 at w = 3 / 6 / 12 -- but that is almost entirely the
+  baseline moving, because a longer window shifts the fold boundaries and changes which weeks
+  are evaluated. Persistence on the same folds is 17.86 / 18.06 / 18.58. Against its **own**
+  window's persistence:
+
+  | arm | w=3 | w=6 | w=12 |
+  |---|---|---|---|
+  | AAGCN+direct | -2.20 | -2.20 | -2.28 |
+  | LSTM+direct | -2.06 | -1.86 | -2.23 |
+  | ASTGCN+foi_res | -1.13 | -1.04 | -1.45 |
+  | LSTM+foi_res | -0.59 | -0.46 | -0.69 |
+
+  Flat to within noise. The margin over the baseline does not depend on the window.
+- **Verdict:** answered, negative. Window 3 stays; the deviation is closed and not carried
+  forward.
+- **Notes:** Two things worth keeping. (1) This was predicted to be the largest remaining lever
+  and it is approximately null -- more history does not help because, as EXP-024 established,
+  cases at t-1 already explain r2 = 0.85 and the rest is close to unpredictable. (2) **Arms at
+  different windows must never be compared on absolute RMSE**, because the evaluation folds
+  differ. `sweep.run` now emits one persistence row per window for exactly this reason, and
+  reading the raw leaderboard without matching baselines would have produced the opposite and
+  wrong conclusion.
+
 ## EXP-035 — Combination grid: first significant wins over persistence
 - **Date:** 2026-09-23
 - **Who:** Group 05

@@ -32,10 +32,10 @@ def _job(spec: dict) -> dict:
     import train
     torch.set_num_threads(1)
     data = cd.load()
-    folds = core.build_folds(data.cases, data.missing)
+    cfg = {k: v for k, v in spec.items() if k not in ("origin", "seed", "name", "window")}
+    folds = core.build_folds(data.cases, data.missing, spec.get("window", core.WINDOW))
     fold = next(f for f in folds if f.origin == spec["origin"])
     edge, fixed = core.adjacency(data.names)
-    cfg = {k: v for k, v in spec.items() if k not in ("origin", "seed", "name")}
     t0 = time.time()
     row, _, _ = train.run_fold(data, fold, seed=spec["seed"], edge=edge, fixed=fixed, **cfg)
     row["name"] = spec["name"]
@@ -43,15 +43,24 @@ def _job(spec: dict) -> dict:
     return row
 
 
-def persistence_rows() -> list[dict]:
+def persistence_rows(windows: tuple[int, ...] = (core.WINDOW,)) -> list[dict]:
+    """One persistence row per (window, origin).
+
+    A longer window shifts the fold boundaries, so each window needs its own
+    baseline; pairing an arm against the wrong one would compare across
+    different evaluation windows.
+    """
     data = cd.load()
     rows = []
-    for fold in core.build_folds(data.cases, data.missing):
+    for w, fold in [(w, f) for w in windows
+                    for f in core.build_folds(data.cases, data.missing, w)]:
         pack = core.build_tensors(data, fold, "test", False, False, False)
         val = core.build_tensors(data, fold, "val", False, False, False)
         row = core.score(pack["p_raw"].numpy(), pack["y_raw"].numpy())
-        row.update(name="persistence", backbone="-", head="-", loss="-", origin=fold.origin,
-                   seed=-1, val_RMSE=core.rmse(val["p_raw"].numpy(), val["y_raw"].numpy()))
+        name = "persistence" if w == core.WINDOW else f"persistence w={w}"
+        row.update(name=name, backbone="-", head="-", loss="-", origin=fold.origin,
+                   seed=-1, window=w,
+                   val_RMSE=core.rmse(val["p_raw"].numpy(), val["y_raw"].numpy()))
         rows.append(row)
     return rows
 
@@ -61,7 +70,8 @@ def run(configs: list[dict], out_name: str, workers: int = 6) -> list[dict]:
             in itertools.product(configs, itertools.product(core.ORIGINS, SEEDS))]
     print(f"{len(configs)} configs x {len(core.ORIGINS)} origins x {len(SEEDS)} seeds "
           f"= {len(jobs)} runs on {workers} workers", flush=True)
-    rows, done, t0 = persistence_rows(), 0, time.time()
+    windows = tuple(sorted({c.get("window", core.WINDOW) for c in configs}))
+    rows, done, t0 = persistence_rows(windows), 0, time.time()
     with ProcessPoolExecutor(max_workers=workers) as pool:
         futures = [pool.submit(_job, j) for j in jobs]
         for fut in as_completed(futures):

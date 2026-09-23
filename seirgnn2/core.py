@@ -35,19 +35,27 @@ class Fold:
     idx: dict[str, np.ndarray]
     mean: float
     std: float
+    window: int = WINDOW
 
 
-def build_folds(cases: np.ndarray, missing: np.ndarray) -> list[Fold]:
+def build_folds(cases: np.ndarray, missing: np.ndarray, window: int = WINDOW) -> list[Fold]:
     """The frozen protocol's split boundaries, computed on the full window list.
 
     Boundaries come from ``len(ids)`` before any missing-week filtering, so a
     gap never shifts a fold; windows touching a gap are then dropped.
+
+    ``window`` is the one protocol parameter this function will vary. The frozen
+    value is 3, inherited from the benchmark paper; any other value is a
+    deviation under plan R5 and must be logged. It changes the fold boundaries
+    (a longer window consumes more of the series before the first forecastable
+    week), so arms at different windows are **not** paired against each other --
+    each window is its own experiment with its own persistence baseline.
     """
     bad = {int(m) for m in np.where(missing)[0]}
-    ids = list(range(WINDOW, cases.shape[0] - HORIZON))
+    ids = list(range(window, cases.shape[0] - HORIZON))
 
     def clean(i: int) -> bool:
-        return not any(t in bad for t in range(i - WINDOW, i + HORIZON))
+        return not any(t in bad for t in range(i - window, i + HORIZON))
 
     folds = []
     for origin in ORIGINS:
@@ -60,7 +68,7 @@ def build_folds(cases: np.ndarray, missing: np.ndarray) -> list[Fold]:
         mean = float(np.nanmean(history))
         std = float(np.nanstd(history) + 1e-8)
         folds.append(Fold(origin, {"train": np.array(tr), "val": np.array(va),
-                                   "test": np.array(te)}, mean, std))
+                                   "test": np.array(te)}, mean, std, window))
     return folds
 
 
@@ -86,7 +94,7 @@ def build_tensors(data: cd.CorrectedData, fold: Fold, split: str, use_climate: b
     """
     idx = fold.idx[split]
     cases = data.cases
-    x_raw = np.stack([cases[i - WINDOW : i].T for i in idx])          # (K,N,W)
+    x_raw = np.stack([cases[i - fold.window : i].T for i in idx])     # (K,N,W)
     y_raw = np.stack([cases[i : i + HORIZON].T for i in idx])         # (K,N,H)
     p_raw = np.repeat(cases[idx - 1][:, :, None], HORIZON, axis=2)    # (K,N,H)
 

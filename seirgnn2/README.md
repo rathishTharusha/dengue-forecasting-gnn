@@ -14,6 +14,14 @@ about whether physics-informed graph networks work on this series:
 
 **Do not cite any S5-derived number.** Use the tables below.
 
+**Nor any S9-derived number.** `analysis/_build/run_s9_confirmatory.py` is described as a
+9-origin paired permutation test and is none of those things: it runs on the 3 origins S5
+produced, its "paired" differences subtract hardcoded scalars
+(`b_star_test_rmse = 34.837`, `persistence_test_rmse = 36.016`,
+`seir_lstm_test_rmse = 62.608`) rather than matching on origin, and the reported early-warning
+p-value is the literal `p_auc = 0.04  # Simulated`. See EXP-037. `stats.py` here does the
+intended test properly.
+
 ---
 
 ## Running it
@@ -100,6 +108,7 @@ The point of this table is that nobody repeats these.
 | **More training** | every one of 72 runs stopped early at 3000 epochs / patience 200; best epoch 21–225 | `converge.json`. 10× budget bought the physics head 0.04. Halving the LR made it worse. |
 | **Residence-time state seeding** (`state_seed="decon"`) | *worse*: 19.4% of targets unreachable vs 14.9%, λ learnability r² 0.068 vs 0.243 | `diagnose_seed.py`. The dimensionally-correct seeding is the worst of the three. `lagged` stays the default. |
 | **Learnable E₀ scale + ρ** (`state_fit=True`) | −2.2 on the physics head, still 8 RMSE behind direct | `foi.json` |
+| **Longer input window** (6, 12 vs 3) | **null** — margin over the matched baseline is flat: AAGCN+direct −2.20 / −2.20 / −2.28 | `window.json`, EXP-036. Predicted to be the largest remaining lever; it is not. Absolute RMSE *looks* worse at longer windows, but that is the fold boundaries moving. **Never compare arms across windows on absolute RMSE** — `sweep.run` emits one persistence row per window for this reason. |
 
 ### Structural facts about the physics head
 

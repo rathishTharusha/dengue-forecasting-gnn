@@ -72,7 +72,7 @@ def run_fold(data, fold: core.Fold, *, backbone: str, head: str, loss: str = "ms
     net = models.Net(packs["train"]["x"].shape[-1], packs["train"]["x"].shape[1],
                      horizon=core.HORIZON, hidden=hidden, backbone=backbone, head=head,
                      layers=layers, dropout=dropout, lam_param=lam_param, state_fit=state_fit,
-                     window=core.WINDOW, edge_index=edge, dist=dist)
+                     window=fold.window, edge_index=edge, dist=dist)
     opt = torch.optim.Adam(net.parameters(), lr=lr, weight_decay=weight_decay)
     sched = torch.optim.lr_scheduler.CosineAnnealingLR(opt, T_max=epochs)
     stopper = core.EarlyStop(net, patience=patience)

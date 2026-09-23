@@ -110,3 +110,25 @@ def combo(epochs: int = 400) -> list[dict]:
                                   loss=loss, dist=dist, lam_param="log", state_fit=True,
                                   epochs=epochs, **feats))
     return out
+
+
+def window(epochs: int = 400) -> list[dict]:
+    """The one protocol deviation worth testing: how much history the model sees.
+
+    ``WINDOW = 3`` is inherited from the benchmark paper, and three weekly points
+    can barely estimate a trend. It is the largest untested lever in the study,
+    and under plan R5 changing it is a deviation -- logged, not silent.
+
+    A longer window shifts the fold boundaries, so `sweep.run` emits a separate
+    persistence row per window and arms are never paired across windows. The four
+    carried arms are the survivors of `combo`: the best direct and the best
+    physics arm, each with its matched LSTM control.
+    """
+    out = []
+    for w in (3, 6, 12):
+        for bb, head in (("AAGCN", "direct"), ("LSTM", "direct"),
+                         ("ASTGCN", "foi_res"), ("LSTM", "foi_res")):
+            out.append(_c(f"{bb}+{head} w={w}", backbone=bb, head=head, loss="nb",
+                          dist="nb", use_season=True, lam_param="log", state_fit=True,
+                          window=w, epochs=epochs))
+    return out

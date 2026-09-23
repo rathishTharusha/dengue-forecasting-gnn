@@ -43,11 +43,29 @@ def _cell(kind: str, text: str) -> dict:
 
 def notebook(grid: str, sha: str, workers: int, epochs: int) -> dict:
     setup = f"""
+# Shell work goes through subprocess, not IPython magics: `tools/check_notebooks.py`
+# parses every committed notebook as Python and runs in CI, so `!` and `%` cells
+# fail the build.
+import os, subprocess, sys
+from pathlib import Path
+
+
+def sh(*cmd, **kw):
+    print("$", " ".join(str(c) for c in cmd), flush=True)
+    r = subprocess.run([str(c) for c in cmd], text=True, **kw)
+    if r.returncode:
+        raise SystemExit(f"failed ({{r.returncode}}): {{cmd}}")
+    return r
+
+
+REPO_URL = "https://github.com/rathishTharusha/dengue-forecasting-gnn.git"
 # Pinned to the commit this kernel was generated from, so the result is traceable.
-!git clone --quiet --branch {BRANCH} https://github.com/rathishTharusha/dengue-forecasting-gnn.git repo
-%cd repo
-!git checkout --quiet {sha}
-!git log --oneline -1
+SHA = "{sha}"
+if not Path("repo").exists():
+    sh("git", "clone", "--quiet", "--branch", "{BRANCH}", REPO_URL, "repo")
+os.chdir("repo")
+sh("git", "checkout", "--quiet", SHA)
+sh("git", "log", "--oneline", "-1")
 """
     deps = """
 # Two installs, and the order matters.
@@ -63,8 +81,8 @@ def notebook(grid: str, sha: str, workers: int, epochs: int) -> dict:
 # declared torch-sparse / torch-scatter have no wheels here and would try a
 # source build. It needs torch_sparse only for evolvegcno, which none of the five
 # use; backbones.install_shim() supplies the symbol.
-!pip install --quiet torch-geometric
-!pip install --quiet --no-deps torch-geometric-temporal
+sh(sys.executable, "-m", "pip", "install", "--quiet", "torch-geometric")
+sh(sys.executable, "-m", "pip", "install", "--quiet", "--no-deps", "torch-geometric-temporal")
 import torch
 print("torch", torch.__version__, "| cuda", torch.cuda.is_available())
 import torch_geometric; print("pyg", torch_geometric.__version__)
@@ -72,7 +90,6 @@ import torch_geometric; print("pyg", torch_geometric.__version__)
     check = """
 # Gate: every encoder must build and run before the grid starts. Kernel v1 had no
 # gate, so a broken install looked like a short results file rather than a failure.
-import subprocess, sys
 out = subprocess.run([sys.executable, "seirgnn2/backbones.py"],
                      capture_output=True, text=True)
 print(out.stdout or out.stderr)
@@ -82,7 +99,7 @@ assert "FAIL" not in out.stdout, "an encoder failed to build -- fix before runni
 # Workers, not GPU: every architecture here is small and the grid is many short
 # runs, so process-level parallelism over CPU cores beats one GPU stream. Set
 # enable_gpu in kernel-metadata.json if a future grid actually needs it.
-!python seirgnn2/sweep.py {grid} --workers {workers} --epochs {epochs}
+sh(sys.executable, "seirgnn2/sweep.py", "{grid}", "--workers", "{workers}", "--epochs", "{epochs}")
 """
     collect = f"""
 import json, shutil
@@ -92,7 +109,7 @@ rows = json.load(open(src))
 print(f"{{len(rows)}} rows -> /kaggle/working/{grid}.json")
 """
     stats = f"""
-!python seirgnn2/stats.py {grid}
+sh(sys.executable, "seirgnn2/stats.py", "{grid}")
 """
     cells = [
         _cell("markdown", f"# seirgnn2 — `{grid}`\n\n"

@@ -37,6 +37,44 @@ Copy this block for a new entry:
 > `CEILING_R0_MAX`) survived the cleanup and now lives in `dengue_gnn.seir`, still
 > asserted by `tests/test_seir.py` and reproduced by `scripts/verify_seir_paper.py`.
 
+## EXP-043 — Climate lags and growth, on training data only
+- **Date:** 2026-09-23
+- **Who:** Group 05
+- **Commit:** `eceaaa7` + `seirgnn2/climate_lags.py` (committed with this entry)
+- **Script:** `python seirgnn2/climate_lags.py` -> `seirgnn2/results/climate_lags.txt`
+- **Hardware:** Local CPU, no network training.
+- **Config:** Inside each of the three frozen folds' *training* windows only, split in
+  time: fit on the earliest 70%, score on the latest 30%. The real validation windows are
+  not read. Six ERA5 channels (temperature mean/min/max, precipitation, relative humidity,
+  soil moisture) and NDVI; lags 2-26 (climate) and 0-26 (NDVI, already as-of). Target:
+  log growth, log1p(cases[t+h]) - log1p(cases[t-1]), h = 0..2 -- the part persistence
+  cannot see, rather than the case *level* Stage S2 correlated against.
+- **Question:** The models have only ever seen climate at lags 2-4. Does climate at longer
+  lags -- which the mosquito and virus life cycle suggest -- or a longer case window
+  predict growth?
+- **Result:**
+  1. *Anomaly correlations with 3-week growth* are small but patterned: precipitation,
+     humidity and soil moisture ~4 weeks back +0.06 to +0.08, 8-13 weeks back -0.07 to
+     -0.10; temperature 2-6 weeks back negative, 10-20 weeks back positive. Largest |r|
+     0.111 (humidity, lag 13).
+  2. *Ridge (linear), out-of-sample R2 of growth:* base (3-week cases + season + district)
+     0.194. Longer case windows *lower* it: 8 weeks 0.187, 13 weeks 0.186. Adding climate
+     at any block gains at most +0.006 (raw 14-17), usually negative, with the sign
+     flipping between folds.
+  3. *Gradient-boosted trees:* base 0.158. Raw climate blocks 2-5, 6-9, 10-13 add
+     **+0.028, positive in 3/3 folds** (+0.040 / +0.024 / +0.021); six blocks to lag 25 add
+     +0.027 (3/3); six anomaly blocks +0.023 (3/3); three anomaly blocks +0.004 (2/3).
+  4. *NDVI:* |r| <= 0.071 at every lag, no pattern.
+- **Verdict:** partly answered. Longer case windows do not help (agreeing with EXP-036).
+  Climate carries a weak, biologically coherent signal that a linear model cannot use
+  out of sample but a nonlinear one can, consistently across folds. Raw climate beating
+  anomalies suggests district-specific seasonality (two monsoons reaching different
+  districts at different times) as a possible mechanism. Whether the network can use it is
+  tested in EXP-044 under `docs/CLIMATE_PLAN.md`.
+- **Notes:** The trees' base R2 (0.158) is below the ridge's (0.194), so part of their
+  climate gain may compensate for fitting the persistence structure less well; the
+  network arms are what decide it.
+
 ## EXP-042 — Synthetic training data (GAN and SEIR simulator): none adopted
 - **Date:** 2026-09-23
 - **Who:** Group 05

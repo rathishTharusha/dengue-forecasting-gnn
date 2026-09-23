@@ -1,0 +1,45 @@
+Inner validation = latest 30% of each fold's training windows. Real validation untouched.
+
+1. Correlation of climate ANOMALY at lag L with 3-week log growth (fit part, pooled)
+   lag:                             2     4     6     8    10    12    16    20    26
+   temperature_2m_mean         -0.045-0.085-0.051+0.028+0.038+0.050+0.058+0.080+0.031   peak |r| 0.085 at lag 4
+   temperature_2m_min          -0.025-0.060-0.069-0.029-0.027-0.007+0.051+0.041+0.009   peak |r| 0.070 at lag 18
+   temperature_2m_max          -0.051-0.073-0.028+0.047+0.057+0.067+0.051+0.070+0.026   peak |r| 0.088 at lag 13
+   precipitation_sum           +0.013+0.078+0.014-0.028-0.067-0.049-0.016-0.067-0.053   peak |r| 0.094 at lag 25
+   relative_humidity_2m_mean   +0.021+0.058-0.005-0.073-0.095-0.085-0.023-0.061-0.051   peak |r| 0.111 at lag 13
+   soil_moisture_0_to_7cm_mean +0.058+0.076+0.010-0.093-0.103-0.101-0.026-0.061-0.034   peak |r| 0.107 at lag 9
+
+2. Out-of-sample R2 of growth on inner validation (mean over 3 folds)
+   cases 3w, no climate               R2 = +0.1936   (per fold +0.264, +0.192, +0.124)
+   cases 8w, no climate               R2 = +0.1874   (per fold +0.258, +0.181, +0.124)
+   cases 13w, no climate              R2 = +0.1857   (per fold +0.256, +0.178, +0.123)
+
+   Gain in R2 from adding climate to the 3-week case window + season + district:
+   raw     14-17                      dR2 = +0.0059   (per fold -0.0025, +0.0107, +0.0095)
+   anomaly 2-5,6-9                    dR2 = -0.0002   (per fold -0.0086, +0.0238, -0.0157)
+   anomaly 2-5                        dR2 = -0.0018   (per fold -0.0069, +0.0078, -0.0064)
+   anomaly 2-5,6-9,10-13              dR2 = -0.0034   (per fold -0.0125, +0.0325, -0.0302)
+   anomaly 2-4 (current)              dR2 = -0.0040   (per fold -0.0104, +0.0073, -0.0090)
+   raw     2-4 (current)              dR2 = -0.0055   (per fold -0.0123, +0.0080, -0.0122)
+   raw     2-5                        dR2 = -0.0056   (per fold -0.0094, +0.0056, -0.0130)
+   raw     2-5,6-9                    dR2 = -0.0057   (per fold -0.0078, +0.0129, -0.0222)
+   anomaly 6-9                        dR2 = -0.0065   (per fold -0.0247, +0.0078, -0.0026)
+   raw     6-9                        dR2 = -0.0067   (per fold -0.0179, +0.0041, -0.0063)
+   raw     2-5,6-9,10-13              dR2 = -0.0073   (per fold -0.0159, +0.0196, -0.0256)
+   anomaly 10-13                      dR2 = -0.0080   (per fold -0.0238, +0.0163, -0.0164)
+   anomaly 14-17                      dR2 = -0.0085   (per fold -0.0209, -0.0071, +0.0027)
+   raw     2-5..22-25 (6 blocks)      dR2 = -0.0142   (per fold -0.0088, +0.0094, -0.0432)
+   raw     10-13                      dR2 = -0.0150   (per fold -0.0274, -0.0072, -0.0104)
+   anomaly 2-5..22-25 (6 blocks)      dR2 = -0.0295   (per fold -0.0770, +0.0188, -0.0302)
+
+4. Same test through gradient-boosted trees (nonlinear, district interactions)
+   raw     2-5,6-9,10-13              dR2 = +0.0284   (per fold +0.0400, +0.0240, +0.0212)
+   anomaly 2-5,6-9,10-13              dR2 = +0.0044   (per fold +0.0185, +0.0088, -0.0141)
+   raw     14-17                      dR2 = -0.0059   (per fold -0.0033, -0.0172, +0.0029)
+   anomaly 14-17                      dR2 = -0.0121   (per fold +0.0143, -0.0404, -0.0101)
+   raw     2-5..22-25 (6 blocks)      dR2 = +0.0265   (per fold +0.0350, +0.0261, +0.0186)
+   anomaly 2-5..22-25 (6 blocks)      dR2 = +0.0234   (per fold +0.0531, +0.0031, +0.0140)
+   (base R2, trees)                   R2 = +0.1579   (per fold +0.1903, +0.1726, +0.1108)
+
+5. Correlation of NDVI at lag L with 3-week log growth (fit part, pooled)
+     L0:-0.038  L2:-0.071  L4:-0.024  L6:-0.044  L8:-0.028  L10:-0.030  L12:+0.013  L16:+0.033  L20:+0.058  L26:-0.012

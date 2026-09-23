@@ -1,0 +1,13 @@
+{
+  "id": "tharushaperera16/seirgnn2-arch",
+  "title": "seirgnn2 arch",
+  "code_file": "seirgnn2_arch.ipynb",
+  "language": "python",
+  "kernel_type": "notebook",
+  "is_private": true,
+  "enable_gpu": false,
+  "enable_internet": true,
+  "dataset_sources": [],
+  "competition_sources": [],
+  "kernel_sources": []
+}

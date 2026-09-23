@@ -173,6 +173,43 @@ mixing in components from other papers cannot help, because every one of those
 models collapses onto the same persistence-like forecast. Only new information,
 a longer horizon, or a different target can move this.
 
+## Horizon sweep: does the mechanism pay off further out?
+
+**Pre-registered reasoning.** At three weeks the forecast is largely the
+incubation-and-reporting pipeline draining, which is arithmetically close to
+persistence, and the fitted model sits at R_eff ~ 0.42 - subcritical, so
+transmission contributes little. Further out the pipeline empties and
+transmission has to carry the forecast, so a mechanism should degrade more
+slowly than carrying one number forward.
+
+**Result: the prediction fails.** 9 disjoint origins x 3 seeds at each horizon,
+same protocol, 162 trained models.
+
+| horizon | physics | persistence | no physics | physics - persistence | origins won | p |
+|---|---|---|---|---|---|---|
+| 3 weeks | 29.60 | **28.54** | 47.76 | +1.06 | 4/9 | 0.32 |
+| 6 weeks | 38.32 | **36.04** | 50.44 | +2.29 | 3/9 | 0.055 |
+| 12 weeks | 46.31 | **45.08** | 55.34 | +1.23 | 5/9 | 0.30 |
+
+Persistence is ahead at every horizon tested, and the two degrade at
+indistinguishable rates: from 3 to 12 weeks the physics arm's error grows 1.56x
+and persistence's 1.58x.
+
+**What does survive at every horizon** is the SEIR layer itself, against the
+identical encoder with the physics removed:
+
+| horizon | physics - no physics | origins won | p |
+|---|---|---|---|
+| 3 weeks | -18.16 | 8/9 | 0.0078 |
+| 6 weeks | -12.11 | 8/9 | 0.0117 |
+| 12 weeks | -9.02 | 8/9 | 0.0078 |
+
+**Reading.** The limit is not the pipeline length, and it is not the horizon. It
+is that the *growth* of the series is unpredictable from the available inputs at
+any distance, so the conditional mean stays close to the current level however
+far ahead one looks. This closes the horizon as an escape route, with data
+rather than argument.
+
 ## Replication on a second dataset (`reordered`)
 
 A different week list (451 weeks against 559), different folds, no

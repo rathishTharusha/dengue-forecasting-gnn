@@ -65,23 +65,30 @@ def split_nb(raw: torch.Tensor, persistence_log: torch.Tensor):
     return mu, alpha
 
 
-def nb_nll(mu: torch.Tensor, alpha: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
+def nb_nll(mu: torch.Tensor, alpha: torch.Tensor, target: torch.Tensor,
+           weight: torch.Tensor | None = None) -> torch.Tensor:
     """Mean negative log-likelihood of ``target`` under NB2(``mu``, ``alpha``).
 
     ``Var = mu + alpha * mu^2``. Constant terms in the target are kept because
     ``lgamma(y + 1)`` is cheap and dropping it makes the reported loss
     uninterpretable across runs with different targets.
+
+    ``weight``, if given, makes it a weighted mean over cells (used for
+    label-distribution-smoothed reweighting); the default is unchanged.
     """
     y = target.clamp_min(0.0)
     r = 1.0 / alpha
     log_r_mu = torch.log(r + mu)
-    return -(
+    nll = -(
         torch.lgamma(y + r)
         - torch.lgamma(r)
         - torch.lgamma(y + 1.0)
         + r * (torch.log(r) - log_r_mu)
         + y * (torch.log(mu) - log_r_mu)
-    ).mean()
+    )
+    if weight is None:
+        return nll.mean()
+    return (nll * weight).sum() / weight.sum()
 
 
 def nb_mean(mu: torch.Tensor) -> torch.Tensor:

@@ -188,6 +188,7 @@ def remedies(epochs: int = 400) -> list[dict]:
 #: Pre-registered equal-weight ensembles per grid (docs/REMEDIES_PLAN.md, R5).
 #: Fixed before the grid runs; ``build_seirgnn2_kernel.py --keep`` computes them.
 ENSEMBLES = {
+    "augment": [],
     "remedies": [["B", "R4b knn"],
                  ["B", "R4a nbglm"],
                  ["B", "R4a nbglm", "R4b knn"]],
@@ -206,3 +207,27 @@ def curve(epochs: int = 400) -> list[dict]:
     base = dict(backbone="AAGCN", head="direct", loss="nb", dist="nb", use_season=True,
                 epochs=epochs)
     return [_c(f"B frac={f:.2f}", train_frac=f, **base) for f in (0.25, 0.5, 0.75, 1.0)]
+
+
+def augment(epochs: int = 400) -> list[dict]:
+    """docs/AUGMENTATION_PLAN.md: synthetic training data, each arm against B (G0).
+
+    G3a/G3b are the SEIR simulator exactly as pre-registered; its fidelity check
+    showed targets ~10x the real scale. G3c/G3d are the logged deviation that
+    calibrates it to training growth, which overshoots the other way and loses
+    the tails. Running both brackets the real distribution instead of tuning
+    between them. G2t is a train-on-synthetic fidelity diagnostic, never a finalist.
+    """
+    base = dict(backbone="AAGCN", head="direct", loss="nb", dist="nb", use_season=True,
+                epochs=epochs)
+    return [
+        _c("G0 B", **base),
+        _c("G1 jitter", augment="jitter", **base),
+        _c("G2 timegan", augment="timegan", **base),
+        _c("G2t timegan only (TSTR)", augment="timegan_only", **base),
+        _c("G3a seir mix", augment="seir_mix", **base),
+        _c("G3b seir pretrain", augment="seir_pretrain", **base),
+        _c("G3c seir mix calibrated", augment="seir_mix_cal", **base),
+        _c("G3d seir pretrain calibrated", augment="seir_pretrain_cal", **base),
+        _c("G4 lds reweight", augment="lds", **base),
+    ]

@@ -249,6 +249,7 @@ Both point at the 9-origin confirmatory grid before anything is claimed.
 | `diagnose_arch.py` | retrains the remaining architectures keeping every forecast, then measures how they are wrong (EXP-039) |
 | `knn.py` | k-nearest-neighbour analogue forecaster (remedy R4b); strict analogue library, leakage-tested |
 | `ensemble.py` | equal-weight ensembles from `sweep.py --keep` forecasts (remedy R5) |
+| `augment.py` | synthetic training data (EXP-042): TimeGAN, SEIR-simulated epidemics (pre-registered and calibrated), plus LDS weights; training sets only, leakage-tested |
 
 ### A note on the seasonal feature's rationale
 

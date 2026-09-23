@@ -18,10 +18,15 @@ from torch import nn
 
 import count_loss as cl
 
+import augment as aug
 import core
 import models
 
 LOSSES = ("mse_z", "huber_z", "mse_raw", "smape", "nb")
+AUGMENTS = ("none", "jitter", "timegan", "timegan_only", "seir_mix", "seir_pretrain",
+            "seir_mix_cal", "seir_pretrain_cal", "lds")
+#: Fixed a priori in docs/AUGMENTATION_PLAN.md.
+JIT_NOISE, JIT_SCALE, PRETRAIN_EPOCHS = 0.05, 0.1, 50
 
 
 def _loss(kind: str, pred_z: torch.Tensor, batch: dict, mean: float, std: float,
@@ -32,7 +37,7 @@ def _loss(kind: str, pred_z: torch.Tensor, batch: dict, mean: float, std: float,
         # smearing correction, because there is no retransformation left to bias.
         mu = torch.expm1(torch.clamp(pred_z * std + mean, -1.0, cl.LOG_MU_MAX)).clamp_min(1e-6)
         alpha = cl.ALPHA_MIN + (cl.ALPHA_MAX - cl.ALPHA_MIN) * torch.sigmoid(disp)
-        return cl.nb_nll(mu, alpha, batch["y_raw"])
+        return cl.nb_nll(mu, alpha, batch["y_raw"], batch.get("w"))
     if kind == "mse_z":
         return nn.functional.mse_loss(pred_z, batch["y_z"])
     if kind == "huber_z":
@@ -42,6 +47,26 @@ def _loss(kind: str, pred_z: torch.Tensor, batch: dict, mean: float, std: float,
         return nn.functional.mse_loss(counts, batch["y_raw"])
     denom = (counts.abs() + batch["y_raw"].abs() + 1e-5) / 2.0
     return ((counts - batch["y_raw"]).abs() / denom).mean()
+
+
+def _jitter(batch: dict, fold: core.Fold, g: torch.Generator) -> dict:
+    """G1: noise on the log1p inputs, and one magnitude shift per window.
+
+    The shift moves inputs *and* targets together in log1p space -- a scaled
+    epidemic, not a mislabelled one. Resampled every batch.
+    """
+    b = dict(batch)
+    w = fold.window
+    shape = b["x"].shape[:2] + (1,)
+    shift = torch.randn(shape, generator=g) * JIT_SCALE
+    noise = torch.randn(b["x"][..., :w].shape, generator=g) * JIT_NOISE
+    x = b["x"].clone()
+    x[..., :w] = x[..., :w] + (noise + shift) / fold.std
+    b["x"] = x
+    b["p_z"] = b["p_z"] + shift / fold.std
+    b["y_z"] = b["y_z"] + shift / fold.std
+    b["y_raw"] = torch.expm1(torch.log1p(b["y_raw"]) + shift).clamp_min(0.0)
+    return b
 
 
 def to_counts(pred_z: torch.Tensor, mean: float, std: float) -> np.ndarray:
@@ -56,7 +81,8 @@ def run_fold(data, fold: core.Fold, *, backbone: str, head: str, loss: str = "ms
              lam_param: str = "sigmoid", state_fit: bool = False,
              state_seed: str = "lagged", dist: str = "point",
              norm: str = "fold", node_emb: int = 0, aux_phys: float = 0.0,
-             train_frac: float = 1.0, keep: bool = False) -> dict:
+             train_frac: float = 1.0, augment: str = "none",
+             keep: bool = False) -> dict:
     """Train one (fold, seed) and return its test scores plus the raw predictions."""
     torch.manual_seed(seed)
     np.random.seed(seed)
@@ -78,6 +104,24 @@ def run_fold(data, fold: core.Fold, *, backbone: str, head: str, loss: str = "ms
         cum[s] = torch.tensor(np.stack([cases[:i].sum(0) for i in pack["idx"]]), dtype=torch.float32)
 
     needs_state = head in ("foi", "foi_res") or aux_phys > 0
+    if augment not in AUGMENTS:
+        raise ValueError(f"unknown augment {augment!r}; expected one of {AUGMENTS}")
+    if augment != "none" and needs_state:
+        raise ValueError("augmentation is defined for heads without SEIR state")
+    # docs/AUGMENTATION_PLAN.md. Synthetic windows only ever join the TRAINING
+    # pack; validation and test are the real packs built above, untouched.
+    pretrain = None
+    n_real = len(packs["train"]["idx"])
+    if augment in ("timegan", "timegan_only"):
+        syn = aug.synth_timegan(data, fold, n_real, seed)
+        packs["train"] = syn if augment == "timegan_only" else aug.concat(packs["train"], syn)
+    elif augment in ("seir_mix", "seir_mix_cal"):
+        syn = aug.synth_seir(data, fold, n_real, seed, calibrated=augment.endswith("_cal"))
+        packs["train"] = aug.concat(packs["train"], syn)
+    elif augment in ("seir_pretrain", "seir_pretrain_cal"):
+        pretrain = aug.synth_seir(data, fold, n_real, seed, calibrated=augment.endswith("_cal"))
+    elif augment == "lds":
+        packs["train"]["w"] = aug.lds_weights(packs["train"]["y_raw"])
     state = {s: models.seir_state(packs[s]["x_raw"], packs[s]["pop"], cum[s],
                                   mode=state_seed) if needs_state else None
              for s in packs}
@@ -96,6 +140,25 @@ def run_fold(data, fold: core.Fold, *, backbone: str, head: str, loss: str = "ms
         return net(pack["x"], fixed, pack["p_z"], state[split], pack["pop"], fold.mean,
                    fold.std, edge)[0]
 
+    if pretrain is not None:
+        # G3b: learn from simulated epidemics first, then from real data as
+        # usual. No early stopping here -- validation is real, and this phase
+        # is not what is being selected.
+        m = len(pretrain["idx"])
+        for _ in range(PRETRAIN_EPOCHS):
+            net.train()
+            for sl in torch.randperm(m).split(batch_size):
+                b = {k: v[sl] for k, v in pretrain.items() if k != "idx"}
+                opt.zero_grad()
+                pred, disp, _ = net(b["x"], fixed, b["p_z"], None, b["pop"],
+                                    fold.mean, fold.std, edge)
+                _loss(loss, pred, b, fold.mean, fold.std, disp).backward()
+                torch.nn.utils.clip_grad_norm_(net.parameters(), 5.0)
+                opt.step()
+        opt = torch.optim.Adam(net.parameters(), lr=lr, weight_decay=weight_decay)
+        sched = torch.optim.lr_scheduler.CosineAnnealingLR(opt, T_max=epochs)
+
+    jit = torch.Generator().manual_seed(2000 + seed)
     n = len(packs["train"]["idx"])
     ran, halted = 0, False
     for ep in range(epochs):
@@ -105,6 +168,8 @@ def run_fold(data, fold: core.Fold, *, backbone: str, head: str, loss: str = "ms
             pack = packs["train"]
             batch = {k: v[sl] for k, v in pack.items() if k != "idx"}
             st = state["train"][sl] if needs_state else None
+            if augment == "jitter":
+                batch = _jitter(batch, fold, jit)
             opt.zero_grad()
             pred, disp, aux = net(batch["x"], fixed, batch["p_z"], st, batch["pop"],
                                   fold.mean, fold.std, edge)
@@ -138,6 +203,7 @@ def run_fold(data, fold: core.Fold, *, backbone: str, head: str, loss: str = "ms
                climate=use_climate, ndvi=use_ndvi, season=use_season,
                lam_param=lam_param, state_fit=state_fit, state_seed=state_seed, dist=dist,
                norm=norm, node_emb=node_emb, aux_phys=aux_phys, train_frac=train_frac,
+               augment=augment,
                epochs_ran=ran, best_epoch=ran - stopper.waited, stopped_early=halted)
     if keep:
         # Everything a post-hoc diagnosis needs, per split: the forecast, the

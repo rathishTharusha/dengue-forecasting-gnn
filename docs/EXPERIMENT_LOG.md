@@ -37,6 +37,41 @@ Copy this block for a new entry:
 > `CEILING_R0_MAX`) survived the cleanup and now lives in `dengue_gnn.seir`, still
 > asserted by `tests/test_seir.py` and reproduced by `scripts/verify_seir_paper.py`.
 
+## EXP-041 — Learning curve: more data of the same kind does not help
+- **Date:** 2026-09-23
+- **Who:** Group 05
+- **Commit:** `4a7a11e` + `train_frac` in `seirgnn2/train.py` (committed with this entry)
+- **Script:** `sweep.py curve --keep --epochs 400` -> `seirgnn2/results/curve.json`
+- **Hardware:** Local CPU, 6 workers, 62 s
+- **Config:** B (AAGCN, direct, NB, season) trained on a random 25 / 50 / 75 / 100% of
+  its training windows, drawn with a generator separate from the initialisation stream.
+  Validation, test and normalisation unchanged. Frozen three origins x seeds 0/1/2.
+- **Question:** The proposal is to generate synthetic training data with a GAN because
+  "the issue is lack of data". A generator fitted to the training windows can at best
+  add samples from the same distribution. Would more samples help?
+- **Result:**
+
+  | training windows | val RMSE | sd over seeds | skill vs persistence |
+  |---|---|---|---|
+  | 25% | 15.85 | 0.17 | +0.112 |
+  | 50% | 15.88 | 0.21 | +0.111 |
+  | 75% | 15.64 | 0.11 | +0.124 |
+  | 100% | 15.66 | 0.09 | +0.123 |
+
+  Skill over persistence on the *training* windows themselves is lower than on
+  validation: mean -0.117 (origins 0.55 / 0.70 / 0.85: +0.160 / -0.190 / -0.321) against
+  +0.118 on validation.
+- **Verdict:** answered. Four times the real data improves validation RMSE by 0.19 --
+  about one seed sd -- and nothing past 75%. The model is not data-starved for samples of
+  this kind, and it is not overfitting (it fits its own training windows *worse* relative to
+  persistence than it fits validation; the 2017 epidemic dominates training RMSE). More data
+  from the same distribution, real or synthetic, is not expected to help.
+- **Notes:** This does not test data of a *different* kind. Synthetic epidemics from a
+  mechanistic simulator can cover regimes the real history lacks, which is how synthetic
+  data helped in Osthus et al. (2026) and DEFSI (2019). That is tested in EXP-042, under
+  `docs/AUGMENTATION_PLAN.md`. The GAN idea was also tested once before, in EXP-010, on
+  legacy data: the GAN was the worst arm (RMSE 93.81 against 61.81 without augmentation).
+
 ## EXP-040 — Remedies from the literature: none adopted
 - **Date:** 2026-09-23
 - **Who:** Group 05

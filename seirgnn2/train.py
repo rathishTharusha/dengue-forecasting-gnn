@@ -10,6 +10,8 @@ Gampaha at 226 and 136, so the objective pulled away from the metric.
 
 from __future__ import annotations
 
+import dataclasses
+
 import numpy as np
 import torch
 from torch import nn
@@ -54,10 +56,19 @@ def run_fold(data, fold: core.Fold, *, backbone: str, head: str, loss: str = "ms
              lam_param: str = "sigmoid", state_fit: bool = False,
              state_seed: str = "lagged", dist: str = "point",
              norm: str = "fold", node_emb: int = 0, aux_phys: float = 0.0,
-             keep: bool = False) -> dict:
+             train_frac: float = 1.0, keep: bool = False) -> dict:
     """Train one (fold, seed) and return its test scores plus the raw predictions."""
     torch.manual_seed(seed)
     np.random.seed(seed)
+    if train_frac < 1.0:
+        # Learning curve: a random subset of training windows, drawn with its own
+        # generator so the model's initialisation stream is untouched. Validation,
+        # test and the fold's normalisation are unchanged -- only how much the
+        # model gets to learn from varies.
+        tr = fold.idx["train"]
+        keep_n = max(1, int(round(train_frac * len(tr))))
+        sub = np.sort(np.random.default_rng(1000 + seed).choice(tr, keep_n, replace=False))
+        fold = dataclasses.replace(fold, idx={**fold.idx, "train": sub})
 
     packs = {s: core.build_tensors(data, fold, s, use_climate, use_ndvi, use_season)
              for s in ("train", "val", "test")}
@@ -126,7 +137,7 @@ def run_fold(data, fold: core.Fold, *, backbone: str, head: str, loss: str = "ms
                origin=fold.origin, seed=seed, backbone=backbone, head=head, loss=loss,
                climate=use_climate, ndvi=use_ndvi, season=use_season,
                lam_param=lam_param, state_fit=state_fit, state_seed=state_seed, dist=dist,
-               norm=norm, node_emb=node_emb, aux_phys=aux_phys,
+               norm=norm, node_emb=node_emb, aux_phys=aux_phys, train_frac=train_frac,
                epochs_ran=ran, best_epoch=ran - stopper.waited, stopped_early=halted)
     if keep:
         # Everything a post-hoc diagnosis needs, per split: the forecast, the

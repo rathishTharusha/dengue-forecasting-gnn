@@ -348,3 +348,91 @@ ensembles, the most reliable remedy in this literature, have nothing to work wit
 | dengue_nn_review2025 | evaluation | 62 studies: mostly shallow nets; inconsistent horizons and evaluation |
 | benjarattanaporn2026nma | evaluation | Network meta-analysis: k-NN, VAR, Kalman, GLM top dengue RMSE; all beat naive |
 | dengue_hybrid_guangdong2025 | evaluation | Hybrid deep-learning/mechanistic dengue framework (Guangdong) |
+
+---
+
+## 7. Generative augmentation — would synthetic data help?
+
+Asked after EXP-040: if the limit is the data, can a GAN generate better data?
+Fifteen further papers (`category = augmentation` in `manifest.csv`), set against
+two measurements of our own.
+
+### What our data says first
+
+- **The premise does not hold for more-of-the-same.** A learning curve (EXP-041)
+  trains the best model B on 25 / 50 / 75 / 100% of its real training windows:
+  validation RMSE 15.85 / 15.88 / 15.64 / 15.66. Four times the real data buys
+  0.19 (one seed sd), and nothing past 75%. A generator fitted to the training
+  windows can at best add more samples of the same distribution, so it cannot
+  beat what four times the real data does not.
+- **No overfitting to regularise away.** B's skill over persistence on its own
+  training windows is *lower* than on validation (mean −0.12 vs +0.12; the 2017
+  epidemic dominates training RMSE). Augmentation as a regulariser addresses
+  variance; this model is not variance-limited.
+- **It has been tried here.** EXP-010 (legacy data, older model): a GAN scored
+  RMSE 93.81 against 61.81 with no augmentation; jittering and window-warping
+  were also worse than none. Verdict then: *"augmentation does not help this
+  dataset."*
+
+### What the literature says about GANs for time series
+
+- **TimeGAN** (Yoon, Jarrett & van der Schaar, NeurIPS 2019) is the reference
+  method: an embedding network, a supervised next-step loss and an adversarial
+  loss trained jointly. Its benchmarks (sines, stocks, energy, events) supply
+  thousands of sequences. Ours supply ~300 training windows per fold.
+- **Train on synthetic, test on real (TSTR)** (Esteban, Hyland & Rätsch 2017) is
+  the standard fidelity test: if a model trained only on synthetic data does
+  much worse than one trained on real data, the generator has not captured what
+  matters for the task.
+- **Generated data loses the tails.** Shumailov et al. (Nature 2024): training
+  on model-generated data causes *"irreversible defects ... where tails of the
+  original content distribution disappear."* On this series the tail *is* the
+  problem: the top 5% of cells carry ~60% of squared error, and outbreaks are
+  under-predicted by every model (EXP-039).
+- **Gains shrink as data grows.** Semenoglou, Spiliotis & Assimakopoulos
+  (Pattern Recognition 2023), nine augmentation methods for forecasting: gains
+  are larger for deeper networks and *"become less significant as the initial
+  size of the set increases"*; combining and upsampling series worked best.
+  (Paywalled; not in `pdfs/`.)
+- **Assumptions must fit the data.** Iwana & Uchida (2021): jittering, for
+  example, *"assumes that it is normal for the time series patterns of the
+  particular dataset to be noisy"*; no augmentation family helps universally.
+- **Pooled augmentation helps global models when data is scarce.** Bandara et
+  al. (2021) use GRATIS, moving-block bootstrap and DBA, with gains in *"less
+  data-abundant settings."* Chronos (Ansari et al. 2024) pretrains foundation
+  models partly on Gaussian-process synthetic series.
+
+### Where synthetic data *did* help epidemic forecasting — and how
+
+Every case found generates data from a **mechanistic simulator**, not a GAN:
+
+| study | generator | result |
+|---|---|---|
+| DEFSI (Wang, Chen & Marathe, AAAI 2019) | agent-based epidemic simulations | trained on synthetic data; significantly beat other methods at county level, where real data is thinnest |
+| Osthus et al. (PLOS Comp Bio 2026) | agent-based model MutAntiGen, ~36,000 series through an observation-noise model | models trained on synthetic data beat real-data models in over 75% of bootstrap samples; best rMAE 0.777 vs persistence |
+| Dimarco et al. (2025) | calibrated compartmental model plus uncertainty | *"significantly improved predictive performance"* for neural forecasters |
+
+Osthus et al. explain their gain as **covariate shift**: the COVID-19 test data
+was *"overwhelmingly classified as synthetic data rather than non-COVID-19, real
+respiratory data"* — the simulator covered dynamics the real history had never
+shown. That is the one mechanism by which synthetic data adds something a
+learning curve cannot measure: it changes *which* situations training covers,
+not how many samples there are. Our catastrophic fold is that situation — the
+2017 epidemic at 5.4× anything in its training data.
+
+### Alternatives for the tail that generate nothing
+
+Deep imbalanced regression (Yang et al., ICML 2021) reweights training by the
+smoothed density of target values (label distribution smoothing), so rare large
+targets carry more weight without synthesising any data.
+
+### Implication
+
+| arm | expected | why |
+|---|---|---|
+| GAN (TimeGAN) augmentation | no gain, possible harm | flat learning curve; ~300 windows is too little to train a GAN; tails collapse; EXP-010 |
+| jitter / magnitude scaling | no gain | same distribution; EXP-010 |
+| SEIR-simulated epidemics | the only arm with a mechanism | covers regimes absent from training, as in Osthus / DEFSI |
+| outbreak reweighting | better outbreak bias, likely worse RMSE | reweighting is not new information |
+
+Pre-registered as `docs/AUGMENTATION_PLAN.md`; results as EXP-042.

@@ -192,3 +192,17 @@ ENSEMBLES = {
                  ["B", "R4a nbglm"],
                  ["B", "R4a nbglm", "R4b knn"]],
 }
+
+
+def curve(epochs: int = 400) -> list[dict]:
+    """Would more data of the same kind help?  B trained on a fraction of its windows.
+
+    The premise behind generative augmentation is that the model is short of
+    data. A GAN fitted to the training windows can at best supply more samples
+    from the same distribution, so it can only help if validation error is still
+    falling as the real training set grows. If the curve is flat near 100%, the
+    premise fails before any generator is built.
+    """
+    base = dict(backbone="AAGCN", head="direct", loss="nb", dist="nb", use_season=True,
+                epochs=epochs)
+    return [_c(f"B frac={f:.2f}", train_frac=f, **base) for f in (0.25, 0.5, 0.75, 1.0)]

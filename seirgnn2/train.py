@@ -52,7 +52,8 @@ def run_fold(data, fold: core.Fold, *, backbone: str, head: str, loss: str = "ms
              lr: float = 3e-3, weight_decay: float = 1e-4, epochs: int = 300,
              batch_size: int = 32, patience: int = 40, edge=None, fixed=None,
              lam_param: str = "sigmoid", state_fit: bool = False,
-             state_seed: str = "lagged", dist: str = "point") -> dict:
+             state_seed: str = "lagged", dist: str = "point",
+             keep: bool = False) -> dict:
     """Train one (fold, seed) and return its test scores plus the raw predictions."""
     torch.manual_seed(seed)
     np.random.seed(seed)
@@ -119,4 +120,17 @@ def run_fold(data, fold: core.Fold, *, backbone: str, head: str, loss: str = "ms
                climate=use_climate, ndvi=use_ndvi, season=use_season,
                lam_param=lam_param, state_fit=state_fit, state_seed=state_seed, dist=dist,
                epochs_ran=ran, best_epoch=ran - stopper.waited, stopped_early=halted)
+    if keep:
+        # Everything a post-hoc diagnosis needs, per split: the forecast, the
+        # truth, the persistence anchor and the last observed week. Test is
+        # included for completeness, but diagnoses should read "val" -- studying
+        # test errors and then designing around them spends the held-out set.
+        with torch.no_grad():
+            tpred = to_counts(predict("train"), fold.mean, fold.std)
+        extra = {s_: {"pred": p_, "truth": packs[s_]["y_raw"].numpy(),
+                      "persist": packs[s_]["p_raw"].numpy(),
+                      "last": packs[s_]["x_raw"].numpy()[..., -1],
+                      "idx": packs[s_]["idx"]}
+                 for s_, p_ in (("train", tpred), ("val", vpred), ("test", pred))}
+        return out, extra
     return out, pred, truth

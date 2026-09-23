@@ -88,12 +88,33 @@ Copy this block for a new entry:
   2. **Test is below validation here** (31.70 vs 38.30), inverted relative to the 3-origin
      grids. Different weeks, nothing more -- but it is why val/test divergence on three origins
      should not have been read as a warning sign about the model.
-  3. **The strongest single signal in this run is a variance one.** ASTGCN+direct is the worst
-     arm at 46.29 with sd 25.77 across origins, while the *same encoder* behind the physics
-     head is the best at 38.30 with sd 4.27. The force-of-infection layer is acting as a
-     stabiliser on an encoder that is otherwise unstable on this series. That is a cleaner and
-     better-evidenced claim than the point-accuracy one, and it is what EXP-035's null direct
-     result already hinted at.
+  3. **RETRACTED, same day, before anything was built on it.** This entry first claimed the
+     run's strongest signal was a variance one: ASTGCN+direct at sd 25.77 across origins against
+     ASTGCN+foi_res at sd 4.27, read as the physics layer stabilising an unstable encoder. The
+     per-origin table kills it. Origin 0.40 is an outlier where **every** arm fails -- 140 to 227
+     RMSE against 13 to 48 everywhere else -- and it dominates every mean and sd in the run:
+
+     | origin | ASTGCN+direct | ASTGCN+foi_res | AAGCN+direct | persistence |
+     |---|---|---|---|---|
+     | **0.400** | **226.99** | **142.73** | **157.12** | **153.54** |
+     | 0.467 | 21.86 | 22.17 | 20.26 | 23.17 |
+     | 0.533 | 17.39 | 18.87 | 16.16 | 21.12 |
+     | 0.600 | 42.18 | 47.21 | 42.86 | 43.56 |
+     | 0.667 | 20.85 | 22.41 | 21.39 | 30.11 |
+     | 0.733 | 13.26 | 14.45 | 12.90 | 14.48 |
+     | 0.800 | 23.28 | 24.62 | 23.46 | 28.76 |
+     | 0.867 | 19.48 | 19.58 | 19.39 | 22.52 |
+     | 0.933 | 31.29 | 32.61 | 31.35 | 33.65 |
+
+     ASTGCN+foi_res beats ASTGCN+direct on **1 of 9 origins** -- that one. On the other eight it
+     is slightly worse. One hard period is an anecdote, not a stabilisation property, and the
+     mean difference of -7.99 carries sd 28.64. **Mean RMSE across these nine origins is not a
+     usable summary**; read the win count and the per-origin column, which is why `stats.py`
+     prints wins beside every delta. The general lesson: a variance claim computed across folds
+     that include a catastrophic fold is a claim about that fold.
+  3b. **What survives the same scrutiny.** ASTGCN+foi_res vs LSTM+foi_res is -0.75 on **8/9**
+     origins and is *not* outlier-driven -- it wins at 0.40 by 2.0 and on seven of the other
+     eight. That consistency, not any mean, is what makes it the one robust result here.
   4. Kaggle kernel v1 of this grid returned 63 rows instead of 144 and had to be discarded:
      `pip install --no-deps torch-geometric-temporal` also skips torch_geometric, which Kaggle
      does not ship, so every graph arm died in its worker while the LSTM arms ran. v2 installs

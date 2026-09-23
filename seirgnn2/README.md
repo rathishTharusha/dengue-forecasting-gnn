@@ -187,11 +187,17 @@ meets two of three; p_adj = 0.059 against a 0.05 bar (raw p = 0.012, the gap
 being multiplicity correction). Report as a consistent directional advantage that
 does not clear the bar — **not** as "SEIR-GNN beats SEIR-LSTM".
 
-The strongest signal in that run is about **variance**, not point accuracy:
-ASTGCN+direct is the worst arm (46.29, sd 25.77 across origins) while the *same
-encoder* behind the physics head is the best (38.30, sd 4.27). The
-force-of-infection layer stabilises an encoder that is otherwise erratic on this
-series. That is the better-evidenced claim.
+**Do not read the mean RMSE column on this grid.** Origin 0.40 is an outlier
+where every arm fails (140–227 against 13–48 elsewhere) and it dominates every
+mean and standard deviation. A variance claim was briefly drawn from it —
+ASTGCN+direct sd 25.77 against ASTGCN+foi_res sd 4.27, read as the physics layer
+stabilising the encoder — and retracted the same day: the physics head beats the
+direct head on **1 of 9 origins**, that one, and is slightly worse on the other
+eight. Read win counts and the per-origin column, which is why `stats.py` prints
+wins beside every delta. See EXP-038 note 3.
+
+The SEIR-GNN vs SEIR-LSTM result survives that scrutiny: 8/9 origins, winning at
+0.40 *and* on seven of the other eight, so it is not outlier-driven.
 
 Absolute levels on the nine origins are much higher (persistence 41.21 vs 17.86)
 because they reach back to 0.40. **Never pool or pair across origin sets.**

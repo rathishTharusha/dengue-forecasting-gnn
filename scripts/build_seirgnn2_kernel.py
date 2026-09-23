@@ -50,17 +50,33 @@ def notebook(grid: str, sha: str, workers: int, epochs: int) -> dict:
 !git log --oneline -1
 """
     deps = """
-# torch_geometric_temporal needs torch_sparse only for evolvegcno, which none of
-# the five architectures use; backbones.install_shim() supplies the symbol. The
-# source build that --no-deps avoids is what makes this install feasible at all.
+# Two installs, and the order matters.
+#
+# torch_geometric is a hard requirement of the five architectures and Kaggle does
+# not ship it, so it is installed WITH its dependencies (it is pure Python; no
+# build). Leaving it out is what broke kernel version 1: --no-deps on
+# torch-geometric-temporal also skipped torch_geometric, so every graph arm died
+# in its worker while the LSTM arms -- which need no PyG -- ran fine, and the
+# grid came back 63 rows instead of 144 with no obvious error.
+#
+# torch-geometric-temporal then goes in WITHOUT dependencies, because its
+# declared torch-sparse / torch-scatter have no wheels here and would try a
+# source build. It needs torch_sparse only for evolvegcno, which none of the five
+# use; backbones.install_shim() supplies the symbol.
+!pip install --quiet torch-geometric
 !pip install --quiet --no-deps torch-geometric-temporal
 import torch
 print("torch", torch.__version__, "| cuda", torch.cuda.is_available())
+import torch_geometric; print("pyg", torch_geometric.__version__)
 """
     check = """
-import subprocess
-print(subprocess.run(["python", "seirgnn2/backbones.py"],
-                     capture_output=True, text=True).stdout)
+# Gate: every encoder must build and run before the grid starts. Kernel v1 had no
+# gate, so a broken install looked like a short results file rather than a failure.
+import subprocess, sys
+out = subprocess.run([sys.executable, "seirgnn2/backbones.py"],
+                     capture_output=True, text=True)
+print(out.stdout or out.stderr)
+assert "FAIL" not in out.stdout, "an encoder failed to build -- fix before running the grid"
 """
     run = f"""
 # Workers, not GPU: every architecture here is small and the grid is many short

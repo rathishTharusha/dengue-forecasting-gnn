@@ -65,3 +65,12 @@ will beat A3 if the trees' gain came from nonlinearity. A5 will be small either
 way, since the national component is a contemporaneous shock that past inputs
 do not reveal. A6 has the most capacity and the highest risk of overfitting a
 three-week window.
+
+## Outcome (added after the run — see EXP-045)
+
+No arm adopted. Climate helps once the head is nonlinear (−0.24 vs the
+nonlinear head alone) but the nonlinear head costs as much, so the net is zero.
+District seasonal curves and the combination lower horizon-3 error by 0.14–0.22
+while leaving the average flat — a lead, not a result. Residuals again correlate
+0.87–0.97 with B's. EXP-045 note 4 records a validation/test disagreement that
+four experiments share and that bears on the selection protocol itself.

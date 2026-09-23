@@ -37,6 +37,58 @@ Copy this block for a new entry:
 > `CEILING_R0_MAX`) survived the cleanup and now lives in `dengue_gnn.seir`, still
 > asserted by `tests/test_seir.py` and reproduced by `scripts/verify_seir_paper.py`.
 
+## EXP-045 — Architecture changes (head, fusion, district seasonality, global context): none adopted
+- **Date:** 2026-09-23
+- **Who:** Group 05
+- **Commit:** `0586cd1` (code); plan `docs/ARCH_PLAN.md` committed earlier at `923ac46`
+- **Script:** Kaggle kernel `seirgnn2-arch` (v1) = `sweep.py arch --keep --epochs 400
+  --workers 4`; results `seirgnn2/results/arch.json` (66 rows, complete).
+- **Hardware:** Kaggle CPU, 4 workers.
+- **Config:** as pre-registered. Control A0 reproduces the local B bit for bit with every
+  new switch off.
+- **Question:** EXP-044 located a structural limit: exogenous inputs reach one linear
+  output layer shared by all districts, so climate acts only linearly and every district
+  shares one seasonal curve; EXP-039 found a national common component in the residuals.
+  Do architectural changes aimed at those limits move the best model?
+- **Result:** validation RMSE paired against A0 at the origin_seed unit.
+
+  | arm | val | vs A0 | wins | p_adj | val h3 | d h3 | resid corr A0 | test |
+  |---|---|---|---|---|---|---|---|---|
+  | A5 global context | 15.57 | -0.07 | 5/9 | 0.771 | 17.54 | -0.06 | 0.974 | 37.19 |
+  | A2 district seasonal curves | 15.63 | -0.01 | 6/9 | 0.945 | 17.38 | -0.22 | 0.951 | 38.03 |
+  | **A0 B** | **15.65** | — | — | — | 17.60 | — | 1.000 | 37.55 |
+  | A4 MLP head + climate 2-13 | 15.66 | +0.01 | 3/9 | 0.945 | 17.44 | -0.16 | 0.907 | 37.85 |
+  | A3 MLP head | 15.91 | +0.26 | 2/9 | 0.109 | 17.84 | +0.24 | 0.962 | 37.81 |
+  | A6 combined | 15.96 | +0.32 | 2/9 | 0.438 | 17.46 | -0.14 | 0.870 | 37.74 |
+  | A1 residual head + NB | 15.97 | +0.33 | 4/9 | 0.438 | 18.19 | +0.58 | 0.946 | 34.55 |
+  | persistence | 17.86 | +2.21 | — | — | — | — | — | 36.02 |
+
+  A4 against A3 (does climate help once the head is nonlinear?): -0.24, 5/9, p_adj 0.552.
+- **Verdict:** answered, negative. No arm meets the adoption rule. Of the written
+  predictions: A3 alone did not help (right), A4 improved on A3 (right in direction, n.s.),
+  A5 was small (right), A6 overfit (right); A2 was expected to be the likeliest adoption and
+  is not (6/9, -0.01), and A1 was expected to tie and is +0.33.
+- **Notes:**
+  1. **The fusion bottleneck was real but was not the limit.** A nonlinear head lets climate
+     help (-0.24 against the nonlinear head without it) -- the network reproduces what the
+     trees found -- but the nonlinear head itself costs about as much, and the net is zero.
+  2. **Horizon 3 is where the exogenous changes pay, and horizon 1 where they cost.** A2, A4
+     and A6 lower horizon-3 RMSE by 0.14-0.22 while leaving the average flat -- plausible,
+     since persistence decays with horizon and season and climate matter more further out.
+     Not tested for significance; recorded as a lead, not a result.
+  3. **Same errors again:** residual correlation with A0 0.87-0.97.
+  4. **A recurring validation/test disagreement (see EXP-038, EXP-040, this entry).** On
+     test, forecasts anchored to the last observation keep beating the direct-level model
+     that validation selects: here the residual head scores 34.55 against B's 37.55 and
+     persistence's 36.02; in EXP-040 k-NN 34.34 and B + k-NN 34.18; in EXP-038 (nine
+     origins) the gated-SEIR arms 31.47-31.70 against the direct arms' 33.93-36.79. On
+     validation the order reverses every time. Nothing has been selected on test, and nothing
+     is here. But four experiments agreeing is evidence about the *selection protocol*:
+     a 30-week validation span preceding each origin appears to reward fitting that span's
+     level, which does not carry into the following test period. Acting on this needs a new
+     pre-registered protocol -- selection over longer or multiple validation spans -- and a
+     test set nothing here has touched, which only data after February 2024 can provide.
+
 ## EXP-044 — Longer climate lags and a longer window: not adopted; the head is the bottleneck
 - **Date:** 2026-09-23
 - **Who:** Group 05

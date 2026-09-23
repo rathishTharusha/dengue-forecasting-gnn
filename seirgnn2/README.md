@@ -156,6 +156,9 @@ The point of this table is that nobody repeats these.
 | **More real data** (25 → 100% of training windows) | flat: 15.85 → 15.66, nothing past 75% | `curve.json`, EXP-041. The model is neither data-starved nor overfitting |
 | **Synthetic training data** (TimeGAN, SEIR-simulated epidemics, jitter, LDS) | **none adopted**; TimeGAN significantly *worse* (+0.53, 1/9) and worsens outbreak bias | `augment.json`, EXP-042. TimeGAN loses the tail (max 882 vs real 2,631). Also tried in EXP-010 on legacy data, same verdict |
 
+| **Climate at longer lags** (2–13, 2–25 weeks) and an 8-week window | **none adopted**; longer lags progressively *worse* (+0.13 → +0.62). Trees gain from climate (−0.49), the network does not | `climate.json`, EXP-044. Exogenous inputs reach only a linear head shared by all districts |
+| **Architecture: nonlinear head, district seasonal curves, global context, residual+NB** | **none adopted**; best −0.07 (global context, 5/9). Nonlinear head lets climate help (−0.24) but costs as much itself | `arch.json`, EXP-045. Horizon-3 improves 0.14–0.22 in three arms — a lead only |
+
 ### Structural facts about the physics head
 
 Measured by `diagnose_foi.py`, which inverts the simulator by bisection for the

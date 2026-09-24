@@ -312,3 +312,21 @@ def physics9(epochs: int = 400) -> list[dict]:
     keep = ("P0 B", "P3 gated SEIR-GNN", "P4 metapopulation SEIR-GNN", "P6 SEIR-LSTM")
     arms = _physics_arms(epochs)
     return [_c(name, origins="nine", **arms[name]) for name in keep]
+
+
+def rescue(epochs: int = 300) -> list[dict]:
+    """docs/RESCUE_PLAN.md: is the gated SEIR head's rescue of STGAT, A3TGCN and
+    DCRNN (EXP-034) physics, or just the persistence anchor?
+
+    Same configuration as ``real`` -- squared error on the scaled target, no
+    seasonal features, 300 epochs -- so the only thing varied is the head:
+    direct, residual (anchor, no gate, no physics), gated (anchor + the same
+    gate, no physics) and foi_res (anchor + gate + SEIR). All six encoders, so
+    the working three show what the anchor costs where nothing needs rescuing.
+    """
+    out = []
+    for bb in ("STGAT", "A3TGCN", "DCRNN", "AAGCN", "ASTGCN", "LSTM"):
+        for head in ("direct", "residual", "gated", "foi_res"):
+            out.append(_c(f"{bb}+{head}", backbone=bb, head=head, loss="mse_z",
+                          lam_param="log", state_fit=True, epochs=epochs))
+    return out

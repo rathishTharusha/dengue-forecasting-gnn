@@ -17,6 +17,11 @@ Heads
 ``foi_res``   the same, but the simulator's incidence is blended onto the
               persistence anchor with a learned gate, so the physics supplies
               the *departure* from persistence rather than the whole signal.
+``gated``     the no-physics twin of ``foi_res``: the encoder's direct forecast is
+              blended onto the persistence anchor through the same learned gate,
+              initialised the same way. ``foi_res`` minus ``gated`` is the effect
+              of routing the departure through SEIR, with the anchor and the gate
+              held fixed (docs/RESCUE_PLAN.md).
 ``foi_meta``  metapopulation SEIR (docs/PHYSICS_GNN_PLAN.md, P4): the encoder
               predicts each district's weekly transmission rate beta_i(t), and
               the simulator recomputes the force of infection every day as
@@ -40,7 +45,7 @@ sys.path.insert(0, str(REPO / "analysis" / "lib"))
 import backbones  # noqa: E402
 import seir_sim  # noqa: E402
 
-HEADS = ("direct", "residual", "foi", "foi_res", "foi_meta")
+HEADS = ("direct", "residual", "gated", "foi", "foi_res", "foi_meta")
 BACKBONES = ("none", "gcn", "gat", "adaptive", "hybrid", "linear", *backbones.REAL)
 LAM_PARAMS = ("sigmoid", "log")
 SEEDS = ("lagged", "recent", "decon")
@@ -185,6 +190,8 @@ class Net(nn.Module):
                     if head_mlp else nn.Linear(feat, horizon))
         self.disp = nn.Linear(feat, horizon) if dist == "nb" else None
         self.out_phys = nn.Linear(feat, horizon) if aux_phys else None
+        if head == "gated":
+            self.alpha = nn.Parameter(torch.tensor(-2.0))   # same gate and init as foi_res
         if head in ("foi", "foi_res", "foi_meta") or aux_phys:
             self.alpha = nn.Parameter(torch.tensor(-2.0))   # gate, through sigmoid
             self.beta = nn.Parameter(torch.tensor(0.0))     # log-scale spatial import weight
@@ -317,6 +324,8 @@ class Net(nn.Module):
             return raw, disp, aux
         if self.head == "residual":
             return p_z + raw, disp, aux
+        if self.head == "gated":
+            return p_z + torch.sigmoid(self.alpha) * (raw - p_z), disp, aux
         if self.head == "foi_meta":
             phys_z = self._meta_physics(raw, st0, pop, mean, std, fixed)
             gate = torch.sigmoid(self.alpha)

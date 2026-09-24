@@ -1,0 +1,13 @@
+{
+  "id": "tharushaperera16/seirgnn2-rescue",
+  "title": "seirgnn2 rescue",
+  "code_file": "seirgnn2_rescue.ipynb",
+  "language": "python",
+  "kernel_type": "notebook",
+  "is_private": true,
+  "enable_gpu": false,
+  "enable_internet": true,
+  "dataset_sources": [],
+  "competition_sources": [],
+  "kernel_sources": []
+}

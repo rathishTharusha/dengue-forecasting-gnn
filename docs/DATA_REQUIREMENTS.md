@@ -54,6 +54,17 @@ at all.
 
 # Priority 1 — free, legitimately real-time, and aimed at the largest loss
 
+> **Both obtained, 2026-09-24.** `python analysis/_build/fetch_covid_response.py`
+> downloads them and writes `data/external/covid_response_weekly.csv`: 559 weeks,
+> stringency on 158, mobility on 140. Checksums are in
+> `data/external/source_manifest.csv`, provenance in `DATA_PROVENANCE.md` §6–7.
+> The alignment lands exactly on the failure: 2020-03-07 carries stringency 12
+> and 462 cases, 2020-03-14 carries stringency 68, workplace mobility −33% and
+> 245 cases, and by 2020-04-04 stringency 100 and 79 cases. Across the covered
+> weeks, stringency correlates −0.42 with log cases and workplace mobility +0.50.
+> **Still to do:** feed them to the 9-origin protocol and see whether origin 0.60
+> improves.
+
 ## 1. Government response stringency
 
 The 2020 collapse is not epidemiology. Cases fell ~90% as movement restrictions
@@ -194,8 +205,8 @@ is reporting behaviour, not disease.
 
 | # | dataset | fixes | free | real-time | effort | expected value |
 |---|---|---|---|---|---|---|
-| 1 | Policy stringency (OxCGRT) | 2020 collapse | yes | yes | hours | **high** |
-| 2 | Mobility (Google / Meta) | 2020+, and the graph | yes | yes | days | high |
+| 1 | Policy stringency (OxCGRT) | 2020 collapse | yes | yes | **obtained** | **high** |
+| 2 | Mobility (Google / Meta) | 2020+, and the graph | yes | yes | **obtained (national only)** | high |
 | 3 | Climate extremes from existing ERA5 | growth windows | yes | yes | 1–3 days | medium |
 | 4 | Serotype proportions | growth windows | yes | **no — oracle** | days | medium, measurable only |
 | 5 | Entomological indices | the vector half | request | ask | weeks | medium |

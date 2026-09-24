@@ -37,6 +37,61 @@ Copy this block for a new entry:
 > `CEILING_R0_MAX`) survived the cleanup and now lives in `dengue_gnn.seir`, still
 > asserted by `tests/test_seir.py` and reproduced by `scripts/verify_seir_paper.py`.
 
+## EXP-049 — Audit of the earlier "positive physics" Kaggle runs: none survives
+- **Date:** 2026-09-24
+- **Who:** Group 05
+- **Commit:** this entry's commit (outputs only, no new training)
+- **Script:** retrieved with `kaggle kernels output` from `seir-gnn-full-reproducible-workflow`
+  (run 2026-09-15), `seir-gnn-stage-s5-benchmark` (2026-09-14) and
+  `beat-floor-physics-super-ensemble` (2026-09-11, status ERROR). Saved to
+  `analysis/results/seir_gnn/kaggle_full_workflow/` and `analysis/results/super_ensemble/`.
+  Note: on Windows the Kaggle CLI writes an empty log unless run with `PYTHONUTF8=1`.
+- **Hardware:** Kaggle CPU (as run); audit local.
+- **Config:** none new. S4–S9 pipeline (`analysis/_build/run_s4..s9_*.py`) on the rebuilt data;
+  `run_beat_baseline.py` on the **original benchmark array** (`--dataset original` default),
+  nine origins 0.50–0.90, every arm trained with the spatial physics penalty.
+- **Question:** The project had reported positive physics results before the seirgnn2 re-run.
+  What happened to them?
+- **Result:**
+  1. **EXP-027's headline (STGAT SEIR-GNN "Test RMSE 26.10 on origin 0.70, outperforming
+     Persistence 36.016") compares one origin with persistence pooled over three.** S5 uses
+     `run_corrected_benchmark.build_folds_masked`, the same folds as
+     `analysis/results/corrected_benchmark/persistence.json`, so origin-by-origin
+     comparison is valid:
+
+     | origin | STGAT + foi head, test (S5 kernel 09-14) | persistence, test |
+     |---|---|---|
+     | 0.55 | 84.77 | 38.95 |
+     | 0.70 | 26.42 | **22.40** |
+     | 0.85 | 72.18 | 46.69 |
+     | pooled | 61.12 | 36.02 |
+
+     The SEIR-GNN loses to persistence at every origin, including the one quoted.
+  2. **The last full run of the same pipeline (09-15) did not claim a physics win.** Its S5
+     gate chose STGAT with the *direct* head on validation (25.823) over the FOI head
+     (28.157). S6's eight physics-sensitivity arms are therefore identical to four decimals
+     (the parameters never reach a direct head). S9 reports no significant comparison and
+     prints "Beats Baseline Claim Satisfied? False (Wins on origins: 1/9)". S8 used the
+     invented survey values noted in the S8 fix task. The FOI head was better on test
+     (61.12 vs 69.04), the same validation/test disagreement as EXP-045 note 4.
+  3. **The physics super-ensemble (legacy array, spatial penalty in every arm) was never
+     logged.** Two of its three stages finished (64 arms each, deterministic and Gaussian
+     heads). Best arm: the three-architecture ensemble `multi_raw`, -0.848 vs the per-origin
+     artifact-free floor, 7/9 origins, p = 0.091; `multi_blend_raw` -0.617, 7/9, p = 0.028.
+     These are raw p-values among 128 comparisons; none survives any correction. The third
+     stage (NB head) crashed on a bug: `run_beat_baseline.py:198` splits the output only for
+     the `gauss` head, so the NB head's two channels are added to a one-channel anchor
+     (`size of tensor a (2) must match ... b (3)`).
+  4. The spatial penalty result (-0.044, 57/60 runs, STGAT, legacy array) is unaffected and
+     stands as a benchmark-array result; on the corrected data with B it is -0.06, 6/9
+     (EXP-046). The S7 AUC gain 0.807 -> 0.826 (legacy array) stands; its p = 0.04 was a
+     typed literal (EXP-037).
+- **Verdict:** answered. EXP-027's positive claim is withdrawn: at matched origins the
+  SEIR-GNN is worse than persistence. No earlier physics result on the rebuilt data survives;
+  the two that stand (spatial penalty, outbreak AUC) are benchmark-array results.
+- **Notes:** the NB-head bug in `run_beat_baseline.py` is not fixed here; that runner targets
+  the legacy array and is superseded by `seirgnn2/`.
+
 ## EXP-048 — Rescue control: the SEIR head's repair of STGAT, A3TGCN and DCRNN is the anchor, not the physics
 - **Date:** 2026-09-24
 - **Who:** Group 05

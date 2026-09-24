@@ -1,158 +1,188 @@
 %=============================================================================
 % RESULTS
 %=============================================================================
-\section{Architectures and Increments}
+\section{Results}
 \label{sec:results}
 
-\cA{We evaluate the five reproduced architectures under the protocol of
-\S\ref{sec:setup}, each with four increments justified by prior work or by our own
-exploratory analysis: per-horizon output heads, additive temporal attention and a
-Gaussian predictive head~\cite{gulmohamed2026denguegnn}, and a Huber objective
-motivated by the target's skewness. All five architectures accept all four
-increments through a shared output seam, so no cell of the table covers an
-unstated subset.}
+All numbers are RMSE in weekly cases on the corrected dataset. Validation
+decides and test is reported beside it. Unless stated otherwise, pairs are on
+the (origin, seed) unit of the frozen three origins.
 
 \begin{figure*}[t]
   \centering
-  \includegraphics[width=\linewidth]{figures/fig_results}
-  \caption{Every arm against the persistence floor, scored both ways. AAGCN's
-  3.8-point lead in (a) does not survive in (b): it was a lead at predicting a
-  reporting backlog. Bars are means over 3 origins $\times$ 3 seeds.}
-  \label{fig:results}
+  \includegraphics[width=\linewidth]{figures/fig_encoders}
+  \caption{Six encoders behind three heads (Table~\ref{tab:encoders}). The direct
+  head separates encoders that work from encoders that fail; the SEIR decoder
+  fails on all of them; the gated SEIR head puts all six at the same level, below
+  persistence (dashed) on validation and test.}
+  \label{fig:encoders}
 \end{figure*}
 
-\cA{Figure~\ref{fig:results} gives the result. Measured
-over all windows, AAGCN (40.99) appears to beat the 44.80 floor by 3.8 points and
-ASTGCN by 1.4. Measured artifact-free, AAGCN sits at 29.84 against a floor of
-29.52---\emph{above} it---and the ordering of architectures changes. The apparent
-winner was the architecture that best absorbed six windows of backlogged
-reporting.}
+\subsection{Six encoders, one harness}
+\label{sec:encoders}
+Table~\ref{tab:encoders} and Figure~\ref{fig:encoders} give the comparison the
+SEIR-GNN question needs, with every encoder sharing folds, loss, early stopping
+and metric.
 
-\cB{Artifact-free, only STGAT (29.35) and A3TGCN (29.05) are below the floor at
-all, by 0.6\% and 1.6\%. Under paired $t$-tests on matched (architecture, origin,
-seed) runs, \textbf{no increment differs from its own baseline at $p<0.05$}:
-per-horizon heads $+0.526$ ($p=0.078$), temporal attention $+0.245$ ($p=0.077$),
-Huber $+0.128$ ($p=0.462$), Gaussian head $+0.280$ ($p=0.304$). The two smallest
-$p$-values belong to increments that are \emph{worse} than baseline. We report
-this as the null it is; selecting the minimum of a table this noisy would
-manufacture a result.}
+\textbf{Architecture matters little, and the graph less.} Behind the direct head
+AAGCN, ASTGCN and the LSTM score 16.76, 16.84 and 16.91: a spread of 0.15, and
+all three beat persistence (17.86). The LSTM has no message passing at all.
+A GCN beats the same network without message passing by only 0.07 (4/9,
+Table~\ref{tab:levers}). STGAT, A3TGCN and DCRNN score 23.32, 28.63 and 34.89, all worse than
+persistence; STGAT and A3TGCN are worse at every horizon. A linear model on the same inputs
+recovers 47--62\% of STGAT's and A3TGCN's residual variance out of sample but
+only 4--6\% of the working encoders'. The failing encoders are underfitting,
+limited by their wiring rather than by the data.
 
-\cB{One increment does earn its place, on a different axis. The Gaussian head
-yields 95\% prediction intervals with empirical coverage between 0.947 and 0.962
-across all five architectures---calibrated intervals that a point forecast cannot
-supply, and the operationally useful output of the whole study.}
+\textbf{The SEIR decoder fails on every encoder.} Routing the forecast entirely
+through the simulator scores 23.69--25.72: 6.9--7.4 worse than the direct head
+on each working encoder. The deficit is structural, and we measured it without
+training by inverting the simulator for the force of infection that reproduces
+each observed count:
+(i) with transmission switched off, the $E$ already seeded from recent cases
+still emits \emph{more} cases than observed for 14--16\% of targets, which are
+therefore unreachable at any network output;
+(ii) the required force of infection is only $r^2=0.22$--$0.26$ predictable from
+case history, against 0.81--0.82 for the direct target;
+(iii) it is not an optimisation problem, since ten times the training budget
+bought 0.04;
+(iv) it is not susceptible depletion, since only 2.5\% of cells reach the
+susceptible clamp.
+Point (ii) replicates on the corrected data, through a different mechanism,
+our earlier renewal-equation finding on the benchmark array: the reproduction
+number is about 26\% predictable out of sample.
 
-%=============================================================================
-\section{The Mechanistic Prior}
-\label{sec:physics}
+\textbf{The gated SEIR head stabilises every encoder.} Letting the simulator
+supply only the departure from persistence brings all six encoders to
+17.44--17.69, within 0.25 of each other and below persistence on validation
+(17.86) and on test (35.50--35.84 against 36.02). For the three failing encoders
+this is a large repair, on 9/9 paired units each:
+STGAT $-5.70$ (test $-24.99$), A3TGCN $-10.95$ ($-24.90$) and DCRNN $-17.22$
+($-38.23$). It costs the working encoders 0.63--0.78 on validation.
 
-\cD{The project's intended contribution was a physics-informed loss from the
-SEIR--SEI model. A hard compartmental residual is not identifiable here---seven
-compartments with exactly one observed, and that one under-ascertained---so we use
-the mechanistic identity that acts on the observable, the renewal equation
-\begin{equation}
-  y_t \;=\; R_t \sum_{s\ge 1} w_s \, y_{t-s},
-  \label{eq:renewal}
-\end{equation}
-where the generation-interval distribution $w$ follows from the SEIR--SEI stage
-durations of Phaijoo and Gurung~\cite{phaijoo2018sensitivity}, whose nine
-sensitivity indices we reproduce. The implied mean generation interval is 3.30
-weeks. Only the stage durations are used; their $R_0$ is not, since generation
-interval is disease biology and transmission intensity is local.}
+\subsection{Anchor, gate or physics?}
+\label{sec:rescue}
+The gated SEIR head differs from the direct head in three ways at once: it
+forecasts a departure from last week's value (the anchor), it shrinks that
+departure through a learned gate, and the departure comes from the SEIR
+simulator. Only the third is physics. A pre-registered control separates them
+by rerunning all six encoders behind four heads that add these one at a time:
+direct, residual (anchor), gated (anchor and gate) and gated SEIR (all three).
+The rescue is credited to physics only if gated SEIR beats its no-physics twin on
+at least 7 of 9 units with $\padj<0.05$ on each failing encoder. Our stated
+prediction was that the anchor and gate carry most of the rescue.
 
-\cD{Equation~\eqref{eq:renewal} describes the record well. Given oracle $R_t$, a
-three-week replay scores RMSE \textbf{13.44} where persistence scores 55.03 on the
-same windows. We tested it both as a soft penalty and as a decoder in which the
-network emits $\log R_t$ and cases are reconstructed through the mechanism. The
-decoder does exactly what it was built to do---maximum predicted weekly log-growth
-rises from 0.07 to 4.14, so the flatness is gone---and is 6 RMSE worse anyway. The
-penalty degrades RMSE monotonically in its weight.}
+% RESCUE-RESULT: filled in from rescue.json (EXP-048) when the Kaggle grid returns.
+\emph{[Pending: EXP-048 is running. Table~\ref{tab:rescue} and this paragraph are
+generated when its results return.]}
 
-\cE{Table~\ref{tab:physics} localises the failure. Every causally available
-anchor loses to persistence: force alone ($R{=}1$) scores
-35.45, a damped ratio form 33.05, and $\Rhat\cdot\text{force}$ 50.01, against
-29.52. The predictive content of Eq.~\eqref{eq:renewal} is entirely in $R_t$---and
-$R_t$ is only 26\% predictable out of sample, from its own past and from nothing
-else. With $\mathrm{sd}(\log R)=0.749$, that leaves a residual multiplicative
-error of $\exp(0.64)=\mathbf{1.90\times}$ per step, compounding over three weeks.
-Persistence carries no such factor. \emph{Reconstructing a forecast through $R$
-re-injects a factor-of-two error where the naive baseline had none.}}
+\subsection{What moves the metric}
+\label{sec:levers}
+Table~\ref{tab:levers} pairs every lever we tried against its own control, and
+Figure~\ref{fig:levers} shows the same deltas. Two levers improve validation
+consistently. The \textbf{negative-binomial likelihood} is the largest controlled
+gain: $-0.41$, 9/9, $\padj=0.018$, larger than any architecture difference. It
+corrects a bias, since squared error on $\log(1+y)$ targets a median while RMSE
+scores a mean.
+\textbf{Seasonal features} give the largest mean change ($-0.81$) but win only
+6/9. Combined, the best model $B$ (AAGCN, direct head, NB, seasonal features)
+scores 15.66 against persistence's 17.86: $-2.20$ on 9/9 units.
 
-\cE{Neither mechanism that could supply the missing predictability does.
-\textbf{Susceptible depletion} adds nothing beyond $R$'s own past ($r^2$
-$0.263\rightarrow0.263$): even at 1-in-20 under-ascertainment, cumulative
-infection over 8.8 years moves $\log R$ by 0.618, about $0.0013$ per week against
-a weekly sd of 0.749. Sri Lankan dengue is endemic in 21.9M people who do not run
-out of susceptibles on a three-week horizon. \textbf{Climate driving $R_0$} fails
-too: the sensitivity indices ($b$ $+1.000$, $\mu_v$ $-0.818$, $m$ $+0.500$,
-$\nu_v$ $+0.318$) imply a hump-shaped thermal response, and allowing that
-curvature moves out-of-sample $r^2$ from $-0.025$ to $-0.028$. We did not fit
-entomological curves to our own data: a constant estimated from the series it then
-constrains is not a prior.}
+That is the headline a benchmark would report. It does not hold out of
+sample: on test, $B$ scores 37.55 against persistence's 36.02, and the NB
+likelihood is \emph{worse} on test by 1.57. We return to this in
+\S\ref{sec:valtest}.
 
-\cF{Table~\ref{tab:physics} also gives the sign error directly: $\log\Rhat_t$
-correlates $+0.798$ with the \emph{past} three weeks of growth and $-0.217$ with
-the next three. It is a backward-looking state estimate, so a penalty pulling a
-forecast toward it pulls the wrong way---which is the monotonic damage we measured.
-A physics-informed \emph{variance} term fails for the same reason and with the
-same sign: $\log\Rhat_t$ correlates $-0.106$ with the magnitude of future growth,
-so elevated $\Rhat$ does not even signal elevated uncertainty.}
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\linewidth]{figures/fig_levers}
+  \caption{Every lever's validation delta against its own control
+  (Table~\ref{tab:levers}); win counts on the right. Green: negative and
+  $\ge$7/9 wins. Grey: negative but inconsistent. Red: worse.}
+  \label{fig:levers}
+\end{figure}
+
+\subsection{SEIR-GNN against SEIR-LSTM}
+\label{sec:seirgnn}
+The comparison the research question poses is a graph encoder against the LSTM,
+behind the same gated SEIR head. On three origins the graph wins on validation
+every time: ASTGCN $-0.62$ (9/9), AAGCN $-0.18$ (9/9) with NB and seasonal
+features, and AAGCN $-0.17$ (9/9) in a separate grid. Behind the direct head the
+same graph gains nothing ($-0.14$, 5/9). So what the graph adds appeared
+specific to estimating a transmission quantity, where spatial coupling is
+mechanistically plausible.
+
+The nine-origin confirmation does not support that reading
+(Table~\ref{tab:nine}). In the first run, the graph's advantage holds on validation
+($-0.75$, 8/9, $p=0.012$) and \emph{reverses} on test ($+0.23$, 4/9). In the
+second, with a different encoder, it vanishes on validation ($-0.01$) and
+appears on test ($-0.41$, 6/9, $p=0.031$). Neither run clears its pre-registered
+corrected threshold. The two confirmations also named different endpoints
+(validation for the first, test for the second), a flaw in our own
+pre-registration that we record rather than resolve after the fact. We
+therefore do not claim that the SEIR-GNN beats the SEIR-LSTM. On three origins
+it does so consistently on validation but not on test, where ASTGCN's gated
+SEIR head is $+0.30$ against the SEIR-LSTM. On nine origins it is not robust to
+the encoder, the metric or the run.
+
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=\linewidth]{figures/fig_nine}
+  \caption{Nine disjoint origins (EXP-047), per-origin RMSE on a log scale.
+  Origin 0.40's validation span contains the 2017 DENV-2 epidemic, 5.4$\times$
+  anything in its training data, and dominates every validation mean; read win
+  counts, not means. On test the gated SEIR arms track or undercut persistence
+  while the direct model $B$ is worst on four origins.}
+  \label{fig:nine}
+\end{figure*}
+
+\subsection{Physics as structure: penalty and metapopulation coupling}
+\label{sec:physicsstruct}
+Two further physics-informed structures were pre-registered against $B$. The
+\textbf{spatial physics penalty} was the one significant physics gain in our
+earlier work on the benchmark array ($-0.044$ on STGAT, 57/60 runs). On $B$ it
+keeps its sign ($-0.06$, and $-0.20$ at horizon 3) but wins only 6/9 and is not
+adopted. The \textbf{metapopulation SEIR head}, which couples districts inside
+the dynamics rather than through the initial state, is \emph{worse} than the
+gated head ($+0.20$, 2/9). On nine origins it ties the SEIR-LSTM ($-0.01$ on
+test, 4/9). The reason is in the data. On the benchmark array, Moran's $I$ of
+$\log R$ on the district graph is 0.005, against 0.274 for log cases.
+Transmission has almost no local spatial structure at district-week
+resolution, so a learned coupling has nothing to encode.
 
 \subsection{The ceiling is informational}
-\cF{Regressing each model's predicted log-growth on realised log-growth gives a
-slope of \textbf{0.002}. The models' growth predictions carry no information about
-growth; they are persistence with noise. Under squared error this is
-\emph{correct}: the target is a residual over a baseline that already explains
-$r^2=0.85$, and the conditional mean of what remains is approximately zero.
-Flatness is what the objective asks for. This is why an asymmetric loss, the
-renewal penalty and the renewal decoder each bought responsiveness and paid for it
-in RMSE, in the same direction: weighting $3\times$ against under-prediction
-removes the outbreak bias entirely ($-10.58 \rightarrow +1.21$ cases) and costs
-2.8 RMSE, because the model cannot tell which windows are outbreaks.}
+\label{sec:ceiling}
+Table~\ref{tab:levers} records what did not work. Architecture changes (district
+seasonal curves, a nonlinear head, a global context node, a learned adjacency)
+move validation by less than 0.15. The literature's remedies for weak
+spatio-temporal models are neutral or worse. RevIN costs 1.27 (0/9), and
+$k$-nearest-neighbour analogues with no network cost 0.87. Data-side levers fail
+too. Halving the training windows costs 0.22, and the learning curve is flat past
+75\%. TimeGAN augmentation costs 0.53 (1/9) and truncates the tail: its largest
+generated week is 882 cases against a real 2,631. Climate at lags 2--13 costs
+0.09--0.13. Gradient-boosted trees gain from climate ($-0.49$), which a network
+does only once its head is nonlinear, and then the nonlinear head costs as much
+as climate gains.
 
-\subsection{What the mechanism can still do: constrain, not reconstruct}
-\label{sec:constraint}
+These failures share a cause. The residuals of every model family we trained
+correlate 0.87--0.99 with $B$'s, including $k$-NN, which has no network and no
+training, so the models make the same errors. The remaining error is a lag on
+moves. Models under-predict rising weeks by 11--13 cases and over-predict falling
+weeks by 10--11, and the top 5\% of district-weeks carry $\sim$60\% of the squared
+error. That is what a mean-seeking objective produces on a near-random-walk
+target whose next move is not in the inputs.
 
-\cD{Every failure above shares a form. The decoder routes the forecast
-\emph{through} $R$; the penalty pulls it \emph{toward} a target derived from
-$\Rhat$. Both make the mechanism carry predictive weight, which $\Rhat$ cannot. An
-\emph{inequality} constraint does not: it is zero inside the admissible region and
-cannot inject a target. We test two, added to the reproduced architectures'
-objective and scored against each architecture's own base on matched
-(origin, seed) runs at 20--25 seeds. A \textbf{biological envelope} bounds weekly
-log-growth above by $r_{\max}=2.3884$ and below by the host clearance rate. A
-\textbf{spatial term} penalises disagreement in \emph{relative} incidence
-$\hat{y}_i/s_i$ between adjacent districts---the scale-free form of a
-graph-Laplacian penalty, which on raw counts merely taxes population.}
-
-\cE{The two separate cleanly, and only at adequate $n$. The \textbf{spatial term
-holds}: on STGAT it improves artifact-free RMSE by $\mathbf{-0.044}$ on
-$\mathbf{57/60}$ matched runs ($p<0.0001$), and independently on each origin
-($p=0.040$, $<0.0001$, $0.025$). The \textbf{envelope does not}: $-0.186$ with
-$5/9$ better at $n=9$ becomes $-0.042$ with $38/75$ at $n=75$ ($p=0.69$), a coin
-flip. At $n=9$ the two were indistinguishable. The envelope is in any case
-\emph{provably inert} wherever a model under-reacts---STGAT and A3TGCN peak at
-$0.31$ against a ceiling of $2.3884$ and their envelope arms are bit-identical to
-base on every run---which restates EXP-014 as a design rule: a bound helps exactly
-the models that violate it, and here most do not.}
-
-\cA{The mechanism's second use is a different target. Ranking---\emph{which}
-districts will breach an alert threshold, rather than by how much---is the
-operationally relevant question and a tractable one. Defining an outbreak as a
-district-week above that district's training-set 90th percentile within the horizon
-(base rate 14.4\%), current level alone reaches AUC \textbf{0.807}; adding $\Rhat$
-raises it to \textbf{0.826}, a larger gain than recent growth ($+0.004$) or
-neighbouring districts ($+0.006$), while climate again subtracts. Before onset,
-mean $\Rhat$ runs 1.13--1.24 for six weeks against a global median of
-0.911---sustained $R>1$, visible before the outbreak is.}
-
-\cF{The forecasting gain is real and small: $0.15\%$ of a $29.52$ floor. It is a reliable
-improvement \emph{of the model}, not a move past the baseline---STGAT goes from
-$29.550$ to $29.506$ against a floor of $29.52$, a margin that remains inside noise
-($p=0.70$). So \S\ref{sec:physics} stands, with one qualification we think is the
-useful part. On a target a naive baseline already explains to $r^2=0.85$,
-mechanistic knowledge pays when it \emph{restricts the hypothesis space} and not
-when it supplies a prediction: a constraint, not a forecast. Only the first
-survives a poorly-determined $R_t$.}
-
-%=============================================================================
+\subsection{Validation and test disagree, systematically}
+\label{sec:valtest}
+In five separate grids, models anchored to the last observation score better
+on test than the direct model that validation selects, and validation reverses
+the order each time. Examples: the residual head with NB (34.55 against $B$'s
+37.55), $k$-NN (34.34), the gated SEIR arms (34.92--35.34), and on nine origins
+the gated SEIR-GNN at 31.06 against $B$ at 33.21 and persistence at 31.76.
+Nothing here was selected on test, and none of these differences is significant
+on nine origins (the gated SEIR-GNN against $B$ is $-2.15$ on test, 6/9,
+$p=0.20$). Five grids agreeing is nonetheless evidence about the selection
+protocol. A 30-week validation span immediately before each origin appears to
+reward fitting that span's level, which does not carry into the next period.
+Acting on it needs a new pre-registered protocol and a test set nothing here has
+touched, which only data after March 2024 can provide.

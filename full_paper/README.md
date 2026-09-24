@@ -1,6 +1,7 @@
 # Full Paper & Complete Reproducibility Package
 
-**Paper Title**: *Know When the Epidemic Comes: Mathematics Before Data in Dengue Outbreak Forecasting*  
+**Paper Title**: *Where Does Physics Help a Graph Network? A Leakage-Controlled Study of SEIR-Informed Spatio-Temporal GNNs for Dengue Forecasting*
+(rewritten 2026-09-24; the previous title, *Know When the Epidemic Comes*, was the Phase-2 short paper on the benchmark array, which is kept in `paper/`)  
 **Authors**: Group 05 (CS3631)  
 **Target Format**: IEEE / ACM Conference & Journal Full Paper Format  
 
@@ -93,10 +94,11 @@ The master notebook `reproduce_full_paper.ipynb` reproduces every empirical figu
 > on origin, and reported an early-warning p-value (`p = 0.04`) that was a typed-in literal
 > rather than a computed quantity. See `docs/EXPERIMENT_LOG.md` EXP-032 and EXP-037.
 >
-> **None of this affects the manuscript.** The paper in `overleaf/` contains no SEIR-GNN
-> stage results; its contribution is the artifact audit, the increment nulls, the renewal
-> analysis and the constraint-versus-reconstruction finding, none of which depend on the
-> retracted code.
+> **The manuscript in `overleaf/` was rewritten on 2026-09-24** around the corrected re-run.
+> It now reports the array audit, the six-encoder x head comparison, every lever tried, and
+> the nine-origin confirmations. Every number in its tables and figures is generated from
+> `seirgnn2/results/*.json` by `scripts/build_paper_assets.py`, and the result files it reads
+> are copied to `outputs/results/`.
 
 The replacement is a leakage-controlled re-run (`seirgnn2/`) on **nine origins with disjoint
 test spans**, five arms frozen before the run, three seeds each, selection on validation only.
@@ -112,18 +114,18 @@ Differences are paired at the origin unit, which is the only unit resampled from
 
 **What this supports, stated plainly:**
 
-- **Against SEIR-LSTM** — the proposed method is better on 8 of 9 independent origins, and
-  the advantage is not driven by any single fold. Raw p = 0.012. It **misses the
-  pre-registered endpoint** (BH-adjusted p < 0.05) at p_adj = 0.059, and on held-out test
-  RMSE the two are indistinguishable with SEIR-LSTM marginally ahead. Report as a consistent
-  directional advantage, not as a win.
+- **Against SEIR-LSTM** — on validation the proposed method wins 8 of 9 origins (raw p = 0.012,
+  p_adj = 0.059, missing the pre-registered bar); on test it loses 4/9 (+0.23). A second
+  nine-origin run with the AAGCN encoder (EXP-047) reverses the pattern: a tie on validation
+  (−0.01) and a win on test (−0.41, 6/9, p_adj 0.125). **The advantage is not robust across
+  encoders, metrics or runs; do not report it as a win.**
 - **Against the naive persistence floor** — a small consistent edge on validation that does
   not survive correction, and nothing at all on test (31.70 vs 31.76). **Persistence is not
   beaten.**
 - **Against the five published architectures** — comfortably better than STGAT, A3TGCN and
-  DCRNN; **not** better than AAGCN or ASTGCN on the direct head, which win on 8 of 9 origins.
-  The three weaker architectures ran with settings tuned around the two stronger ones and may
-  simply be undertuned, so that comparison is weak evidence.
+  DCRNN; **not** better than AAGCN or ASTGCN on the direct head. Behind the gated SEIR head
+  all six encoders land within 0.25 of each other (EXP-034); whether that repair is the SEIR
+  physics or the persistence anchor is tested in EXP-048 (`docs/RESCUE_PLAN.md`).
 - **Mean RMSE across these nine origins is not a usable summary.** Origin 0.40 is an outlier
   where every arm fails (140–227 RMSE against 13–48 elsewhere) and it dominates every mean.
   Read win counts and per-origin values; `seirgnn2/stats.py` prints wins beside every delta
@@ -131,8 +133,10 @@ Differences are paired at the origin unit, which is the only unit resampled from
 
 **Withdrawn without replacement:** the S7 early-warning significance claim. The AUC figures
 themselves (0.807 → 0.826, from `analysis/_build/outbreak_signal.py`) are computed and stand;
-the `p = 0.04` attached to them never was. S6 and S8 are not re-run here and are unverified
-under the corrected harness.
+the `p = 0.04` attached to them never was. S6 is not re-run here and is unverified under
+the corrected harness. **S8 (EXP-030) is invalid**: `run_s8_seroprevalence.py` compares against
+hardcoded "example" survey values that do not match the transcribed survey in
+`data/external/seroprevalence_nine_districts.csv`.
 
 Reproduce with:
 

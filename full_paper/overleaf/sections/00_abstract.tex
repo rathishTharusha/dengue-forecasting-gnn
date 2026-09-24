@@ -2,28 +2,30 @@
 % ABSTRACT
 %=============================================================================
 \begin{abstract}
-Early warning asks \emph{when} an epidemic arrives, not only how many cases
-follow. We show these are different problems on district-level dengue, and that
-mechanistic structure answers the first while data answers the second.
-Spatio-temporal graph neural networks are widely applied here, yet their advantage
-over naive baselines is rarely verified under a leak-free protocol. We reproduce five published ST-GNNs on Sri Lanka's
-dengue record (25 districts, 459 weeks) to within 7.3\%, and find the reported
-gains are measured with training data included: naive persistence beats every
-model in the column the source paper reports. We also identify an administrative
-reporting backlog occupying one fold's test split and carrying $\sim$90\% of its
-squared error; scoring with and without those windows moves the persistence floor
-from RMSE 44.80 to 29.52 and erases the best architecture's 3.8-point lead.
-Against that floor, no architecture and none of four evidence-led increments
-separate from their own baseline at $p<0.05$. Testing the mechanistic prior the
-task invites---a renewal equation whose generation interval comes from a validated
-SEIR--SEI model---it reconstructs the record given oracle $R_t$ (RMSE 13.44) and
-fails as a forecaster, because $R_t$ is only 26\% predictable, so routing a
-forecast through it re-injects a 1.90$\times$ error per step where persistence
-carries none. The ceiling is informational, not architectural. The mechanism is
-nonetheless useful in the two roles that do not ask it to predict: as an
-inequality constraint it reliably improves a model ($-0.044$ RMSE on 57/60 paired
-runs, $p<0.0001$), and it is the largest single contributor to ranking which
-districts will breach an alert threshold (AUC $0.807 \rightarrow 0.826$).
-Mechanistic knowledge pays here when it restricts the hypothesis space, not when
-it supplies a forecast.
+Spatio-temporal graph neural networks (ST-GNNs) and SEIR-informed neural models
+are both proposed for district-level dengue forecasting, but they are rarely
+compared under one leak-free protocol. We study whether replacing the LSTM of an
+SEIR-informed forecaster with a graph encoder helps, on Sri Lanka's weekly record
+(25 districts, three-week horizon). Before modelling, we audit the benchmark
+array used by prior work. Its rows are out of date order, every training split
+contains 2023 data from after the test periods, its case and climate columns drift
+apart by up to a year, its ``lagged'' climate channels hold values 12--17 weeks in
+the \emph{future}, and its largest spike is a spreadsheet error. We rebuild a
+559-week dataset from the source reports and enforce causal lags with tests.
+On one harness, six encoders (five published ST-GNNs and the SEIR-LSTM's LSTM)
+are each paired with a direct head, a pure SEIR decoder and a gated SEIR head.
+The architecture matters little: working encoders span 0.15 RMSE, and the graph
+adds 0.07. The pure SEIR decoder loses 6--7 RMSE on every encoder. The cause is
+structural: 14--16\% of targets lie below its zero-transmission floor, and its
+force of infection is only $r^2\approx0.25$ predictable. The gated SEIR head behaves
+differently. It brings all six encoders within 0.25 of each other and below
+persistence, and repairs the three that fail as published by 5.7--17.2
+validation RMSE on 9/9 paired runs. A negative-binomial likelihood is the
+largest controlled gain ($-0.41$, 9/9). The graph beats the LSTM only inside the
+gated SEIR head (9/9 on three origins), and that advantage does not replicate on
+nine disjoint origins. More than twenty further levers are not adopted:
+architecture, embeddings, climate lags, synthetic data, a spatial physics penalty
+and a metapopulation SEIR head. Their residuals correlate 0.87--0.99. On this
+target, physics helps a graph network as a stabilising structural prior, not as
+a forecaster.
 \end{abstract}

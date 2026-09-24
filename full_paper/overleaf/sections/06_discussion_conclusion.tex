@@ -1,31 +1,59 @@
 %=============================================================================
 % DISCUSSION AND CONCLUSION
 %=============================================================================
-\section{Discussion and Conclusion}
+\section{Discussion}
 \label{sec:discussion}
 
-\cB{\textbf{When does a mechanistic prior pay?} PINNs succeed where data are
-scarce relative to the dynamics---MP-PINN~\cite{nguyen2024mppinn} trains on 35
-days and forecasts 97. Ours is the opposite regime, and the decisive quantity is
-not sample size but how much a naive baseline already explains: here $r^2=0.85$,
-leaving an $R_t$ that is 26\% predictable. That ratio predicts \emph{which} use
-survives---a prior supplying a forecast inherits $R_t$'s error, one restricting the
-hypothesis space does not.}
+\textbf{Where physics helps a graph network.} On this target, physics cannot
+be the forecaster. A pure SEIR decoder inherits the unpredictability of its
+force of infection, and 14--16\% of targets lie out of its reach. It does help
+as \emph{structure}: gated onto persistence, the SEIR head makes every encoder
+we tried usable and interchangeable, repairing three published architectures
+that fail on their own. Section~\ref{sec:rescue} measures how much of that is the
+simulator and how much the anchor it is gated onto. Coupling districts inside
+the dynamics, as metapopulation GNNs do, does not help here, because
+transmission has almost no local spatial structure at district-week resolution.
+These results agree with our earlier work on the benchmark array, which found
+that mechanistic knowledge pays when it restricts a model, not when it supplies
+the prediction.
 
-\cC{\textbf{Reporting.} A caution that applies to us as much as to the work we
-reproduce: at $n=9$ the spatial constraint ($p=0.057$) and the growth envelope
-($p=0.238$) were indistinguishable; at $n\ge60$ one holds and the other is a coin
-flip. Small effects on folds this noisy need the seeds to separate them.}
+\textbf{Why the ceiling is not architectural.} The target's own last value
+explains $r^2=0.85$ of the next, the best covariate 0.02, and what remains is a
+move the inputs do not reveal. Every model family converges to the same
+function, with residual correlation 0.87--0.99. Architecture, embeddings,
+climate, synthetic data and physics penalties each change validation by less
+than the seed spread. A study that searches this space and reports its best
+cell will find a winner; a paired study finds noise. The NB likelihood is the
+exception, because it corrects what the objective targets rather than what the
+model sees.
 
-\cD{\textbf{Limitations.} One country, one disease, one processed array. We do not
-evaluate GAN augmentation---the remaining proposed contribution---and the detection
-result uses a single-week threshold where sustained exceedance would be more
-operationally meaningful.}
+\textbf{What the evaluation taught us.} The benchmark array leaks future data
+through its row order and its climate channels. Our own first SEIR-GNN pipeline
+reported a win that did not survive a correct training loop. A validation span
+before each origin selects models that underperform anchored ones on test, in
+five grids. Two nine-origin confirmations disagree with each other. Each of these
+would have produced a publishable positive result had it gone unchecked.
 
-\cE{\textbf{Conclusion.} Under a leak-free, artifact-aware protocol no reproduced
-architecture and no increment separates from a persistence floor of 29.52, and
-reconstructing a forecast through the mechanism cannot close that gap. But the
-mechanism holds in the two roles that do not ask it to predict---as an inequality
-constraint and as a state estimate for ranking outbreaks. Knowing \emph{when} is
-where the mathematics comes first. Code and a reproduction notebook accompany this
-paper.}
+\textbf{Limitations.} One country and one disease at district-week resolution.
+Three origins cannot support claims at the origin unit, and our nine-origin
+test spans were used twice, so they are not fresh. The two confirmations named
+different endpoints. Some earlier diagnostics (renewal predictability, Moran's
+$I$, the STGAT spatial penalty) were measured on the benchmark array and have
+not been rerun on the corrected data. The graph is the benchmark's hand-built
+adjacency; mobility data might couple districts differently.
+
+\textbf{Next steps.} Clean confirmation needs data nothing here has touched: the
+weekly reports after March 2024. Before any such run we would pre-register a
+single endpoint, selection over several validation spans rather than one, and
+the gated SEIR-GNN, $B$ and SEIR-LSTM as the only finalists.
+
+\section{Conclusion}
+We asked whether replacing the LSTM of an SEIR-informed forecaster with a graph
+network improves district-level dengue forecasts. Under a leak-free protocol on
+a corrected dataset, the answer is narrower than either literature suggests. The
+graph adds little on its own (0.07). The graph's advantage over the LSTM inside
+the SEIR head is consistent on three origins and not robust on nine. The largest
+controlled gain comes from the likelihood, not the architecture. Physics fails
+as a decoder for measurable, structural reasons, but a gated SEIR head
+stabilises every encoder. Code, pre-registrations, the experiment log and a
+reproduction notebook accompany this paper.

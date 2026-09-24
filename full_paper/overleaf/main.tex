@@ -1,9 +1,15 @@
 %=============================================================================
-%  CS3631 Phase 2 — Short Paper
-%  Gated Adaptive Graph Neural Networks for Dengue Forecasting
+%  CS3631 Phase 3 -- Full Paper
+%  Physics-informed spatio-temporal GNNs for district-level dengue forecasting
 %  Group 05, Department of Computer Science and Engineering, University of Moratuwa
 %
-%  PAGE LIMIT: 4 pages EXCLUDING references.
+%  Rewritten 2026-09-24 on the corrected dataset and the leakage-controlled
+%  harness (seirgnn2/). Every number in tables_generated.tex and the fig_* files
+%  comes from scripts/build_paper_assets.py; numbers in the prose must match it.
+%
+%  CONTRIBUTION COLOURS: the rewrite was done in one pass, so the \cA..\cF
+%  wrappers are not applied to the new text. Re-assign them at the team standup
+%  before building main-highlighted.pdf.
 %
 %  BUILD:
 %    make              -> main.pdf            (clean version, for submission)
@@ -24,7 +30,7 @@
 \setlength{\marginparwidth}{2cm}
 \usepackage[textsize=tiny]{todonotes}
 
-% One colour per member. EDIT THESE NAMES at the Day 0 standup.
+% One colour per member.
 \definecolor{colTharusha}{RGB}{255,236,153}   % yellow
 \definecolor{colPraveenD}{RGB}{183,225,205}   % green
 \definecolor{colJanith}  {RGB}{255,204,204}   % pink
@@ -58,25 +64,14 @@
 \usepackage{subcaption}
 \usepackage{balance}
 
-% Notation shorthands — keep the maths consistent across sections.
+% Notation shorthands -- keep the maths consistent across sections.
 \newcommand{\R}{\mathbb{R}}
-\newcommand{\Aadp}{\mathbf{A}_{\mathrm{adp}}}
-\newcommand{\Afix}{\hat{\mathbf{A}}_{\mathrm{fix}}}
-\newcommand{\Ablend}{\mathbf{A}_{\mathrm{blend}}}
-\newcommand{\Ldata}{\mathcal{L}_{\mathrm{data}}}
-\newcommand{\Lreg}{\mathcal{L}_{\mathrm{reg}}}
-\newcommand{\Lcons}{\mathcal{L}_{\mathrm{cons}}}
-\newcommand{\Lsmooth}{\mathcal{L}_{\mathrm{smooth}}}
-
-% No model name. Earlier drafts carried one (PIAG-Net, then GAG-Net); the paper
-% no longer proposes an architecture, so naming one would misdescribe it. What is
-% proposed is an evaluation protocol and a set of measurements.
 \newcommand{\Rhat}{\hat{R}}
+\newcommand{\padj}{p_{\text{adj}}}
 
 % NOTE: do NOT add authorsperrow here. With six authors sharing ONE \affiliation,
 % acmart keeps them in a single box, so authorsperrow only narrows that box --- it
 % squeezes the affiliation and pushes the shared email line past the right margin.
-% Tried and reverted. The stacked author block is correct for this configuration.
 \settopmatter{printacmref=false}
 \setcopyright{none}
 \renewcommand\footnotetextcopyrightpermission[1]{}
@@ -85,15 +80,13 @@
 %=============================================================================
 \begin{document}
 
-% TITLE. The paper reports what caps accuracy on this task and shows why a
-% mechanistic prior cannot lift it. It does not propose an architecture, so the
-% title does not name one. Earlier drafts were titled for a model (PIAG-Net, then
-% GAG-Net); both names outlived the claim they described.
-\title{Know When the Epidemic Comes:\\Mathematics Before Data in Dengue
-Outbreak Forecasting}
+% TITLE. The paper asks where an SEIR prior helps a graph network and answers
+% with a controlled study, not a named architecture.
+\title{Where Does Physics Help a Graph Network?\\A Leakage-Controlled Study of
+SEIR-Informed Spatio-Temporal GNNs for Dengue Forecasting}
 
-% AUTHORS — Phase 2 order. Phase 3 requires TAs then Prof.\ Dulani and Dr.\ Sandareka
-% appended as final co-authors; not needed for the short paper.
+% AUTHORS. Phase 3 requires TAs then Prof.\ Dulani and Dr.\ Sandareka appended
+% as final co-authors -- add them before submission.
 \author{Tharusha Perera}
 \author{Praveen De Silva}
 \author{Janith Mahanama}
@@ -109,21 +102,18 @@ Outbreak Forecasting}
 
 \input{sections/00_abstract}
 
-\keywords{dengue forecasting, graph neural networks, reproducibility,
-evaluation protocols, physics-informed learning, epidemic early warning,
-negative results}
+\keywords{dengue forecasting, spatio-temporal graph neural networks, SEIR,
+physics-informed learning, data leakage, reproducibility, negative results}
 
 \maketitle
 
 \input{sections/01_introduction}
 \input{sections/02_related_work}
-\input{sections/03_framework}
-% Table floats can only move FORWARD, so the input sits early: declared late it
-% landed on the references page, and each step earlier lets it settle sooner and
-% frees the text after it to reflow.
+\input{sections/03_data}
+\input{sections/04_models_protocol}
+% Table floats only move forward, so the generated tables are declared before
+% the results text that cites them.
 \input{tables_generated}
-
-\input{sections/04_experimental_setup}
 \input{sections/05_results}
 \input{sections/06_discussion_conclusion}
 

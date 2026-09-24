@@ -1,0 +1,91 @@
+%=============================================================================
+% MODELS AND PROTOCOL
+%=============================================================================
+\section{Models and Protocol}
+\label{sec:models}
+
+A run is a tuple (encoder, head, likelihood, features). Each element is varied
+while the others are held fixed, so every difference is attributable to one
+component.
+
+\subsection{Encoders}
+The five published ST-GNNs (STGAT, A3TGCN, ASTGCN, AAGCN, DCRNN) are built from
+the reference implementations. The sixth encoder is the two-layer LSTM of the
+SEIR-LSTM~\cite{liu2025seirlstm}. Each maps a $W=3$ week window of log cases,
+plus any exogenous features, to a 64-dimensional representation $h_i$ per
+district. The graph is the benchmark's district adjacency with self-loops,
+row-normalised; AAGCN runs with its adaptive adjacency off, as published.
+
+\subsection{Heads}
+All heads output fold-standardised $\log(1+y)$ for $h=1,2,3$. Let $p_i$ be the
+persistence anchor (last observed week) in the same space and $f(h_i)$ a
+linear read-out.
+\begin{itemize}\itemsep1pt
+\item \textbf{direct}: $\hat{z}_i = f(h_i)$, as in the published ST-GNNs.
+\item \textbf{residual}: $\hat{z}_i = p_i + f(h_i)$.
+\item \textbf{gated}: $\hat{z}_i = p_i + \sigma(a)\,(f(h_i) - p_i)$, a single
+      learned gate initialised at $\sigma(-2)=0.12$. This head was added for
+      \S\ref{sec:rescue}; it is the gated SEIR head with the simulator removed.
+\item \textbf{SEIR decoder} (\texttt{foi}): $f(h_i)$ gives a weekly force of
+      infection $\lambda_{i,h}=\exp(f(h_i)+b)$, clamped at $1/7$ per day. An
+      SEIR model is stepped daily from an initial state seeded by observed
+      cases: $E_0$ from cases at $t-2$ scaled by the reporting rate $\rho=1/11$,
+      $S_0 = 1-0.682$ from a 2013--14 Colombo serosurvey, incubation rate
+      $0.1$/day and recovery rate $1/7$/day. Predicted incidence times $\rho$
+      times population gives counts. A learned scale on $E_0$ and $\rho$ is
+      allowed.
+\item \textbf{gated SEIR} (\texttt{foi\_res}): $\hat{z}_i = p_i +
+      \sigma(a)\,(\mathrm{SEIR}(\lambda_i) - p_i)$. The simulator supplies the
+      \emph{departure} from persistence. This is our SEIR-GNN when the encoder
+      is a graph network, and SEIR-LSTM when it is the LSTM.
+\item \textbf{metapopulation SEIR} (\texttt{foi\_meta}): the encoder predicts a
+      transmission rate $\beta_i(t)$, and the simulator recomputes the force of
+      infection each day as $\beta_i\sum_j C_{ij} I_j/N_j$, with
+      $C=\mathrm{softmax}(\log A + \Theta)$ a learned row-stochastic coupling
+      initialised at the border graph $A$, as in MepoGNN and
+      CausalGNN~\cite{cao2023mepognn,wang2022causalgnn}. It is gated like
+      \texttt{foi\_res}.
+\end{itemize}
+
+\subsection{Likelihood, features and physics penalty}
+The default objective is squared error on the standardised target. The
+negative-binomial (NB) alternative adds a dispersion head and minimises the NB2
+negative log-likelihood with the mean $\mu = \exp(\hat z\sigma+m)-1$. Under
+squared error on $\log(1+y)$, $\exp$ of the fitted value is a conditional
+\emph{median}, while RMSE rewards the conditional \emph{mean}; NB's $\mu$ is the
+mean. Seasonal features are $\sin$ and $\cos$ of the week of year at one and two
+cycles per year. The spatial physics penalty adds
+$\lambda_s\sum_{(i,j)\in E}(\hat y_i/s_i-\hat y_j/s_j)^2$ with $s_i$ the
+district's training-mean cases: relative incidence should not jump across a
+border.
+
+\subsection{Protocol}
+\label{sec:protocol}
+Rolling origins at 0.55, 0.70 and 0.85 of the series, three seeds each. The 30
+windows before each origin are validation, the following 15\% are test, and
+normalisation uses training weeks only. Windows touching a missing week are
+dropped, never imputed. Training uses Adam (learning rate $3\times10^{-3}$,
+weight decay $10^{-4}$, batch 32), early stopping on validation with patience 40,
+and 300--400 epochs. Metrics are pooled RMSE on counts, overall and per horizon.
+
+\textbf{Selection uses validation RMSE only.} Test is written to disk and
+never used to choose. The protocol, and for each later experiment its arms,
+control, decision rule and a prediction of the outcome, were committed before
+it ran. An arm is adopted if its
+mean validation delta against the control is negative, it wins at least 7 of 9
+(origin, seed) units, and it does not raise horizon-3 error.
+
+\textbf{Two pairing units.} Differences are paired on matched (origin, seed)
+units and tested with an exact two-sided sign-flip permutation test, BH-adjusted
+within each family. The \emph{origin} unit (seeds averaged) is what a claim about
+the series rests on, but with three origins its $p$-value cannot fall below 0.25.
+The (origin, seed) unit reaches 0.004 but mostly measures run-to-run stability.
+Claims about the series therefore need the \textbf{nine-origin} protocol: origins
+at $0.40+k/15$ ($k=0,\dots,8$), with nine disjoint test spans of 1/15 of the
+series, where the origin unit reaches 0.004.
+
+\textbf{Reproducibility.} Runs are single-threaded and bit-reproducible
+within one environment. Grids ran on local CPUs and on Kaggle CPU kernels that
+clone a pinned commit. The two environments agree on means but not on single
+runs, so every comparison pairs arms from the same grid in the same
+environment.

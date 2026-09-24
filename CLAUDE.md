@@ -131,7 +131,7 @@ ablation table mean anything.
 A run is `(backbone, head, loss, dist, features, seeding)`, each varied independently so any
 difference is attributable:
 
-- `HEADS = ("direct", "residual", "foi", "foi_res")` — `foi` routes through a force-of-infection
+- `HEADS = ("direct", "residual", "gated", "foi", "foi_res", "foi_meta")` — `foi` routes through a force-of-infection
   decoder against SEIR state from `seir_state()`; `foi_res` gates it onto the persistence anchor.
 - `BACKBONES` — the toy controls `("none", "gcn", "gat", "adaptive", "hybrid")` **plus** the five
   published architectures and Liu et al.'s LSTM via `backbones.py`. Note `gat` is a literal alias
@@ -189,6 +189,9 @@ EXP-046/047 (physics-informed structure) added: the spatial penalty and a metapo
 head (`foi_meta`) are not adopted. Gated SEIR-GNN vs SEIR-LSTM on nine origins is not robust:
 EXP-038 won on validation (−0.75) but lost on test (+0.23); EXP-047 tied on validation and won
 on test (−0.41, p_adj 0.125). Always compare on a matched metric.
+
+EXP-048: the gated SEIR head's repair of STGAT/A3TGCN/DCRNN (EXP-034) is the persistence anchor,
+not the physics — `head="gated"` (foi_res minus the simulator) matches or beats it on validation.
 
 One more inconsistency worth knowing: `seirgnn2/core.py::seasonal_features` justifies its
 week-of-year features by citing "EDA finding F9", but **F9 was retracted** (see

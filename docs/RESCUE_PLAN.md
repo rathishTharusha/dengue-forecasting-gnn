@@ -57,3 +57,14 @@ the gate a failing encoder's correction reaches the forecast unshrunk. If this
 is wrong and `foi_res` beats `gated` 7/9 or better, the gated SEIR head is a
 physics-informed fix for unstable graph encoders, the cleanest physics result
 in the project.
+
+## Outcome (added after the run — see EXP-048)
+
+The rescue is the anchor, not the physics. Anchor + gate carry 96–112% of the
+validation repair on all three failing encoders, and the SEIR simulator earns
+credit on none: STGAT is significantly *worse* with it (+0.67, 2/9,
+p_adj 0.047), A3TGCN ties (−0.00) and DCRNN's −0.68 wins only 3/9. On the working
+encoders the simulator costs 0.74–0.88 (0/9). Prediction check: the share was
+right; the ±0.3 band and the residual-vs-gated ordering were wrong. On test the
+SEIR head does beat its twin on the failing encoders (A3TGCN −1.65, DCRNN −3.33,
+9/9) — the recurring validation/test disagreement, recorded and not acted on.

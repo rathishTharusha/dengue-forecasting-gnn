@@ -37,6 +37,65 @@ Copy this block for a new entry:
 > `CEILING_R0_MAX`) survived the cleanup and now lives in `dengue_gnn.seir`, still
 > asserted by `tests/test_seir.py` and reproduced by `scripts/verify_seir_paper.py`.
 
+## EXP-048 — Rescue control: the SEIR head's repair of STGAT, A3TGCN and DCRNN is the anchor, not the physics
+- **Date:** 2026-09-24
+- **Who:** Group 05
+- **Commit:** `9f7cbe9` (gated head + grid), kernel pinned at `3362bc2`; plan `docs/RESCUE_PLAN.md` in `9f7cbe9`
+- **Script:** Kaggle kernel `seirgnn2-rescue` (v1) = `sweep.py rescue --keep --epochs 300
+  --workers 4`; results `seirgnn2/results/rescue.json` (219 rows, complete).
+- **Hardware:** Kaggle CPU, 4 workers.
+- **Config:** as pre-registered. Six encoders x heads {direct, residual, gated, foi_res},
+  `loss=mse_z`, `lam_param=log`, `state_fit=True`, no seasonal features, 300 epochs --
+  identical to `grids.real` -- frozen three origins x seeds 0/1/2. `gated` is `foi_res`
+  with the SEIR simulator removed (same anchor, same gate, same initialisation;
+  `tests/test_gated_head.py`).
+- **Question:** EXP-034 found the gated SEIR head repairs the three encoders that fail on
+  the direct head (-5.70 / -10.95 / -17.22 val). Is that the SEIR physics, or the
+  persistence anchor and gate it comes with?
+- **Result:** mean validation / test RMSE.
+
+  | encoder | direct | residual | gated | foi_res |
+  |---|---|---|---|---|
+  | STGAT | 23.3153 / 60.8213 | 17.8388 / 35.9485 | **16.9493** / 36.6617 | 17.6218 / 35.8352 |
+  | A3TGCN | 28.6305 / 60.4004 | **17.4735** / 35.0298 | 17.6815 / 37.1555 | 17.6787 / 35.5028 |
+  | DCRNN | 34.7809 / 73.6131 | **17.4906** / 35.5007 | 18.3603 / 38.9158 | 17.6754 / 35.5823 |
+  | AAGCN | 16.7634 / 35.6508 | 16.7508 / 34.2365 | **16.5828** / 33.7502 | 17.4641 / 35.7774 |
+  | ASTGCN | 16.8341 / 35.5449 | 16.7823 / 34.8460 | **16.7404** / 34.6672 | 17.4779 / 35.6209 |
+  | LSTM | **16.9072** / 35.0985 | 16.9538 / 34.9987 | 16.9416 / 35.8598 | 17.6855 / 35.5204 |
+  | persistence | 17.8561 / 36.0157 | | | |
+
+  Primary comparison, `foi_res` vs `gated`, validation, origin_seed unit, BH over the three
+  failing encoders:
+
+  | encoder | val delta | wins | p | p_adj | test delta | test wins |
+  |---|---|---|---|---|---|---|
+  | STGAT | **+0.6726** | 2/9 | 0.0156 | **0.0469** | -0.8265 | 7/9 |
+  | A3TGCN | -0.0029 | 6/9 | 0.9844 | 0.9844 | -1.6527 | 9/9 |
+  | DCRNN | -0.6849 | 3/9 | 0.2500 | 0.3750 | -3.3334 | 9/9 |
+  | AAGCN (context) | +0.8812 | 0/9 | 0.0039 | — | +2.0272 | 0/9 |
+  | ASTGCN (context) | +0.7375 | 0/9 | 0.0039 | — | +0.9537 | 3/9 |
+  | LSTM (context) | +0.7439 | 0/9 | 0.0039 | — | -0.3394 | 6/9 |
+
+  Share of the validation rescue carried by anchor + gate, (direct - gated) / (direct -
+  foi_res): STGAT 1.12, A3TGCN 1.00, DCRNN 0.96.
+- **Verdict:** answered, against the physics. The rescue is not credited to the SEIR
+  simulator on any failing encoder; on STGAT the simulator is significantly *worse* than
+  its no-physics twin. Anchoring to last week's value is what repairs the three encoders:
+  the plain residual head alone gets them to 17.47-17.84.
+- **Notes:**
+  1. **Predictions against outcome.** Share > 0.8: right (0.96-1.12). `foi_res` vs `gated`
+     within +/-0.3 on every failing encoder: wrong for STGAT (+0.67) and DCRNN (-0.68).
+     `residual` rescues less than `gated`: wrong on two of three -- residual is better than
+     gated on A3TGCN (-0.21) and DCRNN (-0.87), worse on STGAT (+0.89, p 0.031).
+  2. **The gated head (no physics) is the best head for the working graph encoders** on
+     validation: AAGCN 16.58 vs direct 16.76 (-0.18, 8/9, p 0.008). Not pre-registered as
+     a comparison; recorded as a lead. It is behind B (15.66), which adds NB and season.
+  3. **The val/test disagreement of EXP-045 note 4, a sixth time.** On test the SEIR head
+     beats its no-physics twin on the failing encoders (A3TGCN -1.65 and DCRNN -3.33,
+     both 9/9); on validation it does not. Nothing is selected on test.
+  4. EXP-034's direct and foi_res numbers reproduce here to within 0.11 on a different
+     machine (e.g. STGAT direct 23.32 both times, DCRNN direct 34.89 vs 34.78).
+
 ## EXP-047 — Nine-origin confirmation of the physics arms: endpoint not met
 - **Date:** 2026-09-24
 - **Who:** Group 05

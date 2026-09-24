@@ -159,6 +159,7 @@ The point of this table is that nobody repeats these.
 | **Climate at longer lags** (2–13, 2–25 weeks) and an 8-week window | **none adopted**; longer lags progressively *worse* (+0.13 → +0.62). Trees gain from climate (−0.49), the network does not | `climate.json`, EXP-044. Exogenous inputs reach only a linear head shared by all districts |
 | **Architecture: nonlinear head, district seasonal curves, global context, residual+NB** | **none adopted**; best −0.07 (global context, 5/9). Nonlinear head lets climate help (−0.24) but costs as much itself | `arch.json`, EXP-045. Horizon-3 improves 0.14–0.22 in three arms — a lead only |
 | **Physics-informed structure: spatial penalty, metapopulation SEIR head** (`head="foi_meta"`, `spatial=`) | **none adopted**; spatial penalty −0.06, 6/9 (h3 −0.20). Metapopulation coupling *worse* than the gated head (+0.20, 2/9, p_adj 0.022) and ties SEIR-LSTM on nine origins (−0.01) | `physics.json`, `physics9.json`, EXP-046/047. Moran's I of R is 0.005: nothing spatial for the coupling to learn |
+| **SEIR physics as the rescue of failing encoders** (`head="gated"` = `foi_res` without the simulator) | anchor + gate carry 96–112% of the repair of STGAT/A3TGCN/DCRNN; SEIR vs its twin +0.67 (STGAT, p_adj 0.047), −0.00, −0.68 (3/9); costs 0.74–0.88 on working encoders | `rescue.json`, EXP-048. The plain residual head alone repairs them (17.47–17.84) |
 
 ### Structural facts about the physics head
 

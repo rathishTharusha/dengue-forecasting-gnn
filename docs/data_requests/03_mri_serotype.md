@@ -5,7 +5,14 @@ Date: **[ DD Month YYYY ]**
 The Director
 Medical Research Institute
 Ministry of Health
-**[ address — verify on www.mri.gov.lk ]**
+Dr. Danister De Silva Mawatha (Baseline Road)
+P.O. Box 527, Colombo 08
+
+*Tel +94 11 269 3532–34 · Fax +94 11 269 1495 · info.mri@health.gov.lk*
+*Addressee: confirm the current Director before sending. The Institute has an
+Ethics Review Committee; if the request is routed there, expect to submit a short
+protocol — the annex plus this letter should cover it, since only aggregate data
+is requested.*
 
 Dear Dr **[ surname ]**,
 

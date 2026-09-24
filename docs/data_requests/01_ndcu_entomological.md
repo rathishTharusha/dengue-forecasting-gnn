@@ -5,7 +5,12 @@ Date: **[ DD Month YYYY ]**
 The Director
 National Dengue Control Unit
 Ministry of Health
-**[ address — verify on www.dengue.health.gov.lk ]**
+Public Health Complex, 555/5, Elvitigala Mawatha
+Narahenpita, Colombo 05
+
+*Tel +94 11 236 8416 · Fax +94 11 236 9893 · ndcu2010@yahoo.com*
+*Addressee: confirm the current Director before sending — the post was held in an
+acting capacity during 2026.*
 
 Dear Dr **[ surname ]**,
 

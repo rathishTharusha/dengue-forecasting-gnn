@@ -5,7 +5,12 @@ Date: **[ DD Month YYYY ]**
 The Chief Epidemiologist
 Epidemiology Unit
 Ministry of Health
-**[ address — verify on www.epid.gov.lk ]**
+231, De Saram Place
+Colombo 10
+
+*Tel +94 11 269 5112 · Fax +94 11 269 6583 · chepid@sltnet.lk (Chief
+Epidemiologist), epidunit@sltnet.lk (Unit)*
+*Addressee: confirm the current Chief Epidemiologist before sending.*
 
 Dear Dr **[ surname ]**,
 

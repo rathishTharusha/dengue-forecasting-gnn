@@ -4,7 +4,16 @@ Date: **[ DD Month YYYY ]**
 
 The Director General
 Department of Census and Statistics
-**[ address — verify on www.statistics.gov.lk ]**
+306/71, Polduwa Road
+Battaramulla
+
+*Tel +94 11 214 7000 · Fax +94 11 214 7011*
+*Send to dgcensus@statistics.gov.lk, copying data.requests@statistics.gov.lk —
+this is the Department's stated route for data it does not publish on the website.
+Ask in the covering email whether a Data Request Application (DRA) form is
+required; for licensed microdata the Department asks for a project proposal and a
+recommendation letter, both of which the annex and your supervisor's endorsement
+provide.*
 
 Dear **[ title and surname ]**,
 

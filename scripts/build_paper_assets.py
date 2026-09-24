@@ -70,6 +70,7 @@ LEVERS = [
     ("Climate, lags 2--13", "climate", "K2 climate blocks 2-13", "K0 B"),
     ("\\emph{Physics}", None, None, None),
     ("SEIR as auxiliary loss", "remedies+ens", "R6 aux_phys 0.1", "B"),
+    ("SEIR simulator vs no-physics twin (AAGCN)", "rescue", "AAGCN+foi_res", "AAGCN+gated"),
     ("Spatial physics penalty", "physics", "P1 spatial penalty (ratio)", "P0 B"),
     ("Metapopulation vs gated SEIR head", "physics", "P4 metapopulation SEIR-GNN", "P3 gated SEIR-GNN"),
     ("Gated SEIR-GNN vs SEIR-LSTM", "physics", "P3 gated SEIR-GNN", "P6 SEIR-LSTM"),
@@ -140,7 +141,7 @@ def table_levers(out: list[str]) -> list[dict]:
         " arm is better; $p_{\\text{adj}}$ is BH across this table. Test $\\Delta$ is shown"
         " and decided nothing. With three origins these $p$-values describe run-to-run"
         " stability, not the series (\\S\\ref{sec:protocol}).}",
-        "\\label{tab:levers}", "\\small", "\\setlength{\\tabcolsep}{3pt}",
+        "\\label{tab:levers}", "\\small", "\\setlength{\\tabcolsep}{1.8pt}",
         "\\begin{tabular}{lrcrr}", "\\toprule",
         "lever & $\\Delta$ val & wins & $p_{\\text{adj}}$ & $\\Delta$ test \\\\", "\\midrule",
     ]
@@ -192,19 +193,23 @@ def table_rescue(out: list[str]) -> bool:
     out += [
         "\\begin{table}[t]", "\\centering",
         "\\caption{Anchor, gate or physics? Each encoder behind four heads that add, in turn, the"
-        " persistence anchor, the learned gate and the SEIR simulator (validation RMSE; same"
-        " configuration as Table~\\ref{tab:encoders}, rerun together). The last column pairs the"
-        " gated SEIR head against its no-physics twin.}",
-        "\\label{tab:rescue}", "\\small", "\\setlength{\\tabcolsep}{3pt}",
-        "\\begin{tabular}{lrrrrc}", "\\toprule",
-        "encoder & direct & residual & gated & gated SEIR & SEIR$-$gated \\\\", "\\midrule",
+        " persistence anchor, the learned gate and the SEIR simulator (mean validation RMSE;"
+        " configuration of Table~\\ref{tab:encoders}, all rerun together on Kaggle). The last two"
+        " columns pair the gated SEIR head against its no-physics twin (\\texttt{gated});"
+        " negative favours the physics, and the count is units where it wins.}",
+        "\\label{tab:rescue}", "\\small", "\\setlength{\\tabcolsep}{2.5pt}",
+        "\\begin{tabular}{lrrrrrr}", "\\toprule",
+        " & & & & gated & \\multicolumn{2}{c}{SEIR $-$ gated} \\\\",
+        "\\cmidrule(lr){6-7}",
+        "encoder & direct & resid. & gated & SEIR & val & test \\\\", "\\midrule",
     ]
     for bb in ENCODERS:
         vals = " & ".join(f"{mean(rs, f'{bb}+{h}', 'val_RMSE'):.2f}" for h in heads)
         d, w, n, _ = pair(rs, f"{bb}+foi_res", f"{bb}+gated", "val_RMSE", "origin_seed")
-        out.append(f"{bb} & {vals} & {d:+.2f} ({w}/{n}) \\\\")
+        dt, wt, nt, _ = pair(rs, f"{bb}+foi_res", f"{bb}+gated", "RMSE", "origin_seed")
+        out.append(f"{bb} & {vals} & {d:+.2f} ({w}/{n}) & {dt:+.2f} ({wt}/{nt}) \\\\")
     out += ["\\midrule",
-            f"persistence & \\multicolumn{{5}}{{c}}{{{mean(rs, 'persistence', 'val_RMSE'):.2f}}} \\\\",
+            f"persistence & \\multicolumn{{4}}{{c}}{{{mean(rs, 'persistence', 'val_RMSE'):.2f}}} & & \\\\",
             "\\bottomrule", "\\end{tabular}", "\\end{table}", ""]
     return True
 

@@ -17,15 +17,20 @@ are each paired with a direct head, a pure SEIR decoder and a gated SEIR head.
 The architecture matters little: working encoders span 0.15 RMSE, and the graph
 adds 0.07. The pure SEIR decoder loses 6--7 RMSE on every encoder. The cause is
 structural: 14--16\% of targets lie below its zero-transmission floor, and its
-force of infection is only $r^2\approx0.25$ predictable. The gated SEIR head behaves
-differently. It brings all six encoders within 0.25 of each other and below
-persistence, and repairs the three that fail as published by 5.7--17.2
-validation RMSE on 9/9 paired runs. A negative-binomial likelihood is the
+force of infection is only $r^2\approx0.25$ predictable. A gated SEIR head,
+which lets the simulator supply only the departure from persistence, brings all
+six encoders below persistence and repairs the three that fail as published by
+5.7--17.2 validation RMSE on 9/9 paired runs. A pre-registered control shows
+that this repair is not physics. The same head with the simulator removed
+accounts for 96--112\% of it. With the simulator added, validation RMSE is
+significantly worse on one failing encoder and not better on the other two, and
+0.74--0.88 worse on the working ones. A negative-binomial likelihood is the
 largest controlled gain ($-0.41$, 9/9). The graph beats the LSTM only inside the
 gated SEIR head (9/9 on three origins), and that advantage does not replicate on
 nine disjoint origins. More than twenty further levers are not adopted:
 architecture, embeddings, climate lags, synthetic data, a spatial physics penalty
 and a metapopulation SEIR head. Their residuals correlate 0.87--0.99. On this
-target, physics helps a graph network as a stabilising structural prior, not as
-a forecaster.
+target the useful prior is persistence, not transmission dynamics. Anchored
+models, SEIR-informed ones included, do score better out of sample, but
+validation does not select them.
 \end{abstract}

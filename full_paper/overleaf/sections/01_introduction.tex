@@ -27,12 +27,12 @@ naive persistence forecast $\hat{y}_{t+h}=y_t$. A benchmark that omits it
 cannot tell whether a model contributed anything, and the reference benchmark
 omits it.
 
-Our first attempt at the SEIR-GNN reported a win. On re-examination that
-pipeline trained for about sixty gradient steps, optimised SMAPE while scoring
-RMSE, held the force of infection constant across the horizon, and collapsed
-every covariate to a scalar before the graph saw it. This paper reports the
-controlled re-run. Every experiment was pre-registered before it ran, and the
-negative results are reported as such.
+Our first SEIR-GNN pipeline reported a win, and it was wrong. It trained for
+about sixty gradient steps, optimised SMAPE while scoring RMSE, held the force
+of infection constant across the horizon, and collapsed every covariate to a
+scalar before the graph saw it. This paper reports the controlled re-run. Its
+protocol and each experiment's decision rule were committed before the runs,
+and negative results are reported as such.
 
 \noindent\textbf{Contributions.}
 \begin{itemize}\itemsep1pt
@@ -44,10 +44,11 @@ negative results are reported as such.
   \item \textbf{One harness for six encoders and four SEIR-informed heads}
         (\S\ref{sec:models}), with validation-only selection, paired tests at
         two units, and a nine-origin confirmation.
-  \item \textbf{Where physics helps} (\S\ref{sec:results}). A pure SEIR decoder
-        fails on every encoder, for reasons we measure. A gated SEIR head
-        stabilises all six encoders and repairs the three that fail as published.
-        We also isolate what part of that repair is physics
+  \item \textbf{Whether physics helps} (\S\ref{sec:results}). A pure SEIR
+        decoder fails on every encoder, for reasons we measure. A gated SEIR head
+        appears to repair the three encoders that fail as published, but a
+        pre-registered control attributes 96--112\% of that repair to the
+        persistence anchor and none of it to the simulator
         (\S\ref{sec:rescue}).
   \item \textbf{An informational ceiling, measured} (\S\ref{sec:ceiling}).
         More than twenty architectural, data and physics levers leave the same

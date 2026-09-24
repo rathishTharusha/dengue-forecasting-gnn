@@ -124,8 +124,9 @@ Differences are paired at the origin unit, which is the only unit resampled from
   beaten.**
 - **Against the five published architectures** — comfortably better than STGAT, A3TGCN and
   DCRNN; **not** better than AAGCN or ASTGCN on the direct head. Behind the gated SEIR head
-  all six encoders land within 0.25 of each other (EXP-034); whether that repair is the SEIR
-  physics or the persistence anchor is tested in EXP-048 (`docs/RESCUE_PLAN.md`).
+  all six encoders land within 0.25 of each other (EXP-034). **EXP-048 shows that repair is the
+  persistence anchor, not the SEIR physics**: the same head without the simulator carries
+  96–112% of it, and the simulator is significantly worse on STGAT (`docs/RESCUE_PLAN.md`).
 - **Mean RMSE across these nine origins is not a usable summary.** Origin 0.40 is an outlier
   where every arm fails (140–227 RMSE against 13–48 elsewhere) and it dominates every mean.
   Read win counts and per-origin values; `seirgnn2/stats.py` prints wins beside every delta

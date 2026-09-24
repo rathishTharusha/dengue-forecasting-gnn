@@ -52,13 +52,15 @@ Point (ii) replicates on the corrected data, through a different mechanism,
 our earlier renewal-equation finding on the benchmark array: the reproduction
 number is about 26\% predictable out of sample.
 
-\textbf{The gated SEIR head stabilises every encoder.} Letting the simulator
-supply only the departure from persistence brings all six encoders to
+\textbf{The gated SEIR head repairs the failing encoders.} Letting the
+simulator supply only the departure from persistence brings all six encoders to
 17.44--17.69, within 0.25 of each other and below persistence on validation
 (17.86) and on test (35.50--35.84 against 36.02). For the three failing encoders
 this is a large repair, on 9/9 paired units each:
 STGAT $-5.70$ (test $-24.99$), A3TGCN $-10.95$ ($-24.90$) and DCRNN $-17.22$
-($-38.23$). It costs the working encoders 0.63--0.78 on validation.
+($-38.23$). It costs the working encoders 0.63--0.78 on validation. Read at face
+value, this is the physics-informed result the study set out to find. The next
+section shows that it is not.
 
 \subsection{Anchor, gate or physics?}
 \label{sec:rescue}
@@ -72,16 +74,31 @@ The rescue is credited to physics only if gated SEIR beats its no-physics twin o
 at least 7 of 9 units with $\padj<0.05$ on each failing encoder. Our stated
 prediction was that the anchor and gate carry most of the rescue.
 
-% RESCUE-RESULT: filled in from rescue.json (EXP-048) when the Kaggle grid returns.
-\emph{[Pending: EXP-048 is running. Table~\ref{tab:rescue} and this paragraph are
-generated when its results return.]}
+Table~\ref{tab:rescue} gives the result: \textbf{the rescue is the anchor, not
+the physics}. Anchor and gate alone account for 96--112\% of the validation repair
+on each failing encoder. A plain residual head, with no gate and no simulator,
+already brings them to 17.47--17.84. Adding the SEIR simulator to the gated
+head earns credit on none of the three. It is significantly \emph{worse} on
+STGAT ($+0.67$, 2/9, $\padj=0.047$), ties on A3TGCN ($-0.00$, 6/9), and helps
+DCRNN by $-0.68$ on only 3/9 units ($\padj=0.38$). On the three working
+encoders the simulator costs 0.74--0.88 on 0/9 units each. The best head for
+AAGCN on this grid is the gated head without physics (16.58 against the direct
+head's 16.76; $-0.18$, 8/9), a comparison we did not pre-register and report
+only as a lead. Our prediction was right that anchor and gate carry the repair
+(share $>0.8$). It was wrong that the simulator's effect would stay within
+$\pm0.3$, and wrong that the residual head would rescue less than the gated one.
+
+On test the picture reverses. The SEIR head beats its no-physics twin on the
+failing encoders (A3TGCN $-1.65$ and DCRNN $-3.33$, both 9/9; STGAT $-0.83$,
+7/9). That is the recurring disagreement of \S\ref{sec:valtest}. It was not used
+to decide anything, and we do not claim it.
 
 \subsection{What moves the metric}
 \label{sec:levers}
 Table~\ref{tab:levers} pairs every lever we tried against its own control, and
 Figure~\ref{fig:levers} shows the same deltas. Two levers improve validation
 consistently. The \textbf{negative-binomial likelihood} is the largest controlled
-gain: $-0.41$, 9/9, $\padj=0.018$, larger than any architecture difference. It
+gain: $-0.41$, 9/9, $\padj=0.016$, larger than any architecture difference. It
 corrects a bias, since squared error on $\log(1+y)$ targets a median while RMSE
 scores a mean.
 \textbf{Seasonal features} give the largest mean change ($-0.81$) but win only

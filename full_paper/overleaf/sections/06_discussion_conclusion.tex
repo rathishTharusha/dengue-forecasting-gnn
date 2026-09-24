@@ -4,18 +4,26 @@
 \section{Discussion}
 \label{sec:discussion}
 
-\textbf{Where physics helps a graph network.} On this target, physics cannot
-be the forecaster. A pure SEIR decoder inherits the unpredictability of its
-force of infection, and 14--16\% of targets lie out of its reach. It does help
-as \emph{structure}: gated onto persistence, the SEIR head makes every encoder
-we tried usable and interchangeable, repairing three published architectures
-that fail on their own. Section~\ref{sec:rescue} measures how much of that is the
-simulator and how much the anchor it is gated onto. Coupling districts inside
-the dynamics, as metapopulation GNNs do, does not help here, because
-transmission has almost no local spatial structure at district-week resolution.
-These results agree with our earlier work on the benchmark array, which found
-that mechanistic knowledge pays when it restricts a model, not when it supplies
-the prediction.
+\textbf{Where physics helps a graph network, and where it does not.} On this
+target the SEIR model cannot be the forecaster. A pure SEIR decoder inherits the
+unpredictability of its force of infection, and 14--16\% of targets lie out of its
+reach. The gated SEIR head seemed to show that physics could still help as
+structure, since it made every encoder usable and repaired three published
+architectures. The control in \S\ref{sec:rescue} removes that reading. The repair
+comes from anchoring the forecast to last week's value, which a residual head
+does without any mechanism, and on validation the simulator adds nothing or
+costs up to 0.9 RMSE. Coupling districts inside the dynamics, as metapopulation
+GNNs do, does not help either, because transmission has almost no local spatial
+structure at district-week resolution. The prior that matters here is the one
+the data already state, that next week looks like this week.
+
+Two findings keep the question open rather than closed. First, on test the SEIR
+head beats its no-physics twin on the failing encoders (up to $-3.33$, 9/9), and
+every gated SEIR arm we trained sits at or below persistence on test, in every
+grid where it appears; the direct models do so only in some. Second, the graph's advantage over the LSTM appears only inside the
+SEIR head. Neither survives our selection protocol, and we have argued that the
+protocol itself may be the reason (\S\ref{sec:valtest}). A test of either needs
+data nothing here has touched.
 
 \textbf{Why the ceiling is not architectural.} The target's own last value
 explains $r^2=0.85$ of the next, the best covariate 0.02, and what remains is a
@@ -27,12 +35,19 @@ cell will find a winner; a paired study finds noise. The NB likelihood is the
 exception, because it corrects what the objective targets rather than what the
 model sees.
 
-\textbf{What the evaluation taught us.} The benchmark array leaks future data
-through its row order and its climate channels. Our own first SEIR-GNN pipeline
-reported a win that did not survive a correct training loop. A validation span
-before each origin selects models that underperform anchored ones on test, in
-five grids. Two nine-origin confirmations disagree with each other. Each of these
-would have produced a publishable positive result had it gone unchecked.
+\textbf{What the evaluation taught us.} Each of the following would have
+produced a publishable positive result had it gone unchecked:
+\begin{itemize}\itemsep1pt
+\item the benchmark array leaks future data through its row order and its
+      climate channels;
+\item our own first SEIR-GNN pipeline reported a win that did not survive a
+      correct training loop;
+\item the gated SEIR head's repair of three encoders looked like physics and
+      was the anchor;
+\item a validation span before each origin selects models that underperform
+      anchored ones on test, in five grids;
+\item two nine-origin confirmations disagree with each other.
+\end{itemize}
 
 \textbf{Limitations.} One country and one disease at district-week resolution.
 Three origins cannot support claims at the origin unit, and our nine-origin
@@ -40,12 +55,15 @@ test spans were used twice, so they are not fresh. The two confirmations named
 different endpoints. Some earlier diagnostics (renewal predictability, Moran's
 $I$, the STGAT spatial penalty) were measured on the benchmark array and have
 not been rerun on the corrected data. The graph is the benchmark's hand-built
-adjacency; mobility data might couple districts differently.
+adjacency; mobility data might couple districts differently. The SEIR head uses
+fixed stage durations and one initial susceptible fraction for every district.
 
 \textbf{Next steps.} Clean confirmation needs data nothing here has touched: the
 weekly reports after March 2024. Before any such run we would pre-register a
 single endpoint, selection over several validation spans rather than one, and
-the gated SEIR-GNN, $B$ and SEIR-LSTM as the only finalists.
+four finalists: $B$, the gated head without physics, the gated SEIR-GNN and the
+SEIR-LSTM. That design would settle whether the simulator's test-set advantage
+is real.
 
 \section{Conclusion}
 We asked whether replacing the LSTM of an SEIR-informed forecaster with a graph
@@ -54,6 +72,7 @@ a corrected dataset, the answer is narrower than either literature suggests. The
 graph adds little on its own (0.07). The graph's advantage over the LSTM inside
 the SEIR head is consistent on three origins and not robust on nine. The largest
 controlled gain comes from the likelihood, not the architecture. Physics fails
-as a decoder for measurable, structural reasons, but a gated SEIR head
-stabilises every encoder. Code, pre-registrations, the experiment log and a
-reproduction notebook accompany this paper.
+as a decoder for measurable, structural reasons, and its apparent success as a
+gated head belongs to the persistence anchor it is gated onto. Code,
+pre-registrations, the experiment log and a reproduction notebook accompany this
+paper.

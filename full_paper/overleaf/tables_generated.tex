@@ -27,39 +27,40 @@ persistence & \multicolumn{3}{c}{17.86 / 36.02} \\
 \caption{Every lever, paired against its own control on matched (origin, seed) runs. $\Delta$ is validation RMSE (negative is better); wins count the 9 units where the arm is better; $p_{\text{adj}}$ is BH across this table. Test $\Delta$ is shown and decided nothing. With three origins these $p$-values describe run-to-run stability, not the series (\S\ref{sec:protocol}).}
 \label{tab:levers}
 \small
-\setlength{\tabcolsep}{3pt}
+\setlength{\tabcolsep}{1.8pt}
 \begin{tabular}{lrcrr}
 \toprule
 lever & $\Delta$ val & wins & $p_{\text{adj}}$ & $\Delta$ test \\
 \midrule
 \multicolumn{5}{l}{\emph{Worked}} \\
-\quad NB likelihood (vs squared error) & -0.41 & 9/9 & 0.018 & +1.57 \\
-\quad Seasonal features & -0.81 & 6/9 & 0.210 & +1.07 \\
-\quad Best model $B$ vs persistence & -2.20 & 9/9 & 0.018 & +1.54 \\
+\quad NB likelihood (vs squared error) & -0.41 & 9/9 & 0.016 & +1.57 \\
+\quad Seasonal features & -0.81 & 6/9 & 0.202 & +1.07 \\
+\quad Best model $B$ vs persistence & -2.20 & 9/9 & 0.016 & +1.54 \\
 \multicolumn{5}{l}{\emph{Graph and architecture}} \\
-\quad Graph (GCN vs no message passing) & -0.07 & 4/9 & 0.519 & -0.20 \\
-\quad Learned adjacency (adaptive) & -0.14 & 5/9 & 0.210 & -0.26 \\
+\quad Graph (GCN vs no message passing) & -0.07 & 4/9 & 0.513 & -0.20 \\
+\quad Learned adjacency (adaptive) & -0.14 & 5/9 & 0.202 & -0.26 \\
 \quad District seasonal curves & -0.01 & 6/9 & 0.918 & +0.48 \\
-\quad Nonlinear (MLP) head & +0.26 & 2/9 & 0.051 & +0.26 \\
-\quad Global context node & -0.07 & 5/9 & 0.633 & -0.36 \\
-\quad Residual head + NB & +0.33 & 4/9 & 0.387 & -2.99 \\
+\quad Nonlinear (MLP) head & +0.26 & 2/9 & 0.047 & +0.26 \\
+\quad Global context node & -0.07 & 5/9 & 0.629 & -0.36 \\
+\quad Residual head + NB & +0.33 & 4/9 & 0.375 & -2.99 \\
 \multicolumn{5}{l}{\emph{Literature remedies}} \\
-\quad RevIN (reversible normalisation) & +1.27 & 0/9 & 0.018 & -0.81 \\
-\quad District identity embedding & +0.06 & 4/9 & 0.727 & +2.19 \\
-\quad STID-style MLP & +0.71 & 2/9 & 0.060 & -1.22 \\
-\quad $k$-NN analogues (no network) & +0.87 & 0/9 & 0.018 & -3.20 \\
+\quad RevIN (reversible normalisation) & +1.27 & 0/9 & 0.016 & -0.81 \\
+\quad District identity embedding & +0.06 & 4/9 & 0.724 & +2.19 \\
+\quad STID-style MLP & +0.71 & 2/9 & 0.056 & -1.22 \\
+\quad $k$-NN analogues (no network) & +0.87 & 0/9 & 0.016 & -3.20 \\
 \quad Ensemble $B$ + NB-GLM + $k$-NN & -0.01 & 5/9 & 0.918 & -1.81 \\
 \multicolumn{5}{l}{\emph{Data}} \\
-\quad Half the training windows & +0.22 & 3/9 & 0.207 & +1.07 \\
-\quad TimeGAN augmentation & +0.53 & 1/9 & 0.056 & -0.02 \\
-\quad SEIR-simulated pre-training & -0.06 & 4/9 & 0.519 & +0.27 \\
-\quad Climate, lags 2--4 & +0.09 & 3/9 & 0.519 & +0.83 \\
-\quad Climate, lags 2--13 & +0.13 & 3/9 & 0.520 & +0.05 \\
+\quad Half the training windows & +0.22 & 3/9 & 0.196 & +1.07 \\
+\quad TimeGAN augmentation & +0.53 & 1/9 & 0.052 & -0.02 \\
+\quad SEIR-simulated pre-training & -0.06 & 4/9 & 0.513 & +0.27 \\
+\quad Climate, lags 2--4 & +0.09 & 3/9 & 0.513 & +0.83 \\
+\quad Climate, lags 2--13 & +0.13 & 3/9 & 0.516 & +0.05 \\
 \multicolumn{5}{l}{\emph{Physics}} \\
-\quad SEIR as auxiliary loss & -0.04 & 6/9 & 0.519 & -0.37 \\
-\quad Spatial physics penalty & -0.06 & 6/9 & 0.519 & +0.50 \\
-\quad Metapopulation vs gated SEIR head & +0.20 & 2/9 & 0.051 & +0.20 \\
-\quad Gated SEIR-GNN vs SEIR-LSTM & -0.17 & 9/9 & 0.018 & -0.04 \\
+\quad SEIR as auxiliary loss & -0.04 & 6/9 & 0.513 & -0.37 \\
+\quad SEIR simulator vs no-physics twin (AAGCN) & +0.88 & 0/9 & 0.016 & +2.03 \\
+\quad Spatial physics penalty & -0.06 & 6/9 & 0.513 & +0.50 \\
+\quad Metapopulation vs gated SEIR head & +0.20 & 2/9 & 0.047 & +0.20 \\
+\quad Gated SEIR-GNN vs SEIR-LSTM & -0.17 & 9/9 & 0.016 & -0.04 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -87,4 +88,26 @@ gated SEIR-GNN vs persistence & EXP-047 & -2.17 & 8/9 & 0.105 & -0.70 & 6/9 & 0.
 \end{tabular}
 \end{table*}
 
-% tab:rescue -- rescue.json not yet available (EXP-048 running on Kaggle).
+\begin{table}[t]
+\centering
+\caption{Anchor, gate or physics? Each encoder behind four heads that add, in turn, the persistence anchor, the learned gate and the SEIR simulator (mean validation RMSE; configuration of Table~\ref{tab:encoders}, all rerun together on Kaggle). The last two columns pair the gated SEIR head against its no-physics twin (\texttt{gated}); negative favours the physics, and the count is units where it wins.}
+\label{tab:rescue}
+\small
+\setlength{\tabcolsep}{2.5pt}
+\begin{tabular}{lrrrrrr}
+\toprule
+ & & & & gated & \multicolumn{2}{c}{SEIR $-$ gated} \\
+\cmidrule(lr){6-7}
+encoder & direct & resid. & gated & SEIR & val & test \\
+\midrule
+AAGCN & 16.76 & 16.75 & 16.58 & 17.46 & +0.88 (0/9) & +2.03 (0/9) \\
+ASTGCN & 16.83 & 16.78 & 16.74 & 17.48 & +0.74 (0/9) & +0.95 (3/9) \\
+LSTM & 16.91 & 16.95 & 16.94 & 17.69 & +0.74 (0/9) & -0.34 (6/9) \\
+STGAT & 23.32 & 17.84 & 16.95 & 17.62 & +0.67 (2/9) & -0.83 (7/9) \\
+A3TGCN & 28.63 & 17.47 & 17.68 & 17.68 & -0.00 (6/9) & -1.65 (9/9) \\
+DCRNN & 34.78 & 17.49 & 18.36 & 17.68 & -0.68 (3/9) & -3.33 (9/9) \\
+\midrule
+persistence & \multicolumn{4}{c}{17.86} & & \\
+\bottomrule
+\end{tabular}
+\end{table}

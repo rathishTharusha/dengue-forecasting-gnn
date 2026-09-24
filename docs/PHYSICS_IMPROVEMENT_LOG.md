@@ -258,8 +258,13 @@ epidemic also depletes S during ordinary years.
 | 0.85 | 30.3 | 31.0 | win |
 | 0.90 | 31.8 | 32.9 | win |
 
-Seven wins, two losses, and both losses are the windows containing the 2017
-DENV-2 epidemic and its collapse. Everywhere else the mechanism is ahead.
+Seven wins, two losses. **Correction to an earlier draft of this log: the two
+losing windows are not the 2017 epidemic.** Origin 0.55 covers 2019-05 to
+2019-11, when national cases rise from 1386 to 2566 a week - the 2019 DENV-3
+epidemic - and the model under-predicts it (bias -12.9). Origin 0.60 covers
+2019-11 to 2020-06, when cases collapse from 3057 to 299 a week as the
+COVID-19 lockdown begins, and the model over-predicts it (bias +19.8).
+Everywhere else the mechanism is ahead.
 
 **Why damping cannot cross the line.** As alpha goes to zero the forecast
 becomes persistence exactly, so damping interpolates between the mechanism and
@@ -289,14 +294,29 @@ Under rule R4 such an arm is an oracle and is never a forecaster.
 | oracle w52 | yes | 26.94 | 29.59 | 14.74 | +1.05 | 5/9 |
 | persistence | - | - | **28.54** | **13.94** | - | - |
 
-**The oracle is worth nothing.** With the switch dates: 28.81. Without them, the
-same model: 28.74. On the fold it was meant to repair, origin 0.60, the oracle
-scores 57.2 against persistence's 48.7 - the same failure.
+**On average the oracle is worth nothing** - 28.81 with the switch dates against
+28.74 for the same model without them - but the average hides two opposite
+effects, and they are the interesting part.
 
-So the 2017 epidemic is not unforecastable merely because the serotype switch is
-invisible. Knowing that a new serotype arrived does not tell a model how large
-the epidemic will be or when it will turn, and those are what the error is made
-of.
+| origin | period | what happens | damped | with serotype | persistence |
+|---|---|---|---|---|---|
+| 0.55 | 2019-05 to 2019-11 | epidemic **rises** 1386 -> 2566 | 46.6 | **44.4** | 45.5 |
+| 0.60 | 2019-11 to 2020-06 | cases **collapse** 3057 -> 299 | 59.7 | 60.6 | 48.7 |
+
+At the epidemic-growth window the serotype date converts a loss into a win: the
+model goes from 46.6 to 44.4 and passes persistence's 45.5, and its
+under-prediction bias shrinks from -12.9 to -9.8. That is the first time any arm
+in this project has beaten the floor on a growth window.
+
+At the collapse window it does nothing, because the collapse is not
+epidemiological. Cases fall by 90% as the COVID-19 lockdown begins in March
+2020. No compartmental model can anticipate that from case history, and our
+model over-predicts with a bias of +19.8 while persistence, which only lags by a
+week, over-predicts less.
+
+So the honest statement is narrower and more useful than "serotype data will not
+help": **serotype timing helps where epidemics start, and nothing epidemiological
+helps where policy stops one.**
 
 **Caveat on what was tested.** This oracle is crude: two dates, restarting the
 depletion clock. Real surveillance would give serotype proportions per district

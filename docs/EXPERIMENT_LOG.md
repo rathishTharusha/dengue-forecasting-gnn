@@ -37,6 +37,31 @@ Copy this block for a new entry:
 > `CEILING_R0_MAX`) survived the cleanup and now lives in `dengue_gnn.seir`, still
 > asserted by `tests/test_seir.py` and reproduced by `scripts/verify_seir_paper.py`.
 
+## EXP-037 — Stage S8 re-run against the actual seroprevalence survey
+- **Date:** 2026-09-24
+- **Who:** Praveen De Silva
+- **Commit:** see this entry's commit
+- **Notebook / script:** `analysis/_build/run_s8_seroprevalence.py`
+- **Hardware:** Local CPU, no training
+- **Config:** implied cumulative infected fraction = cumulative reported cases / (rho * N) at the survey midpoint, rho = 1/11, week 496 (2022-12-17); survey figures read from `data/external/seroprevalence_nine_districts.csv`, `10-20 (all)` row per district
+- **Question:** does the model's implied cumulative infection rank districts the way the IgG survey does?
+- **Result:** **Spearman rho = 0.6833, p = 0.0424** across the nine surveyed districts.
+
+  | district | implied fraction | surveyed seroprevalence |
+  |---|---|---|
+  | Badulla | 0.1319 | 0.1420 |
+  | Gampaha | 0.2961 | 0.3060 |
+  | Jaffna | 0.5111 | 0.3130 |
+  | Kandy | 0.2977 | 0.1703 |
+  | Kurunegala | 0.1654 | 0.1550 |
+  | Matara | 0.2140 | 0.1620 |
+  | Polonnaruwa | 0.0907 | 0.2802 |
+  | Ratnapura | 0.2099 | 0.3000 |
+  | Trincomalee | 0.3286 | 0.5430 |
+
+- **Verdict:** answered, and it **supersedes the S8 result recorded in EXP-030** (rho = 0.2500, p = 0.5165).
+- **Notes:** EXP-030 did not use this survey. The script held nine values typed inline, under a comment reading "example reported rates / survey reference values": Colombo 0.682, Gampaha 0.540, Kalutara 0.490, Kandy 0.450, Galle 0.420, Jaffna 0.380, Kurunegala 0.350, Ratnapura 0.320, Batticaloa 0.310. Four of those districts - Colombo, Kalutara, Galle, Batticaloa - were never sampled by the survey, and the five that were carry different figures (Gampaha 0.306, Kandy 0.170, Kurunegala 0.155, Jaffna 0.313, Ratnapura 0.300). The cumulative window also ended at week 480, which is 2022-08-27 rather than the December midpoint the docstring claimed. Both are fixed here, and the corrected comparison is the stronger result: a real, significant rank correlation in place of a null one. The two quantities still measure different things - the survey covers ages 10-20 and lifetime exposure, the model the whole population from 2013 - so only the ranking is interpretable, and under rule R4 this stage stays validation only.
+
 ## EXP-031 — Stage S9 Confirmatory Evaluation and Primary Endpoint Test
 - **Date:** 2026-09-15
 - **Who:** Group 05

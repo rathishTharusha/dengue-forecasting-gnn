@@ -72,11 +72,21 @@ Copy this block for a new entry:
 - **Notes:**
   1. **The metapopulation head ties SEIR-LSTM** (-0.01 test, +0.51 val). Coupling
      districts inside the dynamics adds nothing measurable over the LSTM.
-  2. **The gated SEIR-GNN beats SEIR-LSTM in the same direction a second time.** EXP-038:
-     ASTGCN + foi_res -0.75, 8/9, p 0.012, p_adj 0.059. Here: AAGCN + foi_res -0.41, 6/9,
-     p 0.031, p_adj 0.125. Different encoder, same sign, raw p under 0.05 both times,
-     neither clearing the correction. The two runs share the nine test spans, so they are
-     not independent replications. Report it as a consistent directional advantage.
+  2. **SEIR-GNN vs SEIR-LSTM is not consistent across the two nine-origin runs.** (Corrected
+     the same day: this note first paired EXP-038's validation delta with this run's test
+     delta and called them the same direction.) Matched metric by matched metric:
+
+     | run | encoder | val delta | val wins | test delta | test wins |
+     |---|---|---|---|---|---|
+     | EXP-038 | ASTGCN + foi_res | -0.75 (p 0.012) | 8/9 | **+0.23** (p 0.41) | 4/9 |
+     | EXP-047 | AAGCN + foi_res | -0.01 (p 0.996) | 6/9 | -0.41 (p 0.031) | 6/9 |
+
+     Each run wins on one metric and not the other, and on different metrics. EXP-038's
+     endpoint was validation RMSE; this plan's was test RMSE ("as plan S9") -- the two
+     confirmations did not use the same endpoint, which is itself a flaw in the
+     pre-registration and is recorded here. What does hold: on the three-origin validation
+     screens the gated graph beats the LSTM 9/9 twice (EXP-035 ASTGCN -0.62; EXP-046 AAGCN
+     -0.17), but three origins cannot reach significance at the origin unit.
   3. **The validation/test disagreement of EXP-045 note 4, a fifth time.** B has the best
      validation (38.29) and the worst test (33.21, behind persistence 31.76); P3 has the
      best test (31.06, the only arm below persistence by more than 0.5) with validation 0.75

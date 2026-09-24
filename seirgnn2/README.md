@@ -233,10 +233,10 @@ wins beside every delta. See EXP-038 note 3.
 The SEIR-GNN vs SEIR-LSTM result survives that scrutiny: 8/9 origins, winning at
 0.40 *and* on seven of the other eight, so it is not outlier-driven.
 
-**Second nine-origin run (EXP-047), AAGCN encoder, test RMSE:** gated SEIR-GNN vs
-SEIR-LSTM **−0.41, 6/9, p = 0.031, p_adj = 0.125** (origin_seed unit 18/27, p = 0.0003).
-Same sign as EXP-038 with a different encoder; again short of the corrected bar. The two
-runs share test spans, so they are not independent replications. The metapopulation
+**Second nine-origin run (EXP-047), AAGCN encoder:** gated SEIR-GNN vs SEIR-LSTM on
+test **−0.41, 6/9, p = 0.031, p_adj = 0.125**; on validation −0.01, 6/9. EXP-038 on test
+was **+0.23, 4/9** (the graph lost). So the two nine-origin runs disagree on both metrics
+— the SEIR-GNN advantage is not robust across encoders and metrics. The metapopulation
 head ties SEIR-LSTM (−0.01, 4/9).
 
 Absolute levels on the nine origins are much higher (persistence 41.21 vs 17.86)

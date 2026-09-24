@@ -37,6 +37,83 @@ Copy this block for a new entry:
 > `CEILING_R0_MAX`) survived the cleanup and now lives in `dengue_gnn.seir`, still
 > asserted by `tests/test_seir.py` and reproduced by `scripts/verify_seir_paper.py`.
 
+## EXP-036 — What serotype timing is worth, and which windows the arm loses
+- **Date:** 2026-09-24
+- **Who:** Praveen De Silva
+- **Commit:** `29bf588`
+- **Notebook / script:** `analysis/_build/oracle_serotype.py`
+- **Hardware:** Local CPU, 6 workers, pinned stack (torch 2.1.2 / PyG 2.4.0)
+- **Config:** 7 arms x 9 disjoint origins x 3 seeds = 189 models; susceptible depletion restarted at the published serotype emergence weeks 168 (DENV-2, 2016-09) and 328 (DENV-3, 2019-09); oracle arms under rule R4, never finalists
+- **Question:** the arm loses on two of nine origins - is serotype blindness the cause, and what would surveillance buy?
+- **Result:** averaged over nine origins the oracle buys nothing (28.81 with the dates, 28.74 without). The average hides two opposite effects.
+
+  | origin | period | national cases | damped | + serotype | persistence |
+  |---|---|---|---|---|---|
+  | 0.55 | 2019-05 to 2019-11 | rising 1386 -> 2566 | 46.6 | **44.4** | 45.5 |
+  | 0.60 | 2019-11 to 2020-06 | collapsing 3057 -> 299 | 59.7 | 60.6 | 48.7 |
+
+  At the growth window the serotype date turns a loss into a win - the first time any arm in this project has beaten the persistence floor on a rising epidemic - and the under-prediction bias falls from -12.9 to -9.8. At the collapse window it changes nothing: that window is the COVID-19 lockdown, and the model over-predicts with bias +19.8.
+- **Verdict:** answered. Serotype timing helps where epidemics start; nothing epidemiological helps where policy stops one.
+- **Notes:** this corrects an earlier draft that attributed both losing windows to the 2017 epidemic. The oracle tests switch *timing* only; per-district serotype proportions carry more and remain untested.
+
+## EXP-035 — Damped mechanistic correction on top of persistence
+- **Date:** 2026-09-24
+- **Who:** Praveen De Silva
+- **Commit:** `2dd4e76`
+- **Notebook / script:** `analysis/_build/persistence_plus.py`
+- **Hardware:** Local CPU, 6 workers
+- **Config:** forecast = persistence x (mechanism / persistence)^alpha, alpha learned on training data; also a learned cap on the deviation, and waning immunity over 26 / 52 / 104 weeks; 9 origins x 3 seeds
+- **Question:** the mechanism's forecast is persistence plus a correction - can the correction be made safer rather than larger?
+- **Result:** damping gives the best arm in the project: test RMSE 29.15 against 30.01 for the undamped model, better on 7/9 origins, p = 0.07, and it repairs most of the failure fold (64.9 -> 59.7). Learned alpha is 0.27-0.49, so the model applies about a third of its own correction. Combined with waning immunity: **28.74 RMSE, 14.14 MAE** against the persistence floor of 28.54 / 13.94, statistically level (+0.20, p = 0.90). A learned cap changes nothing; waning immunity alone is worse (29.79).
+- **Verdict:** answered. Damping cannot cross the floor by construction - as alpha goes to zero the forecast becomes persistence - so this family's ceiling is persistence itself.
+- **Notes:** CSV at `analysis/results/seir_gnn/s5_v2/persistence_plus_runs.csv`.
+
+## EXP-034 — Horizon sweep: the mechanism does not pay off further out
+- **Date:** 2026-09-23
+- **Who:** Praveen De Silva
+- **Commit:** `606c121`
+- **Notebook / script:** `analysis/_build/horizon_sweep.py`
+- **Hardware:** Local CPU, 6 workers
+- **Config:** horizons 3 / 6 / 12 weeks, window 3, 9 disjoint origins x 3 seeds, physics vs the same encoder without SEIR vs persistence; 162 models
+- **Question:** at three weeks the forecast is mostly the incubation pipeline draining and the fitted model is subcritical (R_eff ~ 0.42) - does the mechanism pull ahead once the pipeline empties?
+- **Result:**
+
+  | horizon | physics | persistence | no physics | physics - persistence | origins won | p |
+  |---|---|---|---|---|---|---|
+  | 3 | 29.60 | 28.54 | 47.76 | +1.06 | 4/9 | 0.32 |
+  | 6 | 38.32 | 36.04 | 50.44 | +2.29 | 3/9 | 0.055 |
+  | 12 | 46.31 | 45.08 | 55.34 | +1.23 | 5/9 | 0.30 |
+
+  Persistence is ahead at every horizon and the two degrade at the same rate (1.56x against 1.58x from 3 to 12 weeks). The SEIR layer still beats the no-physics control at every horizon: -18.16, -12.11, -9.02, 8/9 origins each, p <= 0.012.
+- **Verdict:** answered, prediction falsified. The limit is not the horizon.
+- **Notes:** CSV at `analysis/results/seir_gnn/s5_v2/horizon_sweep_runs.csv`.
+
+## EXP-033 — The SEIR layer is worth 39% of the error
+- **Date:** 2026-09-23
+- **Who:** Praveen De Silva
+- **Commit:** `f104646`
+- **Notebook / script:** `analysis/_build/run_s5_seir_gnn_v2.py --arm v2 v2_mech`, `analysis/_build/phys_lab.py --variant v2_direct`
+- **Hardware:** Local CPU, 6 workers
+- **Config:** identical encoder, loss, normalisation and 400-epoch budget, with and without the SEIR simulator in the prediction path; 9 origins x 3 seeds
+- **Question:** does the physics earn its place, or was it only ever a handicap?
+- **Result:** with SEIR 30.04 test RMSE, without it 49.45 - **-19.41, better on 8/9 origins, p = 0.0078**, a 39% lower error. The no-physics arm scores 38.23 on validation and 49.45 on test, so it fits what it has seen and extrapolates badly; the mechanism removes that freedom. Freezing the encoder instead (`v2_mech`, physics with one learned transmission rate) scores the same as the full model, p = 0.97.
+- **Verdict:** answered. The mechanism is the single largest source of accuracy in the model; the graph network on top of it is worth nothing measurable.
+- **Notes:** the original arm lost to its own `direct` control because a *mis-specified* mechanism is a hard constraint pointing the wrong way.
+
+## EXP-032 — Four defects in the Stage-S5 physics, corrected
+- **Date:** 2026-09-23
+- **Who:** Praveen De Silva
+- **Commit:** `757f98d`, replication `6440a9c`
+- **Notebook / script:** `analysis/_build/run_s5_seir_gnn_v2.py` (new; `run_s5_seir_gnn.py` untouched and reproduced by `--arm baseline`)
+- **Hardware:** Local CPU, 6 workers, pinned stack built by `reproduction/verify_local.py --env-only`
+- **Config:** STGAT, window 3 -> horizon 3, `rebuilt`, 3 and 9 origin protocols, seeds 0/1/2 and 3/4/5, MSE loss, training-only normalisation, 400 epochs, early stopping on validation RMSE
+- **Question:** the physics arm lost to its own no-physics control - is the physics wrong, or is physics the wrong idea?
+- **Result:** four defects, each tested alone. (1) compartments built from weekly flows rather than standing stocks, a structural factor-of-two under-prediction: 28.16 -> 25.28 validation RMSE. (2) ten years of cumulative cases subtracted from S, which assumes lifelong immunity to a four-serotype disease: 24.03 -> 19.29, and the prediction bias disappears (39.6 predicted against 40.5 true, from 17.4). (3) no mass action, so no epidemic growth: 25.28 -> 24.03. (4) reporting rate frozen at 1/11 against a published range of 1/2.5 to 1/30: 19.29 -> 17.90. Plus learned stock factors and rates, 17.68 -> 17.29, and squared error instead of SMAPE.
+
+  Confirmatory, 9 disjoint origins x 3 seeds: **test RMSE 50.13 -> 29.86, better on 9/9 origins, p = 0.0039**. Replicated on `reordered` (451 weeks, artifact windows excluded): 55.70 -> 30.65, better on all three origins, with the persistence floor computed there matching the published 31.089.
+- **Verdict:** answered. Still not better than persistence (+1.3 RMSE, 7/9 origins, p = 0.92).
+- **Notes:** ~40 variants, failures included, in `docs/PHYSICS_IMPROVEMENT_LOG.md`; per-run CSV in `analysis/results/seir_gnn/s5_v2/`.
+
 ## EXP-031 — Stage S9 Confirmatory Evaluation and Primary Endpoint Test
 - **Date:** 2026-09-15
 - **Who:** Group 05

@@ -135,6 +135,46 @@ to its all-ages count and every column to the table's total. The source is
 itself inconsistent in two places (Jaffna 31.3% stated vs 36.1% implied by its
 age groups; Trincomalee 54.3% vs 56.5%); both are recorded, not corrected.
 
+## 6. COVID-19 policy stringency — OxCGRT
+
+| | |
+|---|---|
+| **Official source** | Oxford COVID-19 Government Response Tracker, Blavatnik School of Government, University of Oxford |
+| **File used** | `data/timeseries/stringency_index_avg.csv` from https://github.com/OxCGRT/covid-policy-tracker (Sri Lanka row, `country_code = LKA`, `jurisdiction = NAT_TOTAL`) |
+| **Coverage** | daily, 2020-01-01 to 2022-12-31, index 0–100, national only |
+| **Licence** | CC BY 4.0 — cite the tracker |
+| **Available in real time?** | **Yes.** Published within days of each policy change, so a forecaster at the time could have used it. This is a covariate under rule R2, not hindsight under R4 |
+| **Builder** | `python analysis/_build/fetch_covid_response.py` → `data/external/covid_response_weekly.csv` |
+
+## 7. Mobility — Google COVID-19 Community Mobility Reports
+
+| | |
+|---|---|
+| **Official source** | https://www.google.com/covid19/mobility/ (archive) |
+| **Files used** | `https://www.gstatic.com/covid19/mobility/{2020,2021,2022}_LK_Region_Mobility_Report.csv` |
+| **Coverage** | daily, 2020-02-15 to 2022-10-15, six place categories, percent change from a pre-pandemic baseline |
+| **Granularity** | **national only** — Google published no sub-region rows for Sri Lanka, so every district carries the same value. It can explain national timing, never spatial differences |
+| **Licence** | free to use with attribution |
+| **Available in real time?** | Yes, published with a few days' lag |
+
+**Why these two are here.** The largest single loss in the frozen 9-origin
+protocol is the window 2019-11 to 2020-06, where national cases collapse from
+3057 to 299 a week while the model over-predicts with a bias of +19.8 (EXP-035,
+EXP-036). The collapse is not epidemiological. In the weekly table the turn is
+unmistakable: 2020-03-07 carries stringency 12 and 462 cases; 2020-03-14 carries
+stringency 68, workplace mobility −33%, and 245 cases; by 2020-04-04, stringency
+100 and 79 cases.
+
+**Weeks outside the coverage are left `NaN`, never zero-filled** (rule R3). A
+model may choose to treat pre-2020 stringency as 0 on the grounds that such
+policies did not exist, but that is a modelling decision and stays in the model.
+
+**Manual check (2 minutes):** open the OxCGRT file, find the `LKA` row, and
+compare any date with the `stringency_index` column of
+`data/external/covid_response_weekly.csv` for the week containing it. The weekly
+value is the mean of that week's days, and `stringency_days` records how many
+days were available.
+
 ---
 
 ## What is excluded, and why

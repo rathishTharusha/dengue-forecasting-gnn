@@ -50,6 +50,11 @@ SOURCES = {
     "disease_modeling_MLOS2/Data": "Authors' repository sample files and GADM 4.1 boundaries -- "
                                    "https://github.com/MLOpenSourceOpenScience/disease_modeling_MLOS2",
     "wer": "Epidemiology Unit Weekly Epidemiological Reports -- https://www.epid.gov.lk/storage/post/pdfs/",
+    "oxcgrt": "Oxford COVID-19 Government Response Tracker, daily stringency index (CC BY 4.0) -- "
+              "https://raw.githubusercontent.com/OxCGRT/covid-policy-tracker/master/data/timeseries/"
+              "stringency_index_avg.csv",
+    "google_mobility": "Google COVID-19 Community Mobility Reports, Sri Lanka -- "
+                       "https://www.gstatic.com/covid19/mobility/<year>_LK_Region_Mobility_Report.csv",
 }
 DCS_POPULATION_PDF_URL = ("https://www.statistics.gov.lk/Resource/en/Population/Vital_Statistics/"
                           "Mid-year_population_by_district_and_sex_2024.pdf")

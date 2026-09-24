@@ -36,8 +36,10 @@ def setup():
     fold = next(f for f in core.build_folds(data.cases, data.missing) if f.origin == 0.70)
     origin = int(fold.idx["val"][5])
     # Exactly what train.run_fold does before building tensors with lag blocks.
-    one = core.with_history(dataclasses.replace(fold, idx={**fold.idx, "val": np.array([origin])}),
-                            max(b for _, b in BLOCKS))
+    one = core.with_history(
+        dataclasses.replace(fold, idx={**fold.idx, "val": np.array([origin])}),
+        max(b for _, b in BLOCKS),
+    )
     return data, one, origin
 
 

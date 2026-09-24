@@ -43,17 +43,18 @@ def test_batched_equals_one_sample_at_a_time():
 
 def test_coupling_moves_infection_across_districts():
     state, beta, _ = _setup(batch=1, n=2)
-    state[0, 1, 1:3] = 0.0                      # district 1 starts with no E and no I
+    state[0, 1, 1:3] = 0.0  # district 1 starts with no E and no I
     iso = torch.eye(2)
     mix = torch.tensor([[0.5, 0.5], [0.5, 0.5]])
     _, a, _ = seir_sim.simulate_closed_loop(state, beta, 0.1, 1 / 7, coupling=iso)
     _, b, _ = seir_sim.simulate_closed_loop(state, beta, 0.1, 1 / 7, coupling=mix)
-    assert float(a[0, 1].sum()) == 0.0          # isolated: nothing ever arrives
-    assert float(b[0, 1].sum()) > 0.0           # coupled: it does
+    assert float(a[0, 1].sum()) == 0.0  # isolated: nothing ever arrives
+    assert float(b[0, 1].sum()) > 0.0  # coupled: it does
 
 
 def test_foi_meta_coupling_starts_at_the_border_graph():
     import models
+
     fixed = torch.softmax(torch.rand(25, 25), -1)
     net = models.Net(7, 25, head="foi_meta", backbone="gcn")
     c = torch.softmax(torch.log(fixed.clamp_min(1e-9)) + net.c_logit, -1)

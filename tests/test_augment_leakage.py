@@ -45,13 +45,17 @@ def _same(a: dict, b: dict) -> None:
 
 def test_seir_generator_ignores_validation_and_test(pair):
     data, tampered, fold = pair
-    _same(augment.synth_seir(data, fold, 40, seed=3), augment.synth_seir(tampered, fold, 40, seed=3))
+    _same(
+        augment.synth_seir(data, fold, 40, seed=3), augment.synth_seir(tampered, fold, 40, seed=3)
+    )
 
 
 def test_calibrated_seir_ignores_validation_and_test(pair):
     data, tampered, fold = pair
-    _same(augment.synth_seir(data, fold, 40, seed=3, calibrated=True),
-          augment.synth_seir(tampered, fold, 40, seed=3, calibrated=True))
+    _same(
+        augment.synth_seir(data, fold, 40, seed=3, calibrated=True),
+        augment.synth_seir(tampered, fold, 40, seed=3, calibrated=True),
+    )
 
 
 def test_timegan_ignores_validation_and_test(pair):

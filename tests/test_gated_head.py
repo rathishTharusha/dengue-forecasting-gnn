@@ -21,6 +21,7 @@ sys.path.insert(0, str(REPO / "seirgnn2"))
 
 def _net(head):
     import models
+
     torch.manual_seed(0)
     return models.Net(7, 5, head=head, backbone="gcn")
 

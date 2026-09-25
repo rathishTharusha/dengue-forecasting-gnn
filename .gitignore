@@ -147,3 +147,6 @@ ehthumbs.db
 # Reference PDFs downloaded for the literature review (copyrighted; manifest.csv has the URLs).
 literature/pdfs/
 seirgnn2/results/*.pkl
+
+# Kaggle dataset of original source files (built by full_paper/kaggle/fetch_sources.py)
+full_paper/kaggle/dataset/

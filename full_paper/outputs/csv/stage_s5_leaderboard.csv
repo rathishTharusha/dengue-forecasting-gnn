@@ -1,6 +1,0 @@
-Model,Type,Head,val_RMSE,test_RMSE
-Persistence Floor,Baseline,Naive,17.25,33.87
-LSTM,Baseline,Direct,23.79,65.91
-A3T-GCN,Baseline GNN,Direct,29.81,63.15
-STGAT (Direct),GNN,Direct,30.64,83.99
-SEIR-GNN (Proposed),Physics-GNN,FOI Physics,27.21,71.8

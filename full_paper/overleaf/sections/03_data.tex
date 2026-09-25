@@ -16,19 +16,23 @@ spanning the full series, so it includes training data. RMSE is averaged per
 window rather than pooled, which on this target is $\sim$39\% lower. No naive
 baseline is reported, and adding persistence to that same column reverses the
 ranking: it beats \emph{every} model on MAE and RMSE. An independent
-re-implementation that shares no code with either codebase reproduces this.
+re-implementation that shares no code with either codebase reproduces this. This
+reproduction runs the authors' own code in its pinned environment and is
+packaged separately (\texttt{reproduction/} in the repository); everything from
+\S\ref{sec:audit} on is produced by the reproduction notebook.
 
 \subsection{Auditing the benchmark array}
 \label{sec:audit}
 The benchmark array (\texttt{sri\_lanka\_2013-2022\_shifted.npy}) has no date
-axis. We dated every row against the 552 weekly epidemiological reports it was
-built from, and dated the climate channels against ERA5 reanalysis and the
-authors' own raw satellite files. Table~\ref{tab:audit} lists what we found.
+axis. We dated every row by matching its 25 district counts exactly against the
+weekly reports, and dated the weather channels separately by finding the
+calendar offset at which the array's temperature best matches ERA5.
+Table~\ref{tab:audit} lists what that shows.
 
 \begin{table}[t]
 \centering
-\caption{Audit of the benchmark array. Each finding is confirmed against the
-source reports or an independent reanalysis.}
+\caption{Audit of the benchmark array, recomputed by the reproduction notebook
+from the original files.}
 \label{tab:audit}
 \small
 \setlength{\tabcolsep}{3pt}
@@ -36,51 +40,47 @@ source reports or an independent reanalysis.}
 \toprule
 finding & consequence \\
 \midrule
-Rows 0--47 are 2023; the rest run 2013--2022 & every training split of the
-standard protocol contains data from \emph{after} its test period \\
-Case column reordered, climate not & cases sit beside weather from a different
-week, drifting to 48--55 weeks apart by 2019 \\
-``Lagged'' precipitation and canopy channels & match ERA5 best 12--13 weeks
-\emph{later}; min-NDVI best 9--18 weeks later: future information \\
-49 source reports missing, one week duplicated & 2014 half missing; 2022 stops
-in March \\
-Week-395 ``19$\times$ spike'' & a formula dragged across one printed table
-(15 of 24 cells are each the sum of the two before); the same table's cumulative row gives the
-true count \\
-4\% of weather values are zero-filled & Jaffna's columns are all zero: it gets no
-grid cells in the authors' aggregation \\
+Rows 0--47 are 2023; rows 51 onward run 2013--2022 & 45 rows from 2023 sit in
+the training split of every fold, which tests on 2018--2022 \\
+Cases reordered, weather not & the array's temperature matches ERA5 at
+$r = 0.95$ on its own row order and $r = 0.45$ on the dates the case rows carry \\
+``Lag 12'' precipitation & matches ERA5 rain 12 weeks \emph{later}
+($r = 0.68$) and not 12 weeks earlier ($r = 0.19$): future information \\
+48 reports dropped, one week stored twice & 454 of 459 rows equal a published
+report exactly \\
+Week-395 ``19$\times$ spike'' & row A of one printed table is a dragged formula
+(15 of 24 cells are the sum of the two before, districts sum to 7,165 against a
+national cell of 35); the same table's cumulative row gives the true count \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 Two of these are information leaks. Training on 2023 while testing on
-2018--2022 lets a model see the future of its test period. ``Lagged'' climate
-channels that carry rainfall and vegetation from three to four months ahead
-give it that future's weather. Any score on this array, including the
-published ones and our own earlier work, is therefore an optimistic bound.
-Earlier drafts of this study called the week-395 spike an administrative
-reporting backlog. It is a spreadsheet error, and it can be corrected from the
-same published table.
+2018--2022 lets a model see the future of its test period, and a ``lagged''
+rainfall channel that holds rain from twelve weeks ahead gives it that future's
+weather. Any score on this array, including the published ones and our own
+earlier work, is therefore an optimistic bound. Earlier drafts of this study
+called the week-395 spike an administrative reporting backlog. It is a
+spreadsheet error, and it can be corrected from the same published table.
 
 \subsection{The corrected dataset}
 \label{sec:corrected}
-We rebuilt the case series from every source report, keyed by report volume and
-number: 559 weeks from 2013-W26 to 2024-W10. The seven weeks with no report stay
-missing and are never interpolated. All 451 weeks the array shares with the
-rebuilt series match exactly, so the array's values were correct and only their
-order and coverage were wrong. Covariates are aligned row for row: ERA5
-temperature, precipitation, humidity and soil moisture for each district;
-MODIS NDVI taken \emph{as of} each week, so a composite counts only after its
-release; and population using the previous year's official figure.
+Every input is an original file, checked against the SHA-256 recorded when it
+was first retrieved: the parsed Table~1 rows of every Weekly Epidemiological
+Report, the one report PDF used for the correction, ERA5 daily responses from
+the Open-Meteo archive, and the Department of Census and Statistics population
+and census PDFs. From these the case series is rebuilt, keyed by report volume
+and number: 559 weeks from 2013-W26 to 2024-W10. The seven weeks with no report
+stay missing and are never interpolated; districts plus the Kalmunai division
+equal the Epidemiology Unit's own national total in 432 of 552 reports. Weekly
+ERA5 temperature, precipitation, humidity and soil moisture are aggregated from
+daily values at an interior point of each district, and each week's population
+is the latest official figure for an earlier year (the 2012 Census, whose 25
+district totals sum exactly to the national total, then mid-year estimates).
 
-Lags are applied in the model, not baked into the data: cases up to $t-1$,
-climate up to $t-2$, and NDVI and population as of $t$. A test perturbs every
-input value at or after each limit and asserts that no model input moves, and
-every new input path in this study received its own such test. The
-2022--23 serosurvey and serotype-switch dates are used for validation only.
-Unless stated otherwise, every number from here on is on this dataset. The
-persistence test RMSE on the frozen three origins (averaged over origins, as for
-every model) moves from 44.80 (29.52 with the week-395 windows excluded) on the
-array to \textbf{36.02}, and it reproduces exactly when recomputed from the raw
-series. The last test
-fold now covers the 2023 epidemic.
+Lags are applied in the model, not baked into the data: a forecast for week $t$
+reads cases up to $t-1$ and climate up to $t-2$, since ERA5 is published about
+five days late. On this series the persistence test RMSE on the frozen three
+origins (averaged over origins, as for every model) is \textbf{36.02}, against
+44.80 on the array (29.52 with the week-395 windows excluded). The last test
+fold covers the 2023 epidemic.

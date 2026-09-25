@@ -1,7 +1,11 @@
 # Data in this package
 
-Everything the reproduction notebook (`../reproduce_full_paper.ipynb`) reads, plus the
-source tables it was built from. The authoritative provenance, with download steps, is
+**The reproduction notebook does not read these files.** It rebuilds everything from the
+original sources in its Kaggle dataset (`../kaggle/fetch_sources.py` builds it; see
+`../README.md`). The tables here are reference copies of the derived data, for reading
+without running anything. The notebook's rebuild matches the repository's corrected data
+(`data/corrected/`, which `rebuilt_*.csv` export) exactly for cases, and to within 3e-5 for
+climate (float rounding). The authoritative provenance, with download steps, is
 `docs/DATA_PROVENANCE.md` and `docs/ARRAY_AUDIT.md` in the repository.
 
 > **Corrected on 2026-09-25.** An earlier version of this file said that missing weeks
@@ -10,11 +14,11 @@ source tables it was built from. The authoritative provenance, with download ste
 > serosurvey was Tissera et al. (2020). None of that matches the data. The descriptions
 > below do.
 
-## Files the notebook uses
+## The corrected series
 
 | file | what it is |
 |---|---|
-| `rebuilt_cases_weekly.csv` | **The corrected case series used by every result.** 559 weeks (2013-W26 → 2024-W10) × 25 districts, rebuilt from all 552 weekly epidemiological reports, keyed by report volume and number. The 7 weeks with no published report are **left empty (NaN)** and flagged in the `missing` column; the harness drops any forecast window that touches one. Written by `scripts/build_full_paper_notebook.py` from `analysis/lib/corrected_data.py`. |
+| `rebuilt_cases_weekly.csv` | **The corrected case series used by every result.** 559 weeks (2013-W26 → 2024-W10) × 25 districts, rebuilt from all 552 weekly epidemiological reports, keyed by report volume and number. The 7 weeks with no published report are **left empty (NaN)** and flagged in the `missing` column; the harness drops any forecast window that touches one. Exported from `analysis/lib/corrected_data.py`. |
 | `rebuilt_climate_weekly.csv` | The six ERA5 channels aligned row for row with the case series (`week` = row index): temperature mean/min/max, precipitation sum, relative humidity, soil moisture 0–7 cm. **No lags are baked in**; the harness applies a 2-week lag when it reads them. |
 
 ## Source tables
@@ -40,5 +44,5 @@ with self-loops, row-normalised.
 
 `sri_lanka_2013-2022_shifted.npy`, used by prior work, has rows out of date order (2023 in
 every training split), case and climate columns from different weeks, "lagged" climate
-channels shifted into the future, and a spreadsheet error at week 395. Section 2 of the
-notebook shows the measurements.
+channels shifted into the future, and a spreadsheet error at week 395. Section 3 of the
+notebook measures each of these from the array itself.

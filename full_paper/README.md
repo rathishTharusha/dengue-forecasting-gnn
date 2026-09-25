@@ -1,168 +1,164 @@
-# Full Paper & Complete Reproducibility Package
+# Full paper and its reproduction package
 
-**Paper Title**: *Where Does Physics Help a Graph Network? A Leakage-Controlled Study of SEIR-Informed Spatio-Temporal GNNs for Dengue Forecasting*
-(rewritten 2026-09-24; the previous title, *Know When the Epidemic Comes*, was the Phase-2 short paper on the benchmark array, which is kept in `paper/`)  
-**Authors**: Group 05 (CS3631)  
-**Target Format**: IEEE / ACM Conference & Journal Full Paper Format  
+**Title:** *Where Does Physics Help a Graph Network? A Leakage-Controlled Study of
+SEIR-Informed Spatio-Temporal GNNs for Dengue Forecasting*
+**Authors:** Group 05 (CS3631). The Phase-2 short paper (*Know When the Epidemic Comes*,
+on the benchmark array) is kept unchanged in `paper/`.
+
+Every number, table and figure in this paper comes from **one notebook run from original
+source files**. The notebook reads no result computed elsewhere: it verifies the sources,
+rebuilds the data, defines every model in plain PyTorch, trains all 810 runs and analyses
+only those runs.
 
 ---
 
-## 📦 Standalone Package Overview
-
-This directory (`full_paper/`) is a **completely self-contained, standalone distribution package**. Anyone can download only this directory and execute the entire experimental pipeline, reproduce all paper tables/figures, inspect the full-text reference papers, and compile the manuscript in LaTeX without relying on any external path or repository root setup.
-
----
-
-## 📂 Directory Structure
+## Layout
 
 ```
 full_paper/
-├── README.md                      # Main package documentation & execution instructions
-├── reproduce_full_paper.ipynb     # Master end-to-end interactive reproduction notebook
-├── overleaf.zip                   # Complete, ready-to-upload Overleaf LaTeX source ZIP
-├── overleaf/                      # Unzipped LaTeX source code, section files, & figures
-│   ├── main.tex                   # Primary full paper LaTeX manuscript
-│   ├── main-highlighted.tex       # Color-coded contribution build (for review/grading)
-│   ├── refs.bib                   # BibTeX bibliography database
-│   ├── tables_generated.tex       # LaTeX tables for the manuscript (renewal/physics), not the SEIR-GNN stages
-│   ├── sections/                  # Modular paper sections (00_abstract to 06_discussion)
-│   └── figures/                   # High-resolution vector PDF & raster PNG figures
-├── data/                          # Standalone dataset directory
-│   ├── dengue_cases_raw.csv       # Raw weekly 25-district epidemiological case series (2013-2024)
-│   ├── era5_weekly_by_district.csv# ERA5 climate reanalysis features (temp, rainfall, humidity)
-│   ├── modis_ndvi_weekly_by_district.csv # MODIS satellite vegetation index (NDVI)
-│   ├── district_census_2012.csv   # Sri Lanka Census 2012 district population metadata
-│   ├── seroprevalence_nine_districts.csv # 9-District empirical field survey dataset
-│   └── seir_parameters.json       # Calibrated SEIR-SEI compartmental parameters
-└── references/                    # Full-text PDFs of all 12 peer-reviewed primary papers
-    ├── Bai_2021_A3TGCN.pdf
-    ├── GulMohamed_2026_DengueGNN.pdf
-    ├── Guo_2019_ASTGCN.pdf
-    ├── Hasan_2022_SEIR_SEI_Dengue.pdf
-    ├── Li_2018_DCRNN_Traffic_Forecasting.pdf
-    ├── Nguyen_2024_MP_PINN_Epidemic_Forecasting.pdf
-    ├── Phaijoo_Gurung_2018_Sensitivity_Analysis_SEIR_SEI.pdf
-    ├── Raissi_2019_Physics_Informed_Neural_Networks.pdf
-    ├── Shi_2019_AAGCN.pdf
-    ├── Tissera_2020_Severe_Dengue_Sri_Lanka_2017.pdf
-    ├── Weng_2024_Graph_Representation_Learning_Dengue.pdf
-    ├── Wu_2019_Graph_WaveNet.pdf
-    └── README.md                  # Literature index and citation mapping
+├── full_paper.pdf                 # the compiled paper (8 pages with references)
+├── overleaf.zip / overleaf/       # LaTeX source; upload the zip to Overleaf
+├── REVIEW_NOTES.md                # notes for co-author review
+├── kaggle/
+│   ├── dengue_physics_gnn.ipynb   # THE reproduction notebook (generated; see below)
+│   ├── src/*.py                   # its cell sources, one file per section
+│   ├── fetch_sources.py           # downloads the original source files -> kaggle/dataset/
+│   ├── dataset/                   # (git-ignored) the Kaggle dataset fetch_sources.py builds
+│   └── kernel/                    # kernel-metadata.json + a copy of the notebook for `kaggle kernels push`
+├── outputs/kaggle_run/            # the outputs of the run the paper reports (EXP-050)
+├── data/                          # reference copies of the derived tables; the notebook does not read them
+└── references/                    # full-text PDFs of the cited papers
 ```
 
 ---
 
-## 🚀 Quick Start: LaTeX Compilation & Overleaf
+## Run it on Kaggle
 
-1. **Upload to Overleaf**:
-   - Log in to Overleaf $\to$ Click **New Project** $\to$ **Upload Project**.
-   - Select `full_paper/overleaf.zip`.
-2. **Compiler Configuration**:
-   - Compiler: **pdfLaTeX** (or XeLaTeX)
-   - TeX Live Version: **2023 or later**
-3. **Manuscript Variants**:
-   - **Standard Full Paper**: Compile `main.tex`.
-   - **Contribution-Highlighted Variant**: Compile `main-highlighted.tex` (uses color coding for author contributions).
+The notebook needs only its source dataset: CPU, internet off.
 
----
-
-## 🧪 Quick Start: the reproduction notebook
-
-`reproduce_full_paper.ipynb` reproduces **every finding in the paper and the experiment
-log (EXP-032 … EXP-049)** in one run, in the order of the paper: the corrected data and
-the persistence floor recomputed from the raw series, the benchmark-array audit, the six
-encoders × SEIR heads, the SEIR-decoder diagnosis, the anchor/gate/physics control,
-every lever against its own control, the best model against persistence, SEIR-GNN
-against SEIR-LSTM on three and nine origins, the physics-structure arms, the
-informational ceiling, the validation/test disagreement across every grid, and the audit
-of the earlier "positive physics" runs. Every paired test is recomputed in the notebook
-from the per-run rows in `outputs/results/`.
+**1. Build the dataset from the original sources** (repository root, internet on):
 
 ```bash
-pip install numpy pandas matplotlib jupyter
-jupyter notebook reproduce_full_paper.ipynb      # Run All: under a minute
+python full_paper/kaggle/fetch_sources.py
 ```
 
-- **Read without running:** `reproduce_full_paper.html` is the executed notebook.
-- **Re-train instead of reading committed rows:** set `RERUN = True` and list grids in
-  `RERUN_GRIDS` in the first code cell, and run it from inside the repository
-  (hours on CPU; section 14 of the notebook lists the cost per grid).
-- **Regenerate the notebook and its inputs:** `python scripts/build_full_paper_notebook.py --execute`
-  from the repository root. It is generated; do not edit the `.ipynb` by hand.
+This downloads each file from where it was originally obtained and checks its SHA-256
+against the hash recorded at first retrieval (`data/external/source_manifest.csv`). It
+also writes `SOURCES.csv` (file, bytes, hash, URL, date) and `dataset-metadata.json`.
+The result is 58 files and 42.5 MB:
+
+| folder | files | source |
+|---|---|---|
+| `graph/` | district adjacency, GADM 4.1 boundaries, district config | benchmark authors' repository `MLOpenSourceOpenScience/disease_modeling_MLOS2` |
+| `benchmark/` | `sri_lanka_2013-2022_shifted.npy` (audited only, never trained on) | same repository |
+| `cases/` | `output_Dengue Fever.csv`, the table parsed from the Weekly Epidemiological Reports | received from the benchmark authors; no public URL, copied byte for byte |
+| `cases/` | WER Vol 48 No 02 PDF (the one corrected report) | Epidemiology Unit URL via its Internet Archive capture; the hash matches the original download |
+| `climate/` | ERA5 daily series, one interior point per district | Open-Meteo Historical Weather API |
+| `population/` | mid-year estimates 2014–2024 and 25 Census 2012 district reports | Department of Census and Statistics |
+| `wheels/` | PyMuPDF 1.28.2, for reading the PDFs offline | PyPI |
+
+**2. Upload the dataset** as a private Kaggle dataset, from the web UI (drag in
+`full_paper/kaggle/dataset/`) or the CLI:
+
+```bash
+cd full_paper/kaggle && kaggle datasets create -p dataset -r zip
+```
+
+**3. Run the notebook.** Upload `full_paper/kaggle/dengue_physics_gnn.ipynb` as a
+new notebook, attach the dataset, choose CPU and turn internet off, then **Save Version → Save
+& Run All**. Or push the prepared kernel:
+
+```bash
+cd full_paper/kaggle && kaggle kernels push -p kernel
+```
+
+The notebook finds the dataset wherever Kaggle mounts it. The first code cell sets
+`PROFILE = "full"` (810 runs, about 3 h on Kaggle's 4 CPU cores) or `"quick"` (a few
+minutes, for checking the pipeline only; **never quote its numbers**). Outputs go to
+`/kaggle/working/outputs/`. Every table is also printed in the notebook.
+
+It also runs locally (`jupyter nbconvert --execute`) with the dataset at
+`full_paper/kaggle/dataset/`, given numpy, pandas, matplotlib, torch and pymupdf.
+
+### What the notebook does, in order
+
+1. **Sources** — verifies the SHA-256 of all 58 files and installs PyMuPDF from the bundled wheel.
+2. **Data** — rebuilds the 559-week case series (2013-W26 to 2024-W10, 7 missing weeks left
+   missing), reading the week-395 correction from the printed PDF table; aggregates ERA5 to
+   weeks; parses population from the census and mid-year PDFs; builds the graph and the
+   frozen folds with causal lags (cases ≤ t−1, climate ≤ t−2).
+3. **Benchmark-array audit** — dates the array's rows against the reports, and measures the
+   2023 rows in training, the weather offset, the future-rain "lag 12" channel and the
+   week-395 error.
+4. **Architectures** — STGAT, A3TGCN, ASTGCN, AAGCN and DCRNN in plain PyTorch (dense graph
+   operators, parameter names matching PyTorch Geometric Temporal), plus the SEIR-LSTM's LSTM.
+   `tests/test_kaggle_architectures.py` loads reference weights into each and checks the
+   outputs match the reference implementations.
+5. **Heads and physics** — direct, residual, gated, SEIR decoder, gated SEIR, metapopulation
+   SEIR; the daily SEIR simulator; the NB likelihood; the spatial penalty.
+6. **SEIR-decoder diagnosis** — inverts the simulator for the required force of infection.
+7. **Training** — 69 configurations × 3 origins × 3 seeds plus 7 × 9 origins × 3 seeds,
+   with baselines (k-NN, gradient boosting) and augmentation (TimeGAN, SEIR-simulated).
+   Runs resume from `runs.jsonl` if a session is interrupted.
+8. **Analysis** — every paired test (sign-flip permutation, BH-adjusted) in the paper,
+   computed from the runs just trained.
+9. **Outputs** — CSVs, `results.json`, figures and a summary.
 
 ---
 
-## 📊 SEIR-GNN results
+## The reported run (EXP-050)
 
-> **These replace the Stage S4–S9 table that stood here until 2026-09-23.** That table
-> was withdrawn in full: every number in it traced to `analysis/_build/run_s5_seir_gnn.py`,
-> which took one gradient step per epoch, minimised SMAPE while being scored by RMSE, held
-> the force of infection constant across the horizon, and collapsed every covariate to a
-> scalar through `nn.Linear(in_dim, 1)` before the graph saw it. The S9 row was worse than
-> mistuned: `run_s9_confirmatory.py` is described as a nine-origin paired permutation test,
-> but runs on the three origins S5 produced, subtracts hardcoded scalars instead of matching
-> on origin, and reported an early-warning p-value (`p = 0.04`) that was a typed-in literal
-> rather than a computed quantity. See `docs/EXPERIMENT_LOG.md` EXP-032 and EXP-037.
->
-> **The manuscript in `overleaf/` was rewritten on 2026-09-24** around the corrected re-run.
-> It now reports the array audit, the six-encoder x head comparison, every lever tried, and
-> the nine-origin confirmations. Every number in its tables and figures is generated from
-> `seirgnn2/results/*.json` by `scripts/build_paper_assets.py`, and the result files it reads
-> are copied to `outputs/results/`.
+`outputs/kaggle_run/` holds the downloaded outputs of the run the paper reports: Kaggle
+CPU, 810 runs, 3.01 h, notebook at commit `180ffae`. `predictions.pkl` (88 MB, every
+prediction) is git-ignored; rerun the notebook to regenerate it.
+`scripts/build_paper_assets.py` builds the paper's tables and figures from these files
+alone.
 
-The replacement is a leakage-controlled re-run (`seirgnn2/`) on **nine origins with disjoint
-test spans**, five arms frozen before the run, three seeds each, selection on validation only.
-Differences are paired at the origin unit, which is the only unit resampled from the data.
+RMSE in weekly cases on the corrected data, three frozen origins × three seeds, pairs on
+(origin, seed):
 
-| comparison (validation RMSE) | Δ | origins won | p | p_adj |
-|---|---|---|---|---|
-| SEIR-GNN (ASTGCN+FOI) vs **SEIR-LSTM** | **−0.75** | **8/9** | **0.012** | 0.059 |
-| SEIR-GNN vs **persistence** | −2.92 | 8/9 | 0.066 | 0.166 |
-| best published GNN (AAGCN direct) vs persistence | −2.89 | 8/9 | 0.035 | 0.166 |
-| SEIR-GNN vs best published GNN | −0.03 | 1/9 | 1.000 | 1.000 |
-| SEIR-GNN vs SEIR-LSTM, **test** RMSE | +0.23 | 4/9 | 0.410 | 0.513 |
+| | validation | test |
+|---|---|---|
+| persistence | 17.86 | 36.02 |
+| direct head: AAGCN / ASTGCN / LSTM | 16.71 / 16.83 / 16.91 | |
+| direct head: STGAT / A3TGCN / DCRNN | 22.93 / 28.63 / 34.64 | |
+| SEIR decoder, all six encoders | 24.01–25.75 | |
+| gated SEIR head, all six encoders | 17.43–17.69 | 35.50–35.84 |
+| best model B (AAGCN, direct, NB, seasonal) | 15.51 | 37.54 |
 
-**What this supports, stated plainly:**
+- **Physics does not earn the repair.** The gated SEIR head repairs STGAT, A3TGCN and DCRNN
+  (−5.30, −10.95, −16.97, 9/9 each), but the same head without the simulator carries
+  96–112% of it. The simulator is significantly worse on STGAT (+0.66, 1/9, p_adj 0.023)
+  and no better on the other two. Credited to physics: none.
+- **NB likelihood** is the largest controlled gain: −0.76, 9/9, p_adj 0.014.
+- **SEIR-GNN vs SEIR-LSTM** wins on three origins on validation (ASTGCN −0.54, 9/9) but is not
+  robust on nine disjoint origins (ASTGCN −0.62 on validation, +0.07 on test; AAGCN +0.18
+  / −0.30).
+- **Ceiling:** the working models' residuals correlate 0.91–0.97 with B's; TimeGAN's largest
+  week is 2,036 against a real 2,631; Moran's I of weekly log growth is −0.03.
+- **Validation and test disagree:** in 5 of 8 families validation's pick is worse than
+  persistence on test.
 
-- **Against SEIR-LSTM** — on validation the proposed method wins 8 of 9 origins (raw p = 0.012,
-  p_adj = 0.059, missing the pre-registered bar); on test it loses 4/9 (+0.23). A second
-  nine-origin run with the AAGCN encoder (EXP-047) reverses the pattern: a tie on validation
-  (−0.01) and a win on test (−0.41, 6/9, p_adj 0.125). **The advantage is not robust across
-  encoders, metrics or runs; do not report it as a win.**
-- **Against the naive persistence floor** — a small consistent edge on validation that does
-  not survive correction, and nothing at all on test (31.70 vs 31.76). **Persistence is not
-  beaten.**
-- **Against the five published architectures** — comfortably better than STGAT, A3TGCN and
-  DCRNN; **not** better than AAGCN or ASTGCN on the direct head. Behind the gated SEIR head
-  all six encoders land within 0.25 of each other (EXP-034). **EXP-048 shows that repair is the
-  persistence anchor, not the SEIR physics**: the same head without the simulator carries
-  96–112% of it, and the simulator is significantly worse on STGAT (`docs/RESCUE_PLAN.md`).
-- **Mean RMSE across these nine origins is not a usable summary.** Origin 0.40 is an outlier
-  where every arm fails (140–227 RMSE against 13–48 elsewhere) and it dominates every mean.
-  Read win counts and per-origin values; `seirgnn2/stats.py` prints wins beside every delta
-  for this reason.
+Full tables: `outputs/kaggle_run/*.csv`; the log entry is `docs/EXPERIMENT_LOG.md` EXP-050.
 
-**Withdrawn without replacement:** the S7 early-warning significance claim. The AUC figures
-themselves (0.807 → 0.826, from `analysis/_build/outbreak_signal.py`) are computed and stand;
-the `p = 0.04` attached to them never was. S6 is not re-run here and is unverified under
-the corrected harness. **S8 (EXP-030) is invalid**: `run_s8_seroprevalence.py` compares against
-hardcoded "example" survey values that do not match the transcribed survey in
-`data/external/seroprevalence_nine_districts.csv`.
+**Not in the notebook:** the reproduction of Weng et al.'s published numbers (paper §3.1) runs
+the authors' own code in its pinned environment and lives in `reproduction/`. The earlier
+spatial-penalty result on the benchmark array (−0.044 on STGAT) is cited from the Phase-2
+study, not re-run.
 
-Reproduce with:
+---
+
+## Rebuild the paper
 
 ```bash
-python seirgnn2/sweep.py confirm --workers 6 --epochs 400
-python seirgnn2/stats.py confirm --ref "LSTM+foi_res" --metric val_RMSE
+python scripts/build_kaggle_notebook.py     # regenerate the notebook from kaggle/src/*.py
+python scripts/build_paper_assets.py        # tables_generated.tex + fig_*.pdf/png from outputs/kaggle_run/
+cd full_paper/overleaf && pdflatex main && bibtex main && pdflatex main && pdflatex main
 ```
 
-Verified identical on Kaggle (144 rows both sides, every arm within 0.11 RMSE) via
-`python scripts/build_seirgnn2_kernel.py --grid confirm`. See `seirgnn2/README.md` for the
-harness, the protocol, and a table of every lever tried with its measured effect.
+Or upload `overleaf.zip` to Overleaf (pdfLaTeX, TeX Live 2023 or later). Edit
+`kaggle/src/*.py`, never the `.ipynb`.
 
-## 📚 Literature & Citation Integrity
+## References
 
-All primary references cited in the full paper are archived as full-text PDFs in `full_paper/references/`:
-* **Epidemiology & Physics-Informed Modeling**: Phaijoo & Gurung (2018), Hasan et al. (2022), Raissi et al. (2019), Nguyen et al. (2024).
-* **Baseline Spatial GNNs**: STGAT (Huang et al.), ASTGCN (Guo et al., 2019), AAGCN (Shi et al., 2019), A3TGCN (Bai et al., 2021), DCRNN (Li et al., 2018), DengueGNN (GulMohamed et al., 2026).
-* **Empirical Field Data**: Tissera et al. (2020) for Sri Lanka 2017 Dengue Outbreak data.
+Full-text PDFs of the cited papers are in `references/`, indexed in `references/README.md`.

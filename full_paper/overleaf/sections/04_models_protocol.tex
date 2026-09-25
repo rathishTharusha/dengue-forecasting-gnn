@@ -85,8 +85,12 @@ Claims about the series therefore need the \textbf{nine-origin} protocol: origin
 at $0.40+k/15$ ($k=0,\dots,8$), with nine disjoint test spans of 1/15 of the
 series, where the origin unit reaches 0.004.
 
-\textbf{Reproducibility.} Runs are single-threaded and bit-reproducible
-within one environment. Grids ran on local CPUs and on Kaggle CPU kernels that
-clone a pinned commit. The two environments agree on means but not on single
-runs, so every comparison pairs arms from the same grid in the same
-environment.
+\textbf{Reproducibility.} One notebook produces every number in this paper. It
+reads only original source files, each verified against the SHA-256 recorded at
+retrieval; rebuilds the data; defines the five published architectures and the
+LSTM in plain PyTorch (each checked weight-for-weight against the reference
+implementation); and trains every configuration once, in one environment:
+69 configurations on the three origins and 7 on the nine, three seeds each,
+810 runs in 3.0 hours on four Kaggle CPU cores. A configuration shared by several
+comparisons, such as $B$, is trained once, so every pair is matched on the same
+runs. Runs are single-threaded and reproducible from their seeds.

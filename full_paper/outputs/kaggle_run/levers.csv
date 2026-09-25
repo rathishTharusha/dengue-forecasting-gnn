@@ -1,0 +1,29 @@
+group,lever,arm,control,val delta,wins,p,test delta,p_adj,consistent gain
+worked,NB likelihood (vs squared error),B,"B, squared error",-0.7625679439968533,9/9,0.00390625,1.6077921125623915,0.013671875,True
+worked,seasonal features,feat=season,graph=gcn,-0.7587887446085612,6/9,0.10546875,0.6994953155517578,0.1845703125,False
+worked,best model B vs persistence,B,persistence,-2.3462489446004233,9/9,0.00390625,1.5274238586425781,0.013671875,True
+graph/architecture,graph (GCN vs no message passing),graph=gcn,graph=none,-0.062324735853407115,3/9,0.421875,-0.07181549072265625,0.5013020833333334,False
+graph/architecture,learned adjacency,graph=adaptive,graph=gcn,-0.14462757110595703,5/9,0.1015625,-0.3341331481933594,0.1845703125,False
+graph/architecture,district seasonal curves,A2 district seasonal curves,B,-0.05235428280300564,6/9,0.67578125,0.11062452528211805,0.756875,False
+graph/architecture,nonlinear (MLP) head,A3 MLP head,B,0.27773867713080513,1/9,0.01171875,-0.31021690368652344,0.02734375,False
+graph/architecture,MLP head + climate lags 2-13,A4 MLP head + climate 2-13,B,0.13458336724175346,3/9,0.37890625,-0.6978018018934462,0.4822443181818182,False
+graph/architecture,global context node,A5 global context,B,0.022187974717881944,3/9,0.84375,-1.395592795477973,0.84375,False
+graph/architecture,residual head + NB,A1 residual head,B,0.46540440453423393,2/9,0.13671875,-2.956270217895508,0.20723684210526316,False
+graph/architecture,combined architecture changes,A6 combined,B,0.5529414282904731,2/9,0.0390625,0.5947617424858941,0.078125,False
+literature remedy,RevIN,R1 RevIN,B,1.465796258714464,0/9,0.00390625,-0.4198165469699436,0.013671875,False
+literature remedy,district identity embedding,R2 district embedding,B,0.18581411573621961,3/9,0.15625,0.9801633622911241,0.21875,False
+literature remedy,STID-style MLP,R3 STID-style MLP,B,0.842950079176161,0/9,0.00390625,-1.216361363728841,0.013671875,False
+literature remedy,NB-GLM (no network),R4a NB-GLM,B,1.4590796364678278,0/9,0.00390625,5.305582258436415,0.013671875,False
+literature remedy,k-NN analogues (no network),R4b k-NN,B,1.0053358328911723,0/9,0.00390625,-3.2003301630859995,0.013671875,False
+literature remedy,ensemble B + NB-GLM + k-NN,R5 ensemble B + NB-GLM + k-NN,B,0.06485219843266875,4/9,0.4296875,-1.793210069976614,0.5013020833333334,False
+data,half the training windows,"B, 50% of training",B,0.3918267356024848,2/9,0.0234375,0.46659596761067706,0.05048076923076923,False
+data,TimeGAN augmentation,G2 TimeGAN,B,0.5998006396823459,0/9,0.00390625,0.5193193223741319,0.013671875,False
+data,SEIR-simulated pre-training,G3 SEIR pre-training,B,0.027315139770507812,6/9,0.79296875,0.9192852444118924,0.8223379629629629,False
+data,"climate, lags 2-4",K1 climate lags 2-4,B,0.18264632754855686,2/9,0.12109375,0.5069149865044488,0.19944852941176472,False
+data,"climate, lags 2-13",K2 climate lags 2-13,B,0.18537320031060112,2/9,0.2265625,-0.04842419094509549,0.3020833333333333,False
+data,"climate, lags 2-25",K3 climate lags 2-25,B,0.47290632459852433,0/9,0.00390625,-0.47203021579318577,0.013671875,False
+physics,SEIR as auxiliary loss,R6 SEIR auxiliary loss,B,0.01673942142062717,4/9,0.75390625,-0.32497236463758683,0.8118990384615384,False
+physics,SEIR simulator vs no-physics twin (AAGCN),AAGCN+foi_res,AAGCN+gated,0.8629327350192599,1/9,0.0078125,2.0501581827799478,0.019886363636363636,False
+physics,spatial physics penalty,P1 spatial penalty,B,-0.0599305894639757,6/9,0.140625,-0.02107217576768663,0.20723684210526316,False
+physics,metapopulation vs gated SEIR head,P4 metapopulation SEIR,"AAGCN+foi_res, NB+season",0.2002603742811415,1/9,0.0078125,0.04144605000813802,0.019886363636363636,False
+physics,gated SEIR-GNN vs SEIR-LSTM,"AAGCN+foi_res, NB+season","LSTM+foi_res, NB+season",-0.1402062310112847,8/9,0.0078125,0.0210471683078342,0.019886363636363636,True

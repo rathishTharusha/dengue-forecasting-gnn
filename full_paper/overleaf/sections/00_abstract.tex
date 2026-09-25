@@ -7,31 +7,28 @@ are both proposed for district-level dengue forecasting, but they are rarely
 compared under one leak-free protocol. We study whether replacing the LSTM of an
 SEIR-informed forecaster with a graph encoder helps, on Sri Lanka's weekly record
 (25 districts, three-week horizon). Before modelling, we audit the benchmark
-array used by prior work. Its rows are out of date order, every training split
-contains 2023 data from after the test periods, its case and climate columns drift
-apart by up to a year, its ``lagged'' climate channels hold values 12--17 weeks in
-the \emph{future}, and its largest spike is a spreadsheet error. We rebuild a
-559-week dataset from the source reports and enforce causal lags with tests.
-On one harness, six encoders (five published ST-GNNs and the SEIR-LSTM's LSTM)
-are each paired with a direct head, a pure SEIR decoder and a gated SEIR head.
-The architecture matters little: working encoders span 0.15 RMSE, and the graph
-adds 0.07. The pure SEIR decoder is worse than persistence on every encoder,
-and 6--7 RMSE worse than the direct head on each working one. The cause is
-structural: 14--16\% of targets lie below its zero-transmission floor, and its
-force of infection is only $r^2\approx0.25$ predictable. A gated SEIR head,
-which lets the simulator supply only the departure from persistence, brings all
-six encoders below persistence and repairs the three that fail as published by
-5.7--17.2 validation RMSE on 9/9 paired runs. A pre-registered control shows
-that this repair is not physics. The same head with the simulator removed
-accounts for 96--112\% of it. With the simulator added, validation RMSE is
-significantly worse on one failing encoder and not better on the other two, and
-0.74--0.88 worse on the working ones. A negative-binomial likelihood is the
-largest controlled gain ($-0.41$, 9/9). The graph beats the LSTM only inside the
-gated SEIR head (9/9 on three origins), and that advantage does not replicate on
-nine disjoint origins. More than twenty further levers are not adopted:
-architecture, embeddings, climate lags, synthetic data, a spatial physics penalty
-and a metapopulation SEIR head. Their residuals correlate 0.87--0.99. On this
-target the useful prior is persistence, not transmission dynamics. Anchored
-models, SEIR-informed ones included, do score better out of sample, but
-validation does not select them.
+array used by prior work: its rows are out of date order, every training split
+contains 2023 data from after the test periods, its case and weather columns are
+on different timelines, its ``lag 12'' rainfall channel holds rain from twelve
+weeks \emph{ahead}, and its largest spike is a spreadsheet error. We rebuild a
+559-week dataset from hash-verified original sources, and one self-contained
+notebook reproduces every result from them. On one harness, six encoders (five
+published ST-GNNs and the SEIR-LSTM's LSTM) are each paired with a direct head, a
+pure SEIR decoder and a gated SEIR head. Architecture matters little: the working
+encoders span 0.20 RMSE and the graph adds 0.06. The pure SEIR decoder is worse
+than persistence on every encoder, and 7.3--7.4 RMSE worse than the direct head
+on each working one, for structural reasons: 14--16\% of targets lie below its
+zero-transmission floor and its force of infection is only $r^2\approx0.25$
+predictable. A gated SEIR head, which lets the simulator supply only the
+departure from persistence, brings all six encoders below persistence and repairs
+the three that fail as published by 5.3--17.0 validation RMSE on 9/9 paired runs.
+A pre-registered control shows that this repair is not physics: the same head
+without the simulator accounts for 96--112\% of it, and adding the simulator is
+significantly worse on one failing encoder, not better on the other two, and
+0.75--0.86 worse on the working ones. A negative-binomial likelihood is the
+largest controlled gain ($-0.76$, 9/9). The graph beats the LSTM inside the gated
+SEIR head on three origins, and that advantage is not robust on nine disjoint
+origins. More than twenty further levers are not adopted, and the working models
+make the same errors (residual correlation 0.91--0.97). On this target the useful
+prior is persistence, not transmission dynamics.
 \end{abstract}

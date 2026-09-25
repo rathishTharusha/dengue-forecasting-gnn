@@ -39,19 +39,19 @@
 \citation{weng2024graph}
 \@writefile{toc}{\contentsline {section}{\numberline {2}Related Work}{2}{section.2}\protected@file@percent }
 \newlabel{sec:related}{{2}{2}{Related Work}{section.2}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Audit of the benchmark array, recomputed by the reproduction notebook from the original files.\relax }}{2}{table.caption.4}\protected@file@percent }
+\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
+\newlabel{tab:audit}{{1}{2}{Audit of the benchmark array, recomputed by the reproduction notebook from the original files.\relax }{table.caption.4}{}}
 \@writefile{toc}{\contentsline {section}{\numberline {3}Data}{2}{section.3}\protected@file@percent }
 \newlabel{sec:data}{{3}{2}{Data}{section.3}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Reproducing the benchmark}{2}{subsection.3.1}\protected@file@percent }
 \newlabel{sec:repro}{{3.1}{2}{Reproducing the benchmark}{subsection.3.1}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Audit of the benchmark array. Each finding is confirmed against the source reports or an independent reanalysis.\relax }}{2}{table.caption.4}\protected@file@percent }
-\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
-\newlabel{tab:audit}{{1}{2}{Audit of the benchmark array. Each finding is confirmed against the source reports or an independent reanalysis.\relax }{table.caption.4}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Auditing the benchmark array}{2}{subsection.3.2}\protected@file@percent }
 \newlabel{sec:audit}{{3.2}{2}{Auditing the benchmark array}{subsection.3.2}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}The corrected dataset}{2}{subsection.3.3}\protected@file@percent }
-\newlabel{sec:corrected}{{3.3}{2}{The corrected dataset}{subsection.3.3}{}}
 \citation{liu2025seirlstm}
 \citation{cao2023mepognn,wang2022causalgnn}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}The corrected dataset}{3}{subsection.3.3}\protected@file@percent }
+\newlabel{sec:corrected}{{3.3}{3}{The corrected dataset}{subsection.3.3}{}}
 \@writefile{toc}{\contentsline {section}{\numberline {4}Models and Protocol}{3}{section.4}\protected@file@percent }
 \newlabel{sec:models}{{4}{3}{Models and Protocol}{section.4}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Encoders}{3}{subsection.4.1}\protected@file@percent }
@@ -59,39 +59,38 @@
 \@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Likelihood, features and physics penalty}{3}{subsection.4.3}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {4.4}Protocol}{3}{subsection.4.4}\protected@file@percent }
 \newlabel{sec:protocol}{{4.4}{3}{Protocol}{subsection.4.4}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {5}Results}{3}{section.5}\protected@file@percent }
-\newlabel{sec:results}{{5}{3}{Results}{section.5}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}Six encoders, one harness}{3}{subsection.5.1}\protected@file@percent }
-\newlabel{sec:encoders}{{5.1}{3}{Six encoders, one harness}{subsection.5.1}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Six encoders behind three heads (Table\nonbreakingspace \ref {tab:encoders}). The direct head separates encoders that work from encoders that fail; the SEIR decoder fails on all of them; the gated SEIR head puts all six at the same level, below persistence (dashed) on validation and test.\relax }}{4}{figure.caption.9}\protected@file@percent }
-\newlabel{fig:encoders}{{1}{4}{Six encoders behind three heads (Table~\ref {tab:encoders}). The direct head separates encoders that work from encoders that fail; the SEIR decoder fails on all of them; the gated SEIR head puts all six at the same level, below persistence (dashed) on validation and test.\relax }{figure.caption.9}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces The six encoders on one harness (corrected data, 3 origins $\times $ 3 seeds, squared error, no seasonal features). Mean validation / test RMSE. The pure SEIR decoder (\texttt  {foi}) is worse than persistence on every encoder; the gated SEIR head (\texttt  {foi\_res}) brings all six to within 0.25 of each other, below persistence.\relax }}{4}{table.caption.5}\protected@file@percent }
-\newlabel{tab:encoders}{{2}{4}{The six encoders on one harness (corrected data, 3 origins $\times $ 3 seeds, squared error, no seasonal features). Mean validation / test RMSE. The pure SEIR decoder (\texttt {foi}) is worse than persistence on every encoder; the gated SEIR head (\texttt {foi\_res}) brings all six to within 0.25 of each other, below persistence.\relax }{table.caption.5}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces The six encoders on one harness (corrected data, 3 origins $\times $ 3 seeds, squared error, no seasonal features). Mean validation / test RMSE. The pure SEIR decoder (\texttt  {foi}) is worse than persistence on every encoder; the gated SEIR head (\texttt  {foi\_res}) brings all six close together, below persistence.\relax }}{4}{table.caption.5}\protected@file@percent }
+\newlabel{tab:encoders}{{2}{4}{The six encoders on one harness (corrected data, 3 origins $\times $ 3 seeds, squared error, no seasonal features). Mean validation / test RMSE. The pure SEIR decoder (\texttt {foi}) is worse than persistence on every encoder; the gated SEIR head (\texttt {foi\_res}) brings all six close together, below persistence.\relax }{table.caption.5}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {5}Results}{4}{section.5}\protected@file@percent }
+\newlabel{sec:results}{{5}{4}{Results}{section.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}Six encoders, one harness}{4}{subsection.5.1}\protected@file@percent }
+\newlabel{sec:encoders}{{5.1}{4}{Six encoders, one harness}{subsection.5.1}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Every lever, paired against its own control on matched (origin, seed) runs. $\Delta $ is validation RMSE (negative is better); wins count the 9 units where the arm is better; $p_{\text  {adj}}$ is BH across this table. Test $\Delta $ is shown and decided nothing. With three origins these $p$-values describe run-to-run stability, not the series (\S  \ref {sec:protocol}).\relax }}{4}{table.caption.6}\protected@file@percent }
+\newlabel{tab:levers}{{3}{4}{Every lever, paired against its own control on matched (origin, seed) runs. $\Delta $ is validation RMSE (negative is better); wins count the 9 units where the arm is better; $p_{\text {adj}}$ is BH across this table. Test $\Delta $ is shown and decided nothing. With three origins these $p$-values describe run-to-run stability, not the series (\S \ref {sec:protocol}).\relax }{table.caption.6}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {5.2}Anchor, gate or physics?}{4}{subsection.5.2}\protected@file@percent }
 \newlabel{sec:rescue}{{5.2}{4}{Anchor, gate or physics?}{subsection.5.2}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Every lever, paired against its own control on matched (origin, seed) runs. $\Delta $ is validation RMSE (negative is better); wins count the 9 units where the arm is better; $p_{\text  {adj}}$ is BH across this table. Test $\Delta $ is shown and decided nothing. With three origins these $p$-values describe run-to-run stability, not the series (\S  \ref {sec:protocol}).\relax }}{5}{table.caption.6}\protected@file@percent }
-\newlabel{tab:levers}{{3}{5}{Every lever, paired against its own control on matched (origin, seed) runs. $\Delta $ is validation RMSE (negative is better); wins count the 9 units where the arm is better; $p_{\text {adj}}$ is BH across this table. Test $\Delta $ is shown and decided nothing. With three origins these $p$-values describe run-to-run stability, not the series (\S \ref {sec:protocol}).\relax }{table.caption.6}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.3}What moves the metric}{5}{subsection.5.3}\protected@file@percent }
-\newlabel{sec:levers}{{5.3}{5}{What moves the metric}{subsection.5.3}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Every lever's validation delta against its own control (Table\nonbreakingspace \ref {tab:levers}); win counts on the right. Green: negative and $\ge $7/9 wins. Grey: negative but inconsistent. Red: worse.\relax }}{5}{figure.caption.10}\protected@file@percent }
-\newlabel{fig:levers}{{2}{5}{Every lever's validation delta against its own control (Table~\ref {tab:levers}); win counts on the right. Green: negative and $\ge $7/9 wins. Grey: negative but inconsistent. Red: worse.\relax }{figure.caption.10}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.4}SEIR-GNN against SEIR-LSTM}{5}{subsection.5.4}\protected@file@percent }
-\newlabel{sec:seirgnn}{{5.4}{5}{SEIR-GNN against SEIR-LSTM}{subsection.5.4}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces Nine disjoint origins, paired at the origin unit (the unit a claim about the series rests on; attainable $p$ floor 0.004). Raw two-sided $p$. The two runs share the same test spans and are not independent replications.\relax }}{6}{table.caption.7}\protected@file@percent }
-\newlabel{tab:nine}{{4}{6}{Nine disjoint origins, paired at the origin unit (the unit a claim about the series rests on; attainable $p$ floor 0.004). Raw two-sided $p$. The two runs share the same test spans and are not independent replications.\relax }{table.caption.7}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces Anchor, gate or physics? Each encoder behind four heads that add, in turn, the persistence anchor, the learned gate and the SEIR simulator (mean validation RMSE; configuration of Table\nonbreakingspace \ref {tab:encoders}, all rerun together on Kaggle). The last two columns pair the gated SEIR head against its no-physics twin (\texttt  {gated}); negative favours the physics, and the count is units where it wins.\relax }}{6}{table.caption.8}\protected@file@percent }
-\newlabel{tab:rescue}{{5}{6}{Anchor, gate or physics? Each encoder behind four heads that add, in turn, the persistence anchor, the learned gate and the SEIR simulator (mean validation RMSE; configuration of Table~\ref {tab:encoders}, all rerun together on Kaggle). The last two columns pair the gated SEIR head against its no-physics twin (\texttt {gated}); negative favours the physics, and the count is units where it wins.\relax }{table.caption.8}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces The best model and the SEIR-GNN against their controls. Three-origin rows pair 9 (origin, seed) runs; nine-origin rows pair the 9 disjoint origins (seeds averaged), the unit a claim about the series rests on (attainable $p$ floor 0.004). Raw two-sided $p$.\relax }}{5}{table.caption.7}\protected@file@percent }
+\newlabel{tab:nine}{{4}{5}{The best model and the SEIR-GNN against their controls. Three-origin rows pair 9 (origin, seed) runs; nine-origin rows pair the 9 disjoint origins (seeds averaged), the unit a claim about the series rests on (attainable $p$ floor 0.004). Raw two-sided $p$.\relax }{table.caption.7}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Six encoders behind three heads (Table\nonbreakingspace \ref {tab:encoders}). The direct head separates encoders that work from encoders that fail; the SEIR decoder is worse than persistence on all of them; the gated SEIR head puts all six at the same level, below persistence (dashed) on validation and test.\relax }}{5}{figure.caption.9}\protected@file@percent }
+\newlabel{fig:encoders}{{1}{5}{Six encoders behind three heads (Table~\ref {tab:encoders}). The direct head separates encoders that work from encoders that fail; the SEIR decoder is worse than persistence on all of them; the gated SEIR head puts all six at the same level, below persistence (dashed) on validation and test.\relax }{figure.caption.9}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces Anchor, gate or physics? Each encoder behind four heads that add, in turn, the persistence anchor, the learned gate and the SEIR simulator (mean validation RMSE; configuration of Table\nonbreakingspace \ref {tab:encoders}). The last two columns pair the gated SEIR head with its no-physics twin (\texttt  {gated}); negative favours the physics, and the count is runs where it wins.\relax }}{5}{table.caption.8}\protected@file@percent }
+\newlabel{tab:rescue}{{5}{5}{Anchor, gate or physics? Each encoder behind four heads that add, in turn, the persistence anchor, the learned gate and the SEIR simulator (mean validation RMSE; configuration of Table~\ref {tab:encoders}). The last two columns pair the gated SEIR head with its no-physics twin (\texttt {gated}); negative favours the physics, and the count is runs where it wins.\relax }{table.caption.8}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Every lever's validation delta against its own control (Table\nonbreakingspace \ref {tab:levers}); win counts on the right. Green: negative and $\ge $7/9 wins. Grey: negative but inconsistent. Red: worse.\relax }}{6}{figure.caption.10}\protected@file@percent }
+\newlabel{fig:levers}{{2}{6}{Every lever's validation delta against its own control (Table~\ref {tab:levers}); win counts on the right. Green: negative and $\ge $7/9 wins. Grey: negative but inconsistent. Red: worse.\relax }{figure.caption.10}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.3}What moves the metric}{6}{subsection.5.3}\protected@file@percent }
+\newlabel{sec:levers}{{5.3}{6}{What moves the metric}{subsection.5.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.4}SEIR-GNN against SEIR-LSTM}{6}{subsection.5.4}\protected@file@percent }
+\newlabel{sec:seirgnn}{{5.4}{6}{SEIR-GNN against SEIR-LSTM}{subsection.5.4}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {5.5}Physics as structure: penalty and metapopulation coupling}{6}{subsection.5.5}\protected@file@percent }
 \newlabel{sec:physicsstruct}{{5.5}{6}{Physics as structure: penalty and metapopulation coupling}{subsection.5.5}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {5.6}The ceiling is informational}{6}{subsection.5.6}\protected@file@percent }
 \newlabel{sec:ceiling}{{5.6}{6}{The ceiling is informational}{subsection.5.6}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {5.7}Validation and test disagree, systematically}{6}{subsection.5.7}\protected@file@percent }
 \newlabel{sec:valtest}{{5.7}{6}{Validation and test disagree, systematically}{subsection.5.7}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Nine disjoint origins (EXP-047), per-origin RMSE on a log scale. Origin 0.40's validation span contains the 2017 DENV-2 epidemic, 5.4$\times $ anything in its training data, and dominates every validation mean; read win counts, not means. On test the gated SEIR arms track or undercut persistence while the direct model $B$ is worst on four origins.\relax }}{7}{figure.caption.11}\protected@file@percent }
-\newlabel{fig:nine}{{3}{7}{Nine disjoint origins (EXP-047), per-origin RMSE on a log scale. Origin 0.40's validation span contains the 2017 DENV-2 epidemic, 5.4$\times $ anything in its training data, and dominates every validation mean; read win counts, not means. On test the gated SEIR arms track or undercut persistence while the direct model $B$ is worst on four origins.\relax }{figure.caption.11}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Nine disjoint origins, per-origin RMSE on a log scale. Origin 0.40's validation span contains the 2017 epidemic and dominates every validation mean; read win counts, not means.\relax }}{7}{figure.caption.11}\protected@file@percent }
+\newlabel{fig:nine}{{3}{7}{Nine disjoint origins, per-origin RMSE on a log scale. Origin 0.40's validation span contains the 2017 epidemic and dominates every validation mean; read win counts, not means.\relax }{figure.caption.11}{}}
 \@writefile{toc}{\contentsline {section}{\numberline {6}Discussion}{7}{section.6}\protected@file@percent }
 \newlabel{sec:discussion}{{6}{7}{Discussion}{section.6}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {7}Conclusion}{7}{section.7}\protected@file@percent }
 \bibstyle{ACM-Reference-Format}
 \bibdata{refs}
 \bibcite{bai2021a3tgcn}{{1}{2021}{{Bai et~al\mbox  {.}}}{{}}}
@@ -117,6 +116,7 @@
 \newlabel{tocindent1}{4.185pt}
 \newlabel{tocindent2}{10.34999pt}
 \newlabel{tocindent3}{0pt}
+\@writefile{toc}{\contentsline {section}{\numberline {7}Conclusion}{8}{section.7}\protected@file@percent }
 \@writefile{toc}{\contentsline {section}{References}{8}{section*.13}\protected@file@percent }
 \newlabel{TotPages}{{8}{8}{}{page.8}{}}
 \gdef \@abspage@last{8}

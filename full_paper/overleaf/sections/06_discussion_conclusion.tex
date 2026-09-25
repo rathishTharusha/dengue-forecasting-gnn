@@ -18,19 +18,19 @@ structure at district-week resolution. The prior that matters here is the one
 the data already state, that next week looks like this week.
 
 Two findings keep the question open rather than closed. First, on test the SEIR
-head beats its no-physics twin on the failing encoders (up to $-3.33$, 9/9), and
-every gated SEIR arm we trained sits at or below persistence on test, in every
-grid where it appears; the direct models do so only in some. Second, the graph's advantage over the LSTM appears only inside the
-SEIR head. Neither survives our selection protocol, and we have argued that the
+head beats its no-physics twin on the failing encoders (up to $-3.50$, 9/9), and
+every gated SEIR arm we trained sits below persistence on test, on three origins
+and on nine; the direct models do so only in some. Second, the graph's advantage
+over the LSTM appears mainly inside the SEIR head. Neither survives our selection protocol, and we have argued that the
 protocol itself may be the reason (\S\ref{sec:valtest}). A test of either needs
 data nothing here has touched.
 
 \textbf{Why the ceiling is not architectural.} The target's own last value
 explains $r^2=0.89$ of the next, the best covariate 0.03, and what remains is a
 move the inputs do not reveal. Every model family converges to the same
-function, with residual correlation 0.87--0.99. Architecture, embeddings,
-climate, synthetic data and physics penalties each improve validation by at
-most 0.14, and most make it worse. A study that searches this space and reports its best
+function, with residual correlation 0.91--0.97 among the working models.
+Architecture, embeddings, climate, synthetic data and physics penalties each
+improve validation by at most 0.15, and most make it worse. A study that searches this space and reports its best
 cell will find a winner; a paired study finds noise. The NB likelihood is the
 exception, because it corrects what the objective targets rather than what the
 model sees.
@@ -46,16 +46,16 @@ produced a publishable positive result had it gone unchecked:
 \item the gated SEIR head's repair of three encoders looked like physics and
       was the anchor;
 \item a validation span before each origin selects models that underperform
-      anchored ones on test, in most of our twelve grids;
-\item two nine-origin confirmations disagree with each other.
+      anchored ones on test, in five of eight families of runs;
+\item on nine origins, the SEIR-GNN's advantage over the SEIR-LSTM holds on
+      validation for one encoder and on test for the other.
 \end{itemize}
 
 \textbf{Limitations.} One country and one disease at district-week resolution.
-Three origins cannot support claims at the origin unit, and our nine-origin
-test spans were used twice, so they are not fresh. The two confirmations named
-different endpoints. Some earlier diagnostics (renewal predictability, Moran's
-$I$, the STGAT spatial penalty) were measured on the benchmark array and have
-not been rerun on the corrected data. The graph is the benchmark's hand-built
+Three origins cannot support claims at the origin unit, and the nine-origin
+test spans were already examined in our earlier experiments, so they are not
+fresh. The STGAT spatial-penalty result we contrast with (57/60 runs) comes from
+the Phase-2 study on the benchmark array and is not rerun here. The graph is the benchmark's hand-built
 adjacency; mobility data might couple districts differently. The SEIR head uses
 fixed stage durations and one initial susceptible fraction for every district.
 
@@ -70,10 +70,10 @@ is real.
 We asked whether replacing the LSTM of an SEIR-informed forecaster with a graph
 network improves district-level dengue forecasts. Under a leak-free protocol on
 a corrected dataset, the answer is narrower than either literature suggests. The
-graph adds little on its own (0.07). The graph's advantage over the LSTM inside
+graph adds little on its own (0.06). The graph's advantage over the LSTM inside
 the SEIR head is consistent on three origins and not robust on nine. The largest
 controlled gain comes from the likelihood, not the architecture. Physics fails
 as a decoder for measurable, structural reasons, and its apparent success as a
-gated head belongs to the persistence anchor it is gated onto. Code,
-pre-registrations, the experiment log and a reproduction notebook accompany this
-paper.
+gated head belongs to the persistence anchor it is gated onto. The source-file
+dataset, the notebook that produces every number here, the pre-registrations and
+the experiment log accompany this paper.

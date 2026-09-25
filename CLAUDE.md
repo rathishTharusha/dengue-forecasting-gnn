@@ -64,8 +64,12 @@ never the `.ipynb`.**
 cd analysis/_build && python gen_analysis.py     # same pattern in notebooks/_build, crosscheck/_build, reproduction/_build
 ```
 
-`full_paper/reproduce_full_paper.ipynb` is the exception — a hand-maintained standalone package
-notebook that must keep working from `full_paper/` alone, with no repo-root imports.
+`full_paper/kaggle/dengue_physics_gnn.ipynb` is the paper's reproduction notebook, built by
+`python scripts/build_kaggle_notebook.py` from `full_paper/kaggle/src/*.py`. It must run on Kaggle
+from its source dataset alone (`full_paper/kaggle/fetch_sources.py` builds it): no repo imports,
+no committed results; every number in the paper comes from its run in
+`full_paper/outputs/kaggle_run/`. `tests/test_kaggle_architectures.py` checks its transcribed
+encoders against the reference implementations.
 
 ## Architecture
 
@@ -163,9 +167,9 @@ difference is attributable:
 
 ## Current state and a known defect
 
-**`full_paper/`'s Stage S5 numbers are not citable.** Its leaderboard
-(`full_paper/outputs/csv/stage_s5_leaderboard.csv`) and
-`full_paper/overleaf/sections/05_results.tex` report the SEIR-GNN FOI head as a win, but
+**Stage S5 numbers are not citable.** The old S5 leaderboard (removed from `full_paper/` in
+EXP-050; in git history and `analysis/results/seir_gnn/`) and earlier drafts of the paper
+reported the SEIR-GNN FOI head as a win, but
 `analysis/_build/run_s5_seir_gnn.py` had four defects: one gradient step per epoch (~60 total),
 a SMAPE objective scored by RMSE, a force of infection held constant across the horizon, and
 `nn.Linear(in_dim, 1)` collapsing every covariate before the backbone. Do not propagate any
@@ -192,6 +196,12 @@ on test (−0.41, p_adj 0.125). Always compare on a matched metric.
 
 EXP-048: the gated SEIR head's repair of STGAT/A3TGCN/DCRNN (EXP-034) is the persistence anchor,
 not the physics — `head="gated"` (foi_res minus the simulator) matches or beats it on validation.
+
+EXP-050 re-ran the whole study in one environment (the Kaggle reproduction notebook, 810 runs,
+data rebuilt from original sources). **The paper's numbers now come from that run, not from
+`seirgnn2/results/`**, and they differ slightly from EXP-032..048 (e.g. NB −0.76 rather than
+−0.41; lag-1 r² 0.89 and best climate 0.03 on the corrected data, where 0.85/0.02 above are
+benchmark-array figures). Quote EXP-050 for anything in `full_paper/`.
 
 One more inconsistency worth knowing: `seirgnn2/core.py::seasonal_features` justifies its
 week-of-year features by citing "EDA finding F9", but **F9 was retracted** (see

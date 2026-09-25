@@ -4,17 +4,18 @@
 \section{Results}
 \label{sec:results}
 
-All numbers are RMSE in weekly cases on the corrected dataset. Validation
-decides and test is reported beside it. Unless stated otherwise, pairs are on
-the (origin, seed) unit of the frozen three origins.
+All numbers are RMSE in weekly cases on the corrected dataset, from the 810 runs
+of the reproduction notebook. Validation decides and test is reported beside it.
+Unless stated otherwise, pairs are on the (origin, seed) unit of the frozen three
+origins.
 
 \begin{figure*}[t]
   \centering
   \includegraphics[width=\linewidth]{figures/fig_encoders}
   \caption{Six encoders behind three heads (Table~\ref{tab:encoders}). The direct
-  head separates encoders that work from encoders that fail; the SEIR decoder
-  fails on all of them; the gated SEIR head puts all six at the same level, below
-  persistence (dashed) on validation and test.}
+  head separates encoders that work from encoders that fail; the SEIR decoder is
+  worse than persistence on all of them; the gated SEIR head puts all six at the
+  same level, below persistence (dashed) on validation and test.}
   \label{fig:encoders}
 \end{figure*}
 
@@ -25,42 +26,37 @@ SEIR-GNN question needs, with every encoder sharing folds, loss, early stopping
 and metric.
 
 \textbf{Architecture matters little, and the graph less.} Behind the direct head
-AAGCN, ASTGCN and the LSTM score 16.76, 16.84 and 16.91: a spread of 0.15, and
-all three beat persistence (17.86). The LSTM has no message passing at all.
-A GCN beats the same network without message passing by only 0.07 (4/9,
-Table~\ref{tab:levers}). STGAT, A3TGCN and DCRNN score 23.32, 28.63 and 34.89, all worse than
-persistence; STGAT and A3TGCN are worse at every horizon. A linear model on the same inputs
-recovers 47--62\% of STGAT's and A3TGCN's residual variance out of sample but
-only 4--6\% of the working encoders'. The failing encoders are underfitting,
+AAGCN, ASTGCN and the LSTM score 16.71, 16.83 and 16.91: a spread of 0.20, and
+all three beat persistence (17.86). The LSTM has no message passing at all. A
+GCN beats the same network without message passing by only 0.06 (3/9,
+Table~\ref{tab:levers}). STGAT, A3TGCN and DCRNN score 22.93, 28.63 and 34.64,
+all worse than persistence. A linear model fitted to their training residuals
+recovers 48\% and 60\% of STGAT's and A3TGCN's validation residual variance, but
+only 3--7\% of the working encoders'. The failing encoders are underfitting,
 limited by their wiring rather than by the data.
 
 \textbf{The SEIR decoder fails on every encoder.} Routing the forecast entirely
-through the simulator scores 23.69--25.72: 6.9--7.4 worse than the direct head
-on each working encoder. The deficit is structural, and we measured it without
-training by inverting the simulator for the force of infection that reproduces
-each observed count:
+through the simulator scores 24.01--25.75, worse than persistence on all six and
+7.3--7.4 worse than the direct head on each working encoder. The deficit is
+structural, and we measured it without training by inverting the simulator for
+the force of infection that reproduces each observed count:
 (i) with transmission switched off, the $E$ already seeded from recent cases
-still emits \emph{more} cases than observed for 14--16\% of targets, which are
-therefore unreachable at any network output;
+still emits \emph{more} cases than observed for 14--16\% of training targets,
+which are therefore unreachable at any network output (39--41\% of cells need a
+force of infection of zero);
 (ii) the required force of infection is only $r^2=0.22$--$0.26$ predictable from
 case history, against 0.81--0.82 for the direct target;
-(iii) it is not an optimisation problem, since ten times the training budget
-bought 0.04;
-(iv) it is not susceptible depletion, since only 2.5\% of cells reach the
+(iii) it is not susceptible depletion, since only 0.7--4.9\% of cells reach the
 susceptible clamp.
-Point (ii) replicates on the corrected data, through a different mechanism,
-our earlier renewal-equation finding on the benchmark array: the reproduction
-number is about 26\% predictable out of sample.
 
 \textbf{The gated SEIR head repairs the failing encoders.} Letting the
 simulator supply only the departure from persistence brings all six encoders to
-17.44--17.69, within 0.25 of each other and below persistence on validation
-(17.86) and on test (35.50--35.84 against 36.02). For the three failing encoders
-this is a large repair, on 9/9 paired units each:
-STGAT $-5.70$ (test $-24.99$), A3TGCN $-10.95$ ($-24.90$) and DCRNN $-17.22$
-($-38.23$). It costs the working encoders 0.63--0.78 on validation. Read at face
-value, this is the physics-informed result the study set out to find. The next
-section shows that it is not.
+17.43--17.69, below persistence on validation (17.86) and on test (35.50--35.84
+against 36.02). For the three failing encoders this is a large repair, on 9/9
+paired runs each: STGAT $-5.30$ (test $-26.16$), A3TGCN $-10.95$ ($-24.90$) and
+DCRNN $-16.97$ ($-38.01$). It costs the working encoders 0.68--0.78 on
+validation. Read at face value, this is the physics-informed result the study
+set out to find. The next section shows that it is not.
 
 \subsection{Anchor, gate or physics?}
 \label{sec:rescue}
@@ -68,47 +64,42 @@ The gated SEIR head differs from the direct head in three ways at once: it
 forecasts a departure from last week's value (the anchor), it shrinks that
 departure through a learned gate, and the departure comes from the SEIR
 simulator. Only the third is physics. A pre-registered control separates them
-by rerunning all six encoders behind four heads that add these one at a time:
+by training all six encoders behind four heads that add these one at a time:
 direct, residual (anchor), gated (anchor and gate) and gated SEIR (all three).
 The rescue is credited to physics only if gated SEIR beats its no-physics twin on
-at least 7 of 9 units with $\padj<0.05$ on each failing encoder. Our stated
+at least 7 of 9 runs with $\padj<0.05$ on each failing encoder. Our stated
 prediction was that the anchor and gate carry most of the rescue.
 
 Table~\ref{tab:rescue} gives the result: \textbf{the rescue is the anchor, not
-the physics}. Anchor and gate alone account for 96--112\% of the validation repair
-on each failing encoder. A plain residual head, with no gate and no simulator,
-already brings them to 17.47--17.84. Adding the SEIR simulator to the gated
-head earns credit on none of the three. It is significantly \emph{worse} on
-STGAT ($+0.67$, 2/9, $\padj=0.047$), ties on A3TGCN ($-0.00$, 6/9), and helps
-DCRNN by $-0.68$ on only 3/9 units ($\padj=0.38$). On the three working
-encoders the simulator costs 0.74--0.88 on 0/9 units each. The best head for
-AAGCN on this grid is the gated head without physics (16.58 against the direct
-head's 16.76; $-0.18$, 8/9), a comparison we did not pre-register and report
-only as a lead. Our prediction was right that anchor and gate carry the repair
-(share $>0.8$). It was wrong that the simulator's effect would stay within
-$\pm0.3$, and wrong that the residual head would rescue less than the gated one.
+the physics}. Anchor and gate alone account for 96--112\% of the validation
+repair on each failing encoder, and a plain residual head, with no gate and no
+simulator, already brings them to 17.47--17.85. Adding the simulator to the
+gated head earns credit on none of the three: it is significantly \emph{worse} on
+STGAT ($+0.66$, 1/9, $\padj=0.023$), ties on A3TGCN ($-0.00$, 6/9), and helps
+DCRNN by $-0.68$ on only 3/9 runs ($\padj=0.38$). On the three working encoders
+the simulator costs 0.75--0.86 on 0 or 1 of 9 runs. The best head for AAGCN is
+the gated head without physics (16.57 against the direct head's 16.71), a
+comparison we did not pre-register and report only as a lead.
 
-On test the picture reverses. The SEIR head beats its no-physics twin on the
-failing encoders (A3TGCN $-1.65$ and DCRNN $-3.33$, both 9/9; STGAT $-0.83$,
-7/9). That is the recurring disagreement of \S\ref{sec:valtest}. It was not used
+On test the picture reverses: the SEIR head beats its no-physics twin on the
+failing encoders (STGAT $-0.62$, 8/9; A3TGCN $-1.66$ and DCRNN $-3.50$, both
+9/9). That is the recurring disagreement of \S\ref{sec:valtest}. It was not used
 to decide anything, and we do not claim it.
 
 \subsection{What moves the metric}
 \label{sec:levers}
 Table~\ref{tab:levers} pairs every lever we tried against its own control, and
-Figure~\ref{fig:levers} shows the same deltas. Two levers improve validation
-consistently. The \textbf{negative-binomial likelihood} is the largest controlled
-gain: $-0.41$, 9/9, $\padj=0.018$, larger than any architecture difference. It
-corrects a bias, since squared error on $\log(1+y)$ targets a median while RMSE
-scores a mean.
-\textbf{Seasonal features} give the largest mean change ($-0.81$) but win only
-6/9. Combined, the best model $B$ (AAGCN, direct head, NB, seasonal features)
-scores 15.66 against persistence's 17.86: $-2.20$ on 9/9 units.
+Figure~\ref{fig:levers} shows the same deltas. The \textbf{negative-binomial
+likelihood} is the largest controlled gain: $-0.76$, 9/9, $\padj=0.014$, larger
+than any architecture difference. It corrects a bias, since squared error on
+$\log(1+y)$ targets a median while RMSE scores a mean. \textbf{Seasonal features}
+give a similar mean change ($-0.76$) but win only 6/9. Combined, the best model
+$B$ (AAGCN, direct head, NB, seasonal features) scores 15.51 against persistence's
+17.86: $-2.35$ on 9/9 runs.
 
-That is the headline a benchmark would report. It does not hold out of
-sample: on test, $B$ scores 37.55 against persistence's 36.02, and the NB
-likelihood is \emph{worse} on test by 1.57. We return to this in
-\S\ref{sec:valtest}.
+That is the headline a benchmark would report. It does not hold out of sample: on
+test, $B$ scores 37.54 against persistence's 36.02, and the NB likelihood is
+\emph{worse} on test by 1.61. We return to this in \S\ref{sec:valtest}.
 
 \begin{figure}[t]
   \centering
@@ -122,86 +113,78 @@ likelihood is \emph{worse} on test by 1.57. We return to this in
 \subsection{SEIR-GNN against SEIR-LSTM}
 \label{sec:seirgnn}
 The comparison the research question poses is a graph encoder against the LSTM,
-behind the same gated SEIR head. On three origins the graph wins on validation
-every time: ASTGCN $-0.62$ (9/9), AAGCN $-0.18$ (9/9) with NB and seasonal
-features, and AAGCN $-0.17$ (9/9) in a separate grid. Behind the direct head the
-same graph gains nothing ($-0.14$, 5/9). So what the graph adds appeared
-specific to estimating a transmission quantity, where spatial coupling is
-mechanistically plausible.
+behind the same gated SEIR head (Table~\ref{tab:nine}). On three origins the
+graph wins on validation: ASTGCN $-0.54$ (9/9) and AAGCN $-0.14$ (8/9,
+$\padj=0.020$ in Table~\ref{tab:levers}). Behind the direct head the same graph
+gains less and less consistently ($-0.27$, 6/9) and loses on test ($+1.96$, 1/9).
+So what the graph adds appears specific to estimating a transmission quantity.
 
-The nine-origin confirmation does not support that reading
-(Table~\ref{tab:nine}). In the first run, the graph's advantage holds on validation
-($-0.75$, 8/9, $p=0.012$) and \emph{reverses} on test ($+0.23$, 4/9). In the
-second, with a different encoder, it vanishes on validation ($-0.01$) and
-appears on test ($-0.41$, 6/9, $p=0.031$). Neither run clears its pre-registered
-corrected threshold. The two confirmations also named different endpoints
-(validation for the first, test for the second), a flaw in our own
-pre-registration that we record rather than resolve after the fact. We
-therefore do not claim that the SEIR-GNN beats the SEIR-LSTM. On three origins
-it does so consistently on validation but not on test, where ASTGCN's gated
-SEIR head is $+0.30$ against the SEIR-LSTM. On nine origins it is not robust to
-the encoder, the metric or the run.
+The nine disjoint origins do not support a general claim. ASTGCN's advantage
+holds on validation ($-0.62$, 8/9, $p=0.012$) and vanishes on test ($+0.07$,
+6/9); AAGCN's reverses the other way ($+0.18$ on validation, $-0.30$ on test,
+5/9, $p=0.078$). Neither is significant on the metric where the other is. We
+therefore do not claim that the SEIR-GNN beats the SEIR-LSTM: it does so
+consistently on three origins on validation, and on nine origins it is not robust
+to the encoder or the metric.
 
 \begin{figure*}[t]
   \centering
   \includegraphics[width=\linewidth]{figures/fig_nine}
-  \caption{Nine disjoint origins (EXP-047), per-origin RMSE on a log scale.
-  Origin 0.40's validation span contains the 2017 DENV-2 epidemic, 5.4$\times$
-  anything in its training data, and dominates every validation mean; read win
-  counts, not means. On test the gated SEIR arms track or undercut persistence
-  while the direct model $B$ is worst on four origins.}
+  \caption{Nine disjoint origins, per-origin RMSE on a log scale. Origin 0.40's
+  validation span contains the 2017 epidemic and dominates every validation
+  mean; read win counts, not means.}
   \label{fig:nine}
 \end{figure*}
 
 \subsection{Physics as structure: penalty and metapopulation coupling}
 \label{sec:physicsstruct}
-Two further physics-informed structures were pre-registered against $B$. The
+Two further physics-informed structures were tested against $B$. The
 \textbf{spatial physics penalty} was the one significant physics gain in our
-earlier work on the benchmark array ($-0.044$ on STGAT, 57/60 runs). On $B$ it
-keeps its sign ($-0.06$, and $-0.20$ at horizon 3) but wins only 6/9 and is not
-adopted. The \textbf{metapopulation SEIR head}, which couples districts inside
-the dynamics rather than through the initial state, is \emph{worse} than the
-gated head ($+0.20$, 2/9). On nine origins it ties the SEIR-LSTM ($-0.01$ on
-test, 4/9). The reason is in the data. On the benchmark array, Moran's $I$ of
-$\log R$ on the district graph is 0.005, against 0.274 for log cases.
-Transmission has almost no local spatial structure at district-week
-resolution, so a learned coupling has nothing to encode.
+earlier work on the benchmark array ($-0.044$ on STGAT, 57/60 runs, reported in
+the Phase-2 study). On $B$ it keeps its sign ($-0.06$) but wins only 6/9; its
+log form is worse ($+0.08$, 2/9). The \textbf{metapopulation SEIR head}, which
+couples districts inside the dynamics rather than through the initial state, is
+\emph{worse} than the gated head ($+0.20$, 1/9, $\padj=0.020$), and on nine
+origins it ties the SEIR-LSTM on test ($-0.01$, 4/9). The reason is in the data:
+on the district graph, Moran's $I$ of weekly log growth is $-0.03$, against 0.29
+for log cases. Levels are spatially clustered; transmission changes are not, so
+a learned coupling has nothing to encode.
 
 \subsection{The ceiling is informational}
 \label{sec:ceiling}
 Table~\ref{tab:levers} records what did not work. No architecture change
-improves validation by more than 0.14 (a learned adjacency, 5/9), and several
-make it worse: the nonlinear head by 0.26, the residual head with NB by 0.33 and
-all changes combined by 0.32. The literature's remedies for weak
-spatio-temporal models are neutral or worse. RevIN costs 1.27 (0/9), and
-$k$-nearest-neighbour analogues with no network cost 0.87. Data-side levers fail
-too. Halving the training windows costs 0.22, and the learning curve is flat past
-75\%. TimeGAN augmentation costs 0.53 (1/9) and truncates the tail: its largest
-generated week is 882 cases against a real 2,631. Climate costs 0.09, 0.13 and
-0.30 at lags 2--4, 2--13 and 2--25. Gradient-boosted trees gain from climate ($-0.49$), which a network
-does only once its head is nonlinear, and then the nonlinear head costs as much
-as climate gains.
+improves validation by more than 0.15 (a learned adjacency, 5/9), and several
+make it worse: the nonlinear head by 0.28, the residual head with NB by 0.47 and
+all changes combined by 0.55. The literature's remedies for weak
+spatio-temporal models are neutral or worse: RevIN costs 1.47 (0/9) and
+$k$-nearest-neighbour analogues with no network cost 1.01 (0/9). Data-side levers
+fail too. Training on a quarter of the windows costs only 0.25, and on
+three-quarters 0.11, so the model is not short of data. TimeGAN augmentation
+costs 0.60 (0/9) and truncates the tail: its largest generated week is 2,036
+cases against a real 2,631. Climate costs 0.18, 0.19 and 0.47 at lags 2--4,
+2--13 and 2--25. Gradient-boosted trees do gain from climate ($-0.54$, 6/9), but
+remain far behind $B$ (17.40).
 
-These failures share a cause. The residuals of every model family we trained
-correlate 0.87--0.99 with $B$'s, including $k$-NN, which has no network and no
-training, so the models make the same errors. The remaining error is a lag on
-moves. Models under-predict rising weeks by 11--13 cases and over-predict falling
-weeks by 10--11, and the top 5\% of district-weeks carry $\sim$60\% of the squared
-error. That is what a mean-seeking objective produces on a near-random-walk
-target whose next move is not in the inputs.
+These failures share a cause. The validation residuals of the working encoders,
+the SEIR-LSTM and $k$-NN, which has no network and no training, correlate
+0.91--0.97 with $B$'s: the models make the same errors. The remaining error is a
+lag on moves. $B$ under-predicts rising weeks by 11.5 cases and over-predicts
+falling weeks by 10.1, and the top 5\% of district-weeks carry 54--67\% of every
+model's squared error. That is what a mean-seeking objective produces on a
+near-random-walk target whose next move is not in the inputs.
 
 \subsection{Validation and test disagree, systematically}
 \label{sec:valtest}
-Across the twelve grids that share one window length, the arm validation
-selects is worse than persistence on test in eight, and the best arm on test is
-anchored to the last observation (gated SEIR, residual, gated or $k$-NN) in
-seven. Examples: the residual head with NB (34.55 against $B$'s
-37.55), $k$-NN (34.34), the gated SEIR arms (34.92--35.34), and on nine origins
-the gated SEIR-GNN at 31.06 against $B$ at 33.21 and persistence at 31.76.
-Nothing here was selected on test, and none of these differences is significant
-on nine origins (the gated SEIR-GNN against $B$ is $-2.15$ on test, 6/9,
-$p=0.20$). A pattern across most grids is nonetheless evidence about the
-selection protocol. A 30-week validation span immediately before each origin appears to
-reward fitting that span's level, which does not carry into the next period.
-Acting on it needs a new pre-registered protocol and a test set nothing here has
-touched, which only data after March 2024 can provide.
+Across the eight families of runs, the configuration validation selects is worse
+than persistence on test in five, and the best configuration on test is anchored
+to the last observation (gated SEIR, residual, gated or $k$-NN) in six.
+Examples: the residual head with NB (34.59 against $B$'s 37.54), $k$-NN (34.34),
+the SEIR-LSTM (34.97), and on nine origins the gated SEIR-GNN at 31.17 against
+$B$ at 34.00 and persistence at 31.76. Nothing here was selected on test, and on
+nine origins the gated SEIR-GNN's test advantage over persistence is not
+significant ($-0.59$, 6/9, $p=0.68$). A pattern across most families is
+nonetheless evidence about the selection protocol. A 30-week validation span
+immediately before each origin appears to reward fitting that span's level,
+which does not carry into the next period. Acting on it needs a new
+pre-registered protocol and a test set nothing here has touched, which only data
+after March 2024 can provide.

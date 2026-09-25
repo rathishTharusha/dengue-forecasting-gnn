@@ -21,16 +21,19 @@ coupling and mechanism act together. Whether that hybrid helps, and through
 which component, is the question of this paper.
 
 One property of the data governs every answer: weekly incidence is strongly
-autocorrelated. Cases at $t-1$ explain $r^2=0.85$ of cases at $t$, while the
-best single climate covariate explains $0.02$. Every model competes with the
+autocorrelated. On the corrected data, cases at $t-1$ explain $r^2=0.89$ of
+cases at $t$, while the best single climate covariate at a causal lag explains
+$0.03$. Every model competes with the
 naive persistence forecast $\hat{y}_{t+h}=y_t$. A benchmark that omits it
 cannot tell whether a model contributed anything, and the reference benchmark
 omits it.
 
-Our first SEIR-GNN pipeline reported a win, and it was wrong. It trained for
-about sixty gradient steps, optimised SMAPE while scoring RMSE, held the force
-of infection constant across the horizon, and collapsed every covariate to a
-scalar before the graph saw it. This paper reports the controlled re-run. Its
+Our first SEIR-GNN pipeline reported a win, and it was wrong. Its headline set
+the test error at one forecast origin (26.1) against persistence averaged over
+three (36.0); at that same origin persistence scored 22.4, and it won at every
+origin. The pipeline also trained for about sixty gradient steps, optimised
+SMAPE while scoring RMSE, held the force of infection constant across the
+horizon, and collapsed every covariate to a scalar before the graph saw it. This paper reports the controlled re-run. Its
 protocol and each experiment's decision rule were committed before the runs,
 and negative results are reported as such.
 

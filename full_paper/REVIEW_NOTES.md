@@ -1,6 +1,6 @@
 # Full paper — notes for co-author review
 
-Draft of 2026-09-24: `full_paper.pdf` (8 pages including references), source in
+Draft of 2026-09-25: `full_paper.pdf` (8 pages including references), source in
 `overleaf/` (upload `overleaf.zip` to Overleaf).
 
 ## What changed from the Phase-2 paper
@@ -23,6 +23,21 @@ reports the SEIR-GNN study the project set out to do.
   Gaussian head) and the renewal/early-warning sections. These were measured on the
   flawed array. The renewal and Moran's I findings are cited only as array-based
   results.
+
+## Revised 2026-09-25
+
+- Corrected facts: on the corrected data lag-1 r² is **0.89** and the best causal climate
+  covariate 0.03 (0.85 / 0.02 were benchmark-array numbers); the pure SEIR decoder is worse
+  than *persistence* on every encoder, not worse than the direct head on every encoder;
+  "36.02" is the mean over origins, like every model's number.
+- Added the EXP-049 finding to the introduction: the first pipeline's "win" compared one
+  origin (26.1) with persistence averaged over three (36.0); at that origin persistence
+  scored 22.4.
+- The levers table (Table 3) now has 28 rows and is the same list the notebook uses, so
+  the two report identical p-values.
+- The validation/test section is now quantified across 12 grids instead of five examples.
+- `reproduce_full_paper.ipynb` (and its HTML export) reproduces every number; use it to
+  check anything in the text.
 
 ## Decisions only the team can make
 

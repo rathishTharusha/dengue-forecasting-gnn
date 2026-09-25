@@ -1,0 +1,198 @@
+[
+ [
+  "worked",
+  "NB likelihood (vs squared error)",
+  "combo",
+  "AAGCN+direct season nb",
+  "AAGCN+direct season point"
+ ],
+ [
+  "worked",
+  "seasonal features",
+  "screen",
+  "feat=season",
+  "graph=gcn"
+ ],
+ [
+  "worked",
+  "best model B vs persistence",
+  "combo",
+  "AAGCN+direct season nb",
+  "persistence"
+ ],
+ [
+  "graph/architecture",
+  "graph (GCN vs no message passing)",
+  "screen",
+  "graph=gcn",
+  "graph=none"
+ ],
+ [
+  "graph/architecture",
+  "learned adjacency",
+  "screen",
+  "graph=adaptive",
+  "graph=gcn"
+ ],
+ [
+  "graph/architecture",
+  "district seasonal curves",
+  "arch",
+  "A2 district seasonal curves",
+  "A0 B"
+ ],
+ [
+  "graph/architecture",
+  "nonlinear (MLP) head",
+  "arch",
+  "A3 MLP head",
+  "A0 B"
+ ],
+ [
+  "graph/architecture",
+  "MLP head + climate lags 2-13",
+  "arch",
+  "A4 MLP head + climate 2-13",
+  "A0 B"
+ ],
+ [
+  "graph/architecture",
+  "global context node",
+  "arch",
+  "A5 global context",
+  "A0 B"
+ ],
+ [
+  "graph/architecture",
+  "residual head + NB",
+  "arch",
+  "A1 residual head + NB",
+  "A0 B"
+ ],
+ [
+  "graph/architecture",
+  "combined architecture changes",
+  "arch",
+  "A6 combined",
+  "A0 B"
+ ],
+ [
+  "literature remedy",
+  "RevIN",
+  "remedies+ens",
+  "R1b revin",
+  "B"
+ ],
+ [
+  "literature remedy",
+  "district identity embedding",
+  "remedies+ens",
+  "R2 node_emb",
+  "B"
+ ],
+ [
+  "literature remedy",
+  "STID-style MLP",
+  "remedies+ens",
+  "R3 stid",
+  "B"
+ ],
+ [
+  "literature remedy",
+  "NB-GLM (no network)",
+  "remedies+ens",
+  "R4a nbglm",
+  "B"
+ ],
+ [
+  "literature remedy",
+  "k-NN analogues (no network)",
+  "remedies+ens",
+  "R4b knn",
+  "B"
+ ],
+ [
+  "literature remedy",
+  "ensemble B + NB-GLM + k-NN",
+  "remedies+ens",
+  "ENS[B + R4a nbglm + R4b knn]",
+  "B"
+ ],
+ [
+  "data",
+  "half the training windows",
+  "curve",
+  "B frac=0.50",
+  "B frac=1.00"
+ ],
+ [
+  "data",
+  "TimeGAN augmentation",
+  "augment",
+  "G2 timegan",
+  "G0 B"
+ ],
+ [
+  "data",
+  "SEIR-simulated pre-training",
+  "augment",
+  "G3d seir pretrain calibrated",
+  "G0 B"
+ ],
+ [
+  "data",
+  "climate, lags 2-4",
+  "climate",
+  "K1 climate lags 2-4",
+  "K0 B"
+ ],
+ [
+  "data",
+  "climate, lags 2-13",
+  "climate",
+  "K2 climate blocks 2-13",
+  "K0 B"
+ ],
+ [
+  "data",
+  "climate, lags 2-25",
+  "climate",
+  "K3 climate blocks 2-25",
+  "K0 B"
+ ],
+ [
+  "physics",
+  "SEIR as auxiliary loss",
+  "remedies+ens",
+  "R6 aux_phys 0.1",
+  "B"
+ ],
+ [
+  "physics",
+  "SEIR simulator vs no-physics twin (AAGCN)",
+  "rescue",
+  "AAGCN+foi_res",
+  "AAGCN+gated"
+ ],
+ [
+  "physics",
+  "spatial physics penalty",
+  "physics",
+  "P1 spatial penalty (ratio)",
+  "P0 B"
+ ],
+ [
+  "physics",
+  "metapopulation vs gated SEIR head",
+  "physics",
+  "P4 metapopulation SEIR-GNN",
+  "P3 gated SEIR-GNN"
+ ],
+ [
+  "physics",
+  "gated SEIR-GNN vs SEIR-LSTM",
+  "physics",
+  "P3 gated SEIR-GNN",
+  "P6 SEIR-LSTM"
+ ]
+]

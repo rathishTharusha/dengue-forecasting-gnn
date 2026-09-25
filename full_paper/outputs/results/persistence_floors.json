@@ -1,0 +1,17 @@
+[
+ {
+  "dataset": "original array",
+  "RMSE all windows": 44.795,
+  "RMSE artifact-free": 29.521
+ },
+ {
+  "dataset": "array rows reordered",
+  "RMSE all windows": 48.265,
+  "RMSE artifact-free": 31.089
+ },
+ {
+  "dataset": "rebuilt (used here)",
+  "RMSE all windows": 36.016,
+  "RMSE artifact-free": 36.016
+ }
+]

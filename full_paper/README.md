@@ -66,19 +66,29 @@ full_paper/
 
 ---
 
-## 🧪 Quick Start: Master Reproduction Notebook
+## 🧪 Quick Start: the reproduction notebook
 
-The master notebook `reproduce_full_paper.ipynb` reproduces every empirical figure, table, and statistical metric presented in the full paper:
+`reproduce_full_paper.ipynb` reproduces **every finding in the paper and the experiment
+log (EXP-032 … EXP-049)** in one run, in the order of the paper: the corrected data and
+the persistence floor recomputed from the raw series, the benchmark-array audit, the six
+encoders × SEIR heads, the SEIR-decoder diagnosis, the anchor/gate/physics control,
+every lever against its own control, the best model against persistence, SEIR-GNN
+against SEIR-LSTM on three and nine origins, the physics-structure arms, the
+informational ceiling, the validation/test disagreement across every grid, and the audit
+of the earlier "positive physics" runs. Every paired test is recomputed in the notebook
+from the per-run rows in `outputs/results/`.
 
-1. **Open Notebook**:
-   - Launch JupyterLab, VS Code, or Kaggle Notebooks and open `reproduce_full_paper.ipynb`.
-2. **Environment Requirements**:
-   ```bash
-   pip install torch torch-geometric pandas numpy scikit-learn matplotlib statsmodels
-   ```
-3. **Execution Modes**:
-   - **Fast Empirical Mode**: Renders the committed `seirgnn2/results/confirm.json` leaderboard and publication plots (< 30 seconds).
-   - **Full Re-run**: Executes the leakage-controlled confirmatory grid via `seirgnn2/sweep.py confirm` (5 arms × 9 disjoint origins × 3 seeds, ~70 min on 6 CPU workers; identical on Kaggle).
+```bash
+pip install numpy pandas matplotlib jupyter
+jupyter notebook reproduce_full_paper.ipynb      # Run All: under a minute
+```
+
+- **Read without running:** `reproduce_full_paper.html` is the executed notebook.
+- **Re-train instead of reading committed rows:** set `RERUN = True` and list grids in
+  `RERUN_GRIDS` in the first code cell, and run it from inside the repository
+  (hours on CPU; section 14 of the notebook lists the cost per grid).
+- **Regenerate the notebook and its inputs:** `python scripts/build_full_paper_notebook.py --execute`
+  from the repository root. It is generated; do not edit the `.ipynb` by hand.
 
 ---
 

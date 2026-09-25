@@ -1,0 +1,365 @@
+0.00s - Debugger warning: It seems that frozen modules are being used, which may
+0.00s - make the debugger miss breakpoints. Please pass -Xfrozen_modules=off
+0.00s - to python to disable frozen modules.
+0.00s - Note: Debugging will proceed. Set PYDEVD_DISABLE_FILE_VALIDATION=1 to disable this validation.
+0.00s - Debugger warning: It seems that frozen modules are being used, which may
+0.00s - make the debugger miss breakpoints. Please pass -Xfrozen_modules=off
+0.00s - to python to disable frozen modules.
+0.00s - Note: Debugging will proceed. Set PYDEVD_DISABLE_FILE_VALIDATION=1 to disable this validation.
+kernel python: 3.12.13
+$ /usr/bin/python3 -m pip install -q uv
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 20.0/20.0 MB 74.7 MB/s eta 0:00:00
+
+$ /usr/bin/python3 -m uv python install 3.11
+$ /usr/bin/python3 -m uv venv --python 3.11 /tmp/repro/venv311
+$ /usr/bin/python3 -m uv pip install -q --python /tmp/repro/venv311/bin/python torch==2.1.2 --index-url https://download.pytorch.org/whl/cpu
+$ /usr/bin/python3 -m uv pip install -q --python /tmp/repro/venv311/bin/python torch_scatter torch_sparse -f https://data.pyg.org/whl/torch-2.1.2+cpu.html
+$ /usr/bin/python3 -m uv pip install -q --python /tmp/repro/venv311/bin/python torch_geometric==2.4.0 numpy~=1.26.2 pandas~=2.2.0 scikit_learn==1.4.0 statsmodels==0.14.1 decorator==4.4.2 cython matplotlib tqdm
+$ /usr/bin/python3 -m uv pip install -q --python /tmp/repro/venv311/bin/python --no-deps torch_geometric_temporal==0.54.0
+{
+  "python": "3.11.16",
+  "torch": "2.1.2+cpu",
+  "torch_geometric": "2.4.0",
+  "pandas": "2.2.3",
+  "numpy": "1.26.4"
+}
+all five architectures import OK under Python 3.11
+$ git clone --depth 1 --branch exp/seir-gnn https://github.com/rathishTharusha/dengue-forecasting-gnn.git /tmp/repro/project
+Cloned branch exp/seir-gnn
+Using Python Executable: /tmp/repro/venv311/bin/python
+Project Working Path: /tmp/repro/project
+=== 1. Load & Inspect Corrected Dataset ===
+Dataset span: 2013-05-15 to 2024-02-24 (559 weeks)
+Districts (25): Ampara, Anuradhapura, Badulla, Batticaloa, Colombo, Galle, Gampaha, Hambantota, Jaffna, Kalutara, Kandy, Kegalle, Kilinochchi, Kurunegala, Mannar, Matale, Matara, Moneragala, Mullaitivu, NuwaraEliya, Polonnaruwa, Puttalam, Ratnapura, Trincomalee, Vavuniya
+
+=== District Case Statistics ===
+                mean     std  min    50%     max  missing_weeks
+Ampara          4.57    7.66  0.0    2.0    78.0              7
+Anuradhapura   14.30   21.62  0.0    8.0   244.0              7
+Badulla        23.16   33.35  0.0   13.0   305.0              7
+Batticaloa     48.12   62.50  0.0   23.0   384.0              7
+Colombo       227.56  248.17  2.0  160.0  1972.0              7
+Galle          43.52   53.96  0.0   23.0   332.0              7
+Gampaha       136.47  247.95  0.0   65.0  2631.0              7
+Hambantota     21.55   23.55  0.0   13.0   147.0              7
+Jaffna         69.33  114.47  0.0   33.0   931.0              7
+Kalutara       69.30   84.68  0.0   42.0   703.0              7
+Kandy          91.25  127.90  0.0   50.5  1062.0              7
+Kegalle        44.49   79.71  0.0   22.5   807.0              7
+Kilinochchi     3.62    6.04  0.0    2.0    52.0              7
+Kurunegala     54.54   77.75  0.0   32.0   681.0              7
+Mannar          4.37    8.38  0.0    1.0    63.0              7
+Matale         21.90   32.61  0.0   12.0   260.0              7
+Matara         34.74   52.07  0.0   20.0   489.0              7
+Moneragala     13.14   22.60  0.0    6.0   172.0              7
+Mullaitivu      2.54    4.12  0.0    1.0    31.0              7
+NuwaraEliya     6.28    8.56  0.0    4.0    85.0              7
+Polonnaruwa     8.18   11.99  0.0    5.0   123.0              7
+Puttalam       36.74   57.76  0.0   15.0   394.0              7
+Ratnapura      46.45   76.50  0.0   30.0   920.0              7
+Trincomalee    28.31   60.15  0.0   10.0   435.0              7
+Vavuniya        6.29   10.10  0.0    3.0    89.0              7
+=== 2. Running Full Pre-Registered Benchmark Pipeline (Stages S4 - S9) ===
+Executing Stage S4 SEIR-LSTM Reproduction...
+Running 54 S4 SEIR-LSTM benchmark jobs on 4 CPU workers...
+Running 54 S4 SEIR-LSTM benchmark jobs on 4 CPU workers...
+
+Wrote results to /tmp/repro/project/analysis/results/seir_gnn/s4_seir_lstm/s4_seir_lstm_results.json (Total time: 336.1s)
+
+=== Stage S4 Formulations Ranked by Validation RMSE ===
+formulation  lambda_max loss_type  val_RMSE  test_RMSE
+      F-win         1.0     SMAPE    30.353     62.609
+      F-win         2.0     SMAPE    30.411     62.681
+      F-win         4.0     SMAPE    30.429     62.712
+      F-win         1.0 MSE_log1p    32.923     64.536
+      F-win         2.0 MSE_log1p    32.972     64.632
+      F-win         4.0 MSE_log1p    32.978     64.639
+
+[Gate G4] Winner F*: F-win (lambda_max=1/wk, loss=SMAPE) with Val RMSE=30.353, Test RMSE=62.609
+
+Wrote results to /tmp/repro/project/analysis/results/seir_gnn/s4_seir_lstm/s4_seir_lstm_results.json (Total time: 336.1s)
+
+=== Stage S4 Formulations Ranked by Validation RMSE ===
+formulation  lambda_max loss_type  val_RMSE  test_RMSE
+      F-win         1.0     SMAPE    30.353     62.609
+      F-win         2.0     SMAPE    30.411     62.681
+      F-win         4.0     SMAPE    30.429     62.712
+      F-win         1.0 MSE_log1p    32.923     64.536
+      F-win         2.0 MSE_log1p    32.972     64.632
+      F-win         4.0 MSE_log1p    32.978     64.639
+
+[Gate G4] Winner F*: F-win (lambda_max=1/wk, loss=SMAPE) with Val RMSE=30.353, Test RMSE=62.609
+Executing Stage S5 SEIR-GNN Screening & Expansion Benchmark...
+
+=== Phase 1: Screening 12 arms on A3TGCN (108 jobs on 4 CPU workers) ===
+
+=== Phase 1: Screening 12 arms on A3TGCN (108 jobs on 4 CPU workers) ===
+
+=== Phase 1 Screen Results (A3TGCN) Ranked by Validation RMSE ===
+  arch     input_level coupling head_type  val_RMSE  test_RMSE
+A3TGCN           cases implicit       foi    30.147     62.113
+A3TGCN           cases explicit       foi    30.148     62.112
+A3TGCN      cases+era5 implicit       foi    30.254     62.522
+A3TGCN      cases+era5 explicit       foi    30.255     62.523
+A3TGCN cases+era5+ndvi explicit       foi    30.593     62.796
+A3TGCN cases+era5+ndvi implicit       foi    30.594     62.797
+A3TGCN      cases+era5 explicit    direct    35.103     76.169
+A3TGCN      cases+era5 implicit    direct    35.103     76.169
+A3TGCN cases+era5+ndvi explicit    direct    35.228     76.305
+A3TGCN cases+era5+ndvi implicit    direct    35.228     76.305
+A3TGCN           cases explicit    direct    36.173     77.745
+A3TGCN           cases implicit    direct    36.173     77.745
+
+Top 2 SEIR configurations selected for Phase 2 expansion:
+input_level coupling  val_RMSE  test_RMSE
+      cases implicit 30.147242  62.112850
+      cases explicit 30.147699  62.111861
+
+=== Phase 2: Expanding Top Configurations across 5 Architectures (144 jobs) ===
+
+=== Phase 1 Screen Results (A3TGCN) Ranked by Validation RMSE ===
+  arch     input_level coupling head_type  val_RMSE  test_RMSE
+A3TGCN           cases implicit       foi    30.147     62.113
+A3TGCN           cases explicit       foi    30.148     62.112
+A3TGCN      cases+era5 implicit       foi    30.254     62.522
+A3TGCN      cases+era5 explicit       foi    30.255     62.523
+A3TGCN cases+era5+ndvi explicit       foi    30.593     62.796
+A3TGCN cases+era5+ndvi implicit       foi    30.594     62.797
+A3TGCN      cases+era5 explicit    direct    35.103     76.169
+A3TGCN      cases+era5 implicit    direct    35.103     76.169
+A3TGCN cases+era5+ndvi explicit    direct    35.228     76.305
+A3TGCN cases+era5+ndvi implicit    direct    35.228     76.305
+A3TGCN           cases explicit    direct    36.173     77.745
+A3TGCN           cases implicit    direct    36.173     77.745
+
+Top 2 SEIR configurations selected for Phase 2 expansion:
+input_level coupling  val_RMSE  test_RMSE
+      cases implicit 30.147242  62.112850
+      cases explicit 30.147699  62.111861
+
+=== Phase 2: Expanding Top Configurations across 5 Architectures (144 jobs) ===
+
+Wrote full Stage S5 results to /tmp/repro/project/analysis/results/seir_gnn/s5_seir_gnn/s5_seir_gnn_results.json (Total time: 22655.5s)
+
+=== Full Stage S5 SEIR-GNN Leaderboard Ranked by Validation RMSE ===
+  arch     input_level coupling head_type  val_RMSE  test_RMSE
+ STGAT           cases explicit    direct    25.823     69.040
+ STGAT           cases implicit    direct    25.823     69.040
+ STGAT           cases explicit       foi    28.157     61.121
+ STGAT           cases implicit       foi    28.157     61.119
+ASTGCN           cases implicit    direct    28.426     70.992
+ASTGCN           cases explicit    direct    28.663     71.551
+ASTGCN           cases implicit       foi    29.521     62.116
+ AAGCN           cases implicit       foi    29.827     61.938
+ASTGCN           cases explicit       foi    29.842     61.986
+ AAGCN           cases explicit       foi    30.010     61.996
+A3TGCN           cases implicit       foi    30.147     62.113
+A3TGCN           cases explicit       foi    30.148     62.112
+A3TGCN      cases+era5 implicit       foi    30.254     62.522
+A3TGCN      cases+era5 explicit       foi    30.255     62.523
+A3TGCN cases+era5+ndvi explicit       foi    30.593     62.796
+A3TGCN cases+era5+ndvi implicit       foi    30.594     62.797
+ DCRNN           cases implicit       foi    30.724     62.819
+ DCRNN           cases explicit       foi    30.771     62.913
+ AAGCN           cases implicit    direct    31.957     69.828
+ AAGCN           cases explicit    direct    31.957     69.828
+ DCRNN           cases implicit    direct    34.755     75.971
+ DCRNN           cases explicit    direct    34.755     75.971
+A3TGCN      cases+era5 explicit    direct    35.103     76.169
+A3TGCN      cases+era5 implicit    direct    35.103     76.169
+A3TGCN cases+era5+ndvi explicit    direct    35.228     76.305
+A3TGCN cases+era5+ndvi implicit    direct    35.228     76.305
+A3TGCN           cases implicit    direct    36.173     77.745
+A3TGCN           cases explicit    direct    36.173     77.745
+
+[Gate G5] Finalist S*: STGAT (input=cases, coupling=explicit, head=direct) with Val RMSE=25.823, Test RMSE=69.040
+
+Wrote full Stage S5 results to /tmp/repro/project/analysis/results/seir_gnn/s5_seir_gnn/s5_seir_gnn_results.json (Total time: 22655.5s)
+
+=== Full Stage S5 SEIR-GNN Leaderboard Ranked by Validation RMSE ===
+  arch     input_level coupling head_type  val_RMSE  test_RMSE
+ STGAT           cases explicit    direct    25.823     69.040
+ STGAT           cases implicit    direct    25.823     69.040
+ STGAT           cases explicit       foi    28.157     61.121
+ STGAT           cases implicit       foi    28.157     61.119
+ASTGCN           cases implicit    direct    28.426     70.992
+ASTGCN           cases explicit    direct    28.663     71.551
+ASTGCN           cases implicit       foi    29.521     62.116
+ AAGCN           cases implicit       foi    29.827     61.938
+ASTGCN           cases explicit       foi    29.842     61.986
+ AAGCN           cases explicit       foi    30.010     61.996
+A3TGCN           cases implicit       foi    30.147     62.113
+A3TGCN           cases explicit       foi    30.148     62.112
+A3TGCN      cases+era5 implicit       foi    30.254     62.522
+A3TGCN      cases+era5 explicit       foi    30.255     62.523
+A3TGCN cases+era5+ndvi explicit       foi    30.593     62.796
+A3TGCN cases+era5+ndvi implicit       foi    30.594     62.797
+ DCRNN           cases implicit       foi    30.724     62.819
+ DCRNN           cases explicit       foi    30.771     62.913
+ AAGCN           cases implicit    direct    31.957     69.828
+ AAGCN           cases explicit    direct    31.957     69.828
+ DCRNN           cases implicit    direct    34.755     75.971
+ DCRNN           cases explicit    direct    34.755     75.971
+A3TGCN      cases+era5 explicit    direct    35.103     76.169
+A3TGCN      cases+era5 implicit    direct    35.103     76.169
+A3TGCN cases+era5+ndvi explicit    direct    35.228     76.305
+A3TGCN cases+era5+ndvi implicit    direct    35.228     76.305
+A3TGCN           cases implicit    direct    36.173     77.745
+A3TGCN           cases explicit    direct    36.173     77.745
+
+[Gate G5] Finalist S*: STGAT (input=cases, coupling=explicit, head=direct) with Val RMSE=25.823, Test RMSE=69.040
+Executing Stage S6 Sensitivity Analysis...
+=== Stage S6: Sensitivity Analysis on S* ===
+Selected S*: Arch=STGAT, Input=cases, Coupling=explicit, Head=direct
+Val RMSE: 25.823, Test RMSE: 69.040
+
+=== Executing 72 Stage S6 Jobs on 4 Workers ===
+=== Stage S6: Sensitivity Analysis on S* ===
+Selected S*: Arch=STGAT, Input=cases, Coupling=explicit, Head=direct
+Val RMSE: 25.823, Test RMSE: 69.040
+
+=== Executing 72 Stage S6 Jobs on 4 Workers ===
+
+=== Stage S6 Sensitivity Summary Ranked by Validation RMSE ===
+          arm_name  val_RMSE  test_RMSE
+   omega_gamma_alt    25.823      69.04
+  oracle_reset2017    25.823      69.04
+        primary_S*    25.823      69.04
+     rho_1_div_2.5    25.823      69.04
+      rho_1_div_30    25.823      69.04
+          s0_0.092    25.823      69.04
+          s0_0.486    25.823      69.04
+state_assimilation    25.823      69.04
+Wrote S6 results to /tmp/repro/project/analysis/results/seir_gnn/s6_sensitivity/s6_sensitivity_results.json in 317.6s
+
+=== Stage S6 Sensitivity Summary Ranked by Validation RMSE ===
+          arm_name  val_RMSE  test_RMSE
+   omega_gamma_alt    25.823      69.04
+  oracle_reset2017    25.823      69.04
+        primary_S*    25.823      69.04
+     rho_1_div_2.5    25.823      69.04
+      rho_1_div_30    25.823      69.04
+          s0_0.092    25.823      69.04
+          s0_0.486    25.823      69.04
+state_assimilation    25.823      69.04
+Wrote S6 results to /tmp/repro/project/analysis/results/seir_gnn/s6_sensitivity/s6_sensitivity_results.json in 317.6s
+Executing Stage S7 Early-Warning Outbreak Detection Evaluation...
+=== Stage S7: Early-Warning Evaluation ===
+S* finalist: STGAT (input=cases, coupling=explicit, head=direct)
+Wrote S7 early warning metrics to /tmp/repro/project/analysis/results/seir_gnn/s7_early_warning/s7_early_warning_results.json
+=== Stage S7: Early-Warning Evaluation ===
+S* finalist: STGAT (input=cases, coupling=explicit, head=direct)
+Wrote S7 early warning metrics to /tmp/repro/project/analysis/results/seir_gnn/s7_early_warning/s7_early_warning_results.json
+Executing Stage S8 Seroprevalence Validation...
+=== Stage S8 Seroprevalence Comparison ===
+Spearman rho: 0.2500 (p=0.5165)
+  district  model_implied_frac  survey_seroprevalence   error sign
+Batticaloa              0.4331                  0.310  0.1231    +
+   Colombo              0.4844                  0.682 -0.1976    -
+     Galle              0.1851                  0.420 -0.2349    -
+   Gampaha              0.2928                  0.540 -0.2472    -
+    Jaffna              0.4991                  0.380  0.1191    +
+  Kalutara              0.2702                  0.490 -0.2198    -
+     Kandy              0.2908                  0.450 -0.1592    -
+Kurunegala              0.1628                  0.350 -0.1872    -
+ Ratnapura              0.2072                  0.320 -0.1128    -
+Wrote S8 results to /tmp/repro/project/analysis/results/seir_gnn/s8_seroprevalence/s8_seroprevalence_results.json
+=== Stage S8 Seroprevalence Comparison ===
+Spearman rho: 0.2500 (p=0.5165)
+  district  model_implied_frac  survey_seroprevalence   error sign
+Batticaloa              0.4331                  0.310  0.1231    +
+   Colombo              0.4844                  0.682 -0.1976    -
+     Galle              0.1851                  0.420 -0.2349    -
+   Gampaha              0.2928                  0.540 -0.2472    -
+    Jaffna              0.4991                  0.380  0.1191    +
+  Kalutara              0.2702                  0.490 -0.2198    -
+     Kandy              0.2908                  0.450 -0.1592    -
+Kurunegala              0.1628                  0.350 -0.1872    -
+ Ratnapura              0.2072                  0.320 -0.1128    -
+Wrote S8 results to /tmp/repro/project/analysis/results/seir_gnn/s8_seroprevalence/s8_seroprevalence_results.json
+Executing Stage S9 Confirmatory Hypothesis Test...
+=== Stage S9: Confirmatory Evaluation ===
+S* Winner: STGAT (cases, explicit, direct) | Val RMSE: 25.823 | Test RMSE: 69.040
+Direct Control: STGAT (cases, explicit, direct) | Val RMSE: 25.823 | Test RMSE: 69.040
+
+=== Stage S9 Confirmatory Results ===
+                    test_name  raw_p_value  bh_adjusted_p_value  significant_at_0.05
+       S* vs B* (ASTGCN base)         0.50              0.83333                False
+            S* vs Persistence         0.50              0.83333                False
+         S* vs Direct Control         1.00              1.00000                False
+              S* vs SEIR-LSTM         0.75              0.93750                False
+Early-Warning AUC of S* vs B*         0.04              0.20000                False
+
+Beats Baseline Claim Satisfied? False (Wins on origins: 1/9, BH p-adj=0.8333)
+Wrote S9 results to /tmp/repro/project/analysis/results/seir_gnn/s9_confirmatory/s9_confirmatory_results.json
+=== Stage S9: Confirmatory Evaluation ===
+S* Winner: STGAT (cases, explicit, direct) | Val RMSE: 25.823 | Test RMSE: 69.040
+Direct Control: STGAT (cases, explicit, direct) | Val RMSE: 25.823 | Test RMSE: 69.040
+
+=== Stage S9 Confirmatory Results ===
+                    test_name  raw_p_value  bh_adjusted_p_value  significant_at_0.05
+       S* vs B* (ASTGCN base)         0.50              0.83333                False
+            S* vs Persistence         0.50              0.83333                False
+         S* vs Direct Control         1.00              1.00000                False
+              S* vs SEIR-LSTM         0.75              0.93750                False
+Early-Warning AUC of S* vs B*         0.04              0.20000                False
+
+Beats Baseline Claim Satisfied? False (Wins on origins: 1/9, BH p-adj=0.8333)
+Wrote S9 results to /tmp/repro/project/analysis/results/seir_gnn/s9_confirmatory/s9_confirmatory_results.json
+All Stage Runners (S4 - S9) completed cleanly.
+=== 3. Summary Leaderboard & Findings ===
+
+=== Stage S5 SEIR-GNN Leaderboard ===
+  arch     input_level coupling head_type  val_RMSE  test_RMSE
+ STGAT           cases explicit    direct    25.823     69.040
+ STGAT           cases implicit    direct    25.823     69.040
+ STGAT           cases explicit       foi    28.157     61.121
+ STGAT           cases implicit       foi    28.157     61.119
+ASTGCN           cases implicit    direct    28.426     70.992
+ASTGCN           cases explicit    direct    28.663     71.551
+ASTGCN           cases implicit       foi    29.521     62.116
+ AAGCN           cases implicit       foi    29.827     61.938
+ASTGCN           cases explicit       foi    29.842     61.986
+ AAGCN           cases explicit       foi    30.010     61.996
+A3TGCN           cases implicit       foi    30.147     62.113
+A3TGCN           cases explicit       foi    30.148     62.112
+A3TGCN      cases+era5 implicit       foi    30.254     62.522
+A3TGCN      cases+era5 explicit       foi    30.255     62.523
+A3TGCN cases+era5+ndvi explicit       foi    30.593     62.796
+A3TGCN cases+era5+ndvi implicit       foi    30.594     62.797
+ DCRNN           cases implicit       foi    30.724     62.819
+ DCRNN           cases explicit       foi    30.771     62.913
+ AAGCN           cases implicit    direct    31.957     69.828
+ AAGCN           cases explicit    direct    31.957     69.828
+ DCRNN           cases implicit    direct    34.755     75.971
+ DCRNN           cases explicit    direct    34.755     75.971
+A3TGCN      cases+era5 explicit    direct    35.103     76.169
+A3TGCN      cases+era5 implicit    direct    35.103     76.169
+A3TGCN cases+era5+ndvi explicit    direct    35.228     76.305
+A3TGCN cases+era5+ndvi implicit    direct    35.228     76.305
+A3TGCN           cases implicit    direct    36.173     77.745
+A3TGCN           cases explicit    direct    36.173     77.745
+
+=== Stage S9 Confirmatory Hypothesis Results ===
+                    test_name  raw_p_value  bh_adjusted_p_value  significant_at_0.05
+       S* vs B* (ASTGCN base)         0.50              0.83333                False
+            S* vs Persistence         0.50              0.83333                False
+         S* vs Direct Control         1.00              1.00000                False
+              S* vs SEIR-LSTM         0.75              0.93750                False
+Early-Warning AUC of S* vs B*         0.04              0.20000                False
+=== 4. Final Master Comparison & Visualizations ===
+
+=== Master Reproducible Workflow Completed Successfully ===
+/usr/local/lib/python3.12/dist-packages/mistune.py:435: SyntaxWarning: invalid escape sequence '\|'
+  cells[i][c] = re.sub('\\\\\|', '|', cell)
+/usr/local/lib/python3.12/dist-packages/nbconvert/filters/filter_links.py:36: SyntaxWarning: invalid escape sequence '\_'
+  text = re.sub(r'_', '\_', text) # Escape underscores in display text
+[NbConvertApp] Converting notebook __notebook__.ipynb to notebook
+[NbConvertApp] Writing 652112 bytes to __notebook__.ipynb
+[NbConvertApp] Converting notebook __notebook__.ipynb to html
+[NbConvertApp] Support files will be in __results___files/
+[NbConvertApp] Making directory __results___files
+[NbConvertApp] Making directory __results___files
+[NbConvertApp] Making directory __results___files
+[NbConvertApp] Making directory __results___files
+[NbConvertApp] Writing 395431 bytes to __results__.html

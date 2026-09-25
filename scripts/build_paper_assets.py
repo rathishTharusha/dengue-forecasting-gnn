@@ -27,8 +27,8 @@ import matplotlib
 import matplotlib.ticker
 
 matplotlib.use("Agg")
-import matplotlib.pyplot as plt  # noqa: E402
-import numpy as np  # noqa: E402
+import matplotlib.pyplot as plt
+import numpy as np
 
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO / "seirgnn2"))
@@ -43,38 +43,28 @@ GRIDS = ("screen", "real", "combo", "confirm", "remedies+ens", "curve", "augment
 
 ENCODERS = ("AAGCN", "ASTGCN", "LSTM", "STGAT", "A3TGCN", "DCRNN")
 
-# (label, grid, arm, control). Validation RMSE, origin_seed unit.
-LEVERS = [
-    ("\\emph{Worked}", None, None, None),
-    ("NB likelihood (vs squared error)", "combo", "AAGCN+direct season nb", "AAGCN+direct season point"),
-    ("Seasonal features", "screen", "feat=season", "graph=gcn"),
-    ("Best model $B$ vs persistence", "combo", "AAGCN+direct season nb", "persistence"),
-    ("\\emph{Graph and architecture}", None, None, None),
-    ("Graph (GCN vs no message passing)", "screen", "graph=gcn", "graph=none"),
-    ("Learned adjacency (adaptive)", "screen", "graph=adaptive", "graph=gcn"),
-    ("District seasonal curves", "arch", "A2 district seasonal curves", "A0 B"),
-    ("Nonlinear (MLP) head", "arch", "A3 MLP head", "A0 B"),
-    ("Global context node", "arch", "A5 global context", "A0 B"),
-    ("Residual head + NB", "arch", "A1 residual head + NB", "A0 B"),
-    ("\\emph{Literature remedies}", None, None, None),
-    ("RevIN (reversible normalisation)", "remedies+ens", "R1b revin", "B"),
-    ("District identity embedding", "remedies+ens", "R2 node_emb", "B"),
-    ("STID-style MLP", "remedies+ens", "R3 stid", "B"),
-    ("$k$-NN analogues (no network)", "remedies+ens", "R4b knn", "B"),
-    ("Ensemble $B$ + NB-GLM + $k$-NN", "remedies+ens", "ENS[B + R4a nbglm + R4b knn]", "B"),
-    ("\\emph{Data}", None, None, None),
-    ("Half the training windows", "curve", "B frac=0.50", "B frac=1.00"),
-    ("TimeGAN augmentation", "augment", "G2 timegan", "G0 B"),
-    ("SEIR-simulated pre-training", "augment", "G3d seir pretrain calibrated", "G0 B"),
-    ("Climate, lags 2--4", "climate", "K1 climate lags 2-4", "K0 B"),
-    ("Climate, lags 2--13", "climate", "K2 climate blocks 2-13", "K0 B"),
-    ("\\emph{Physics}", None, None, None),
-    ("SEIR as auxiliary loss", "remedies+ens", "R6 aux_phys 0.1", "B"),
-    ("SEIR simulator vs no-physics twin (AAGCN)", "rescue", "AAGCN+foi_res", "AAGCN+gated"),
-    ("Spatial physics penalty", "physics", "P1 spatial penalty (ratio)", "P0 B"),
-    ("Metapopulation vs gated SEIR head", "physics", "P4 metapopulation SEIR-GNN", "P3 gated SEIR-GNN"),
-    ("Gated SEIR-GNN vs SEIR-LSTM", "physics", "P3 gated SEIR-GNN", "P6 SEIR-LSTM"),
-]
+# One lever list for the paper and the notebook: defined in build_full_paper_notebook.py.
+sys.path.insert(0, str(REPO / "scripts"))
+from build_full_paper_notebook import LEVERS as _CANON  # noqa: E402
+
+_GROUPS = {"worked": "Worked", "graph/architecture": "Graph and architecture",
+           "literature remedy": "Literature remedies", "data": "Data", "physics": "Physics"}
+
+
+def _tex(label: str) -> str:
+    if not label.startswith("k-NN"):
+        label = label[0].upper() + label[1:]
+    return (label.replace("k-NN", "$k$-NN").replace(" B ", " $B$ ").replace("model B", "model $B$")
+            .replace("lags 2-", "lags 2--"))
+
+
+LEVERS = []
+_seen: set[str] = set()
+for _g, _label, _grid, _arm, _ref in _CANON:
+    if _g not in _seen:
+        _seen.add(_g)
+        LEVERS.append(("\\emph{" + _GROUPS[_g] + "}", None, None, None))
+    LEVERS.append((_tex(_label), _grid, _arm, _ref))
 
 
 def rows(grid: str) -> list[dict]:
@@ -107,8 +97,8 @@ def table_encoders(out: list[str]) -> None:
         "\\begin{table}[t]", "\\centering",
         "\\caption{The six encoders on one harness (corrected data, 3 origins $\\times$ 3 seeds,"
         " squared error, no seasonal features). Mean validation / test RMSE. The pure SEIR"
-        " decoder (\\texttt{foi}) loses to the direct head on every encoder; the gated SEIR head"
-        " (\\texttt{foi\\_res}) brings all six to within 0.25 of each other.}",
+        " decoder (\\texttt{foi}) is worse than persistence on every encoder; the gated SEIR head"
+        " (\\texttt{foi\\_res}) brings all six to within 0.25 of each other, below persistence.}",
         "\\label{tab:encoders}", "\\small", "\\setlength{\\tabcolsep}{4pt}",
         "\\begin{tabular}{lccc}", "\\toprule",
         "encoder & direct & SEIR decoder & gated SEIR \\\\", "\\midrule",
@@ -236,7 +226,7 @@ def fig_encoders() -> None:
 
 
 def fig_levers(levers: list[dict]) -> None:
-    lv = [f for f in levers if f["label"] != "Best model $B$ vs persistence"]
+    lv = [f for f in levers if "vs persistence" not in f["label"]]
     fig, ax = plt.subplots(figsize=(3.4, 4.4))
     y = np.arange(len(lv))[::-1]
     cols = ["#2a9d8f" if f["d"] < 0 and f["w"] >= 7 else "#9aa5b1" if f["d"] < 0 else "#e76f51"

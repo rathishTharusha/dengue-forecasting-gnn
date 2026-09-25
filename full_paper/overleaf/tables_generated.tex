@@ -2,7 +2,7 @@
 
 \begin{table}[t]
 \centering
-\caption{The six encoders on one harness (corrected data, 3 origins $\times$ 3 seeds, squared error, no seasonal features). Mean validation / test RMSE. The pure SEIR decoder (\texttt{foi}) loses to the direct head on every encoder; the gated SEIR head (\texttt{foi\_res}) brings all six to within 0.25 of each other.}
+\caption{The six encoders on one harness (corrected data, 3 origins $\times$ 3 seeds, squared error, no seasonal features). Mean validation / test RMSE. The pure SEIR decoder (\texttt{foi}) is worse than persistence on every encoder; the gated SEIR head (\texttt{foi\_res}) brings all six to within 0.25 of each other, below persistence.}
 \label{tab:encoders}
 \small
 \setlength{\tabcolsep}{4pt}
@@ -33,34 +33,38 @@ persistence & \multicolumn{3}{c}{17.86 / 36.02} \\
 lever & $\Delta$ val & wins & $p_{\text{adj}}$ & $\Delta$ test \\
 \midrule
 \multicolumn{5}{l}{\emph{Worked}} \\
-\quad NB likelihood (vs squared error) & -0.41 & 9/9 & 0.016 & +1.57 \\
-\quad Seasonal features & -0.81 & 6/9 & 0.202 & +1.07 \\
-\quad Best model $B$ vs persistence & -2.20 & 9/9 & 0.016 & +1.54 \\
+\quad NB likelihood (vs squared error) & -0.41 & 9/9 & 0.018 & +1.57 \\
+\quad Seasonal features & -0.81 & 6/9 & 0.204 & +1.07 \\
+\quad Best model $B$ vs persistence & -2.20 & 9/9 & 0.018 & +1.54 \\
 \multicolumn{5}{l}{\emph{Graph and architecture}} \\
-\quad Graph (GCN vs no message passing) & -0.07 & 4/9 & 0.513 & -0.20 \\
-\quad Learned adjacency (adaptive) & -0.14 & 5/9 & 0.202 & -0.26 \\
-\quad District seasonal curves & -0.01 & 6/9 & 0.918 & +0.48 \\
-\quad Nonlinear (MLP) head & +0.26 & 2/9 & 0.047 & +0.26 \\
-\quad Global context node & -0.07 & 5/9 & 0.629 & -0.36 \\
-\quad Residual head + NB & +0.33 & 4/9 & 0.375 & -2.99 \\
+\quad Graph (GCN vs no message passing) & -0.07 & 4/9 & 0.516 & -0.20 \\
+\quad Learned adjacency & -0.14 & 5/9 & 0.204 & -0.26 \\
+\quad District seasonal curves & -0.01 & 6/9 & 0.945 & +0.48 \\
+\quad Nonlinear (MLP) head & +0.26 & 2/9 & 0.049 & +0.26 \\
+\quad MLP head + climate lags 2--13 & +0.01 & 3/9 & 0.945 & +0.31 \\
+\quad Global context node & -0.07 & 5/9 & 0.643 & -0.36 \\
+\quad Residual head + NB & +0.33 & 4/9 & 0.360 & -2.99 \\
+\quad Combined architecture changes & +0.32 & 2/9 & 0.321 & +0.20 \\
 \multicolumn{5}{l}{\emph{Literature remedies}} \\
-\quad RevIN (reversible normalisation) & +1.27 & 0/9 & 0.016 & -0.81 \\
-\quad District identity embedding & +0.06 & 4/9 & 0.724 & +2.19 \\
-\quad STID-style MLP & +0.71 & 2/9 & 0.056 & -1.22 \\
-\quad $k$-NN analogues (no network) & +0.87 & 0/9 & 0.016 & -3.20 \\
-\quad Ensemble $B$ + NB-GLM + $k$-NN & -0.01 & 5/9 & 0.918 & -1.81 \\
+\quad RevIN & +1.27 & 0/9 & 0.018 & -0.81 \\
+\quad District identity embedding & +0.06 & 4/9 & 0.744 & +2.19 \\
+\quad STID-style MLP & +0.71 & 2/9 & 0.055 & -1.22 \\
+\quad NB-GLM (no network) & +1.32 & 1/9 & 0.031 & +5.30 \\
+\quad $k$-NN analogues (no network) & +0.87 & 0/9 & 0.018 & -3.20 \\
+\quad Ensemble $B$ + NB-GLM + $k$-NN & -0.01 & 5/9 & 0.945 & -1.81 \\
 \multicolumn{5}{l}{\emph{Data}} \\
-\quad Half the training windows & +0.22 & 3/9 & 0.196 & +1.07 \\
-\quad TimeGAN augmentation & +0.53 & 1/9 & 0.052 & -0.02 \\
-\quad SEIR-simulated pre-training & -0.06 & 4/9 & 0.513 & +0.27 \\
-\quad Climate, lags 2--4 & +0.09 & 3/9 & 0.513 & +0.83 \\
-\quad Climate, lags 2--13 & +0.13 & 3/9 & 0.516 & +0.05 \\
+\quad Half the training windows & +0.22 & 3/9 & 0.194 & +1.07 \\
+\quad TimeGAN augmentation & +0.53 & 1/9 & 0.055 & -0.02 \\
+\quad SEIR-simulated pre-training & -0.06 & 4/9 & 0.517 & +0.27 \\
+\quad Climate, lags 2--4 & +0.09 & 3/9 & 0.516 & +0.83 \\
+\quad Climate, lags 2--13 & +0.13 & 3/9 & 0.523 & +0.05 \\
+\quad Climate, lags 2--25 & +0.30 & 2/9 & 0.055 & -0.35 \\
 \multicolumn{5}{l}{\emph{Physics}} \\
-\quad SEIR as auxiliary loss & -0.04 & 6/9 & 0.513 & -0.37 \\
-\quad SEIR simulator vs no-physics twin (AAGCN) & +0.88 & 0/9 & 0.016 & +2.03 \\
-\quad Spatial physics penalty & -0.06 & 6/9 & 0.513 & +0.50 \\
-\quad Metapopulation vs gated SEIR head & +0.20 & 2/9 & 0.047 & +0.20 \\
-\quad Gated SEIR-GNN vs SEIR-LSTM & -0.17 & 9/9 & 0.016 & -0.04 \\
+\quad SEIR as auxiliary loss & -0.04 & 6/9 & 0.516 & -0.37 \\
+\quad SEIR simulator vs no-physics twin (AAGCN) & +0.88 & 0/9 & 0.018 & +2.03 \\
+\quad Spatial physics penalty & -0.06 & 6/9 & 0.516 & +0.50 \\
+\quad Metapopulation vs gated SEIR head & +0.20 & 2/9 & 0.049 & +0.20 \\
+\quad Gated SEIR-GNN vs SEIR-LSTM & -0.17 & 9/9 & 0.018 & -0.04 \\
 \bottomrule
 \end{tabular}
 \end{table}

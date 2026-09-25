@@ -15,7 +15,8 @@ the \emph{future}, and its largest spike is a spreadsheet error. We rebuild a
 On one harness, six encoders (five published ST-GNNs and the SEIR-LSTM's LSTM)
 are each paired with a direct head, a pure SEIR decoder and a gated SEIR head.
 The architecture matters little: working encoders span 0.15 RMSE, and the graph
-adds 0.07. The pure SEIR decoder loses 6--7 RMSE on every encoder. The cause is
+adds 0.07. The pure SEIR decoder is worse than persistence on every encoder,
+and 6--7 RMSE worse than the direct head on each working one. The cause is
 structural: 14--16\% of targets lie below its zero-transmission floor, and its
 force of infection is only $r^2\approx0.25$ predictable. A gated SEIR head,
 which lets the simulator supply only the departure from persistence, brings all

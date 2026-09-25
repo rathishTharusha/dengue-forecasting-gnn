@@ -26,11 +26,11 @@ protocol itself may be the reason (\S\ref{sec:valtest}). A test of either needs
 data nothing here has touched.
 
 \textbf{Why the ceiling is not architectural.} The target's own last value
-explains $r^2=0.85$ of the next, the best covariate 0.02, and what remains is a
+explains $r^2=0.89$ of the next, the best covariate 0.03, and what remains is a
 move the inputs do not reveal. Every model family converges to the same
 function, with residual correlation 0.87--0.99. Architecture, embeddings,
-climate, synthetic data and physics penalties each change validation by less
-than the seed spread. A study that searches this space and reports its best
+climate, synthetic data and physics penalties each improve validation by at
+most 0.14, and most make it worse. A study that searches this space and reports its best
 cell will find a winner; a paired study finds noise. The NB likelihood is the
 exception, because it corrects what the objective targets rather than what the
 model sees.
@@ -40,12 +40,13 @@ produced a publishable positive result had it gone unchecked:
 \begin{itemize}\itemsep1pt
 \item the benchmark array leaks future data through its row order and its
       climate channels;
-\item our own first SEIR-GNN pipeline reported a win that did not survive a
-      correct training loop;
+\item our own first SEIR-GNN pipeline reported a win that compared one origin
+      against a three-origin baseline and did not survive a correct training
+      loop;
 \item the gated SEIR head's repair of three encoders looked like physics and
       was the anchor;
 \item a validation span before each origin selects models that underperform
-      anchored ones on test, in five grids;
+      anchored ones on test, in most of our twelve grids;
 \item two nine-origin confirmations disagree with each other.
 \end{itemize}
 

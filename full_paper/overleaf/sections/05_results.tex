@@ -98,7 +98,7 @@ to decide anything, and we do not claim it.
 Table~\ref{tab:levers} pairs every lever we tried against its own control, and
 Figure~\ref{fig:levers} shows the same deltas. Two levers improve validation
 consistently. The \textbf{negative-binomial likelihood} is the largest controlled
-gain: $-0.41$, 9/9, $\padj=0.016$, larger than any architecture difference. It
+gain: $-0.41$, 9/9, $\padj=0.018$, larger than any architecture difference. It
 corrects a bias, since squared error on $\log(1+y)$ targets a median while RMSE
 scores a mean.
 \textbf{Seasonal features} give the largest mean change ($-0.81$) but win only
@@ -169,15 +169,16 @@ resolution, so a learned coupling has nothing to encode.
 
 \subsection{The ceiling is informational}
 \label{sec:ceiling}
-Table~\ref{tab:levers} records what did not work. Architecture changes (district
-seasonal curves, a nonlinear head, a global context node, a learned adjacency)
-move validation by less than 0.15. The literature's remedies for weak
+Table~\ref{tab:levers} records what did not work. No architecture change
+improves validation by more than 0.14 (a learned adjacency, 5/9), and several
+make it worse: the nonlinear head by 0.26, the residual head with NB by 0.33 and
+all changes combined by 0.32. The literature's remedies for weak
 spatio-temporal models are neutral or worse. RevIN costs 1.27 (0/9), and
 $k$-nearest-neighbour analogues with no network cost 0.87. Data-side levers fail
 too. Halving the training windows costs 0.22, and the learning curve is flat past
 75\%. TimeGAN augmentation costs 0.53 (1/9) and truncates the tail: its largest
-generated week is 882 cases against a real 2,631. Climate at lags 2--13 costs
-0.09--0.13. Gradient-boosted trees gain from climate ($-0.49$), which a network
+generated week is 882 cases against a real 2,631. Climate costs 0.09, 0.13 and
+0.30 at lags 2--4, 2--13 and 2--25. Gradient-boosted trees gain from climate ($-0.49$), which a network
 does only once its head is nonlinear, and then the nonlinear head costs as much
 as climate gains.
 
@@ -191,15 +192,16 @@ target whose next move is not in the inputs.
 
 \subsection{Validation and test disagree, systematically}
 \label{sec:valtest}
-In five separate grids, models anchored to the last observation score better
-on test than the direct model that validation selects, and validation reverses
-the order each time. Examples: the residual head with NB (34.55 against $B$'s
+Across the twelve grids that share one window length, the arm validation
+selects is worse than persistence on test in eight, and the best arm on test is
+anchored to the last observation (gated SEIR, residual, gated or $k$-NN) in
+seven. Examples: the residual head with NB (34.55 against $B$'s
 37.55), $k$-NN (34.34), the gated SEIR arms (34.92--35.34), and on nine origins
 the gated SEIR-GNN at 31.06 against $B$ at 33.21 and persistence at 31.76.
 Nothing here was selected on test, and none of these differences is significant
 on nine origins (the gated SEIR-GNN against $B$ is $-2.15$ on test, 6/9,
-$p=0.20$). Five grids agreeing is nonetheless evidence about the selection
-protocol. A 30-week validation span immediately before each origin appears to
+$p=0.20$). A pattern across most grids is nonetheless evidence about the
+selection protocol. A 30-week validation span immediately before each origin appears to
 reward fitting that span's level, which does not carry into the next period.
 Acting on it needs a new pre-registered protocol and a test set nothing here has
 touched, which only data after March 2024 can provide.

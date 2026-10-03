@@ -1,7 +1,12 @@
 """Stage S8: Seroprevalence Validation.
 
-Compares implied cumulative infected fraction from S* at 2022-12 against
-the 9-district IgG seroprevalence survey data.
+Compares the implied cumulative infected fraction at the survey midpoint against
+the nine-district IgG seroprevalence survey.
+
+The survey figures are read from ``data/external/seroprevalence_nine_districts.csv``
+(Jeewandara et al., J Med Virol 2024, sampled 2022-09 to 2023-03), using the
+``10-20 (all)`` age row for each district. Rule R4: the survey post-dates most of
+the study period, so this stage is validation only and never feeds a forecast.
 
 Outputs: analysis/results/seir_gnn/s8_seroprevalence/s8_seroprevalence_results.json
 """
@@ -29,33 +34,32 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--s5-results", default=str(REPO / "analysis" / "results" / "seir_gnn" / "s5_seir_gnn" / "s5_seir_gnn_results.json"))
     ap.add_argument("--out", default=str(REPO / "analysis" / "results" / "seir_gnn" / "s8_seroprevalence" / "s8_seroprevalence_results.json"))
+    ap.add_argument("--survey-week", type=int, default=496,
+                    help="week index of the survey midpoint (496 = 2022-12-17)")
     args = ap.parse_args()
 
     data = cd.load()
     cases = data.cases
     pop = data.population[-1] # Most recent population
     rho = 1.0 / 11.0
-
-    # 9-district survey seroprevalence values (example reported rates / survey reference values)
-    # District indices and names from corrected_data
     districts = data.names
 
-    # Calculate cumulative reported cases up to week 480 (approx Dec 2022)
-    cum_cases_2022 = np.nansum(cases[:480], axis=0)
-    implied_infected_frac = np.clip(cum_cases_2022 / (rho * pop), 0.0, 1.0)
+    # The survey ran 2022-09 to 2023-03; week 496 is its midpoint, 2022-12-17.
+    week = int(args.survey_week)
+    cum_cases = np.nansum(cases[:week], axis=0)
+    implied_infected_frac = np.clip(cum_cases / (rho * pop), 0.0, 1.0)
 
-    # District survey data mapping (9 districts)
+    # The survey itself, not a stand-in for it: nine districts, all-ages row.
+    survey_path = REPO / "data" / "external" / "seroprevalence_nine_districts.csv"
+    survey_df = pd.read_csv(survey_path)
+    survey_df = survey_df[survey_df["age_group"] == "10-20 (all)"]
     survey_data = {
-        "Colombo": 0.682,
-        "Gampaha": 0.540,
-        "Kalutara": 0.490,
-        "Kandy": 0.450,
-        "Galle": 0.420,
-        "Jaffna": 0.380,
-        "Kurunegala": 0.350,
-        "Ratnapura": 0.320,
-        "Batticaloa": 0.310,
+        row.district: float(row.seroprevalence_pct) / 100.0
+        for row in survey_df.itertuples()
     }
+    unknown = sorted(set(survey_data) - set(districts))
+    if unknown:
+        raise SystemExit(f"survey districts not in the case series: {unknown}")
 
     results_rows = []
     model_vals = []
@@ -84,8 +88,15 @@ def main():
     output = {
         "spearman_rho": round(float(corr), 4),
         "p_value": round(float(pval), 4),
+        "n_districts": len(results_rows),
+        "survey_week_index": week,
+        "survey_source": str(survey_path.relative_to(REPO)).replace("\\", "/"),
         "district_comparison": results_rows,
-        "note": "Descriptive comparison between model implied cumulative infection (2013-2022) and lifetime survey seroprevalence."
+        "note": ("Descriptive comparison between implied cumulative infection since 2013 "
+                 "under rho = 1/11 and the surveyed IgG seroprevalence. The two measure "
+                 "different things: the survey covers ages 10-20 and lifetime exposure, "
+                 "the model tracks the whole population from 2013 onwards, so only the "
+                 "ranking across districts is meaningful.")
     }
 
     out_path = Path(args.out)

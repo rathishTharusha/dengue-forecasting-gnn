@@ -160,5 +160,3 @@ paper/main*.pdf
 docs/research/papers/
 # large unreferenced diagnostic dump
 results/phase3_incidence_diagnostic.csv
-# personal Claude Code style file, not project config
-CLAUDE.md

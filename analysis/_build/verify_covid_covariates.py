@@ -1,4 +1,4 @@
-"""Independent verification of the COVID covariate experiment (EXP-038).
+"""Independent verification of the COVID covariate experiment (EXP-056).
 
 The experiment in `run_covid_covariates.py` is sound and its headline numbers
 reproduce exactly. This script re-derives them from the saved rows rather than

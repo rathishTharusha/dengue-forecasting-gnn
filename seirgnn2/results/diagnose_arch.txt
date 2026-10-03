@@ -1,0 +1,162 @@
+
+##############################################################################
+# config = native   (validation windows, 3 origins, seeds averaged)
+##############################################################################
+
+1. RMSE by horizon, and skill = 1 - RMSE/persistence (positive is better)
+   arm             all      h1      h2      h3   skill h1     h2     h3
+   persistence   18.39   15.72   18.05   21.03
+   STGAT         23.05   21.99   22.83   24.26    -0.399  -0.265  -0.154
+   A3TGCN        29.54   28.66   29.24   30.69    -0.823  -0.620  -0.460
+   ASTGCN        17.04   14.57   16.81   19.41    +0.074  +0.069  +0.077
+   AAGCN         16.99   14.61   16.64   19.39    +0.071  +0.078  +0.078
+   LSTM          17.29   14.64   17.02   19.81    +0.069  +0.057  +0.058
+   SEIR-LSTM     25.48   17.99   25.38   31.30    -0.145  -0.406  -0.489
+
+2. Does the forecast move with the truth?  Regress predicted log-growth on
+   realised log-growth: slope 0 = persistence, 1 = tracks change fully.
+   arm           slope       r      r2    sd(pred growth)/sd(true)
+   STGAT         0.461   0.395   0.156                       1.167
+   A3TGCN        0.393   0.295   0.087                       1.334
+   ASTGCN        0.269   0.495   0.245                       0.542
+   AAGCN         0.259   0.519   0.269                       0.499
+   LSTM          0.229   0.473   0.224                       0.484
+   SEIR-LSTM     0.313   0.370   0.137                       0.846
+
+3. Mean error (pred - truth, cases) by regime; |growth| > 0.3 is a move.
+   share of cells: rising 28.6%  falling 28.4%  flat 43.0%  outbreak 2.3%
+   arm           rising  falling    flat  outbreak   quiet   SSE share rising+falling
+   persistence   -14.66    13.71    0.09    -14.88    0.08                      90.2%
+   STGAT         -12.98     4.26   -5.44    -59.90   -3.57                      54.4%
+   A3TGCN        -12.63     5.74   -6.95    -63.49   -3.62                      46.5%
+   ASTGCN        -13.45    10.31   -1.25    -24.99   -0.91                      85.5%
+   AAGCN         -14.23     9.03   -2.28    -24.53   -1.97                      83.4%
+   LSTM          -14.42     9.74   -2.22    -22.64   -1.84                      84.9%
+   SEIR-LSTM     -16.79     3.50   -8.44    -48.47   -6.49                      56.3%
+
+4. Direction called correctly, among cells that actually moved (chance = 50%)
+   STGAT        66.8%   (rises called up 73.9%, falls called down 59.6%)
+   A3TGCN       63.3%   (rises called up 70.4%, falls called down 56.2%)
+   ASTGCN       71.6%   (rises called up 75.8%, falls called down 67.4%)
+   AAGCN        73.0%   (rises called up 66.8%, falls called down 79.3%)
+   LSTM         70.2%   (rises called up 66.9%, falls called down 73.6%)
+   SEIR-LSTM    66.8%   (rises called up 56.7%, falls called down 77.0%)
+
+5. Where the squared error lives
+   persistence Colombo+Gampaha  29.1% of SSE   top 5% of cells  65.3%
+   STGAT       Colombo+Gampaha  25.3% of SSE   top 5% of cells  60.5%
+   A3TGCN      Colombo+Gampaha  33.5% of SSE   top 5% of cells  65.4%
+   ASTGCN      Colombo+Gampaha  29.5% of SSE   top 5% of cells  64.2%
+   AAGCN       Colombo+Gampaha  29.2% of SSE   top 5% of cells  62.6%
+   LSTM        Colombo+Gampaha  30.7% of SSE   top 5% of cells  63.8%
+   SEIR-LSTM   Colombo+Gampaha  46.1% of SSE   top 5% of cells  73.8%
+
+6. Correlation of residuals between architectures (cell level)
+                  STGAT   A3TGCN   ASTGCN    AAGCN     LSTM SEIR-LST
+   STGAT          1.000    0.643    0.677    0.680    0.651    0.594
+   A3TGCN         0.643    1.000    0.546    0.532    0.554    0.757
+   ASTGCN         0.677    0.546    1.000    0.983    0.991    0.702
+   AAGCN          0.680    0.532    0.983    1.000    0.987    0.692
+   LSTM           0.651    0.554    0.991    0.987    1.000    0.722
+   SEIR-LSTM      0.594    0.757    0.702    0.692    0.722    1.000
+   mean of the 5 direct encoders: RMSE 18.09  (best single 16.99)
+
+7. Is there spatial signal left?  Mean correlation of standardised residuals
+   between district pairs, over (window, horizon).
+   persistence neighbours +0.136   non-neighbours +0.104
+   STGAT       neighbours +0.243   non-neighbours +0.188
+   A3TGCN      neighbours +0.148   non-neighbours +0.147
+   ASTGCN      neighbours +0.193   non-neighbours +0.141
+   AAGCN       neighbours +0.181   non-neighbours +0.122
+   LSTM        neighbours +0.185   non-neighbours +0.136
+   SEIR-LSTM   neighbours +0.201   non-neighbours +0.161
+
+8. Residual left on the table: fit OLS on TRAIN residuals, score on VAL
+   (log space; out-of-sample R2 > 0 means signal the architecture missed)
+   STGAT       R2 = +0.496
+   A3TGCN      R2 = +0.624
+   ASTGCN      R2 = -0.004
+   AAGCN       R2 = +0.013
+   LSTM        R2 = +0.039
+   SEIR-LSTM   R2 = +0.302
+
+##############################################################################
+# config = best   (validation windows, 3 origins, seeds averaged)
+##############################################################################
+
+1. RMSE by horizon, and skill = 1 - RMSE/persistence (positive is better)
+   arm             all      h1      h2      h3   skill h1     h2     h3
+   persistence   18.39   15.72   18.05   21.03
+   STGAT         20.34   19.57   20.21   21.22    -0.245  -0.120  -0.009
+   A3TGCN        27.85   27.03   27.79   28.71    -0.719  -0.540  -0.365
+   ASTGCN        16.23   14.22   16.10   18.12    +0.096  +0.108  +0.138
+   AAGCN         15.85   14.04   15.65   17.65    +0.107  +0.133  +0.161
+   LSTM          16.16   14.10   15.94   18.18    +0.103  +0.117  +0.135
+   SEIR-LSTM     17.69   14.78   17.39   20.45    +0.060  +0.036  +0.028
+
+2. Does the forecast move with the truth?  Regress predicted log-growth on
+   realised log-growth: slope 0 = persistence, 1 = tracks change fully.
+   arm           slope       r      r2    sd(pred growth)/sd(true)
+   STGAT         0.468   0.409   0.167                       1.144
+   A3TGCN        0.427   0.323   0.104                       1.324
+   ASTGCN        0.309   0.503   0.253                       0.613
+   AAGCN         0.302   0.493   0.243                       0.612
+   LSTM          0.280   0.476   0.226                       0.587
+   SEIR-LSTM     0.231   0.454   0.206                       0.508
+
+3. Mean error (pred - truth, cases) by regime; |growth| > 0.3 is a move.
+   share of cells: rising 28.6%  falling 28.4%  flat 43.0%  outbreak 2.3%
+   arm           rising  falling    flat  outbreak   quiet   SSE share rising+falling
+   persistence   -14.66    13.71    0.09    -14.88    0.08                      90.2%
+   STGAT          -4.88    12.11    2.74    -39.19    4.20                      59.2%
+   A3TGCN         -6.45    10.80   -0.57    -53.86    2.24                      48.4%
+   ASTGCN        -11.20    11.10    0.31    -21.66    0.59                      82.8%
+   AAGCN         -11.49    10.20   -0.62    -22.69   -0.14                      79.6%
+   LSTM          -11.46    11.10   -0.07    -17.19    0.24                      82.7%
+   SEIR-LSTM     -12.80    11.64   -0.82    -24.03   -0.16                      83.6%
+
+4. Direction called correctly, among cells that actually moved (chance = 50%)
+   STGAT        62.7%   (rises called up 88.3%, falls called down 37.0%)
+   A3TGCN       61.5%   (rises called up 84.0%, falls called down 38.9%)
+   ASTGCN       70.9%   (rises called up 87.9%, falls called down 53.8%)
+   AAGCN        70.2%   (rises called up 87.2%, falls called down 53.0%)
+   LSTM         70.0%   (rises called up 87.7%, falls called down 52.2%)
+   SEIR-LSTM    68.3%   (rises called up 82.7%, falls called down 53.9%)
+
+5. Where the squared error lives
+   persistence Colombo+Gampaha  29.1% of SSE   top 5% of cells  65.3%
+   STGAT       Colombo+Gampaha  25.3% of SSE   top 5% of cells  51.4%
+   A3TGCN      Colombo+Gampaha  26.1% of SSE   top 5% of cells  58.9%
+   ASTGCN      Colombo+Gampaha  26.8% of SSE   top 5% of cells  61.8%
+   AAGCN       Colombo+Gampaha  27.1% of SSE   top 5% of cells  59.6%
+   LSTM        Colombo+Gampaha  27.0% of SSE   top 5% of cells  61.7%
+   SEIR-LSTM   Colombo+Gampaha  32.8% of SSE   top 5% of cells  67.4%
+
+6. Correlation of residuals between architectures (cell level)
+                  STGAT   A3TGCN   ASTGCN    AAGCN     LSTM SEIR-LST
+   STGAT          1.000    0.613    0.696    0.702    0.653    0.638
+   A3TGCN         0.613    1.000    0.554    0.583    0.541    0.623
+   ASTGCN         0.696    0.554    1.000    0.976    0.983    0.928
+   AAGCN          0.702    0.583    0.976    1.000    0.980    0.921
+   LSTM           0.653    0.541    0.983    0.980    1.000    0.929
+   SEIR-LSTM      0.638    0.623    0.928    0.921    0.929    1.000
+   mean of the 5 direct encoders: RMSE 16.73  (best single 15.85)
+
+7. Is there spatial signal left?  Mean correlation of standardised residuals
+   between district pairs, over (window, horizon).
+   persistence neighbours +0.136   non-neighbours +0.104
+   STGAT       neighbours +0.224   non-neighbours +0.196
+   A3TGCN      neighbours +0.049   non-neighbours +0.092
+   ASTGCN      neighbours +0.168   non-neighbours +0.119
+   AAGCN       neighbours +0.168   non-neighbours +0.118
+   LSTM        neighbours +0.166   non-neighbours +0.124
+   SEIR-LSTM   neighbours +0.146   non-neighbours +0.102
+
+8. Residual left on the table: fit OLS on TRAIN residuals, score on VAL
+   (log space; out-of-sample R2 > 0 means signal the architecture missed)
+   STGAT       R2 = +0.474
+   A3TGCN      R2 = +0.605
+   ASTGCN      R2 = +0.044
+   AAGCN       R2 = +0.062
+   LSTM        R2 = +0.061
+   SEIR-LSTM   R2 = +0.058

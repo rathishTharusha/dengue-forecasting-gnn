@@ -2,7 +2,7 @@
 
 Why this exists: the largest single loss in the frozen 9-origin protocol is the
 window 2019-11 to 2020-06, where national cases collapse from 3057 to 299 a week
-as movement restrictions begin (EXP-035, EXP-036). No compartmental model can
+as movement restrictions begin (EXP-054, EXP-055). No compartmental model can
 anticipate that from case history. Both series below were published within days
 of the events they describe, so a forecaster at the time could have used them:
 they are covariates under rule R2, **not** oracle knowledge under R4.

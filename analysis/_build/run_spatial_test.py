@@ -1,7 +1,7 @@
 """Does any spatial structure help, once the border graph is replaced?
 
 The project has tested the border graph twice and found it contributes nothing:
-the adaptive-graph experiment, and the frozen-encoder control in EXP-033. Neither
+the adaptive-graph experiment, and the frozen-encoder control in EXP-052. Neither
 tested a graph built on *movement*, which is what actually carries dengue between
 districts -- *Aedes* mosquitoes travel only a few hundred metres.
 

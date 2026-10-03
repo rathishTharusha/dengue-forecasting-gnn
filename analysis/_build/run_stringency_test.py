@@ -2,7 +2,7 @@
 
 The largest single loss in the frozen 9-origin protocol is origin 0.60, the
 window 2019-11 to 2020-06, where national cases collapse from 3057 to 299 a week
-and the corrected physics arm over-predicts with a bias of +19.8. EXP-036 showed
+and the corrected physics arm over-predicts with a bias of +19.8. EXP-055 showed
 that serotype timing does nothing for it: the collapse is a policy shock, not an
 epidemiological one.
 

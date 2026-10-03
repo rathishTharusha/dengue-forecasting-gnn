@@ -1,0 +1,30 @@
+{
+ "r2_lag1": 0.8893102643909846,
+ "r2_best_climate": 0.029095072714965566,
+ "persistence_3": {
+  "val": 17.85605462392171,
+  "test": 36.01572291056315
+ },
+ "persistence_9": {
+  "val": 41.213250478108726,
+  "test": 31.76191912757026
+ },
+ "array_floor": {
+  "all_windows": 44.79531573322547,
+  "without_row_395": 29.521009708925252
+ },
+ "residual_corr_range_vs_B": [
+  0.5822864178802306,
+  0.9721213454286799
+ ],
+ "timegan_max": {
+  "synthetic": 2036.345947265625,
+  "real": 2631.0
+ },
+ "morans_i_log_growth": -0.028539811321606132,
+ "morans_i_log_cases": 0.28740959872354926,
+ "profile": "full",
+ "runs": 810,
+ "hours": 3.01,
+ "credited_to_physics": []
+}

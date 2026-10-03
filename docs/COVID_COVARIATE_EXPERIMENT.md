@@ -115,7 +115,7 @@ limitations above remain applicable.
 - [Unrounded summary CSV in results/](../results/covid_covariates_summary.csv)
 - [Exact configuration and source hashes](../analysis/results/covid_covariates_final/config.json)
 - [Per-horizon metrics](../analysis/results/covid_covariates_final/per_horizon.csv)
-- [Experiment log entry EXP-038](EXPERIMENT_LOG.md#exp-038--lagged-covid-policy-and-workplace-mobility-completed-exploratory-test)
+- [Experiment log entry EXP-056](EXPERIMENT_LOG.md#exp-056--lagged-covid-policy-and-workplace-mobility-completed-exploratory-test)
 
 The final folder also contains all 81 prediction files, run-level scores, input
 audits and backend assignments. The report is generated from saved evaluations;
@@ -164,6 +164,6 @@ largely cancel. `policy_mobility` is the worst arm because it adds two collinear
 covariates with opposing fitted signs: net effect near zero, variance strictly
 higher.
 
-**Numbering.** This entry is **EXP-038**. EXP-037 was already taken by the Stage
+**Numbering.** This entry is **EXP-056**. EXP-037 was already taken by the Stage
 S8 seroprevalence fix on `fix/s8-seroprevalence`; the log entry and the links
 above were renumbered.

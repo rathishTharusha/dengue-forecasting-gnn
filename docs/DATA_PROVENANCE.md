@@ -159,8 +159,8 @@ age groups; Trincomalee 54.3% vs 56.5%); both are recorded, not corrected.
 
 **Why these two are here.** The largest single loss in the frozen 9-origin
 protocol is the window 2019-11 to 2020-06, where national cases collapse from
-3057 to 299 a week while the model over-predicts with a bias of +19.8 (EXP-035,
-EXP-036). The collapse is not epidemiological. In the weekly table the turn is
+3057 to 299 a week while the model over-predicts with a bias of +19.8 (EXP-054,
+EXP-055). The collapse is not epidemiological. In the weekly table the turn is
 unmistakable: 2020-03-07 carries stringency 12 and 462 cases; 2020-03-14 carries
 stringency 68, workplace mobility −33%, and 245 cases; by 2020-04-04, stringency
 100 and 79 cases.

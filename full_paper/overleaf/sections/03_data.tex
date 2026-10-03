@@ -1,0 +1,86 @@
+%=============================================================================
+% DATA: REPRODUCTION, AUDIT, CORRECTED DATASET
+%=============================================================================
+\section{Data}
+\label{sec:data}
+
+\subsection{Reproducing the benchmark}
+\label{sec:repro}
+We ran the reference implementation~\cite{weng2024graph} unmodified---their code,
+their array, their protocol---on a pinned software stack. It recovers their
+published numbers to within \textbf{7.3\%} across twenty comparisons, with
+AAGCN and DCRNN matching to four decimal places. The published results are
+real, but three properties of the evaluation account for the reported
+advantage. The column labelled ``cross validated'' is computed on a loader
+spanning the full series, so it includes training data. RMSE is averaged per
+window rather than pooled, which on this target is $\sim$39\% lower. No naive
+baseline is reported, and adding persistence to that same column reverses the
+ranking: it beats \emph{every} model on MAE and RMSE. An independent
+re-implementation that shares no code with either codebase reproduces this. This
+reproduction runs the authors' own code in its pinned environment and is
+packaged separately (\texttt{reproduction/} in the repository); everything from
+\S\ref{sec:audit} on is produced by the reproduction notebook.
+
+\subsection{Auditing the benchmark array}
+\label{sec:audit}
+The benchmark array (\texttt{sri\_lanka\_2013-2022\_shifted.npy}) has no date
+axis. We dated every row by matching its 25 district counts exactly against the
+weekly reports, and dated the weather channels separately by finding the
+calendar offset at which the array's temperature best matches ERA5.
+Table~\ref{tab:audit} lists what that shows.
+
+\begin{table}[t]
+\centering
+\caption{Audit of the benchmark array, recomputed by the reproduction notebook
+from the original files.}
+\label{tab:audit}
+\small
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{p{0.33\linewidth}p{0.57\linewidth}}
+\toprule
+finding & consequence \\
+\midrule
+Rows 0--47 are 2023; rows 51 onward run 2013--2022 & 45 rows from 2023 sit in
+the training split of every fold, which tests on 2018--2022 \\
+Cases reordered, weather not & the array's temperature matches ERA5 at
+$r = 0.95$ on its own row order and $r = 0.45$ on the dates the case rows carry \\
+``Lag 12'' precipitation & matches ERA5 rain 12 weeks \emph{later}
+($r = 0.68$) and not 12 weeks earlier ($r = 0.19$): future information \\
+48 reports dropped, one week stored twice & 454 of 459 rows equal a published
+report exactly \\
+Week-395 ``19$\times$ spike'' & row A of one printed table is a dragged formula
+(15 of 24 cells are the sum of the two before, districts sum to 7,165 against a
+national cell of 35); the same table's cumulative row gives the true count \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Two of these are information leaks. Training on 2023 while testing on
+2018--2022 lets a model see the future of its test period, and a ``lagged''
+rainfall channel that holds rain from twelve weeks ahead gives it that future's
+weather. Any score on this array, including the published ones and our own
+earlier work, is therefore an optimistic bound. Earlier drafts of this study
+called the week-395 spike an administrative reporting backlog. It is a
+spreadsheet error, and it can be corrected from the same published table.
+
+\subsection{The corrected dataset}
+\label{sec:corrected}
+Every input is an original file, checked against the SHA-256 recorded when it
+was first retrieved: the parsed Table~1 rows of every Weekly Epidemiological
+Report, the one report PDF used for the correction, ERA5 daily responses from
+the Open-Meteo archive, and the Department of Census and Statistics population
+and census PDFs. From these the case series is rebuilt, keyed by report volume
+and number: 559 weeks from 2013-W26 to 2024-W10. The seven weeks with no report
+stay missing and are never interpolated; districts plus the Kalmunai division
+equal the Epidemiology Unit's own national total in 432 of 552 reports. Weekly
+ERA5 temperature, precipitation, humidity and soil moisture are aggregated from
+daily values at an interior point of each district, and each week's population
+is the latest official figure for an earlier year (the 2012 Census, whose 25
+district totals sum exactly to the national total, then mid-year estimates).
+
+Lags are applied in the model, not baked into the data: a forecast for week $t$
+reads cases up to $t-1$ and climate up to $t-2$, since ERA5 is published about
+five days late. On this series the persistence test RMSE on the frozen three
+origins (averaged over origins, as for every model) is \textbf{36.02}, against
+44.80 on the array (29.52 with the week-395 windows excluded). The last test
+fold covers the 2023 epidemic.

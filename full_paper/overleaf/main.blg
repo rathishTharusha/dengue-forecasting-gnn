@@ -11,50 +11,75 @@ Reallocated glb_str_ptr (elt_size=4) to 20 items from 10.
 Reallocated global_strs (elt_size=200001) to 20 items from 10.
 Reallocated glb_str_end (elt_size=4) to 20 items from 10.
 Reallocated singl_function (elt_size=4) to 100 items from 50.
+Warning--no number and no volume in cao2023mepognn
+Warning--page numbers missing in both pages and numpages fields in cao2023mepognn
+Warning--can't use both volume and number fields in guo2019astgcn
+Warning--empty publisher in guo2019astgcn
+Warning--empty address in guo2019astgcn
+Warning--empty publisher in kim2022revin
+Warning--empty address in kim2022revin
+Warning--page numbers missing in both pages and numpages fields in kim2022revin
+Warning--empty publisher in li2018dcrnn
+Warning--empty address in li2018dcrnn
+Warning--page numbers missing in both pages and numpages fields in li2018dcrnn
 Warning--no number and no volume in nguyen2024mppinn
 Warning--page numbers missing in both pages and numpages fields in nguyen2024mppinn
+Warning--empty publisher in rodriguez2023einns
+Warning--empty address in rodriguez2023einns
+Warning--page numbers missing in both pages and numpages fields in rodriguez2023einns
+Warning--empty publisher in shao2022stid
+Warning--empty address in shao2022stid
+Warning--page numbers missing in both pages and numpages fields in shao2022stid
+Warning--empty publisher in shi2019aagcn
+Warning--empty address in shi2019aagcn
+Warning--empty publisher in wang2022causalgnn
+Warning--empty address in wang2022causalgnn
+Warning--page numbers missing in both pages and numpages fields in wang2022causalgnn
 Warning--empty publisher in weng2024graph
 Warning--empty address in weng2024graph
 Warning--page numbers missing in both pages and numpages fields in weng2024graph
-You've used 6 entries,
+Warning--empty publisher in yoon2019timegan
+Warning--empty address in yoon2019timegan
+Warning--page numbers missing in both pages and numpages fields in yoon2019timegan
+You've used 18 entries,
             5981 wiz_defined-function locations,
-            1508 strings with 19227 characters,
-and the built_in function-call counts, 7495 in all, are:
-= -- 1034
-> -- 298
+            1569 strings with 21991 characters,
+and the built_in function-call counts, 21648 in all, are:
+= -- 2676
+> -- 854
 < -- 0
-+ -- 103
-- -- 101
-* -- 569
-:= -- 735
-add.period$ -- 29
-call.type$ -- 6
-change.case$ -- 55
-chr.to.int$ -- 6
-cite$ -- 11
-duplicate$ -- 589
-empty$ -- 416
-format.name$ -- 125
-if$ -- 1871
++ -- 294
+- -- 278
+* -- 1642
+:= -- 2095
+add.period$ -- 83
+call.type$ -- 18
+change.case$ -- 162
+chr.to.int$ -- 18
+cite$ -- 48
+duplicate$ -- 1870
+empty$ -- 1309
+format.name$ -- 350
+if$ -- 5334
 int.to.chr$ -- 2
 int.to.str$ -- 1
-missing$ -- 25
-newline$ -- 90
-num.names$ -- 42
-pop$ -- 249
+missing$ -- 81
+newline$ -- 181
+num.names$ -- 126
+pop$ -- 865
 preamble$ -- 1
-purify$ -- 103
+purify$ -- 306
 quote$ -- 0
-skip$ -- 201
+skip$ -- 657
 stack$ -- 0
-substring$ -- 476
-swap$ -- 57
+substring$ -- 1338
+swap$ -- 166
 text.length$ -- 0
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 110
-warning$ -- 5
-while$ -- 32
+type$ -- 414
+warning$ -- 30
+while$ -- 79
 width$ -- 0
-write$ -- 153
-(There were 5 warnings)
+write$ -- 370
+(There were 30 warnings)

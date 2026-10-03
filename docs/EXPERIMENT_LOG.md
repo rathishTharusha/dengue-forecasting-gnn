@@ -3,48 +3,6 @@
 Append-only. Newest entries at the top. Every run whose numbers might reach the report goes
 here — a number without a reproducible config does not go in the report.
 
-## EXP-039 — Movement restriction as a fixed mechanistic prior, not a fitted coefficient
-
-- **Date:** 2026-10-03
-- **Who:** Claude
-- **Script:** `analysis/_build/run_stringency_prior.py`; results `analysis/results/seir_gnn/s5_v2/stringency_prior_runs.csv` (108 rows, 0 failures).
-- **Config:** corrected v2 SEIR-STGAT, `rebuilt`, 9 disjoint origins x 3 seeds, window 3 -> horizon 3, training-only normalisation, squared error, early stopping on validation. Arms `base`, `prior_g0.5`, `prior_g1`, `prior_g2`.
-- **Question:** every learned policy arm so far is unidentifiable exactly where it is needed, because the folds that fail contain no lockdown week in training (0, 0, 0, 0, 8, 35, 63, 91, 118 across the nine origins). So impose the effect instead of fitting it: `beta -> beta * (1 - s/100)^gamma` with **gamma fixed in advance**, never selected on test. Stringency is taken at week *i*-1, strictly before the origin, held across the horizon. At s = 0 the multiplier is exactly 1, so every pre-2020 window is unchanged by construction.
-- **Result:** the prior is **significantly worse**, monotonically in gamma.
-
-  | arm | val RMSE | test RMSE | test MAE | vs base | better | p |
-  |---|---|---|---|---|---|---|
-  | base | 26.5162 | **30.0744** | 14.7997 | — | — | — |
-  | prior_g0.5 | 26.8790 | 30.5934 | 14.9659 | +0.52 | 3/9 | 0.1406 |
-  | prior_g1 | 27.3442 | 31.2768 | 15.2368 | +1.20 | 1/9 | **0.0469** |
-  | prior_g2 | 28.0836 | 32.4286 | 15.8815 | +2.35 | 1/9 | **0.0312** |
-
-- **Design check passed:** origins 0.50 and 0.55 are **bit-identical** across all four arms (20.012 and 48.851), as they must be where stringency is zero throughout.
-- **Verdict:** this is the strongest available form of the negative, because it has no identifiability objection left to make. The prior does exactly what the epidemiology says it should, and loses anyway. It *helps* the window it was built for, monotonically -- origin 0.60 goes 63.448, 63.283, 63.119, 62.799, with over-prediction bias falling +21.41 -> +19.88 -- and it destroys the recovery window immediately after: origin 0.65 goes 11.536, 13.446, 15.612, 18.345, with bias flipping +0.09 -> -6.41 from over- to heavy under-prediction. Stringency stayed high into 2022 while notifications were already rebounding, so a multiplier that correctly suppresses transmission in April 2020 goes on suppressing it for two years after that stopped being true. Net: it buys 0.65 RMSE on the target window and costs 6.81 on the next.
-- **Notes:** the decision to test policy at all was prompted by the 2020 failure, which is design-level hindsight and is reported as such; the functional form and the gamma grid were fixed before running. Supersedes the claim previously in `paper/sections/05b_mechanism_corrected.tex`, which described this prior but quoted numbers from the learned-coefficient arm of `run_stringency_test.py` -- see `fef26bf`. Separately worth keeping in mind as a methods warning: in that learned arm the fitted coefficient is 0.6930 at every pre-2020 origin with standard deviation exactly zero, i.e. `ln 2`, its own initialisation, never moved. Its apparent gain at origin 0.60 was an untrained constant reaching a test window, not a fitted response.
-
-## EXP-038 — Lagged COVID policy and workplace mobility (completed exploratory test)
-
-- **Date:** 2026-10-03
-- **Who:** Codex
-- **Commit:** base code `887f9e67bcf2a9c23dab83656019cdcac25c29fb`; experiment runners are local, uncommitted additions. Exact runner/source hashes are recorded in [config.json](../analysis/results/covid_covariates_final/config.json). Earlier CPU runs were resumed after verifying unchanged model inputs and dependencies; see the raw CPU folder's `resume_oct03.json`.
-- **Scripts:** `analysis/_build/run_covid_covariates.py`, `run_covid_gpu.py`, `merge_covid_devices.py`, `finalize_covid_covariates.py`.
-- **Hardware:** pinned torch 2.1.2; CPU for origins 0.50–0.85, RTX 3050 Laptop CUDA for origin 0.90. All arms/seeds within each origin use one backend. Hardware varies across origins, and CPU/CUDA training need not be identical.
-- **Config:** corrected v2 SEIR-STGAT; rebuilt cases; window=3, horizon=3; arms=base/policy/policy_mobility; origins={0.50,0.55,0.60,0.65,0.70,0.75,0.80,0.85,0.90}; seeds={0,1,2}; epochs=400 maximum with validation early stopping; unchanged backbone, optimizer and training-only case scaling. External inputs lag two weeks, fixed physical scaling, signed exposure weights initialized at zero, log multiplier clipped to ±1.5. Missing external observations have neutral model effects, without changing the raw CSV. [Full protocol](COVID_COVARIATE_EXPERIMENT.md).
-- **Question:** do lagged policy and workplace mobility improve the matched cases-only corrected model?
-- **Result:** all 81 evaluations complete. These are means of split metrics, not globally pooled scores. Unrounded summary CSV: [results/covid_covariates_summary.csv](../results/covid_covariates_summary.csv).
-
-  | Arm | Test RMSE | Test MAE | Bias | RMSE difference vs base | Holm p |
-  |---|---|---|---|---|---|
-  | base | 30.048672958656592 | 14.781874462410256 | -0.6566550320121813 | 0.0 | — |
-  | policy | 30.063734972918475 | 14.82079142111319 | -0.9182566973657109 | 0.01506201426188152 | 1.0 |
-  | policy_mobility | 30.0693471343429 | 14.815282415460658 | -0.9506141585526028 | 0.020674175686306417 | 1.0 |
-
-- **Inference:** average seeds within each origin; exact origin-level sign flips with Holm correction for two comparisons. Raw p=0.90625 (policy), 0.84375 (policy_mobility). Origin bootstrap 95% intervals for RMSE differences: [-0.15694274195918326, 0.23640770382351345] and [-0.22776315123946583, 0.23111279805501303]. Differences below 0.0001 RMSE were counted as numerical ties. **That tolerance is too small, and the corrected figure strengthens the verdict.** Origins 0.50 and 0.55 have zero covariate coverage in train, validation *and* test, so all three arms are the same model there by construction; they nevertheless differ by up to **0.109 RMSE** (origin 0.55, seed 1), because a 1e-6 wobble can move which epoch early stopping selects. The measured run-to-run floor of this pipeline is therefore ~0.11 RMSE, and both covariate effects (+0.015, +0.021) are about 5x smaller than it: not merely insignificant, but below the resolution of the experiment. Nine-origin uncertainty estimates have limited precision.
-- **Verdict:** no clear improvement from these covariates under this protocol. This result does not establish that policy or mobility can never help.
-- **Verified independently (Claude, 2026-10-03):** arm means re-derived from `runs.json` and reproduce exactly; 99/99 project tests pass, including the five COVID tests and the `atol=0` bit-identity control; the five input SHA-256s match HEAD. Two findings were added on top. First, the corrected noise floor above. Second, the *mechanism* for why adding mobility is the worst arm: the fitted exposure weights are exactly 0.0000 at origins 0.50-0.65 — the model provably cannot learn a response where training contains no lockdown — while at origins 0.70-0.90 the stringency weight is negative (-0.10 to -0.36, the epidemiologically correct sign) and the mobility weight is **positive** (+0.39 to +0.92, the wrong sign). Both exposures are positive during lockdown, so the two terms nearly cancel: two collinear covariates with opposing fitted signs contribute net nothing and add variance.
-- **Notes:** exploratory after previous searches, not independent confirmation or causal evidence. Archived covariate vintages are unverified; this is retrospective evaluation with lagged inputs. Early training folds have no COVID exposure, so the initial lockdown response cannot be learned. Keep separate from Claude's policy/spatial experiments, which use different lags and priors. [Completed report](../analysis/results/covid_covariates_final/report.md), per-origin/per-horizon CSVs, coverage, saved predictions and input audits are in the same final folder. The 20-epoch GPU speed benchmark (19.2 s CPU, 10.1 s GPU) is timing evidence only.
-
 Copy this block for a new entry:
 
 ```markdown
@@ -79,7 +37,52 @@ Copy this block for a new entry:
 > `CEILING_R0_MAX`) survived the cleanup and now lives in `dengue_gnn.seir`, still
 > asserted by `tests/test_seir.py` and reproduced by `scripts/verify_seir_paper.py`.
 
-## EXP-036 — What serotype timing is worth, and which windows the arm loses
+## EXP-057 — Movement restriction as a fixed mechanistic prior, not a fitted coefficient
+
+- **Date:** 2026-10-03
+- **Who:** Claude
+- **Script:** `analysis/_build/run_stringency_prior.py`; results `analysis/results/seir_gnn/s5_v2/stringency_prior_runs.csv` (108 rows, 0 failures).
+- **Config:** corrected v2 SEIR-STGAT, `rebuilt`, 9 disjoint origins x 3 seeds, window 3 -> horizon 3, training-only normalisation, squared error, early stopping on validation. Arms `base`, `prior_g0.5`, `prior_g1`, `prior_g2`.
+- **Question:** every learned policy arm so far is unidentifiable exactly where it is needed, because the folds that fail contain no lockdown week in training (0, 0, 0, 0, 8, 35, 63, 91, 118 across the nine origins). So impose the effect instead of fitting it: `beta -> beta * (1 - s/100)^gamma` with **gamma fixed in advance**, never selected on test. Stringency is taken at week *i*-1, strictly before the origin, held across the horizon. At s = 0 the multiplier is exactly 1, so every pre-2020 window is unchanged by construction.
+- **Result:** the prior is **significantly worse**, monotonically in gamma.
+
+  | arm | val RMSE | test RMSE | test MAE | vs base | better | p |
+  |---|---|---|---|---|---|---|
+  | base | 26.5162 | **30.0744** | 14.7997 | — | — | — |
+  | prior_g0.5 | 26.8790 | 30.5934 | 14.9659 | +0.52 | 3/9 | 0.1406 |
+  | prior_g1 | 27.3442 | 31.2768 | 15.2368 | +1.20 | 1/9 | **0.0469** |
+  | prior_g2 | 28.0836 | 32.4286 | 15.8815 | +2.35 | 1/9 | **0.0312** |
+
+- **Design check passed:** origins 0.50 and 0.55 are **bit-identical** across all four arms (20.012 and 48.851), as they must be where stringency is zero throughout.
+- **Verdict:** this is the strongest available form of the negative, because it has no identifiability objection left to make. The prior does exactly what the epidemiology says it should, and loses anyway. It *helps* the window it was built for, monotonically -- origin 0.60 goes 63.448, 63.283, 63.119, 62.799, with over-prediction bias falling +21.41 -> +19.88 -- and it destroys the recovery window immediately after: origin 0.65 goes 11.536, 13.446, 15.612, 18.345, with bias flipping +0.09 -> -6.41 from over- to heavy under-prediction. Stringency stayed high into 2022 while notifications were already rebounding, so a multiplier that correctly suppresses transmission in April 2020 goes on suppressing it for two years after that stopped being true. Net: it buys 0.65 RMSE on the target window and costs 6.81 on the next.
+- **Notes:** the decision to test policy at all was prompted by the 2020 failure, which is design-level hindsight and is reported as such; the functional form and the gamma grid were fixed before running. Supersedes the claim previously in `paper/sections/05b_mechanism_corrected.tex`, which described this prior but quoted numbers from the learned-coefficient arm of `run_stringency_test.py` -- see `fef26bf`. Separately worth keeping in mind as a methods warning: in that learned arm the fitted coefficient is 0.6930 at every pre-2020 origin with standard deviation exactly zero, i.e. `ln 2`, its own initialisation, never moved. Its apparent gain at origin 0.60 was an untrained constant reaching a test window, not a fitted response.
+
+## EXP-056 — Lagged COVID policy and workplace mobility (completed exploratory test)
+
+- **Date:** 2026-10-03
+- **Who:** Codex
+- **Commit:** base code `887f9e67bcf2a9c23dab83656019cdcac25c29fb`; experiment runners are local, uncommitted additions. Exact runner/source hashes are recorded in [config.json](../analysis/results/covid_covariates_final/config.json). Earlier CPU runs were resumed after verifying unchanged model inputs and dependencies; see the raw CPU folder's `resume_oct03.json`.
+- **Scripts:** `analysis/_build/run_covid_covariates.py`, `run_covid_gpu.py`, `merge_covid_devices.py`, `finalize_covid_covariates.py`.
+- **Hardware:** pinned torch 2.1.2; CPU for origins 0.50–0.85, RTX 3050 Laptop CUDA for origin 0.90. All arms/seeds within each origin use one backend. Hardware varies across origins, and CPU/CUDA training need not be identical.
+- **Config:** corrected v2 SEIR-STGAT; rebuilt cases; window=3, horizon=3; arms=base/policy/policy_mobility; origins={0.50,0.55,0.60,0.65,0.70,0.75,0.80,0.85,0.90}; seeds={0,1,2}; epochs=400 maximum with validation early stopping; unchanged backbone, optimizer and training-only case scaling. External inputs lag two weeks, fixed physical scaling, signed exposure weights initialized at zero, log multiplier clipped to ±1.5. Missing external observations have neutral model effects, without changing the raw CSV. [Full protocol](COVID_COVARIATE_EXPERIMENT.md).
+- **Question:** do lagged policy and workplace mobility improve the matched cases-only corrected model?
+- **Result:** all 81 evaluations complete. These are means of split metrics, not globally pooled scores. Unrounded summary CSV: [results/covid_covariates_summary.csv](../results/covid_covariates_summary.csv).
+
+  | Arm | Test RMSE | Test MAE | Bias | RMSE difference vs base | Holm p |
+  |---|---|---|---|---|---|
+  | base | 30.048672958656592 | 14.781874462410256 | -0.6566550320121813 | 0.0 | — |
+  | policy | 30.063734972918475 | 14.82079142111319 | -0.9182566973657109 | 0.01506201426188152 | 1.0 |
+  | policy_mobility | 30.0693471343429 | 14.815282415460658 | -0.9506141585526028 | 0.020674175686306417 | 1.0 |
+
+- **Inference:** average seeds within each origin; exact origin-level sign flips with Holm correction for two comparisons. Raw p=0.90625 (policy), 0.84375 (policy_mobility). Origin bootstrap 95% intervals for RMSE differences: [-0.15694274195918326, 0.23640770382351345] and [-0.22776315123946583, 0.23111279805501303]. Differences below 0.0001 RMSE were counted as numerical ties. **That tolerance is too small, and the corrected figure strengthens the verdict.** Origins 0.50 and 0.55 have zero covariate coverage in train, validation *and* test, so all three arms are the same model there by construction; they nevertheless differ by up to **0.109 RMSE** (origin 0.55, seed 1), because a 1e-6 wobble can move which epoch early stopping selects. The measured run-to-run floor of this pipeline is therefore ~0.11 RMSE, and both covariate effects (+0.015, +0.021) are about 5x smaller than it: not merely insignificant, but below the resolution of the experiment. Nine-origin uncertainty estimates have limited precision.
+- **Verdict:** no clear improvement from these covariates under this protocol. This result does not establish that policy or mobility can never help.
+- **Verified independently (Claude, 2026-10-03):** arm means re-derived from `runs.json` and reproduce exactly; 99/99 project tests pass, including the five COVID tests and the `atol=0` bit-identity control; the five input SHA-256s match HEAD. Two findings were added on top. First, the corrected noise floor above. Second, the *mechanism* for why adding mobility is the worst arm: the fitted exposure weights are exactly 0.0000 at origins 0.50-0.65 — the model provably cannot learn a response where training contains no lockdown — while at origins 0.70-0.90 the stringency weight is negative (-0.10 to -0.36, the epidemiologically correct sign) and the mobility weight is **positive** (+0.39 to +0.92, the wrong sign). Both exposures are positive during lockdown, so the two terms nearly cancel: two collinear covariates with opposing fitted signs contribute net nothing and add variance.
+- **Notes:** exploratory after previous searches, not independent confirmation or causal evidence. Archived covariate vintages are unverified; this is retrospective evaluation with lagged inputs. Early training folds have no COVID exposure, so the initial lockdown response cannot be learned. Keep separate from Claude's policy/spatial experiments, which use different lags and priors. [Completed report](../analysis/results/covid_covariates_final/report.md), per-origin/per-horizon CSVs, coverage, saved predictions and input audits are in the same final folder. The 20-epoch GPU speed benchmark (19.2 s CPU, 10.1 s GPU) is timing evidence only.
+
+Copy this block for a new entry:
+
+```markdown
+## EXP-055 — What serotype timing is worth, and which windows the arm loses
 - **Date:** 2026-09-24
 - **Who:** Praveen De Silva
 - **Commit:** `29bf588`
@@ -98,7 +101,7 @@ Copy this block for a new entry:
 - **Verdict:** answered. Serotype timing helps where epidemics start; nothing epidemiological helps where policy stops one.
 - **Notes:** this corrects an earlier draft that attributed both losing windows to the 2017 epidemic. The oracle tests switch *timing* only; per-district serotype proportions carry more and remain untested.
 
-## EXP-035 — Damped mechanistic correction on top of persistence
+## EXP-054 — Damped mechanistic correction on top of persistence
 - **Date:** 2026-09-24
 - **Who:** Praveen De Silva
 - **Commit:** `2dd4e76`
@@ -110,7 +113,7 @@ Copy this block for a new entry:
 - **Verdict:** answered. Damping cannot cross the floor by construction - as alpha goes to zero the forecast becomes persistence - so this family's ceiling is persistence itself.
 - **Notes:** CSV at `analysis/results/seir_gnn/s5_v2/persistence_plus_runs.csv`.
 
-## EXP-034 — Horizon sweep: the mechanism does not pay off further out
+## EXP-053 — Horizon sweep: the mechanism does not pay off further out
 - **Date:** 2026-09-23
 - **Who:** Praveen De Silva
 - **Commit:** `606c121`
@@ -130,7 +133,7 @@ Copy this block for a new entry:
 - **Verdict:** answered, prediction falsified. The limit is not the horizon.
 - **Notes:** CSV at `analysis/results/seir_gnn/s5_v2/horizon_sweep_runs.csv`.
 
-## EXP-033 — The SEIR layer is worth 39% of the error
+## EXP-052 — The SEIR layer is worth 39% of the error
 - **Date:** 2026-09-23
 - **Who:** Praveen De Silva
 - **Commit:** `f104646`
@@ -142,7 +145,7 @@ Copy this block for a new entry:
 - **Verdict:** answered. The mechanism is the single largest source of accuracy in the model; the graph network on top of it is worth nothing measurable.
 - **Notes:** the original arm lost to its own `direct` control because a *mis-specified* mechanism is a hard constraint pointing the wrong way.
 
-## EXP-032 — Four defects in the Stage-S5 physics, corrected
+## EXP-051 — Four defects in the Stage-S5 physics, corrected
 - **Date:** 2026-09-23
 - **Who:** Praveen De Silva
 - **Commit:** `757f98d`, replication `6440a9c`
@@ -155,6 +158,920 @@ Copy this block for a new entry:
   Confirmatory, 9 disjoint origins x 3 seeds: **test RMSE 50.13 -> 29.86, better on 9/9 origins, p = 0.0039**. Replicated on `reordered` (451 weeks, artifact windows excluded): 55.70 -> 30.65, better on all three origins, with the persistence floor computed there matching the published 31.089.
 - **Verdict:** answered. Still not better than persistence (+1.3 RMSE, 7/9 origins, p = 0.92).
 - **Notes:** ~40 variants, failures included, in `docs/PHYSICS_IMPROVEMENT_LOG.md`; per-run CSV in `analysis/results/seir_gnn/s5_v2/`.
+
+## EXP-050 — The whole study, re-run from original sources in one Kaggle notebook
+- **Date:** 2026-09-25
+- **Who:** Group 05
+- **Commit:** `180ffae` (notebook and sources as run); outputs committed with this entry
+- **Notebook:** `full_paper/kaggle/dengue_physics_gnn.ipynb`, generated by
+  `scripts/build_kaggle_notebook.py` from `full_paper/kaggle/src/*.py`. Kaggle kernel
+  `tharushaperera16/dengue-physics-gnn-reproduction` (private) on dataset
+  `tharushaperera16/dengue-physics-gnn-sources` (private, built by
+  `full_paper/kaggle/fetch_sources.py`: 58 original files, 42.5 MB, SHA-256 verified in the
+  notebook; 27 equal the hash recorded at first retrieval, the rest had none recorded).
+- **Hardware:** Kaggle CPU, internet off, 4 worker processes, torch single-threaded. 3.01 h.
+- **Config:** `PROFILE="full"`. Data rebuilt in the notebook (559 weeks, 7 missing, causal lags
+  cases ≤ t−1, climate ≤ t−2). Encoders re-implemented in plain PyTorch and checked against the
+  reference implementations (`tests/test_kaggle_architectures.py`). Three frozen origins
+  0.55/0.70/0.85 × seeds 0,1,2 for 69 configurations (6 encoders × {direct, residual, gated, foi,
+  foi_res}; graph gcn/none/adaptive; seasonal; B = AAGCN direct NB+season and its squared-error
+  twin; foi_res NB+season ×3; direct NB+season ×4; A1–A6; R1–R4b, R6; training curve 25/50/75%;
+  G2 TimeGAN, G3 SEIR pre-training; K1/K2/K3 climate lags, K6/K7 gradient boosting; P1/P2
+  spatial penalty, P4/P5 metapopulation), 300 epochs (400 for NB arms), Adam 3e-3, wd 1e-4,
+  batch 32, patience 40. Nine disjoint origins 0.40+k/15 × 3 seeds for 7 configurations. R5
+  ensemble and persistence computed from the stored predictions. 810 training runs.
+- **Question:** Do the findings of EXP-032..049 hold when every number comes from one run in one
+  environment, from original sources, with no committed results read?
+- **Result** (unrounded tables in `full_paper/outputs/kaggle_run/*.csv`; `results.json`):
+  - lag-1 r² 0.8893, best causal climate r² 0.0291 (corrected data). Array floor 44.7953 /
+    29.5210 without row 395.
+  - Persistence: three origins val 17.8561 / test 36.0157; nine origins val 41.2133 / test 31.7619.
+  - Direct head val RMSE: AAGCN 16.71, ASTGCN 16.83, LSTM 16.91, STGAT 22.93, A3TGCN 28.63,
+    DCRNN 34.64. SEIR decoder (foi) − direct: +7.2970 / +7.3815 / +7.4128 on the working
+    three (0/9 each). Gated SEIR (foi_res) − direct: STGAT −5.2987, A3TGCN −10.9518, DCRNN
+    −16.9646 (9/9 each; test −26.16 / −24.90 / −38.01).
+  - Rescue (EXP-048 rule): SEIR − gated val STGAT +0.6562 (1/9, p_adj 0.0234), A3TGCN −0.0029
+    (6/9, p_adj 0.984), DCRNN −0.6796 (3/9, p_adj 0.375); share of the repair from anchor+gate
+    1.124 / 1.000 / 0.960. **Credited to physics: none.** Test reverses (−0.62 8/9, −1.66 9/9,
+    −3.50 9/9); not used.
+  - NB vs squared error on B: −0.7626, 9/9, p_adj 0.0137 (test +1.61). B vs persistence −2.3462
+    9/9 p_adj 0.0137 (test +1.5274, 3/9).
+  - Gated SEIR-GNN vs SEIR-LSTM: three origins ASTGCN −0.5351 (9/9), AAGCN −0.1402 (8/9);
+    nine origins (origin unit) ASTGCN val −0.6180 (8/9, p 0.0117) / test +0.0666 (6/9);
+    AAGCN val +0.1834 (6/9) / test −0.3034 (5/9, p 0.078). Metapopulation vs SEIR-LSTM, nine
+    origins: val +0.4867, test −0.0105.
+  - Levers: 28 rows in `levers.csv`; none adopted beyond NB (seasonal −0.7588 but 6/9).
+  - Validation residual correlation with B: ASTGCN 0.959, LSTM 0.972, SEIR-LSTM 0.913, k-NN 0.912
+    (STGAT 0.657, A3TGCN 0.582). Residual variance recovered by a linear fit: working 3–7%,
+    STGAT 48%, A3TGCN 60%.
+  - TimeGAN largest generated week 2,036 vs real 2,631. Moran's I: log cases 0.287, weekly log
+    growth −0.029.
+  - Validation vs test: in 5 of 8 families validation's pick is worse than persistence on test;
+    in 6 of 8 the best-on-test configuration is anchored to last week.
+- **Verdict:** answered. Every qualitative conclusion of EXP-032..049 holds. Magnitudes moved:
+  NB −0.76 (EXP-035: −0.41); B val 15.51. **The full paper now quotes this run only.**
+- **Notes:** In `residual_correlation.csv` the row/column labelled `AAGCN` is B (AAGCN direct,
+  NB + season). `predictions.pkl` (88 MB) is git-ignored. The Weng et al. reproduction (§3.1)
+  is not part of this notebook.
+
+## EXP-049 — Audit of the earlier "positive physics" Kaggle runs: none survives
+- **Date:** 2026-09-24
+- **Who:** Group 05
+- **Commit:** this entry's commit (outputs only, no new training)
+- **Script:** retrieved with `kaggle kernels output` from `seir-gnn-full-reproducible-workflow`
+  (run 2026-09-15), `seir-gnn-stage-s5-benchmark` (2026-09-14) and
+  `beat-floor-physics-super-ensemble` (2026-09-11, status ERROR). Saved to
+  `analysis/results/seir_gnn/kaggle_full_workflow/` and `analysis/results/super_ensemble/`.
+  Note: on Windows the Kaggle CLI writes an empty log unless run with `PYTHONUTF8=1`.
+- **Hardware:** Kaggle CPU (as run); audit local.
+- **Config:** none new. S4–S9 pipeline (`analysis/_build/run_s4..s9_*.py`) on the rebuilt data;
+  `run_beat_baseline.py` on the **original benchmark array** (`--dataset original` default),
+  nine origins 0.50–0.90, every arm trained with the spatial physics penalty.
+- **Question:** The project had reported positive physics results before the seirgnn2 re-run.
+  What happened to them?
+- **Result:**
+  1. **EXP-027's headline (STGAT SEIR-GNN "Test RMSE 26.10 on origin 0.70, outperforming
+     Persistence 36.016") compares one origin with persistence pooled over three.** S5 uses
+     `run_corrected_benchmark.build_folds_masked`, the same folds as
+     `analysis/results/corrected_benchmark/persistence.json`, so origin-by-origin
+     comparison is valid:
+
+     | origin | STGAT + foi head, test (S5 kernel 09-14) | persistence, test |
+     |---|---|---|
+     | 0.55 | 84.77 | 38.95 |
+     | 0.70 | 26.42 | **22.40** |
+     | 0.85 | 72.18 | 46.69 |
+     | pooled | 61.12 | 36.02 |
+
+     The SEIR-GNN loses to persistence at every origin, including the one quoted.
+  2. **The last full run of the same pipeline (09-15) did not claim a physics win.** Its S5
+     gate chose STGAT with the *direct* head on validation (25.823) over the FOI head
+     (28.157). S6's eight physics-sensitivity arms are therefore identical to four decimals
+     (the parameters never reach a direct head). S9 reports no significant comparison and
+     prints "Beats Baseline Claim Satisfied? False (Wins on origins: 1/9)". S8 used the
+     invented survey values noted in the S8 fix task. The FOI head was better on test
+     (61.12 vs 69.04), the same validation/test disagreement as EXP-045 note 4.
+  3. **The physics super-ensemble (legacy array, spatial penalty in every arm) was never
+     logged.** Two of its three stages finished (64 arms each, deterministic and Gaussian
+     heads). Best arm: the three-architecture ensemble `multi_raw`, -0.848 vs the per-origin
+     artifact-free floor, 7/9 origins, p = 0.091; `multi_blend_raw` -0.617, 7/9, p = 0.028.
+     These are raw p-values among 128 comparisons; none survives any correction. The third
+     stage (NB head) crashed on a bug: `run_beat_baseline.py:198` splits the output only for
+     the `gauss` head, so the NB head's two channels are added to a one-channel anchor
+     (`size of tensor a (2) must match ... b (3)`).
+  4. The spatial penalty result (-0.044, 57/60 runs, STGAT, legacy array) is unaffected and
+     stands as a benchmark-array result; on the corrected data with B it is -0.06, 6/9
+     (EXP-046). The S7 AUC gain 0.807 -> 0.826 (legacy array) stands; its p = 0.04 was a
+     typed literal (EXP-037).
+- **Verdict:** answered. EXP-027's positive claim is withdrawn: at matched origins the
+  SEIR-GNN is worse than persistence. No earlier physics result on the rebuilt data survives;
+  the two that stand (spatial penalty, outbreak AUC) are benchmark-array results.
+- **Notes:** the NB-head bug in `run_beat_baseline.py` is not fixed here; that runner targets
+  the legacy array and is superseded by `seirgnn2/`.
+
+## EXP-048 — Rescue control: the SEIR head's repair of STGAT, A3TGCN and DCRNN is the anchor, not the physics
+- **Date:** 2026-09-24
+- **Who:** Group 05
+- **Commit:** `9f7cbe9` (gated head + grid), kernel pinned at `3362bc2`; plan `docs/RESCUE_PLAN.md` in `9f7cbe9`
+- **Script:** Kaggle kernel `seirgnn2-rescue` (v1) = `sweep.py rescue --keep --epochs 300
+  --workers 4`; results `seirgnn2/results/rescue.json` (219 rows, complete).
+- **Hardware:** Kaggle CPU, 4 workers.
+- **Config:** as pre-registered. Six encoders x heads {direct, residual, gated, foi_res},
+  `loss=mse_z`, `lam_param=log`, `state_fit=True`, no seasonal features, 300 epochs --
+  identical to `grids.real` -- frozen three origins x seeds 0/1/2. `gated` is `foi_res`
+  with the SEIR simulator removed (same anchor, same gate, same initialisation;
+  `tests/test_gated_head.py`).
+- **Question:** EXP-034 found the gated SEIR head repairs the three encoders that fail on
+  the direct head (-5.70 / -10.95 / -17.22 val). Is that the SEIR physics, or the
+  persistence anchor and gate it comes with?
+- **Result:** mean validation / test RMSE.
+
+  | encoder | direct | residual | gated | foi_res |
+  |---|---|---|---|---|
+  | STGAT | 23.3153 / 60.8213 | 17.8388 / 35.9485 | **16.9493** / 36.6617 | 17.6218 / 35.8352 |
+  | A3TGCN | 28.6305 / 60.4004 | **17.4735** / 35.0298 | 17.6815 / 37.1555 | 17.6787 / 35.5028 |
+  | DCRNN | 34.7809 / 73.6131 | **17.4906** / 35.5007 | 18.3603 / 38.9158 | 17.6754 / 35.5823 |
+  | AAGCN | 16.7634 / 35.6508 | 16.7508 / 34.2365 | **16.5828** / 33.7502 | 17.4641 / 35.7774 |
+  | ASTGCN | 16.8341 / 35.5449 | 16.7823 / 34.8460 | **16.7404** / 34.6672 | 17.4779 / 35.6209 |
+  | LSTM | **16.9072** / 35.0985 | 16.9538 / 34.9987 | 16.9416 / 35.8598 | 17.6855 / 35.5204 |
+  | persistence | 17.8561 / 36.0157 | | | |
+
+  Primary comparison, `foi_res` vs `gated`, validation, origin_seed unit, BH over the three
+  failing encoders:
+
+  | encoder | val delta | wins | p | p_adj | test delta | test wins |
+  |---|---|---|---|---|---|---|
+  | STGAT | **+0.6726** | 2/9 | 0.0156 | **0.0469** | -0.8265 | 7/9 |
+  | A3TGCN | -0.0029 | 6/9 | 0.9844 | 0.9844 | -1.6527 | 9/9 |
+  | DCRNN | -0.6849 | 3/9 | 0.2500 | 0.3750 | -3.3334 | 9/9 |
+  | AAGCN (context) | +0.8812 | 0/9 | 0.0039 | — | +2.0272 | 0/9 |
+  | ASTGCN (context) | +0.7375 | 0/9 | 0.0039 | — | +0.9537 | 3/9 |
+  | LSTM (context) | +0.7439 | 0/9 | 0.0039 | — | -0.3394 | 6/9 |
+
+  Share of the validation rescue carried by anchor + gate, (direct - gated) / (direct -
+  foi_res): STGAT 1.12, A3TGCN 1.00, DCRNN 0.96.
+- **Verdict:** answered, against the physics. The rescue is not credited to the SEIR
+  simulator on any failing encoder; on STGAT the simulator is significantly *worse* than
+  its no-physics twin. Anchoring to last week's value is what repairs the three encoders:
+  the plain residual head alone gets them to 17.47-17.84.
+- **Notes:**
+  1. **Predictions against outcome.** Share > 0.8: right (0.96-1.12). `foi_res` vs `gated`
+     within +/-0.3 on every failing encoder: wrong for STGAT (+0.67) and DCRNN (-0.68).
+     `residual` rescues less than `gated`: wrong on two of three -- residual is better than
+     gated on A3TGCN (-0.21) and DCRNN (-0.87), worse on STGAT (+0.89, p 0.031).
+  2. **The gated head (no physics) is the best head for the working graph encoders** on
+     validation: AAGCN 16.58 vs direct 16.76 (-0.18, 8/9, p 0.008). Not pre-registered as
+     a comparison; recorded as a lead. It is behind B (15.66), which adds NB and season.
+  3. **The val/test disagreement of EXP-045 note 4, a sixth time.** On test the SEIR head
+     beats its no-physics twin on the failing encoders (A3TGCN -1.65 and DCRNN -3.33,
+     both 9/9); on validation it does not. Nothing is selected on test.
+  4. EXP-034's direct and foi_res numbers reproduce here to within 0.11 on a different
+     machine (e.g. STGAT direct 23.32 both times, DCRNN direct 34.89 vs 34.78).
+
+## EXP-047 — Nine-origin confirmation of the physics arms: endpoint not met
+- **Date:** 2026-09-24
+- **Who:** Group 05
+- **Commit:** `269fc29` (code), kernel pinned at `872b091`; plan `docs/PHYSICS_GNN_PLAN.md` at `b114291`
+- **Script:** Kaggle kernel `seirgnn2-physics9` = `sweep.py physics9 --keep --epochs 400
+  --workers 4`; results `seirgnn2/results/physics9.json` (117 rows, complete).
+- **Hardware:** Kaggle CPU, 4 workers.
+- **Config:** P0 (B), P3 (gated SEIR-GNN), P4 (metapopulation SEIR-GNN), P6 (SEIR-LSTM) and
+  persistence on `core.ORIGINS_9` (0.40 + k/15, test fraction 1/15), seeds 0/1/2, 400 epochs.
+- **Question:** the pre-registered S9 endpoint for the physics arms -- test RMSE, family
+  {P4 vs P6, P4 vs P0, P4 vs persistence, P3 vs P6}, BH, p_adj < 0.05 and >= 6/9 origins.
+- **Result:** means over 27 runs (persistence 9), then paired at the origin unit.
+
+  | arm | val | test | test h1 | test h3 |
+  |---|---|---|---|---|
+  | P3 gated SEIR-GNN | 39.0426 | **31.0629** | 24.7098 | 36.4739 |
+  | P4 metapopulation SEIR-GNN | 39.5601 | 31.4677 | 24.7190 | 37.4269 |
+  | P6 SEIR-LSTM | 39.0482 | 31.4750 | 24.9479 | 37.0572 |
+  | persistence | 41.2133 | 31.7619 | 25.9374 | 37.1770 |
+  | P0 B | **38.2904** | 33.2097 | 27.2481 | 38.4276 |
+
+  | comparison (test, origin unit) | delta | wins | p | p_adj | val delta | val wins |
+  |---|---|---|---|---|---|---|
+  | P4 vs P6 SEIR-LSTM | -0.01 | 4/9 | 0.988 | 0.988 | +0.51 | 4/9 |
+  | P4 vs P0 B | -1.74 | 5/9 | 0.266 | 0.531 | +1.27 | 1/9 |
+  | P4 vs persistence | -0.29 | 6/9 | 0.805 | 0.988 | -1.65 | 7/9 |
+  | P3 vs P6 SEIR-LSTM | **-0.41** | 6/9 | **0.031** | 0.125 | -0.01 | 6/9 |
+
+  At the origin_seed unit (27 pairs, reported, not the endpoint): P3 vs P6 -0.41, 18/27,
+  p = 0.0003; P4 vs P6 -0.01, 13/27, p = 0.97.
+- **Verdict:** answered, negative against the pre-registered bar. No comparison reaches
+  p_adj < 0.05.
+- **Notes:**
+  1. **The metapopulation head ties SEIR-LSTM** (-0.01 test, +0.51 val). Coupling
+     districts inside the dynamics adds nothing measurable over the LSTM.
+  2. **SEIR-GNN vs SEIR-LSTM is not consistent across the two nine-origin runs.** (Corrected
+     the same day: this note first paired EXP-038's validation delta with this run's test
+     delta and called them the same direction.) Matched metric by matched metric:
+
+     | run | encoder | val delta | val wins | test delta | test wins |
+     |---|---|---|---|---|---|
+     | EXP-038 | ASTGCN + foi_res | -0.75 (p 0.012) | 8/9 | **+0.23** (p 0.41) | 4/9 |
+     | EXP-047 | AAGCN + foi_res | -0.01 (p 0.996) | 6/9 | -0.41 (p 0.031) | 6/9 |
+
+     Each run wins on one metric and not the other, and on different metrics. EXP-038's
+     endpoint was validation RMSE; this plan's was test RMSE ("as plan S9") -- the two
+     confirmations did not use the same endpoint, which is itself a flaw in the
+     pre-registration and is recorded here. What does hold: on the three-origin validation
+     screens the gated graph beats the LSTM 9/9 twice (EXP-035 ASTGCN -0.62; EXP-046 AAGCN
+     -0.17), but three origins cannot reach significance at the origin unit.
+  3. **The validation/test disagreement of EXP-045 note 4, a fifth time.** B has the best
+     validation (38.29) and the worst test (33.21, behind persistence 31.76); P3 has the
+     best test (31.06, the only arm below persistence by more than 0.5) with validation 0.75
+     behind B. Nothing was selected on test here.
+  4. Origin 0.40 again dominates the *validation* means (145-157 against 13-49 at the other
+     origins, as in EXP-038); its test span is ordinary (about 25.7 for every arm). Read the
+     win counts, not the mean validation column.
+
+## EXP-046 — Physics-informed GNN screen: spatial penalty, gated and metapopulation SEIR heads
+- **Date:** 2026-09-24
+- **Who:** Group 05
+- **Commit:** `269fc29` (code), kernel pinned at `872b091`; plan `docs/PHYSICS_GNN_PLAN.md` at `b114291`
+- **Script:** Kaggle kernel `seirgnn2-physics` = `sweep.py physics --keep --epochs 400
+  --workers 4`; results `seirgnn2/results/physics.json` (66 rows, complete).
+- **Hardware:** Kaggle CPU, 4 workers.
+- **Config:** as pre-registered. B = AAGCN, direct head, NB, season, window 3; three origins
+  x seeds 0/1/2. P1 spatial penalty ratio form, weight 0.001, binary border adjacency,
+  scales = training-mean cases; P2 log form, 0.05; P3 AAGCN + `foi_res`; P4 AAGCN +
+  `foi_meta` (daily force of infection beta_i * sum_j C_ij I_j, C learned row-stochastic,
+  initialised to the border graph); P5 = P4 + P1 penalty + district seasonal beta; P6 LSTM +
+  `foi_res`. Control P0 reproduces the local B (15.65).
+- **Question:** does a physics-informed structural change improve the best GNN, and does
+  SEIR-GNN beat SEIR-LSTM when the coupling is moved inside the dynamics?
+- **Result:** validation, paired at the origin_seed unit.
+
+  | arm | val | vs P0 | wins | p_adj | test (record only) |
+  |---|---|---|---|---|---|
+  | P1 spatial penalty (ratio) | **15.5863** | -0.06 | 6/9 | 0.447 | 38.0473 |
+  | **P0 B** | 15.6455 | — | — | — | 37.5451 |
+  | P2 spatial penalty (log) | 15.6633 | +0.02 | 6/9 | — | 37.7261 |
+  | P3 gated SEIR-GNN | 17.1043 | +1.46 | 0/9 | — | 34.9226 |
+  | P5 metapop + spatial + district season | 17.1878 | +1.54 | 0/9 | — | 35.3415 |
+  | P6 SEIR-LSTM | 17.2786 | +1.63 | 0/9 | — | 34.9664 |
+  | P4 metapopulation SEIR-GNN | 17.3077 | +1.66 | 0/9 | — | 35.1214 |
+  | persistence | 17.8561 | +2.21 | — | — | 36.0157 |
+
+  | physics comparison (val) | delta | wins | p_adj |
+  |---|---|---|---|
+  | P3 vs P6 SEIR-LSTM | **-0.17** | **9/9** | **0.007** |
+  | P5 vs P6 SEIR-LSTM | -0.09 | 8/9 | 0.016 |
+  | P4 vs P6 SEIR-LSTM | +0.03 | 3/9 | — |
+  | P4 vs P3 (coupling in the dynamics vs import term) | +0.20 | 2/9 | 0.022 |
+  | P5 vs P3 | +0.08 | 2/9 | — |
+
+  P1 lowers validation horizon-3 RMSE by 0.20.
+- **Verdict:** answered. No arm adopted against B (P1 is 6/9, short of 7/9). Among the
+  physics formulations, the gated SEIR-GNN beats SEIR-LSTM 9/9; the metapopulation head is
+  significantly *worse* than the gated one.
+- **Notes:**
+  1. **Predictions against outcome.** P1 adopted with ~-0.05: magnitude right (-0.06),
+     adoption wrong (6/9). P2 null: right. P3/P4 trail P0 by 0.5-1.0: direction right, size
+     wrong (~1.5). P4 not much better than P3: right, it is worse. P3/P4 beat P6: right for
+     P3 (9/9), wrong for P4 (tie).
+  2. **Why metapopulation coupling does not help.** Moran's I of R is 0.005 on this data:
+     transmission is not spatially autocorrelated at district-week resolution, so a learned
+     coupling matrix has nothing to encode, and daily coupled simulation adds optimisation
+     difficulty (best epoch 81 against B's 39) without information.
+  3. **The spatial penalty transfers in sign only.** The manuscript's -0.044 on STGAT was
+     57/60 runs; on B it is -0.06 and 6/9. A likely reading, not tested: B's forecasts
+     already satisfy the smoothness the penalty enforces, so the constraint is mostly slack.
+  4. On test, every SEIR-headed arm again beats B and persistence (EXP-045 note 4).
+
+## EXP-045 — Architecture changes (head, fusion, district seasonality, global context): none adopted
+- **Date:** 2026-09-23
+- **Who:** Group 05
+- **Commit:** `0586cd1` (code); plan `docs/ARCH_PLAN.md` committed earlier at `923ac46`
+- **Script:** Kaggle kernel `seirgnn2-arch` (v1) = `sweep.py arch --keep --epochs 400
+  --workers 4`; results `seirgnn2/results/arch.json` (66 rows, complete).
+- **Hardware:** Kaggle CPU, 4 workers.
+- **Config:** as pre-registered. Control A0 reproduces the local B bit for bit with every
+  new switch off.
+- **Question:** EXP-044 located a structural limit: exogenous inputs reach one linear
+  output layer shared by all districts, so climate acts only linearly and every district
+  shares one seasonal curve; EXP-039 found a national common component in the residuals.
+  Do architectural changes aimed at those limits move the best model?
+- **Result:** validation RMSE paired against A0 at the origin_seed unit.
+
+  | arm | val | vs A0 | wins | p_adj | val h3 | d h3 | resid corr A0 | test |
+  |---|---|---|---|---|---|---|---|---|
+  | A5 global context | 15.57 | -0.07 | 5/9 | 0.771 | 17.54 | -0.06 | 0.974 | 37.19 |
+  | A2 district seasonal curves | 15.63 | -0.01 | 6/9 | 0.945 | 17.38 | -0.22 | 0.951 | 38.03 |
+  | **A0 B** | **15.65** | — | — | — | 17.60 | — | 1.000 | 37.55 |
+  | A4 MLP head + climate 2-13 | 15.66 | +0.01 | 3/9 | 0.945 | 17.44 | -0.16 | 0.907 | 37.85 |
+  | A3 MLP head | 15.91 | +0.26 | 2/9 | 0.109 | 17.84 | +0.24 | 0.962 | 37.81 |
+  | A6 combined | 15.96 | +0.32 | 2/9 | 0.438 | 17.46 | -0.14 | 0.870 | 37.74 |
+  | A1 residual head + NB | 15.97 | +0.33 | 4/9 | 0.438 | 18.19 | +0.58 | 0.946 | 34.55 |
+  | persistence | 17.86 | +2.21 | — | — | — | — | — | 36.02 |
+
+  A4 against A3 (does climate help once the head is nonlinear?): -0.24, 5/9, p_adj 0.552.
+- **Verdict:** answered, negative. No arm meets the adoption rule. Of the written
+  predictions: A3 alone did not help (right), A4 improved on A3 (right in direction, n.s.),
+  A5 was small (right), A6 overfit (right); A2 was expected to be the likeliest adoption and
+  is not (6/9, -0.01), and A1 was expected to tie and is +0.33.
+- **Notes:**
+  1. **The fusion bottleneck was real but was not the limit.** A nonlinear head lets climate
+     help (-0.24 against the nonlinear head without it) -- the network reproduces what the
+     trees found -- but the nonlinear head itself costs about as much, and the net is zero.
+  2. **Horizon 3 is where the exogenous changes pay, and horizon 1 where they cost.** A2, A4
+     and A6 lower horizon-3 RMSE by 0.14-0.22 while leaving the average flat -- plausible,
+     since persistence decays with horizon and season and climate matter more further out.
+     Not tested for significance; recorded as a lead, not a result.
+  3. **Same errors again:** residual correlation with A0 0.87-0.97.
+  4. **A recurring validation/test disagreement (see EXP-038, EXP-040, this entry).** On
+     test, forecasts anchored to the last observation keep beating the direct-level model
+     that validation selects: here the residual head scores 34.55 against B's 37.55 and
+     persistence's 36.02; in EXP-040 k-NN 34.34 and B + k-NN 34.18; in EXP-038 (nine
+     origins) the gated-SEIR arms 31.47-31.70 against the direct arms' 33.93-36.79. On
+     validation the order reverses every time. Nothing has been selected on test, and nothing
+     is here. But four experiments agreeing is evidence about the *selection protocol*:
+     a 30-week validation span preceding each origin appears to reward fitting that span's
+     level, which does not carry into the following test period. Acting on this needs a new
+     pre-registered protocol -- selection over longer or multiple validation spans -- and a
+     test set nothing here has touched, which only data after February 2024 can provide.
+
+## EXP-044 — Longer climate lags and a longer window: not adopted; the head is the bottleneck
+- **Date:** 2026-09-23
+- **Who:** Group 05
+- **Commit:** `0ea1273` (code); plan `docs/CLIMATE_PLAN.md` committed earlier at `52cff78`
+- **Script:** Kaggle kernel `seirgnn2-climate` (v1) = `sweep.py climate --keep --epochs 400
+  --workers 4`; results `seirgnn2/results/climate.json` (75 rows, complete).
+- **Hardware:** Kaggle CPU, 4 workers.
+- **Config:** as pre-registered; lag blocks fixed by EXP-043 on training data only. K5 keeps
+  the fold boundaries with an 8-week case history (validation 30/30 windows kept; 5 of 75
+  test windows at origin 0.70 dropped because the longer history touches missing weeks).
+  Long-lag arms drop the first few training windows (`core.with_history`).
+- **Question:** Does climate at lags up to 13 or 25 weeks, or a longer case window, help the
+  network -- and does EXP-043's tree gain reproduce on real validation?
+- **Result:** validation RMSE paired against K0 at the origin_seed unit.
+
+  | arm | val | vs K0 | wins | p_adj | val h3 | resid corr K0 | test |
+  |---|---|---|---|---|---|---|---|
+  | **K0 B** | **15.65** | — | — | — | 17.60 | 1.000 | 37.55 |
+  | K1 climate lags 2-4 | 15.74 | +0.09 | 3/9 | 0.461 | 17.67 | 0.967 | 38.38 |
+  | K2 climate blocks 2-13 | 15.77 | +0.13 | 3/9 | 0.461 | 17.79 | 0.936 | 37.60 |
+  | K5 case window 8 + blocks 2-13 | 15.79 | +0.14 | 3/9 | 0.461 | 17.83 | 0.932 | 36.67 |
+  | K3 climate blocks 2-25 | 15.94 | +0.30 | 2/9 | 0.047 | 17.74 | 0.935 | 37.19 |
+  | K4 anomaly blocks 2-25 | 16.26 | +0.62 | 1/9 | 0.031 | 18.16 | 0.916 | 37.43 |
+  | K6 trees + climate 2-13 | 17.45 | +1.81 | 2/9 | 0.047 | 19.96 | 0.800 | 36.14 |
+  | persistence | 17.86 | +2.21 | — | — | — | — | 36.02 |
+  | K7 trees, no climate | 17.94 | +2.29 | 0/9 | 0.031 | 20.78 | 0.787 | 38.96 |
+
+  Trees with vs without climate: **-0.49**, 2/3 origins, p = 0.50 (deterministic model, so
+  only three independent units).
+- **Verdict:** answered for the network, negative: no arm is adopted, and longer lags make
+  it progressively *worse*. The prediction recorded in the plan was wrong about K2 (expected
+  the most likely adoption; it is +0.13, 3/9) and right about everything else: K1 matches
+  K0, K5 does not beat K2, K4 trails K3, the trees trail the network but gain from climate.
+- **Notes:**
+  1. **Why the network cannot use what the trees can.** In B, exogenous inputs bypass the
+     encoder and meet it at a single linear output layer shared by all 25 districts. Climate
+     can therefore act only linearly -- the setting in which EXP-043's ridge found nothing --
+     while the trees' gain came from nonlinearity. The same layer forces one national
+     seasonal curve on every district; a district identity (EXP-040, R2) shifts levels but
+     cannot change the curve's shape. This is an architectural limit on the one signal found
+     so far, and it motivates `docs/ARCH_PLAN.md`.
+  2. The trees' climate gain reproduces in direction on real validation, as predicted, but
+     is not significant with three units.
+  3. Test recorded, not used.
+
+## EXP-043 — Climate lags and growth, on training data only
+- **Date:** 2026-09-23
+- **Who:** Group 05
+- **Commit:** `eceaaa7` + `seirgnn2/climate_lags.py` (committed with this entry)
+- **Script:** `python seirgnn2/climate_lags.py` -> `seirgnn2/results/climate_lags.txt`
+- **Hardware:** Local CPU, no network training.
+- **Config:** Inside each of the three frozen folds' *training* windows only, split in
+  time: fit on the earliest 70%, score on the latest 30%. The real validation windows are
+  not read. Six ERA5 channels (temperature mean/min/max, precipitation, relative humidity,
+  soil moisture) and NDVI; lags 2-26 (climate) and 0-26 (NDVI, already as-of). Target:
+  log growth, log1p(cases[t+h]) - log1p(cases[t-1]), h = 0..2 -- the part persistence
+  cannot see, rather than the case *level* Stage S2 correlated against.
+- **Question:** The models have only ever seen climate at lags 2-4. Does climate at longer
+  lags -- which the mosquito and virus life cycle suggest -- or a longer case window
+  predict growth?
+- **Result:**
+  1. *Anomaly correlations with 3-week growth* are small but patterned: precipitation,
+     humidity and soil moisture ~4 weeks back +0.06 to +0.08, 8-13 weeks back -0.07 to
+     -0.10; temperature 2-6 weeks back negative, 10-20 weeks back positive. Largest |r|
+     0.111 (humidity, lag 13).
+  2. *Ridge (linear), out-of-sample R2 of growth:* base (3-week cases + season + district)
+     0.194. Longer case windows *lower* it: 8 weeks 0.187, 13 weeks 0.186. Adding climate
+     at any block gains at most +0.006 (raw 14-17), usually negative, with the sign
+     flipping between folds.
+  3. *Gradient-boosted trees:* base 0.158. Raw climate blocks 2-5, 6-9, 10-13 add
+     **+0.028, positive in 3/3 folds** (+0.040 / +0.024 / +0.021); six blocks to lag 25 add
+     +0.027 (3/3); six anomaly blocks +0.023 (3/3); three anomaly blocks +0.004 (2/3).
+  4. *NDVI:* |r| <= 0.071 at every lag, no pattern.
+- **Verdict:** partly answered. Longer case windows do not help (agreeing with EXP-036).
+  Climate carries a weak, biologically coherent signal that a linear model cannot use
+  out of sample but a nonlinear one can, consistently across folds. Raw climate beating
+  anomalies suggests district-specific seasonality (two monsoons reaching different
+  districts at different times) as a possible mechanism. Whether the network can use it is
+  tested in EXP-044 under `docs/CLIMATE_PLAN.md`.
+- **Notes:** The trees' base R2 (0.158) is below the ridge's (0.194), so part of their
+  climate gain may compensate for fitting the persistence structure less well; the
+  network arms are what decide it.
+
+## EXP-042 — Synthetic training data (GAN and SEIR simulator): none adopted
+- **Date:** 2026-09-23
+- **Who:** Group 05
+- **Commit:** `e44c1cd` (code); plan `docs/AUGMENTATION_PLAN.md` committed earlier at `22c2ec9`
+- **Script:** Kaggle kernel `seirgnn2-augment` (v1) = `sweep.py augment --keep --epochs 400
+  --workers 4`; results `seirgnn2/results/augment.json` (84 rows, complete), forecasts in
+  `augment_preds.pkl` (git-ignored).
+- **Hardware:** Kaggle CPU, 4 workers.
+- **Config:** as pre-registered. Every arm is B (AAGCN, direct, NB, season) with one
+  change; synthetic data in **training sets only**, generators fitted to or seeded from the
+  fold's analogue-safe training windows (leakage-tested). Frozen three origins x seeds
+  0/1/2. **Deviation, logged before the run:** the fidelity check showed the pre-registered
+  SEIR simulator producing targets ~10x the real mean (its lambda centre was the median over
+  non-zero inverted cells, and 39% are pinned at zero). Calibrated versions (G3c/G3d), fitted
+  to training growth only, were added; the pre-registered versions (G3a/G3b) were kept.
+- **Question:** If the models are short of data, can generated training data -- from a GAN,
+  as proposed, or from a mechanistic simulator, as the epidemic literature supports -- move
+  the best model?
+- **Fidelity (before any forecaster trained; origin 0.70, training targets):** real mean 50.7
+  / p99 542 / max 2,631. TimeGAN 41.0 / 431 / **882** -- the bulk reproduced, the tail lost.
+  SEIR as pre-registered 549 / 7,482 / 40,491. SEIR calibrated 21.5 / 99 / 273 (step
+  multiplier at the grid's lower bound).
+- **Result:** validation RMSE paired against G0 at the origin_seed unit; horizon-3 and
+  outbreak bias (cells above each fold's validation 97.5th percentile) on validation; test
+  for the record only.
+
+  | arm | val | vs G0 | wins | p_adj | val h3 | outbreak bias | resid corr G0 | test |
+  |---|---|---|---|---|---|---|---|---|
+  | G3d SEIR pretrain, calibrated | 15.58 | -0.06 | 4/9 | 0.457 | 17.60 | -34.61 | 0.967 | 37.81 |
+  | G1 jitter / scaling | 15.60 | -0.05 | 6/9 | 0.281 | 17.56 | -34.22 | 0.983 | 37.59 |
+  | G3b SEIR pretrain, pre-registered | 15.64 | -0.01 | 6/9 | 0.918 | 17.61 | -33.61 | 0.959 | 38.17 |
+  | **G0 B** | **15.65** | — | — | — | 17.60 | -32.99 | 1.000 | 37.55 |
+  | G4 LDS reweighting | 15.91 | +0.26 | 2/9 | 0.056 | 17.94 | -31.92 | 0.984 | 37.64 |
+  | G3c SEIR mixed, calibrated | 16.10 | +0.45 | 2/9 | 0.056 | 18.22 | -31.78 | 0.958 | 37.15 |
+  | G2 TimeGAN mixed | 16.18 | +0.53 | 1/9 | 0.056 | 18.36 | -36.08 | 0.947 | 37.53 |
+  | G2t TimeGAN only (TSTR) | 17.55 | +1.90 | 1/9 | 0.035 | 19.70 | -39.61 | 0.866 | 41.23 |
+  | persistence | 17.86 | +2.21 | — | — | — | — | — | 36.02 |
+  | G3a SEIR mixed, pre-registered | 26.74 | +11.09 | 0/9 | 0.035 | 36.24 | -32.10 | 0.576 | 54.34 |
+
+- **Verdict:** answered, negative. **No arm meets the adoption rule** (>= 7/9 wins with mean
+  delta < 0). The prediction written in the plan held for every arm except one detail: LDS
+  reweighting improved outbreak bias only from -32.99 to -31.92 while raising RMSE.
+- **Notes:**
+  1. **The GAN made outbreak forecasts worse**, not better: outbreak bias -36.08 against
+     -32.99. Its synthetic data reproduces ordinary weeks and drops outbreaks (max 882 against
+     2,631), so mixing it in teaches the model that outbreaks are rarer than they are -- the
+     tail collapse Shumailov et al. (Nature 2024) describe. EXP-010 (legacy data) reached the
+     same verdict on the GAN.
+  2. **The GAN is not useless as a generator.** A model trained on TimeGAN data alone scores
+     17.55 -- slightly better than persistence (17.86) though well short of real data (15.65).
+     It learned the bulk dynamics; what it lacks is the part that matters.
+  3. **Simulated epidemics did not help either, on either side of the calibration.** The
+     explosive version (targets ~10x real) wrecks mixed training (+11.09) and is harmless as
+     pretraining (-0.01); the tame version is harmless as pretraining (-0.06, 4/9) and hurts
+     when mixed (+0.45). Pretraining is harmless in both cases because training on real data
+     afterwards overwrites it.
+  4. **The same errors again.** Every arm that trains reasonably has residual correlation
+     0.947-0.984 with B -- the models end up making the same mistakes whatever training data
+     they see. Only the broken arm (G3a, 0.576) errs differently, because it errs everywhere.
+     Together with EXP-040 (model families) and EXP-041 (training-set size), this closes the
+     question from three directions: the remaining error is not reachable from these inputs
+     by any architecture, model family, training-set size or synthetic training data tested.
+  5. As in EXP-040, test scores are recorded and not used to choose anything.
+
+## EXP-041 — Learning curve: more data of the same kind does not help
+- **Date:** 2026-09-23
+- **Who:** Group 05
+- **Commit:** `4a7a11e` + `train_frac` in `seirgnn2/train.py` (committed with this entry)
+- **Script:** `sweep.py curve --keep --epochs 400` -> `seirgnn2/results/curve.json`
+- **Hardware:** Local CPU, 6 workers, 62 s
+- **Config:** B (AAGCN, direct, NB, season) trained on a random 25 / 50 / 75 / 100% of
+  its training windows, drawn with a generator separate from the initialisation stream.
+  Validation, test and normalisation unchanged. Frozen three origins x seeds 0/1/2.
+- **Question:** The proposal is to generate synthetic training data with a GAN because
+  "the issue is lack of data". A generator fitted to the training windows can at best
+  add samples from the same distribution. Would more samples help?
+- **Result:**
+
+  | training windows | val RMSE | sd over seeds | skill vs persistence |
+  |---|---|---|---|
+  | 25% | 15.85 | 0.17 | +0.112 |
+  | 50% | 15.88 | 0.21 | +0.111 |
+  | 75% | 15.64 | 0.11 | +0.124 |
+  | 100% | 15.66 | 0.09 | +0.123 |
+
+  Skill over persistence on the *training* windows themselves is lower than on
+  validation: mean -0.117 (origins 0.55 / 0.70 / 0.85: +0.160 / -0.190 / -0.321) against
+  +0.118 on validation.
+- **Verdict:** answered. Four times the real data improves validation RMSE by 0.19 --
+  about one seed sd -- and nothing past 75%. The model is not data-starved for samples of
+  this kind, and it is not overfitting (it fits its own training windows *worse* relative to
+  persistence than it fits validation; the 2017 epidemic dominates training RMSE). More data
+  from the same distribution, real or synthetic, is not expected to help.
+- **Notes:** This does not test data of a *different* kind. Synthetic epidemics from a
+  mechanistic simulator can cover regimes the real history lacks, which is how synthetic
+  data helped in Osthus et al. (2026) and DEFSI (2019). That is tested in EXP-042, under
+  `docs/AUGMENTATION_PLAN.md`. The GAN idea was also tested once before, in EXP-010, on
+  legacy data: the GAN was the worst arm (RMSE 93.81 against 61.81 without augmentation).
+
+## EXP-040 — Remedies from the literature: none adopted
+- **Date:** 2026-09-23
+- **Who:** Group 05
+- **Commit:** `f7786ab` (code; plan `docs/REMEDIES_PLAN.md` committed earlier at `7e983ae`)
+- **Script:** Kaggle kernel `seirgnn2-remedies` (v1) =
+  `sweep.py remedies --keep --epochs 400 --workers 4`, then the three pre-registered
+  ensembles; results `seirgnn2/results/remedies.json`, `remedies+ens.json` (120 rows,
+  complete: 90 runs + 3 persistence + 27 ensemble). Forecasts in `remedies_preds.pkl`
+  (git-ignored, 41 MB).
+- **Hardware:** Kaggle CPU, 4 workers.
+- **Config:** as pre-registered. B = AAGCN, direct head, NB likelihood, seasonal features,
+  window 3. Each remedy changes one thing against B. Frozen three origins x seeds 0/1/2.
+  **One change before the run, validation-only:** k-NN's k grid was widened to 320 after a
+  local smoke run chose k = 80, the old grid's top, on every fold (chosen k on Kaggle:
+  80 / 320 / 160).
+- **Question:** Do the remedies the literature proposes for these architectures' weaknesses
+  move the best model, and does SEIR structure help when used as a constraint instead of a
+  decoder?
+- **Result:** validation RMSE (selection metric), paired against B at the origin_seed unit;
+  test shown for the record only.
+
+  | arm | val | vs B | wins | p_adj | test |
+  |---|---|---|---|---|---|
+  | R6 SEIR auxiliary, w = 0.1 | 15.60 | -0.04 | 6/9 | 0.485 | 37.17 |
+  | ENS[B + NB-GLM + k-NN] | 15.63 | -0.01 | 5/9 | 0.965 | 35.74 |
+  | R6 SEIR auxiliary, w = 0.3 | 15.64 | -0.00 | 6/9 | 0.965 | 38.02 |
+  | **B** | **15.65** | — | — | — | 37.55 |
+  | R2 district identity | 15.71 | +0.06 | 4/9 | 0.785 | 39.73 |
+  | ENS[B + k-NN] | 15.72 | +0.08 | 5/9 | 0.487 | 34.18 |
+  | ENS[B + NB-GLM] | 15.78 | +0.13 | 5/9 | 0.476 | 39.28 |
+  | R3 STID | 16.35 | +0.71 | 2/9 | 0.061 | 36.33 |
+  | R4b k-NN | 16.52 | +0.87 | 0/9 | 0.017 | 34.34 |
+  | R1a RevIN (mean) | 16.60 | +0.96 | 4/9 | 0.237 | 37.69 |
+  | R1b RevIN | 16.92 | +1.27 | 0/9 | 0.017 | 36.74 |
+  | R4a NB-GLM | 16.97 | +1.32 | 1/9 | 0.025 | 42.85 |
+  | SEIR-LSTM | 17.28 | +1.63 | 0/9 | 0.017 | 34.97 |
+  | persistence | 17.86 | +2.21 | — | — | 36.02 |
+
+  **Residual correlation with B** (validation, seeds averaged): SEIR auxiliary 0.995,
+  district identity 0.971, STID 0.946, NB-GLM 0.923, SEIR-LSTM 0.921, **k-NN 0.919**,
+  RevIN 0.908.
+
+- **Verdict:** answered, negative. **No remedy meets the adoption rule** (mean delta < 0,
+  >= 7/9 wins, horizon 3 not raised); the closest, the SEIR auxiliary at w = 0.1, wins 6/9
+  by 0.04 against a between-unit sd of 0.16. The finalist is therefore B unchanged, whose
+  nine-origin confirmation already exists (EXP-038, `AAGCN+direct`): it did not beat
+  persistence or SEIR-LSTM on test. Under the plan no further confirmatory run is made.
+- **Notes:**
+  1. **The information limit is now shown across model families, not just architectures.**
+     k-NN analogue forecasting has no network and no training, yet its errors correlate
+     0.92 with B's; the GLM's 0.92; instance normalisation's 0.91. Methods that share no
+     machinery make the same mistakes, so the mistakes belong to the data -- the part of
+     next week that the past does not contain. It is also why equal-weight ensembles, the
+     most reliable remedy in the forecasting literature, gained nothing: they need members
+     that err differently, and none exist here.
+  2. **The SEIR constraint neither helps nor hurts.** As an auxiliary loss it leaves B's
+     forecasts almost unchanged (residual correlation 0.995). Physics as a *decoder* costs
+     ~7 RMSE (EXP-032/034); physics as a *constraint* costs nothing and buys nothing.
+  3. **Why B beats SEIR-LSTM (-1.63, 9/9 on validation):** mostly the head, not the graph.
+     SEIR-LSTM routes its forecast through the gated SEIR path; the LSTM on the direct head
+     scored 15.80 in EXP-035, within 0.15 of AAGCN. Stated this way in any write-up.
+  4. **Instance normalisation hurt, significantly** (RevIN +1.27, 0/9). Removing each
+     window's level discards information that matters here: high levels mean-revert and low
+     levels grow. This is the over-stationarisation Liu et al. (2022) warn about.
+  5. **Validation and test disagree.** On test, k-NN (34.34) and B + k-NN (34.18) beat
+     persistence (36.02) while B (37.55) does not. Selecting on that would be choosing a
+     model by its test score, which the protocol forbids and which is not done here. What
+     the disagreement does support is that 1-2 RMSE differences among these models are not
+     stable across periods.
+  6. Kaggle reproduces local: B here scores 15.65 against 15.66 for the identical
+     configuration run locally in EXP-035.
+
+## EXP-039 — What caps the architectures: diagnosis on their forecasts
+- **Date:** 2026-09-23
+- **Who:** Group 05
+- **Commit:** `7e983ae` (code `seirgnn2/diagnose_arch.py`, committed before this entry)
+- **Script:** `python seirgnn2/diagnose_arch.py collect` then `analyse`;
+  output `seirgnn2/results/diagnose_arch.txt`
+- **Hardware:** Local CPU, 6 workers
+- **Config:** STGAT, A3TGCN, ASTGCN, AAGCN and the LSTM encoder (DCRNN dropped for cost
+  and rank), each in two configurations: `native` (direct head, mse on log1p, no
+  covariates — as published) and `best` (NB likelihood + seasonal features); SEIR-LSTM as
+  `LSTM+foi` (native) and `LSTM+foi_res` (best). Frozen three origins x seeds 0/1/2,
+  300 epochs. **Every number below is on validation windows** — diagnosing on test and then
+  designing around it would spend the held-out set.
+- **Question:** Every earlier grid kept one RMSE per run. What do the forecasts actually get
+  wrong, and is it the architecture or the information?
+- **Result (best configuration unless stated):**
+  1. *Skill vs persistence by horizon:* ASTGCN / AAGCN / LSTM +0.10 to +0.16, **rising**
+     with horizon; STGAT (-0.25 / -0.12 / -0.01) and A3TGCN (-0.72 / -0.54 / -0.37) are
+     worse than persistence at every horizon.
+  2. *Responsiveness:* slope of predicted on realised log-growth 0.28-0.31 for the working
+     three; predicted growth varies ~0.6x as much as real growth.
+  3. *Bias by regime:* under-predict rising weeks by 11-13 cases, over-predict falling
+     weeks by 10-11 — a lag. 80-83% of squared error sits in weeks that moved. Outbreak
+     cells under-predicted by 17-23 (native: 22-25, worse than persistence's 15).
+  4. *Direction:* ~70% correct; with NB + season rises are called up 87-88% of the time but
+     falls called down only 52-54% — the mean-targeting likelihood tilts toward growth.
+  5. *Concentration:* the top 5% of cells carry ~60% of squared error.
+  6. **Residual correlation between ASTGCN, AAGCN and the LSTM: 0.976-0.991.** They are the
+     same forecaster to within noise. The mean of all five direct encoders scores 16.73
+     against 15.85 for AAGCN alone.
+  7. *Spatial structure left:* residual correlation +0.17 between neighbours, +0.12 between
+     any two districts — a national common component plus a small neighbour excess.
+  8. **A linear model on the same inputs recovers only 4-6% of the working models' residual
+     variance out of sample** (fit on train residuals, scored on validation). For STGAT and
+     A3TGCN it recovers 47-62%: those two are underfitting, not capped.
+- **Verdict:** answered. The working architectures have converged to the same function and
+  exhausted the linearly available information in their inputs; what remains is a lag on
+  moves and shrinkage on outbreaks, which squared-error-type objectives produce on a
+  near-random-walk target. STGAT and A3TGCN are limited by their wiring (a national
+  bottleneck; no state carried across weeks), not by the data. Further encoder work on the
+  same inputs is not expected to pay; this motivates `docs/REMEDIES_PLAN.md`.
+- **Notes:** Two new facts about the data came out of this. Origin 0.40's validation window
+  contains the 2017 DENV-2 epidemic, peaking at 5.4x anything in that fold's training data —
+  the catastrophic fold in EXP-038. And 2020-2022 ran at 5-10% of the historical peak. The
+  series changes regime, while every model normalises with one statistic per fold.
+
+## EXP-038 — Confirmatory stage, nine disjoint origins (replaces S9)
+- **Date:** 2026-09-23
+- **Who:** Group 05
+- **Commit:** `2215ae8`
+- **Script:** `seirgnn2/sweep.py confirm` -> `seirgnn2/results/confirm.json` (144 rows)
+- **Hardware:** Local CPU, 6 workers. Also pushed as Kaggle kernel `seirgnn2-confirm`.
+- **Config:** five finalists frozen out of `combo` before this ran -- AAGCN+direct,
+  LSTM+direct, ASTGCN+foi_res, LSTM+foi_res, ASTGCN+direct; loss=nb, dist=nb,
+  use_season=True, lam_param=log, state_fit=True, window=3, epochs=400.
+  `core.ORIGINS_9` = nine origins with **disjoint** test spans (verified zero overlap between
+  any pair), tiling 0.40 -> 1.00 with span 1/15. Three seeds each.
+- **Question:** The pre-registered endpoint. Does the proposed SEIR-GNN beat Liu et al.'s
+  SEIR-LSTM, and does anything beat persistence, on a protocol where the origin unit can
+  actually reach significance?
+- **Result:** validation RMSE. **The origin unit is the one that matters here** (n = 9,
+  attainable floor 0.004); origin_seed (n = 27) is reported second as stability.
+
+  | arm | val | test |
+  |---|---|---|
+  | ASTGCN+foi_res | 38.30 | 31.70 |
+  | AAGCN+direct | 38.32 | 33.93 |
+  | LSTM+foi_res | 39.05 | 31.47 |
+  | LSTM+direct | 39.27 | 34.97 |
+  | persistence | 41.21 | 31.76 |
+  | ASTGCN+direct | 46.29 | 36.79 |
+
+  Paired at the **origin** unit:
+
+  | comparison | delta | wins | p | p_adj |
+  |---|---|---|---|---|
+  | ASTGCN+foi_res vs LSTM+foi_res | **-0.75** | **8/9** | **0.012** | 0.059 |
+  | AAGCN+direct vs LSTM+direct | -0.95 | 7/9 | 0.531 | 0.885 |
+  | ASTGCN+foi_res vs persistence | -2.92 | 8/9 | 0.066 | 0.166 |
+  | AAGCN+direct vs persistence | -2.89 | 8/9 | 0.035 | 0.166 |
+
+  At origin_seed, ASTGCN+foi_res vs LSTM+foi_res is -0.75, **24/27**, p_adj = 0.000.
+
+- **Verdict:** **The primary endpoint is not met.** The pre-registered criteria were BH
+  p-adj < 0.05, a win on >= 6/9 origins, and the same direction as the 3-origin table.
+  SEIR-GNN vs SEIR-LSTM satisfies two of three: 8/9 origins and the same direction (-0.62 in
+  EXP-035), but p_adj = 0.059 against a 0.05 bar. Raw p = 0.012; the gap is the multiplicity
+  correction across the four comparisons. Report as a consistent directional advantage that
+  does not clear the pre-registered significance bar -- **not** as "SEIR-GNN beats SEIR-LSTM".
+- **Notes:**
+  1. **Absolute levels are not comparable to the 3-origin grids.** Persistence is 41.21 here
+     against 17.86 on the frozen three, because the nine origins reach back to 0.40 and include
+     much harder periods. Never pool or pair across origin sets; `sweep.run` keys persistence
+     rows by (window, origin-set) to make that mechanical.
+  2. **Test is below validation here** (31.70 vs 38.30), inverted relative to the 3-origin
+     grids. Different weeks, nothing more -- but it is why val/test divergence on three origins
+     should not have been read as a warning sign about the model.
+  3. **RETRACTED, same day, before anything was built on it.** This entry first claimed the
+     run's strongest signal was a variance one: ASTGCN+direct at sd 25.77 across origins against
+     ASTGCN+foi_res at sd 4.27, read as the physics layer stabilising an unstable encoder. The
+     per-origin table kills it. Origin 0.40 is an outlier where **every** arm fails -- 140 to 227
+     RMSE against 13 to 48 everywhere else -- and it dominates every mean and sd in the run:
+
+     | origin | ASTGCN+direct | ASTGCN+foi_res | AAGCN+direct | persistence |
+     |---|---|---|---|---|
+     | **0.400** | **226.99** | **142.73** | **157.12** | **153.54** |
+     | 0.467 | 21.86 | 22.17 | 20.26 | 23.17 |
+     | 0.533 | 17.39 | 18.87 | 16.16 | 21.12 |
+     | 0.600 | 42.18 | 47.21 | 42.86 | 43.56 |
+     | 0.667 | 20.85 | 22.41 | 21.39 | 30.11 |
+     | 0.733 | 13.26 | 14.45 | 12.90 | 14.48 |
+     | 0.800 | 23.28 | 24.62 | 23.46 | 28.76 |
+     | 0.867 | 19.48 | 19.58 | 19.39 | 22.52 |
+     | 0.933 | 31.29 | 32.61 | 31.35 | 33.65 |
+
+     ASTGCN+foi_res beats ASTGCN+direct on **1 of 9 origins** -- that one. On the other eight it
+     is slightly worse. One hard period is an anecdote, not a stabilisation property, and the
+     mean difference of -7.99 carries sd 28.64. **Mean RMSE across these nine origins is not a
+     usable summary**; read the win count and the per-origin column, which is why `stats.py`
+     prints wins beside every delta. The general lesson: a variance claim computed across folds
+     that include a catastrophic fold is a claim about that fold.
+  3b. **What survives the same scrutiny.** ASTGCN+foi_res vs LSTM+foi_res is -0.75 on **8/9**
+     origins and is *not* outlier-driven -- it wins at 0.40 by 2.0 and on seven of the other
+     eight. That consistency, not any mean, is what makes it the one robust result here.
+  4. Kaggle kernel v1 of this grid returned 63 rows instead of 144 and had to be discarded:
+     `pip install --no-deps torch-geometric-temporal` also skips torch_geometric, which Kaggle
+     does not ship, so every graph arm died in its worker while the LSTM arms ran. v2 installs
+     torch_geometric properly and asserts on `backbones.check()` before the grid starts.
+
+## EXP-037 — Audit: run_s9_confirmatory.py does not compute what S9 claims
+- **Date:** 2026-09-23
+- **Who:** Group 05
+- **Commit:** `198d2cf`
+- **Script audited:** `analysis/_build/run_s9_confirmatory.py`
+- **Question:** Before re-running the confirmatory stage in the seirgnn2 harness, does the
+  existing S9 do what the paper says it does?
+- **Result:** No, in three separate ways.
+  1. **It is 3 origins, not 9.** `s_star_origin_means` is a `groupby("origin")` over the S5
+     results, and `analysis/results/seir_gnn/s5_seir_gnn/s5_seir_gnn_results.json` has 108 rows
+     across origins [0.55, 0.70, 0.85]. The script's own comment reads
+     `# Simulated 9-origin differences for test (9 disjoint origins)`.
+  2. **The paired test is not paired.** The comparators are hardcoded scalars --
+     `b_star_test_rmse = 34.837`, `persistence_test_rmse = 36.016`,
+     `seir_lstm_test_rmse = 62.608` -- so each "difference" is an origin mean minus one
+     constant. Matching on origin was the entire point of the design; subtracting a constant
+     tests something else.
+  3. **One reported p-value is a typed-in literal:** `p_auc = 0.04  # Simulated AUC difference
+     p-value`. This is the `p = 0.04` behind the package README's "Outbreak Detection ROC-AUC:
+     0.807-0.826 (p = 0.04)".
+
+  With 3 origins an exact sign-flip test cannot return a two-sided p below 0.25, so the reported
+  `p_raw = 0.50` was floor-bound whatever the data said.
+- **Verdict:** answered. **No S9-derived number is citable**, including the early-warning
+  p-value. This is a more serious problem than the S5 defects (EXP-032): S5 was a mistuned
+  experiment, whereas this is a statistical claim that does not correspond to its computation.
+- **Notes:** `seirgnn2/stats.py` does the intended thing -- real pairing on matched
+  (origin, seed), exact sign-flip enumeration, BH-FDR -- and prints the smallest attainable p so
+  a 3-origin grid cannot be read as significant. The 9-origin confirmatory run is feasible; it
+  has to actually be run.
+
+## EXP-036 — Window length is not the lever it looked like (logged R5 deviation)
+- **Date:** 2026-09-23
+- **Who:** Group 05
+- **Commit:** `198d2cf`
+- **Script:** `seirgnn2/sweep.py window` -> `seirgnn2/results/window.json` (117 rows)
+- **Hardware:** Local CPU, 6 workers
+- **Deviation:** plan R5 freezes window 3 -> horizon 3, inherited from the benchmark paper.
+  This run varies the **input window only** over {3, 6, 12}; horizon, origins, seeds,
+  normalisation and metric are unchanged, and the climate/NDVI sub-window stays at 3 weeks so
+  the case history is the single varying factor. Reason for deviating: three weekly points can
+  barely estimate a trend, and the seasonal feature -- the only input-side lever that has moved
+  the metric -- suggests the models are starved of temporal context.
+- **Config:** backbone/head in (AAGCN+direct, LSTM+direct, ASTGCN+foi_res, LSTM+foi_res);
+  loss=nb, dist=nb, use_season=True, lam_param=log, state_fit=True, epochs=400.
+- **Question:** Does a longer input window help?
+- **Result:** **No.** In absolute validation RMSE every arm looks worse as the window grows --
+  AAGCN+direct 15.66 / 15.86 / 16.29 at w = 3 / 6 / 12 -- but that is almost entirely the
+  baseline moving, because a longer window shifts the fold boundaries and changes which weeks
+  are evaluated. Persistence on the same folds is 17.86 / 18.06 / 18.58. Against its **own**
+  window's persistence:
+
+  | arm | w=3 | w=6 | w=12 |
+  |---|---|---|---|
+  | AAGCN+direct | -2.20 | -2.20 | -2.28 |
+  | LSTM+direct | -2.06 | -1.86 | -2.23 |
+  | ASTGCN+foi_res | -1.13 | -1.04 | -1.45 |
+  | LSTM+foi_res | -0.59 | -0.46 | -0.69 |
+
+  Flat to within noise. The margin over the baseline does not depend on the window.
+- **Verdict:** answered, negative. Window 3 stays; the deviation is closed and not carried
+  forward.
+- **Notes:** Two things worth keeping. (1) This was predicted to be the largest remaining lever
+  and it is approximately null -- more history does not help because, as EXP-024 established,
+  cases at t-1 already explain r2 = 0.85 and the rest is close to unpredictable. (2) **Arms at
+  different windows must never be compared on absolute RMSE**, because the evaluation folds
+  differ. `sweep.run` now emits one persistence row per window for exactly this reason, and
+  reading the raw leaderboard without matching baselines would have produced the opposite and
+  wrong conclusion.
+
+## EXP-035 — Combination grid: first significant wins over persistence
+- **Date:** 2026-09-23
+- **Who:** Group 05
+- **Commit:** `fc8ab6b`
+- **Script:** `seirgnn2/sweep.py combo` -> `seirgnn2/results/combo.json` (219 rows)
+- **Hardware:** Local CPU, 6 workers
+- **Config:** backbone in (AAGCN, ASTGCN, LSTM) x feats in (season, season+climate+ndvi)
+  x dist in (point/mse_z, nb/nb) x head in (direct, foi_res); lam_param=log, state_fit=True,
+  epochs=400, patience=40; frozen protocol, 3 origins x 3 seeds. Selection on validation (R6).
+- **Question:** Stacking the levers that individually moved the metric, does anything beat
+  persistence, and does the graph beat Liu et al's LSTM?
+- **Result:** validation RMSE, mean over 9 units; paired sign-flip at the origin_seed unit.
+
+  | arm | val | test | vs persistence | wins | p_adj |
+  |---|---|---|---|---|---|
+  | AAGCN+direct season nb | 15.66 | 37.55 | -2.20 | 9/9 | 0.010 |
+  | AAGCN+direct all nb | 15.71 | 37.73 | -2.15 | 8/9 | 0.023 |
+  | LSTM+direct season nb | 15.80 | 35.70 | -2.06 | 9/9 | 0.010 |
+  | ASTGCN+direct season nb | 15.92 | 36.41 | -1.93 | 9/9 | 0.010 |
+  | ASTGCN+foi_res season nb | 16.65 | 35.26 | -1.21 | - | - |
+  | LSTM+foi_res season nb | 17.27 | 34.97 | -0.59 | - | - |
+  | persistence | 17.86 | 36.02 | - | - | - |
+
+  Head-to-head, matched on everything but the encoder:
+  - **physics head:** ASTGCN+foi_res vs LSTM+foi_res = **-0.62, 9/9, p_adj = 0.009**
+  - **direct head:** AAGCN+direct vs LSTM+direct = -0.14, 5/9, p_adj = 0.315 (n.s.)
+  - **NB vs MSE**, matched pair: -0.41, 9/9, p_adj = 0.013
+
+- **Verdict:** answered, provisionally. First arms in this project to beat persistence
+  significantly. The graph beats the LSTM **only** in the physics formulation, not the direct
+  one -- consistent with spatial coupling mattering for a transmission quantity and not for
+  case regression.
+- **Notes:** Two caveats travel with these numbers and must not be dropped. (1) Validation and
+  test disagree at this spread: LSTM+foi_res is *ahead* on test (34.97 vs 35.26) and the best
+  validation arm is *worse than persistence* on test (37.55 vs 36.02). (2) Three origins cannot
+  reach p < 0.05 at the origin pairing unit; all p-values above are origin_seed, i.e. run-to-run
+  stability, not a claim about the series. Both require the 9-origin confirmatory grid (S9)
+  before anything is claimed in paper text.
+
+## EXP-034 — Six encoders in one harness: SEIR-GNN vs SEIR-LSTM, controlled
+- **Date:** 2026-09-23
+- **Who:** Group 05
+- **Commit:** `fc8ab6b`
+- **Script:** `seirgnn2/sweep.py real` -> `seirgnn2/results/real.json` (165 rows)
+- **Hardware:** Local CPU, 6 workers, 71 min
+- **Config:** backbone in (LSTM, STGAT, A3TGCN, ASTGCN, AAGCN, DCRNN) x head in
+  (direct, foi, foi_res); loss=mse_z, lam_param=log, state_fit=True, epochs=300.
+- **Question:** The proposal is Liu et al's SEIR-LSTM with the LSTM replaced by a real
+  spatio-temporal GNN. Earlier seirgnn2 grids used a single dense matmul as the backbone -- and
+  its `gat` mode was a literal alias for `gcn` -- so they could not answer it. With the five
+  published architectures in place, does the physics head work, and does the graph beat the LSTM?
+- **Result:**
+
+  | arm | val | test | best epoch |
+  |---|---|---|---|
+  | AAGCN+direct | 16.76 | 35.59 | 65 |
+  | ASTGCN+direct | 16.84 | 35.39 | 50 |
+  | LSTM+direct | 16.91 | 35.10 | 93 |
+  | AAGCN+foi_res | 17.44 | 35.78 | 24 |
+  | persistence | 17.86 | 36.02 | - |
+  | STGAT+direct | 23.32 | 60.82 | 24 |
+  | AAGCN+foi | 23.69 | 50.06 | 66 |
+  | LSTM+foi | 24.32 | 50.25 | 97 |
+  | A3TGCN+direct | 28.63 | 60.40 | 28 |
+  | DCRNN+direct | 34.89 | 73.74 | 5 |
+
+  AAGCN+foi vs LSTM+foi: -0.62, 6/9, p_adj = 0.178 (n.s.).
+  AAGCN+direct vs LSTM+direct: -0.14, 6/9, p_adj = 0.149 (n.s.).
+- **Verdict:** answered. Real architectures improve the bare `foi` head only from 24.59 to
+  23.69 -- it still loses to the direct head by ~7 RMSE. The conclusion drawn on the toy
+  backbone survives the backbone change. All 162 runs stopped early (best epoch 5-108 of 300),
+  so undertraining is not the explanation at this budget.
+- **Notes:** An 8-epoch smoke test on origin 0.70 alone suggested the opposite and was wrong --
+  origin 0.70 is the easiest fold (persistence 11.72 there against 17.86 averaged), so a single
+  origin must never be compared against a multi-origin mean. Recorded because it nearly became
+  a reported finding.
+
+## EXP-033 — Is the physics head undertrained? (convergence)
+- **Date:** 2026-09-22
+- **Who:** Group 05
+- **Commit:** `fc8ab6b`
+- **Script:** `seirgnn2/sweep.py converge` -> `seirgnn2/results/converge.json` (75 rows)
+- **Hardware:** Local CPU, 6 workers
+- **Config:** head in (direct, residual, foi, foi_res) x lr in (3e-3, 1e-3); epochs=3000,
+  patience=200 -- 10x the epochs and 5x the patience of the screen. foi arms carry both
+  candidate repairs (lam_param=log, state_fit=True).
+- **Question:** Graph networks routed through a simulator may need more steps than a direct
+  regressor. Is the physics head's deficit an optimisation budget problem?
+- **Result:** residual 16.72 / direct 16.73 / foi_res 17.47 / foi 24.59 (best epoch 196 / 92 /
+  21 / 65). **All 72 runs stopped early; none approached the 3000 cap.** The physics head
+  converges *earliest* of any arm and sits flat for 200 epochs. 10x budget bought it 0.04.
+  Halving the learning rate made it worse.
+- **Verdict:** answered, for this backbone. Undertraining is not the explanation.
+- **Notes:** Does not speak to the published architectures, which have more capacity -- that is
+  what EXP-034 tests. `train.py` now records `best_epoch` / `epochs_ran` / `stopped_early` on
+  every row so this question is answerable from any future grid without a special run.
+
+## EXP-032 — Why the force-of-infection head fails (diagnosis, no training)
+- **Date:** 2026-09-22
+- **Who:** Group 05
+- **Commit:** `fc8ab6b`
+- **Script:** `seirgnn2/diagnose_foi.py`, `seirgnn2/diagnose_seed.py`
+- **Hardware:** Local CPU
+- **Question:** The `foi` head scores val RMSE 26.89 against 16.8 for every other head and 17.9
+  for persistence. Which part of the path is responsible?
+- **Method:** The simulator's weekly incidence is monotone in lambda, so it can be inverted by
+  bisection for the lambda that reproduces each true count exactly. Four separable causes were
+  measured rather than argued: reach, the susceptible pool, learnability, saturation.
+- **Result:** consistent across all three origins.
+  - **Reach.** The lambda=0 floor already overshoots **14-16%** of targets: E0 = cases[t-2]/rho
+    and half of E matures within the week, so with transmission switched off the simulator still
+    emits more than truth. 39% of cells need lambda pinned at 0. Backbone-independent.
+  - **Susceptible pool.** *Not* the cause. Only 2.5% of cells hit the S clamp; holding S at s0
+    changes nothing. This was the obvious hypothesis and it is wrong.
+  - **Learnability.** log lambda* has r2 = 0.216 / 0.254 / 0.259 from log cases[t-1] across the
+    three origins; the direct target has r2 = 0.806 / 0.824 / 0.824. The project's own R_t
+    finding (26% predictable) reappearing inside the head.
+  - **Saturation.** Real but **not binding**: sigmoid starts 809-1012x above the inverted median
+    and 57% of cells need |raw| > 6 where the gradient is 150x below maximum, yet
+    lam_param="log" (centred on the measured median) changed val RMSE by 0.01. Verified the flag
+    engages -- lambda at init differs 830x and outputs differ.
+  - **Matched-capacity cost.** Same 2-parameter rule, same inputs, same objective, fitted on
+    count MSE: through SEIR 70.62 / 72.92 / 66.84, predicting directly 55.22 / 51.72 / 47.44.
+    +28% to +41%. A statement about 2-parameter capacity, not a ceiling for all models.
+  - **Seeding.** `decon` (residence-time stocks, the dimensionally correct reading) is the
+    *worst* of the three: 19.4% unreachable vs 14.9%, r2 0.068 vs 0.243. `lagged` stays default.
+- **Verdict:** answered. The deficit is structural, not a tuning bug.
 
 ## EXP-031 — Stage S9 Confirmatory Evaluation and Primary Endpoint Test
 - **Date:** 2026-09-15

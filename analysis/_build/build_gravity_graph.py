@@ -3,7 +3,7 @@
 Why: the project's spatial structure is "two districts are connected if they
 share a border", and that assumption has been tested twice and found to
 contribute nothing measurable -- the adaptive-graph experiment (EXP-016) and the
-frozen-encoder control (EXP-033). Dengue is carried between districts by people,
+frozen-encoder control (EXP-052). Dengue is carried between districts by people,
 while *Aedes* mosquitoes travel only a few hundred metres, so a border is the
 wrong proxy for the thing that matters.
 

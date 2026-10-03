@@ -15,6 +15,7 @@ changed the plan, and both are documented here with the evidence.
 
 | Phase | Deliverable | State |
 |---|---|---|
+| COVID covariates | Lagged policy and workplace mobility, 81 matched evaluations | Done: no clear improvement; RMSE 30.05 base, 30.06 policy, 30.07 policy + mobility. [Protocol and final results](docs/COVID_COVARIATE_EXPERIMENT.md#completed-results--2026-10-03) |
 | 0 | Literature review, project proposal | ✅ Done |
 | 1 | GCN/GAT baseline, rolling-origin CV | ✅ Done — matches the persistence floor |
 | **R** | **Exact reproduction of the source papers** | ✅ **Done — see below** |

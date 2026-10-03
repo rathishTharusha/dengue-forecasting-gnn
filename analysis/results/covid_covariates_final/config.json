@@ -1,0 +1,61 @@
+{
+  "cpu_config": {
+    "commit": "887f9e67bcf2a9c23dab83656019cdcac25c29fb",
+    "runner_sha256": "027233ec39599eeb100883dbd0eae81bd00fd234f743862b2db03c2c8b4ef47f",
+    "source_sha256": "51c6efbd7a9f6df06634dd3723df7e004ef05fefa91cd8955cde4d63c2d8b8e6",
+    "torch": "2.1.2+cpu",
+    "arms": [
+      "base",
+      "policy",
+      "policy_mobility"
+    ],
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "lag_weeks": 2,
+    "protocol": "9origin",
+    "epochs": 400,
+    "exploratory": true,
+    "vintage_verified": false,
+    "missing_external": "neutral multiplier, model-level gate",
+    "smoke": false
+  },
+  "gpu_config": {
+    "device": "cuda",
+    "gpu": "NVIDIA GeForce RTX 3050 Laptop GPU",
+    "torch": "2.1.2+cu121",
+    "origins": [
+      0.9
+    ],
+    "arms": [
+      "base",
+      "policy",
+      "policy_mobility"
+    ],
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "epochs": 400,
+    "device_change_only": true,
+    "original_cpu_results_preserved": true,
+    "cpu_runner_sha256": "027233ec39599eeb100883dbd0eae81bd00fd234f743862b2db03c2c8b4ef47f",
+    "gpu_runner_sha256": "a468a1636eaf256635264256bbb0536979d42904f10cd95a13f18251fe583f62",
+    "covid_source_sha256": "51c6efbd7a9f6df06634dd3723df7e004ef05fefa91cd8955cde4d63c2d8b8e6"
+  },
+  "benchmark": {
+    "torch": "2.1.2+cu121",
+    "gpu": "NVIDIA GeForce RTX 3050 Laptop GPU",
+    "epochs": 20,
+    "origin": 0.9,
+    "cpu_seconds": 19.2,
+    "gpu_seconds": 10.1,
+    "forward_max_case_error": 0.0235595703125,
+    "peak_gpu_memory_mb": 57.1552734375,
+    "scientific_result": false
+  },
+  "note": "GPU selected on timing before its final-origin test scores; all arms/seeds at each origin use one backend. Original CPU results are retained separately. Hardware variation is a limitation; CPU/CUDA training need not match exactly."
+}

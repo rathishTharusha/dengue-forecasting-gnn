@@ -4,24 +4,31 @@
 \section{Related Work}
 \label{sec:related}
 
-\cE{\textbf{ST-GNNs for epidemic forecasting.} Spatio-temporal graph networks
-couple a graph convolution over regions with a temporal operator over history.
-The architectures we evaluate---STGAT, A3TGCN, ASTGCN, DCRNN and
-AAGCN---originate in traffic forecasting and were transferred to dengue by Weng
-et al.~\cite{weng2024graph}, who report them on the dataset used here.
-GulMohamed et al.~\cite{gulmohamed2026denguegnn} propose per-horizon output
-layers, additive temporal attention and a Gaussian predictive head; we adopt all
-three as increments and test them (\S\ref{sec:results}).}
+\textbf{ST-GNNs for dengue.} Spatio-temporal graph networks couple a graph
+operator over regions with a temporal operator over history. The five we
+evaluate come from traffic forecasting. STGAT and A3TGCN~\cite{bai2021a3tgcn}
+use attention, ASTGCN~\cite{guo2019astgcn} attends over space and time,
+AAGCN~\cite{shi2019aagcn} adapts its adjacency, and DCRNN~\cite{li2018dcrnn}
+diffuses over the graph inside a recurrent cell. Weng
+et al.~\cite{weng2024graph} benchmark all five on Sri Lanka's dengue record, and
+GulMohamed et al.~\cite{gulmohamed2026denguegnn} add per-horizon heads,
+temporal attention and a Gaussian output.
 
-\cF{\textbf{Mechanistic models and hybrids.} Compartmental models remain the
-standard description of dengue transmission; we use the SEIR--SEI formulation and
-sensitivity analysis of Phaijoo and Gurung~\cite{phaijoo2018sensitivity}, whose
-nine published sensitivity indices we reproduce. Physics-informed neural networks
-embed such dynamics as a loss term~\cite{raissi2019pinn}, and recent work applies
-them to epidemic curves, typically in a regime where data are scarce relative to
-the dynamics---MP-PINN~\cite{nguyen2024mppinn} trains on 35 days and forecasts 97.
-That is the regime where a mechanistic prior pays. Our setting is the opposite:
-459 weeks across 25 districts forecasting three weeks, where a naive baseline is
-already near-optimal. We show that the difference is not incidental but decides
-the outcome, and we quantify the crossing point in terms of the predictability of
-the reproduction number.}
+\textbf{Mechanistic hybrids.} Liu et al.~\cite{liu2025seirlstm} forecast Sri
+Lankan dengue with an SEIR model whose force of infection is predicted by an
+LSTM; we call this SEIR-LSTM. For epidemics more generally, EINNs~\cite{rodriguez2023einns}
+couple a neural forecaster with a mechanistic model through shared latent
+dynamics. CausalGNN~\cite{wang2022causalgnn} and MepoGNN~\cite{cao2023mepognn}
+embed a metapopulation SEIR in a graph network, so that districts are coupled
+inside the dynamics. Physics-informed networks~\cite{raissi2019pinn} add
+dynamics as a loss; MP-PINN~\cite{nguyen2024mppinn} applies this to epidemic
+curves in a regime where data are scarce relative to the dynamics. We use the
+SEIR--SEI stage durations of Phaijoo and Gurung~\cite{phaijoo2018sensitivity}.
+
+\textbf{Baselines and remedies from forecasting.} Simple baselines often match
+deep spatio-temporal models: STID~\cite{shao2022stid} replaces graph operators
+with identity embeddings. Reversible instance normalisation~\cite{kim2022revin}
+targets distribution shift, and count likelihoods such as the negative binomial
+of DeepAR~\cite{salinas2020deepar} target skewed demand. TimeGAN~\cite{yoon2019timegan}
+generates synthetic sequences for data-poor settings. We test each of these
+here, because each addresses a weakness our diagnosis found.

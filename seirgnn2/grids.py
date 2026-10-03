@@ -1,0 +1,332 @@
+"""The configuration grids. Each function returns a list of configs for sweep.run."""
+
+from __future__ import annotations
+
+
+def _c(name, **kw):
+    return dict(name=name, **kw)
+
+
+def screen(epochs: int = 300) -> list[dict]:
+    """Which of the four defects actually cost accuracy, and does the graph help?
+
+    Factors varied one at a time from a common reference so each difference is
+    attributable: head, loss, graph mode, and the seasonal feature EDA F9 says
+    no model in this project has ever seen.
+    """
+    out = []
+    for head in ("direct", "residual", "foi", "foi_res"):
+        out.append(_c(f"head={head}", backbone="gcn", head=head, loss="mse_z", epochs=epochs))
+    for loss in ("mse_z", "huber_z", "mse_raw", "smape"):
+        out.append(_c(f"loss={loss}", backbone="gcn", head="residual", loss=loss, epochs=epochs))
+    for bb in ("none", "gcn", "adaptive", "hybrid"):
+        out.append(_c(f"graph={bb}", backbone=bb, head="residual", loss="mse_z", epochs=epochs))
+    out.append(_c("feat=season", backbone="gcn", head="residual", loss="mse_z",
+                  use_season=True, epochs=epochs))
+    out.append(_c("feat=climate", backbone="gcn", head="residual", loss="mse_z",
+                  use_climate=True, epochs=epochs))
+    out.append(_c("feat=all", backbone="gcn", head="residual", loss="mse_z",
+                  use_climate=True, use_ndvi=True, use_season=True, epochs=epochs))
+    return out
+
+
+def foi(epochs: int = 300) -> list[dict]:
+    """Does the physics head survive the two defects ``diagnose_foi.py`` measured?
+
+    The diagnostic found the force-of-infection path broken in two separable
+    ways: ``sigmoid`` starts 809x above the inverted median and puts 57% of
+    cells where its gradient is 150x below maximum, and the ``lambda = 0`` floor
+    already overshoots 14% of targets because ``E0`` is seeded from
+    ``cases[t-2]/rho``. Each fix is varied alone, then together, against the two
+    non-physics heads on the same backbone so the comparison is attributable.
+    """
+    out = []
+    for head in ("direct", "residual"):
+        out.append(_c(f"ref:{head}", backbone="gcn", head=head, loss="mse_z", epochs=epochs))
+    for head in ("foi", "foi_res"):
+        for lam in ("sigmoid", "log"):
+            for fit in (False, True):
+                tag = f"{head} lam={lam}{' +statefit' if fit else ''}"
+                out.append(_c(tag, backbone="gcn", head=head, loss="mse_z",
+                              lam_param=lam, state_fit=fit, epochs=epochs))
+    return out
+
+
+def converge(epochs: int = 3000) -> list[dict]:
+    """Is the physics head undertrained, or converged and losing?
+
+    The objection the short screen cannot answer: graph networks routed through
+    a simulator may simply need more steps than a direct regressor. Ten times
+    the epoch budget and five times the patience, so a run that is still
+    improving has room to show it. ``best_epoch`` against ``epochs_ran`` in the
+    output says which of the two happened.
+    """
+    out = []
+    for head in ("direct", "residual", "foi", "foi_res"):
+        for lr in (3e-3, 1e-3):
+            out.append(_c(f"{head} lr={lr:g}", backbone="gcn", head=head, loss="mse_z",
+                          lam_param="log" if head.startswith("foi") else "sigmoid",
+                          state_fit=head.startswith("foi"),
+                          lr=lr, epochs=epochs, patience=200))
+    return out
+
+
+def real(epochs: int = 300) -> list[dict]:
+    """The comparison the paper needs: six encoders, one harness, one protocol.
+
+    Every published architecture plus Liu et al.'s LSTM, each behind the direct
+    head and behind the force-of-infection head. ``direct`` is what the five GNN
+    papers do; ``foi`` is the proposal. ``LSTM + foi`` is SEIR-LSTM. Because all
+    of them share folds, loss, early stopping and metric here, the differences
+    are attributable to the encoder and the head and to nothing else -- which was
+    never true of the S4 vs S5 comparison in the paper.
+    """
+    out = []
+    for bb in ("LSTM", "STGAT", "A3TGCN", "ASTGCN", "AAGCN", "DCRNN"):
+        for head in ("direct", "foi", "foi_res"):
+            out.append(_c(f"{bb}+{head}", backbone=bb, head=head, loss="mse_z",
+                          lam_param="log", state_fit=True, epochs=epochs))
+    return out
+
+
+def combo(epochs: int = 400) -> list[dict]:
+    """Stack the levers that individually moved the metric.
+
+    The six-encoder grid says architecture buys little: the spread from best to
+    worst *working* encoder is 0.15 val RMSE, while the seasonal feature alone
+    was worth 0.88 in the screen. So the search moves off architecture and onto
+    what is fed in and what is optimised. AAGCN and ASTGCN carry the two best
+    encoders forward, LSTM stays as Liu et al.'s control, and every cell is
+    crossed with the feature set, the output distribution and the head.
+    """
+    out = []
+    for bb in ("AAGCN", "ASTGCN", "LSTM"):
+        for feats, tag in (({"use_season": True}, "season"),
+                           ({"use_season": True, "use_climate": True,
+                             "use_ndvi": True}, "all")):
+            for dist, loss in (("point", "mse_z"), ("nb", "nb")):
+                for head in ("direct", "foi_res"):
+                    out.append(_c(f"{bb}+{head} {tag} {dist}", backbone=bb, head=head,
+                                  loss=loss, dist=dist, lam_param="log", state_fit=True,
+                                  epochs=epochs, **feats))
+    return out
+
+
+def window(epochs: int = 400) -> list[dict]:
+    """The one protocol deviation worth testing: how much history the model sees.
+
+    ``WINDOW = 3`` is inherited from the benchmark paper, and three weekly points
+    can barely estimate a trend. It is the largest untested lever in the study,
+    and under plan R5 changing it is a deviation -- logged, not silent.
+
+    A longer window shifts the fold boundaries, so `sweep.run` emits a separate
+    persistence row per window and arms are never paired across windows. The four
+    carried arms are the survivors of `combo`: the best direct and the best
+    physics arm, each with its matched LSTM control.
+    """
+    out = []
+    for w in (3, 6, 12):
+        for bb, head in (("AAGCN", "direct"), ("LSTM", "direct"),
+                         ("ASTGCN", "foi_res"), ("LSTM", "foi_res")):
+            out.append(_c(f"{bb}+{head} w={w}", backbone=bb, head=head, loss="nb",
+                          dist="nb", use_season=True, lam_param="log", state_fit=True,
+                          window=w, epochs=epochs))
+    return out
+
+
+def confirm(epochs: int = 400) -> list[dict]:
+    """The confirmatory stage (plan S9), on nine origins with disjoint test spans.
+
+    Three origins cannot clear p = 0.25 on an exact sign-flip test, so nothing in
+    the screening grids is significant at the pairing unit that matters. Nine
+    disjoint origins take the floor to 0.004.
+
+    The finalists are the survivors of `combo`, frozen before this runs: the best
+    direct arm, the best physics arm, and the matched LSTM control for each, plus
+    the physics arm's own encoder on the direct head so that "the graph helps
+    only through the physics" has its control.
+
+    Note this replaces `analysis/_build/run_s9_confirmatory.py`, which claims nine
+    origins but runs on three and subtracts hardcoded scalars instead of pairing
+    (EXP-037).
+    """
+    arms = (("AAGCN", "direct"), ("LSTM", "direct"),
+            ("ASTGCN", "foi_res"), ("LSTM", "foi_res"), ("ASTGCN", "direct"))
+    return [_c(f"{bb}+{head}", backbone=bb, head=head, loss="nb", dist="nb",
+               use_season=True, lam_param="log", state_fit=True,
+               origins="nine", epochs=epochs)
+            for bb, head in arms]
+
+
+def remedies(epochs: int = 400) -> list[dict]:
+    """The pre-registered remedies from docs/REMEDIES_PLAN.md, screened on the frozen three origins.
+
+    ``B`` is the best configuration found so far and the control every remedy is
+    paired against. Each remedy changes exactly one thing relative to it, except
+    R3 and R4a, which are different model families by design. ``SEIR-LSTM`` is
+    Liu et al.'s encoder behind the same physics head, loss and folds, kept so
+    the proposal's comparison is always in view. Run with ``--keep`` so R5 can
+    be formed afterwards by ``ensemble.py``.
+    """
+    base = dict(head="direct", loss="nb", dist="nb", use_season=True, epochs=epochs)
+    phys = dict(lam_param="log", state_fit=True)
+    return [
+        _c("B", backbone="AAGCN", **base),
+        _c("R1a revin_mean", backbone="AAGCN", norm="revin_mean", **base),
+        _c("R1b revin", backbone="AAGCN", norm="revin", **base),
+        _c("R2 node_emb", backbone="AAGCN", node_emb=16, **base),
+        _c("R3 stid", backbone="none", node_emb=16, **base),
+        _c("R4a nbglm", backbone="linear", node_emb=8, **base),
+        _c("R4b knn", backbone="knn"),
+        _c("R6 aux_phys 0.1", backbone="AAGCN", aux_phys=0.1, **base, **phys),
+        _c("R6 aux_phys 0.3", backbone="AAGCN", aux_phys=0.3, **base, **phys),
+        _c("SEIR-LSTM", backbone="LSTM", head="foi_res", loss="nb", dist="nb",
+           use_season=True, epochs=epochs, **phys),
+    ]
+
+
+#: Pre-registered equal-weight ensembles per grid (docs/REMEDIES_PLAN.md, R5).
+#: Fixed before the grid runs; ``build_seirgnn2_kernel.py --keep`` computes them.
+ENSEMBLES = {
+    "physics": [],
+    "physics9": [],
+    "arch": [],
+    "augment": [],
+    "climate": [],
+    "remedies": [["B", "R4b knn"],
+                 ["B", "R4a nbglm"],
+                 ["B", "R4a nbglm", "R4b knn"]],
+}
+
+
+def curve(epochs: int = 400) -> list[dict]:
+    """Would more data of the same kind help?  B trained on a fraction of its windows.
+
+    The premise behind generative augmentation is that the model is short of
+    data. A GAN fitted to the training windows can at best supply more samples
+    from the same distribution, so it can only help if validation error is still
+    falling as the real training set grows. If the curve is flat near 100%, the
+    premise fails before any generator is built.
+    """
+    base = dict(backbone="AAGCN", head="direct", loss="nb", dist="nb", use_season=True,
+                epochs=epochs)
+    return [_c(f"B frac={f:.2f}", train_frac=f, **base) for f in (0.25, 0.5, 0.75, 1.0)]
+
+
+def augment(epochs: int = 400) -> list[dict]:
+    """docs/AUGMENTATION_PLAN.md: synthetic training data, each arm against B (G0).
+
+    G3a/G3b are the SEIR simulator exactly as pre-registered; its fidelity check
+    showed targets ~10x the real scale. G3c/G3d are the logged deviation that
+    calibrates it to training growth, which overshoots the other way and loses
+    the tails. Running both brackets the real distribution instead of tuning
+    between them. G2t is a train-on-synthetic fidelity diagnostic, never a finalist.
+    """
+    base = dict(backbone="AAGCN", head="direct", loss="nb", dist="nb", use_season=True,
+                epochs=epochs)
+    return [
+        _c("G0 B", **base),
+        _c("G1 jitter", augment="jitter", **base),
+        _c("G2 timegan", augment="timegan", **base),
+        _c("G2t timegan only (TSTR)", augment="timegan_only", **base),
+        _c("G3a seir mix", augment="seir_mix", **base),
+        _c("G3b seir pretrain", augment="seir_pretrain", **base),
+        _c("G3c seir mix calibrated", augment="seir_mix_cal", **base),
+        _c("G3d seir pretrain calibrated", augment="seir_pretrain_cal", **base),
+        _c("G4 lds reweight", augment="lds", **base),
+    ]
+
+
+#: Lag blocks fixed by EXP-043 (training data only) -- docs/CLIMATE_PLAN.md.
+BLOCKS_3 = ((2, 5), (6, 9), (10, 13))
+BLOCKS_6 = ((2, 5), (6, 9), (10, 13), (14, 17), (18, 21), (22, 25))
+
+
+def climate(epochs: int = 400) -> list[dict]:
+    """docs/CLIMATE_PLAN.md: longer climate lags and a longer case window, against B (K0).
+
+    K5 keeps the fold boundaries and feeds 8 weeks of case history, so it pairs
+    with K0 -- EXP-036 rebuilt the folds instead and could not be paired. K6/K7
+    are the tree model from EXP-043, with and without climate.
+    """
+    base = dict(backbone="AAGCN", head="direct", loss="nb", dist="nb", use_season=True,
+                epochs=epochs)
+    return [
+        _c("K0 B", **base),
+        _c("K1 climate lags 2-4", use_climate=True, **base),
+        _c("K2 climate blocks 2-13", clim_blocks=BLOCKS_3, **base),
+        _c("K3 climate blocks 2-25", clim_blocks=BLOCKS_6, **base),
+        _c("K4 climate anomaly blocks 2-25", clim_blocks=BLOCKS_6, clim_anom=True, **base),
+        _c("K5 case window 8 + blocks 2-13", clim_blocks=BLOCKS_3, case_window=8, **base),
+        _c("K6 trees + climate 2-13", backbone="gbm", clim_blocks=BLOCKS_3),
+        _c("K7 trees, no climate", backbone="gbm"),
+    ]
+
+
+def arch(epochs: int = 400) -> list[dict]:
+    """docs/ARCH_PLAN.md: head, fusion and global-context changes against B (A0).
+
+    Targets the two bottlenecks nothing earlier touched: exogenous inputs fused
+    through one linear layer shared by all districts, and a national common
+    component in the residuals that neighbour message passing cannot supply.
+    """
+    base = dict(backbone="AAGCN", head="direct", loss="nb", dist="nb", use_season=True,
+                epochs=epochs)
+    return [
+        _c("A0 B", **base),
+        _c("A1 residual head + NB", **{**base, "head": "residual"}),
+        _c("A2 district seasonal curves", dseason=True, **base),
+        _c("A3 MLP head", head_mlp=64, **base),
+        _c("A4 MLP head + climate 2-13", head_mlp=64, clim_blocks=BLOCKS_3, **base),
+        _c("A5 global context", global_ctx=True, **base),
+        _c("A6 combined", head_mlp=64, dseason=True, global_ctx=True, node_emb=16,
+           clim_blocks=BLOCKS_3, **base),
+    ]
+
+
+def _physics_arms(epochs: int) -> dict[str, dict]:
+    base = dict(backbone="AAGCN", head="direct", loss="nb", dist="nb", use_season=True,
+                epochs=epochs)
+    phys = dict(loss="nb", dist="nb", use_season=True, lam_param="log", state_fit=True,
+                epochs=epochs)
+    return {
+        "P0 B": base,
+        "P1 spatial penalty (ratio)": dict(base, spatial=0.001, spatial_kind="ratio"),
+        "P2 spatial penalty (log)": dict(base, spatial=0.05, spatial_kind="log"),
+        "P3 gated SEIR-GNN": dict(phys, backbone="AAGCN", head="foi_res"),
+        "P4 metapopulation SEIR-GNN": dict(phys, backbone="AAGCN", head="foi_meta"),
+        "P5 metapop + spatial + district season": dict(phys, backbone="AAGCN", head="foi_meta",
+                                                       spatial=0.001, spatial_kind="ratio",
+                                                       dseason=True),
+        "P6 SEIR-LSTM": dict(phys, backbone="LSTM", head="foi_res"),
+    }
+
+
+def physics(epochs: int = 400) -> list[dict]:
+    """docs/PHYSICS_GNN_PLAN.md, screening on the frozen three origins."""
+    return [_c(name, **cfg) for name, cfg in _physics_arms(epochs).items()]
+
+
+def physics9(epochs: int = 400) -> list[dict]:
+    """docs/PHYSICS_GNN_PLAN.md, the nine-origin confirmation of SEIR-GNN against SEIR-LSTM."""
+    keep = ("P0 B", "P3 gated SEIR-GNN", "P4 metapopulation SEIR-GNN", "P6 SEIR-LSTM")
+    arms = _physics_arms(epochs)
+    return [_c(name, origins="nine", **arms[name]) for name in keep]
+
+
+def rescue(epochs: int = 300) -> list[dict]:
+    """docs/RESCUE_PLAN.md: is the gated SEIR head's rescue of STGAT, A3TGCN and
+    DCRNN (EXP-034) physics, or just the persistence anchor?
+
+    Same configuration as ``real`` -- squared error on the scaled target, no
+    seasonal features, 300 epochs -- so the only thing varied is the head:
+    direct, residual (anchor, no gate, no physics), gated (anchor + the same
+    gate, no physics) and foi_res (anchor + gate + SEIR). All six encoders, so
+    the working three show what the anchor costs where nothing needs rescuing.
+    """
+    out = []
+    for bb in ("STGAT", "A3TGCN", "DCRNN", "AAGCN", "ASTGCN", "LSTM"):
+        for head in ("direct", "residual", "gated", "foi_res"):
+            out.append(_c(f"{bb}+{head}", backbone=bb, head=head, loss="mse_z",
+                          lam_param="log", state_fit=True, epochs=epochs))
+    return out

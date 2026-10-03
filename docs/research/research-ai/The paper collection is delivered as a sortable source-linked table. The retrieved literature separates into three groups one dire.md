@@ -1,0 +1,11 @@
+﻿The paper collection is delivered as a sortable source-linked table. The retrieved literature separates into three groups: one direct dengue-specific PINN/DINN study, published dengue hybrids that embed or juxtapose mechanistic models with neural networks, and general epidemiological PINN methods that are not dengue-specific. The closest methodological match is the 2026 DINN preprint: it combines a reduced SI–SIR model with case fitting to infer latent infected-mosquito dynamics, then uses RNN/GRU/LSTM models for one-month-ahead vector forecasts and two-year incidence projections across 15 countries [^1]. Among published dengue studies, the 2020 Fortaleza paper compares separate neural and mechanistic forecasting systems with mobility data, while the 2025 Sri Lanka paper embeds an SEIR structure in an explainable deep-learning compartment model; neither retrieved record reports a strict PINN residual-loss formulation [^2][^3]. The 2024 Recife study combines an SIR model with an RNN and reports RMSE of about 0.8, but the available record does not describe training the network with SIR residuals [^4]. Thus, I did not identify multiple published dengue-specific PINN forecasting studies in this search; the comparison table makes that evidence gap explicit and includes EINNs as a general methodological precedent rather than misclassifying it as dengue evidence [^5].
+
+[^1]: Cao et al., 2026. Inferring unobserved vector dynamics for dengue forecasting using physics-informed neural networks and mechanistic transmission models. bioRxiv.
+
+[^2]: Bomfim et al., 2020. Predicting dengue outbreaks at neighbourhood level using human mobility in urban areas. Journal of the Royal Society Interface.
+
+[^3]: Liu et al., 2025. An explainable covariate compartmental model for predicting the spatio-temporal patterns of dengue in Sri Lanka. PLoS Comput. Biol.
+
+[^4]: Campos et al., 2024. Study of the Temporal Propagation of Arboviruses in the Region of Recife-PE: Analysis of Climatic Influence using the SIR Model and Recurrent Neural Networks. Ibero-Latin American Congress on Computational Methods in Engineering (CILAMCE).
+
+[^5]: Rodr'iguez et al., 2022. EINNs: Epidemiologically-Informed Neural Networks. AAAI Conference on Artificial Intelligence.

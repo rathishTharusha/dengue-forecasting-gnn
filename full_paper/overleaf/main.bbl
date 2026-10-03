@@ -2,7 +2,7 @@
 %%% Do NOT edit. File created by BibTeX with style
 %%% ACM-Reference-Format-Journals [18-Jan-2012].
 
-\begin{thebibliography}{6}
+\begin{thebibliography}{18}
 
 %%% ====================================================================
 %%% NOTE TO THE USER: you can override these defaults by providing
@@ -37,6 +37,33 @@
 \providecommand\natexlab[1]{#1}
 \providecommand\showeprint[2][]{arXiv:#2}
 
+\bibitem[Bai et~al\mbox{.}(2021)]%
+        {bai2021a3tgcn}
+\bibfield{author}{\bibinfo{person}{Jizhou Bai}, \bibinfo{person}{Jiawei Zhu},
+  \bibinfo{person}{Yanyan Song}, \bibinfo{person}{Ling Zhao},
+  \bibinfo{person}{Zhixiang Huang}, {and} \bibinfo{person}{Ronghua Du}.}
+  \bibinfo{year}{2021}\natexlab{}.
+\newblock \showarticletitle{A3T-GCN: Attention Temporal Graph Convolutional
+  Network for Traffic Forecasting}.
+\newblock \bibinfo{journal}{\emph{ISPRS International Journal of
+  Geo-Information}} \bibinfo{volume}{10}, \bibinfo{number}{7}
+  (\bibinfo{year}{2021}), \bibinfo{pages}{485}.
+\newblock
+
+
+\bibitem[Cao et~al\mbox{.}(2023)]%
+        {cao2023mepognn}
+\bibfield{author}{\bibinfo{person}{Qi Cao}, \bibinfo{person}{Renhe Jiang},
+  \bibinfo{person}{Chuang Yang}, \bibinfo{person}{Zipei Fan},
+  \bibinfo{person}{Xuan Song}, {and} \bibinfo{person}{Ryosuke Shibasaki}.}
+  \bibinfo{year}{2023}\natexlab{}.
+\newblock \showarticletitle{Metapopulation Graph Neural Networks: Deep
+  Metapopulation Epidemic Modeling with Human Mobility}.
+\newblock \bibinfo{journal}{\emph{arXiv preprint arXiv:2306.14857}}
+  (\bibinfo{year}{2023}).
+\newblock
+
+
 \bibitem[GulMohamed et~al\mbox{.}(2026)]%
         {gulmohamed2026denguegnn}
 \bibfield{author}{\bibinfo{person}{Rasitha~Banu GulMohamed},
@@ -50,6 +77,59 @@
 \newblock
 \urldef\tempurl%
 \url{https://doi.org/10.1038/s41598-026-43073-y}
+\showDOI{\tempurl}
+
+
+\bibitem[Guo et~al\mbox{.}(2019)]%
+        {guo2019astgcn}
+\bibfield{author}{\bibinfo{person}{Shengnan Guo}, \bibinfo{person}{Youfang
+  Lin}, \bibinfo{person}{Ning Feng}, \bibinfo{person}{Chao Song}, {and}
+  \bibinfo{person}{Huaiyu Wan}.} \bibinfo{year}{2019}\natexlab{}.
+\newblock \showarticletitle{Attention Based Spatial-Temporal Graph
+  Convolutional Networks for Traffic Flow Forecasting}. In
+  \bibinfo{booktitle}{\emph{Proceedings of the AAAI Conference on Artificial
+  Intelligence}}, Vol.~\bibinfo{volume}{33}. \bibinfo{pages}{922--929}.
+\newblock
+
+
+\bibitem[Kim et~al\mbox{.}(2022)]%
+        {kim2022revin}
+\bibfield{author}{\bibinfo{person}{Taesung Kim}, \bibinfo{person}{Jinhee Kim},
+  \bibinfo{person}{Yunwon Tae}, \bibinfo{person}{Cheonbok Park},
+  \bibinfo{person}{Jang-Ho Choi}, {and} \bibinfo{person}{Jaegul Choo}.}
+  \bibinfo{year}{2022}\natexlab{}.
+\newblock \showarticletitle{Reversible Instance Normalization for Accurate
+  Time-Series Forecasting against Distribution Shift}. In
+  \bibinfo{booktitle}{\emph{International Conference on Learning
+  Representations (ICLR)}}.
+\newblock
+
+
+\bibitem[Li et~al\mbox{.}(2018)]%
+        {li2018dcrnn}
+\bibfield{author}{\bibinfo{person}{Yaguang Li}, \bibinfo{person}{Rose Yu},
+  \bibinfo{person}{Cyrus Shahabi}, {and} \bibinfo{person}{Yan Liu}.}
+  \bibinfo{year}{2018}\natexlab{}.
+\newblock \showarticletitle{Diffusion Convolutional Recurrent Neural Network:
+  Data-Driven Traffic Forecasting}. In \bibinfo{booktitle}{\emph{International
+  Conference on Learning Representations (ICLR)}}.
+\newblock
+
+
+\bibitem[Liu et~al\mbox{.}(2025)]%
+        {liu2025seirlstm}
+\bibfield{author}{\bibinfo{person}{Y. Liu}, \bibinfo{person}{P. Fransson},
+  \bibinfo{person}{J. Heidecke}, \bibinfo{person}{P. Liyanage},
+  \bibinfo{person}{J. Wallin}, {and} \bibinfo{person}{J. Rockl{\"o}v}.}
+  \bibinfo{year}{2025}\natexlab{}.
+\newblock \showarticletitle{An explainable covariate compartmental model for
+  predicting the spatio-temporal patterns of dengue in {Sri Lanka}}.
+\newblock \bibinfo{journal}{\emph{PLoS Computational Biology}}
+  \bibinfo{volume}{21}, \bibinfo{number}{9} (\bibinfo{year}{2025}),
+  \bibinfo{pages}{e1013540}.
+\newblock
+\urldef\tempurl%
+\url{https://doi.org/10.1371/journal.pcbi.1013540}
 \showDOI{\tempurl}
 
 
@@ -88,6 +168,54 @@
 \newblock
 
 
+\bibitem[Rodr{\'i}guez et~al\mbox{.}(2023)]%
+        {rodriguez2023einns}
+\bibfield{author}{\bibinfo{person}{Alexander Rodr{\'i}guez},
+  \bibinfo{person}{Jiaming Cui}, \bibinfo{person}{Naren Ramakrishnan},
+  \bibinfo{person}{Bijaya Adhikari}, {and} \bibinfo{person}{B.~Aditya
+  Prakash}.} \bibinfo{year}{2023}\natexlab{}.
+\newblock \showarticletitle{EINNs: Epidemiologically-Informed Neural Networks}.
+  In \bibinfo{booktitle}{\emph{AAAI Conference on Artificial Intelligence}}.
+\newblock
+
+
+\bibitem[Salinas et~al\mbox{.}(2020)]%
+        {salinas2020deepar}
+\bibfield{author}{\bibinfo{person}{David Salinas}, \bibinfo{person}{Valentin
+  Flunkert}, {and} \bibinfo{person}{Jan Gasthaus}.}
+  \bibinfo{year}{2020}\natexlab{}.
+\newblock \showarticletitle{{DeepAR}: Probabilistic Forecasting with
+  Autoregressive Recurrent Networks}.
+\newblock \bibinfo{journal}{\emph{International Journal of Forecasting}}
+  \bibinfo{volume}{36}, \bibinfo{number}{3} (\bibinfo{year}{2020}),
+  \bibinfo{pages}{1181--1191}.
+\newblock
+
+
+\bibitem[Shao et~al\mbox{.}(2022)]%
+        {shao2022stid}
+\bibfield{author}{\bibinfo{person}{Zezhi Shao}, \bibinfo{person}{Zhao Zhang},
+  \bibinfo{person}{Fei Wang}, \bibinfo{person}{Wei Wei}, {and}
+  \bibinfo{person}{Yongjun Xu}.} \bibinfo{year}{2022}\natexlab{}.
+\newblock \showarticletitle{Spatial-Temporal Identity: A Simple yet Effective
+  Baseline for Multivariate Time Series Forecasting}. In
+  \bibinfo{booktitle}{\emph{ACM International Conference on Information and
+  Knowledge Management (CIKM)}}.
+\newblock
+
+
+\bibitem[Shi et~al\mbox{.}(2019)]%
+        {shi2019aagcn}
+\bibfield{author}{\bibinfo{person}{Lei Shi}, \bibinfo{person}{Yifan Zhang},
+  \bibinfo{person}{Jian Cheng}, {and} \bibinfo{person}{Hanqing Lu}.}
+  \bibinfo{year}{2019}\natexlab{}.
+\newblock \showarticletitle{Two-Stream Adaptive Graph Convolutional Networks
+  for Skeleton-Based Action Recognition}. In
+  \bibinfo{booktitle}{\emph{Proceedings of the IEEE/CVF Conference on Computer
+  Vision and Pattern Recognition (CVPR)}}. \bibinfo{pages}{12026--12035}.
+\newblock
+
+
 \bibitem[Tissera et~al\mbox{.}(2020)]%
         {tissera2020severe}
 \bibfield{author}{\bibinfo{person}{Hasitha~A. Tissera},
@@ -104,6 +232,18 @@
 \newblock
 
 
+\bibitem[Wang et~al\mbox{.}(2022)]%
+        {wang2022causalgnn}
+\bibfield{author}{\bibinfo{person}{Lijing Wang}, \bibinfo{person}{Aniruddha
+  Adiga}, \bibinfo{person}{Jiangzhuo Chen}, \bibinfo{person}{Adam Sadilek},
+  \bibinfo{person}{Srinivasan Venkatramanan}, {and} \bibinfo{person}{Madhav
+  Marathe}.} \bibinfo{year}{2022}\natexlab{}.
+\newblock \showarticletitle{CausalGNN: Causal-Based Graph Neural Networks for
+  Spatio-Temporal Epidemic Forecasting}. In \bibinfo{booktitle}{\emph{AAAI
+  Conference on Artificial Intelligence}}.
+\newblock
+
+
 \bibitem[Weng et~al\mbox{.}(2024)]%
         {weng2024graph}
 \bibfield{author}{\bibinfo{person}{Jiaqi Weng}, \bibinfo{person}{David Qiu},
@@ -113,6 +253,17 @@
 \newblock \showarticletitle{Graph Representation Learning for Dengue
   Forecasting}. In \bibinfo{booktitle}{\emph{IEEE International Conference on
   Big Data (BigData)}}.
+\newblock
+
+
+\bibitem[Yoon et~al\mbox{.}(2019)]%
+        {yoon2019timegan}
+\bibfield{author}{\bibinfo{person}{Jinsung Yoon}, \bibinfo{person}{Daniel
+  Jarrett}, {and} \bibinfo{person}{Mihaela van~der Schaar}.}
+  \bibinfo{year}{2019}\natexlab{}.
+\newblock \showarticletitle{Time-series Generative Adversarial Networks}. In
+  \bibinfo{booktitle}{\emph{Advances in Neural Information Processing Systems
+  (NeurIPS)}}.
 \newblock
 
 

@@ -1,0 +1,27 @@
+[
+  {
+    "file": "data/corrected/rebuilt_cases.npy",
+    "sha256": "b55260c0a13297222261ea1f77433a379f1485400c499c5d3de56a4815470716",
+    "matches_git": true
+  },
+  {
+    "file": "data/corrected/rebuilt_index.csv",
+    "sha256": "6e92e4edc9bccea3c4d318670bc2837ddc871afe21ae5f2ea9ba6fe5751b73a5",
+    "matches_git": true
+  },
+  {
+    "file": "data/external/covid_response_weekly.csv",
+    "sha256": "51c6efbd7a9f6df06634dd3723df7e004ef05fefa91cd8955cde4d63c2d8b8e6",
+    "matches_git": true
+  },
+  {
+    "file": "data/external/district_population.csv",
+    "sha256": "0c4f0072be6e294ca31b2f54b01db177bcef9ae3ba2775fca45a3013a3ef4f7f",
+    "matches_git": true
+  },
+  {
+    "file": "notebooks/baseline/sri_lanka_adj_list.json",
+    "sha256": "7206dd0896324d906424ab2a1b93f812bb644475cc9661687fd4f7d46fb9af53",
+    "matches_git": true
+  }
+]

@@ -1,0 +1,23 @@
+{
+  "commit": "887f9e67bcf2a9c23dab83656019cdcac25c29fb",
+  "runner_sha256": "027233ec39599eeb100883dbd0eae81bd00fd234f743862b2db03c2c8b4ef47f",
+  "source_sha256": "51c6efbd7a9f6df06634dd3723df7e004ef05fefa91cd8955cde4d63c2d8b8e6",
+  "torch": "2.1.2+cpu",
+  "arms": [
+    "base",
+    "policy",
+    "policy_mobility"
+  ],
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "lag_weeks": 2,
+  "protocol": "9origin",
+  "epochs": 400,
+  "exploratory": true,
+  "vintage_verified": false,
+  "missing_external": "neutral multiplier, model-level gate",
+  "smoke": false
+}

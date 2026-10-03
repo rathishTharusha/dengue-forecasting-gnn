@@ -3,6 +3,28 @@
 Append-only. Newest entries at the top. Every run whose numbers might reach the report goes
 here — a number without a reproducible config does not go in the report.
 
+## EXP-038 — Lagged COVID policy and workplace mobility (completed exploratory test)
+
+- **Date:** 2026-10-03
+- **Who:** Codex
+- **Commit:** base code `887f9e67bcf2a9c23dab83656019cdcac25c29fb`; experiment runners are local, uncommitted additions. Exact runner/source hashes are recorded in [config.json](../analysis/results/covid_covariates_final/config.json). Earlier CPU runs were resumed after verifying unchanged model inputs and dependencies; see the raw CPU folder's `resume_oct03.json`.
+- **Scripts:** `analysis/_build/run_covid_covariates.py`, `run_covid_gpu.py`, `merge_covid_devices.py`, `finalize_covid_covariates.py`.
+- **Hardware:** pinned torch 2.1.2; CPU for origins 0.50–0.85, RTX 3050 Laptop CUDA for origin 0.90. All arms/seeds within each origin use one backend. Hardware varies across origins, and CPU/CUDA training need not be identical.
+- **Config:** corrected v2 SEIR-STGAT; rebuilt cases; window=3, horizon=3; arms=base/policy/policy_mobility; origins={0.50,0.55,0.60,0.65,0.70,0.75,0.80,0.85,0.90}; seeds={0,1,2}; epochs=400 maximum with validation early stopping; unchanged backbone, optimizer and training-only case scaling. External inputs lag two weeks, fixed physical scaling, signed exposure weights initialized at zero, log multiplier clipped to ±1.5. Missing external observations have neutral model effects, without changing the raw CSV. [Full protocol](COVID_COVARIATE_EXPERIMENT.md).
+- **Question:** do lagged policy and workplace mobility improve the matched cases-only corrected model?
+- **Result:** all 81 evaluations complete. These are means of split metrics, not globally pooled scores. Unrounded summary CSV: [results/covid_covariates_summary.csv](../results/covid_covariates_summary.csv).
+
+  | Arm | Test RMSE | Test MAE | Bias | RMSE difference vs base | Holm p |
+  |---|---|---|---|---|---|
+  | base | 30.048672958656592 | 14.781874462410256 | -0.6566550320121813 | 0.0 | — |
+  | policy | 30.063734972918475 | 14.82079142111319 | -0.9182566973657109 | 0.01506201426188152 | 1.0 |
+  | policy_mobility | 30.0693471343429 | 14.815282415460658 | -0.9506141585526028 | 0.020674175686306417 | 1.0 |
+
+- **Inference:** average seeds within each origin; exact origin-level sign flips with Holm correction for two comparisons. Raw p=0.90625 (policy), 0.84375 (policy_mobility). Origin bootstrap 95% intervals for RMSE differences: [-0.15694274195918326, 0.23640770382351345] and [-0.22776315123946583, 0.23111279805501303]. Differences below 0.0001 RMSE were counted as numerical ties. **That tolerance is too small, and the corrected figure strengthens the verdict.** Origins 0.50 and 0.55 have zero covariate coverage in train, validation *and* test, so all three arms are the same model there by construction; they nevertheless differ by up to **0.109 RMSE** (origin 0.55, seed 1), because a 1e-6 wobble can move which epoch early stopping selects. The measured run-to-run floor of this pipeline is therefore ~0.11 RMSE, and both covariate effects (+0.015, +0.021) are about 5x smaller than it: not merely insignificant, but below the resolution of the experiment. Nine-origin uncertainty estimates have limited precision.
+- **Verdict:** no clear improvement from these covariates under this protocol. This result does not establish that policy or mobility can never help.
+- **Verified independently (Claude, 2026-10-03):** arm means re-derived from `runs.json` and reproduce exactly; 99/99 project tests pass, including the five COVID tests and the `atol=0` bit-identity control; the five input SHA-256s match HEAD. Two findings were added on top. First, the corrected noise floor above. Second, the *mechanism* for why adding mobility is the worst arm: the fitted exposure weights are exactly 0.0000 at origins 0.50-0.65 — the model provably cannot learn a response where training contains no lockdown — while at origins 0.70-0.90 the stringency weight is negative (-0.10 to -0.36, the epidemiologically correct sign) and the mobility weight is **positive** (+0.39 to +0.92, the wrong sign). Both exposures are positive during lockdown, so the two terms nearly cancel: two collinear covariates with opposing fitted signs contribute net nothing and add variance.
+- **Notes:** exploratory after previous searches, not independent confirmation or causal evidence. Archived covariate vintages are unverified; this is retrospective evaluation with lagged inputs. Early training folds have no COVID exposure, so the initial lockdown response cannot be learned. Keep separate from Claude's policy/spatial experiments, which use different lags and priors. [Completed report](../analysis/results/covid_covariates_final/report.md), per-origin/per-horizon CSVs, coverage, saved predictions and input audits are in the same final folder. The 20-epoch GPU speed benchmark (19.2 s CPU, 10.1 s GPU) is timing evidence only.
+
 Copy this block for a new entry:
 
 ```markdown

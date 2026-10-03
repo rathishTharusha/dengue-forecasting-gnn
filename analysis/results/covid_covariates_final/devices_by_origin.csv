@@ -1,0 +1,10 @@
+origin,device
+0.5,cpu
+0.55,cpu
+0.6,cpu
+0.65,cpu
+0.7,cpu
+0.75,cpu
+0.8,cpu
+0.85,cpu
+0.9,cuda

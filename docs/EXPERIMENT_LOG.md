@@ -37,6 +37,128 @@ Copy this block for a new entry:
 > `CEILING_R0_MAX`) survived the cleanup and now lives in `dengue_gnn.seir`, still
 > asserted by `tests/test_seir.py` and reproduced by `scripts/verify_seir_paper.py`.
 
+## EXP-057 — Movement restriction as a fixed mechanistic prior, not a fitted coefficient
+
+- **Date:** 2026-10-03
+- **Who:** Claude
+- **Script:** `analysis/_build/run_stringency_prior.py`; results `analysis/results/seir_gnn/s5_v2/stringency_prior_runs.csv` (108 rows, 0 failures).
+- **Config:** corrected v2 SEIR-STGAT, `rebuilt`, 9 disjoint origins x 3 seeds, window 3 -> horizon 3, training-only normalisation, squared error, early stopping on validation. Arms `base`, `prior_g0.5`, `prior_g1`, `prior_g2`.
+- **Question:** every learned policy arm so far is unidentifiable exactly where it is needed, because the folds that fail contain no lockdown week in training (0, 0, 0, 0, 8, 35, 63, 91, 118 across the nine origins). So impose the effect instead of fitting it: `beta -> beta * (1 - s/100)^gamma` with **gamma fixed in advance**, never selected on test. Stringency is taken at week *i*-1, strictly before the origin, held across the horizon. At s = 0 the multiplier is exactly 1, so every pre-2020 window is unchanged by construction.
+- **Result:** the prior is **significantly worse**, monotonically in gamma.
+
+  | arm | val RMSE | test RMSE | test MAE | vs base | better | p |
+  |---|---|---|---|---|---|---|
+  | base | 26.5162 | **30.0744** | 14.7997 | — | — | — |
+  | prior_g0.5 | 26.8790 | 30.5934 | 14.9659 | +0.52 | 3/9 | 0.1406 |
+  | prior_g1 | 27.3442 | 31.2768 | 15.2368 | +1.20 | 1/9 | **0.0469** |
+  | prior_g2 | 28.0836 | 32.4286 | 15.8815 | +2.35 | 1/9 | **0.0312** |
+
+- **Design check passed:** origins 0.50 and 0.55 are **bit-identical** across all four arms (20.012 and 48.851), as they must be where stringency is zero throughout.
+- **Verdict:** this is the strongest available form of the negative, because it has no identifiability objection left to make. The prior does exactly what the epidemiology says it should, and loses anyway. It *helps* the window it was built for, monotonically -- origin 0.60 goes 63.448, 63.283, 63.119, 62.799, with over-prediction bias falling +21.41 -> +19.88 -- and it destroys the recovery window immediately after: origin 0.65 goes 11.536, 13.446, 15.612, 18.345, with bias flipping +0.09 -> -6.41 from over- to heavy under-prediction. Stringency stayed high into 2022 while notifications were already rebounding, so a multiplier that correctly suppresses transmission in April 2020 goes on suppressing it for two years after that stopped being true. Net: it buys 0.65 RMSE on the target window and costs 6.81 on the next.
+- **Notes:** the decision to test policy at all was prompted by the 2020 failure, which is design-level hindsight and is reported as such; the functional form and the gamma grid were fixed before running. Supersedes the claim previously in `paper/sections/05b_mechanism_corrected.tex`, which described this prior but quoted numbers from the learned-coefficient arm of `run_stringency_test.py` -- see `fef26bf`. Separately worth keeping in mind as a methods warning: in that learned arm the fitted coefficient is 0.6930 at every pre-2020 origin with standard deviation exactly zero, i.e. `ln 2`, its own initialisation, never moved. Its apparent gain at origin 0.60 was an untrained constant reaching a test window, not a fitted response.
+
+## EXP-056 — Lagged COVID policy and workplace mobility (completed exploratory test)
+
+- **Date:** 2026-10-03
+- **Who:** Codex
+- **Commit:** base code `887f9e67bcf2a9c23dab83656019cdcac25c29fb`; experiment runners are local, uncommitted additions. Exact runner/source hashes are recorded in [config.json](../analysis/results/covid_covariates_final/config.json). Earlier CPU runs were resumed after verifying unchanged model inputs and dependencies; see the raw CPU folder's `resume_oct03.json`.
+- **Scripts:** `analysis/_build/run_covid_covariates.py`, `run_covid_gpu.py`, `merge_covid_devices.py`, `finalize_covid_covariates.py`.
+- **Hardware:** pinned torch 2.1.2; CPU for origins 0.50–0.85, RTX 3050 Laptop CUDA for origin 0.90. All arms/seeds within each origin use one backend. Hardware varies across origins, and CPU/CUDA training need not be identical.
+- **Config:** corrected v2 SEIR-STGAT; rebuilt cases; window=3, horizon=3; arms=base/policy/policy_mobility; origins={0.50,0.55,0.60,0.65,0.70,0.75,0.80,0.85,0.90}; seeds={0,1,2}; epochs=400 maximum with validation early stopping; unchanged backbone, optimizer and training-only case scaling. External inputs lag two weeks, fixed physical scaling, signed exposure weights initialized at zero, log multiplier clipped to ±1.5. Missing external observations have neutral model effects, without changing the raw CSV. [Full protocol](COVID_COVARIATE_EXPERIMENT.md).
+- **Question:** do lagged policy and workplace mobility improve the matched cases-only corrected model?
+- **Result:** all 81 evaluations complete. These are means of split metrics, not globally pooled scores. Unrounded summary CSV: [results/covid_covariates_summary.csv](../results/covid_covariates_summary.csv).
+
+  | Arm | Test RMSE | Test MAE | Bias | RMSE difference vs base | Holm p |
+  |---|---|---|---|---|---|
+  | base | 30.048672958656592 | 14.781874462410256 | -0.6566550320121813 | 0.0 | — |
+  | policy | 30.063734972918475 | 14.82079142111319 | -0.9182566973657109 | 0.01506201426188152 | 1.0 |
+  | policy_mobility | 30.0693471343429 | 14.815282415460658 | -0.9506141585526028 | 0.020674175686306417 | 1.0 |
+
+- **Inference:** average seeds within each origin; exact origin-level sign flips with Holm correction for two comparisons. Raw p=0.90625 (policy), 0.84375 (policy_mobility). Origin bootstrap 95% intervals for RMSE differences: [-0.15694274195918326, 0.23640770382351345] and [-0.22776315123946583, 0.23111279805501303]. Differences below 0.0001 RMSE were counted as numerical ties. **That tolerance is too small, and the corrected figure strengthens the verdict.** Origins 0.50 and 0.55 have zero covariate coverage in train, validation *and* test, so all three arms are the same model there by construction; they nevertheless differ by up to **0.109 RMSE** (origin 0.55, seed 1), because a 1e-6 wobble can move which epoch early stopping selects. The measured run-to-run floor of this pipeline is therefore ~0.11 RMSE, and both covariate effects (+0.015, +0.021) are about 5x smaller than it: not merely insignificant, but below the resolution of the experiment. Nine-origin uncertainty estimates have limited precision.
+- **Verdict:** no clear improvement from these covariates under this protocol. This result does not establish that policy or mobility can never help.
+- **Verified independently (Claude, 2026-10-03):** arm means re-derived from `runs.json` and reproduce exactly; 99/99 project tests pass, including the five COVID tests and the `atol=0` bit-identity control; the five input SHA-256s match HEAD. Two findings were added on top. First, the corrected noise floor above. Second, the *mechanism* for why adding mobility is the worst arm: the fitted exposure weights are exactly 0.0000 at origins 0.50-0.65 — the model provably cannot learn a response where training contains no lockdown — while at origins 0.70-0.90 the stringency weight is negative (-0.10 to -0.36, the epidemiologically correct sign) and the mobility weight is **positive** (+0.39 to +0.92, the wrong sign). Both exposures are positive during lockdown, so the two terms nearly cancel: two collinear covariates with opposing fitted signs contribute net nothing and add variance.
+- **Notes:** exploratory after previous searches, not independent confirmation or causal evidence. Archived covariate vintages are unverified; this is retrospective evaluation with lagged inputs. Early training folds have no COVID exposure, so the initial lockdown response cannot be learned. Keep separate from Claude's policy/spatial experiments, which use different lags and priors. [Completed report](../analysis/results/covid_covariates_final/report.md), per-origin/per-horizon CSVs, coverage, saved predictions and input audits are in the same final folder. The 20-epoch GPU speed benchmark (19.2 s CPU, 10.1 s GPU) is timing evidence only.
+
+Copy this block for a new entry:
+
+```markdown
+## EXP-055 — What serotype timing is worth, and which windows the arm loses
+- **Date:** 2026-09-24
+- **Who:** Praveen De Silva
+- **Commit:** `29bf588`
+- **Notebook / script:** `analysis/_build/oracle_serotype.py`
+- **Hardware:** Local CPU, 6 workers, pinned stack (torch 2.1.2 / PyG 2.4.0)
+- **Config:** 7 arms x 9 disjoint origins x 3 seeds = 189 models; susceptible depletion restarted at the published serotype emergence weeks 168 (DENV-2, 2016-09) and 328 (DENV-3, 2019-09); oracle arms under rule R4, never finalists
+- **Question:** the arm loses on two of nine origins - is serotype blindness the cause, and what would surveillance buy?
+- **Result:** averaged over nine origins the oracle buys nothing (28.81 with the dates, 28.74 without). The average hides two opposite effects.
+
+  | origin | period | national cases | damped | + serotype | persistence |
+  |---|---|---|---|---|---|
+  | 0.55 | 2019-05 to 2019-11 | rising 1386 -> 2566 | 46.6 | **44.4** | 45.5 |
+  | 0.60 | 2019-11 to 2020-06 | collapsing 3057 -> 299 | 59.7 | 60.6 | 48.7 |
+
+  At the growth window the serotype date turns a loss into a win - the first time any arm in this project has beaten the persistence floor on a rising epidemic - and the under-prediction bias falls from -12.9 to -9.8. At the collapse window it changes nothing: that window is the COVID-19 lockdown, and the model over-predicts with bias +19.8.
+- **Verdict:** answered. Serotype timing helps where epidemics start; nothing epidemiological helps where policy stops one.
+- **Notes:** this corrects an earlier draft that attributed both losing windows to the 2017 epidemic. The oracle tests switch *timing* only; per-district serotype proportions carry more and remain untested.
+
+## EXP-054 — Damped mechanistic correction on top of persistence
+- **Date:** 2026-09-24
+- **Who:** Praveen De Silva
+- **Commit:** `2dd4e76`
+- **Notebook / script:** `analysis/_build/persistence_plus.py`
+- **Hardware:** Local CPU, 6 workers
+- **Config:** forecast = persistence x (mechanism / persistence)^alpha, alpha learned on training data; also a learned cap on the deviation, and waning immunity over 26 / 52 / 104 weeks; 9 origins x 3 seeds
+- **Question:** the mechanism's forecast is persistence plus a correction - can the correction be made safer rather than larger?
+- **Result:** damping gives the best arm in the project: test RMSE 29.15 against 30.01 for the undamped model, better on 7/9 origins, p = 0.07, and it repairs most of the failure fold (64.9 -> 59.7). Learned alpha is 0.27-0.49, so the model applies about a third of its own correction. Combined with waning immunity: **28.74 RMSE, 14.14 MAE** against the persistence floor of 28.54 / 13.94, statistically level (+0.20, p = 0.90). A learned cap changes nothing; waning immunity alone is worse (29.79).
+- **Verdict:** answered. Damping cannot cross the floor by construction - as alpha goes to zero the forecast becomes persistence - so this family's ceiling is persistence itself.
+- **Notes:** CSV at `analysis/results/seir_gnn/s5_v2/persistence_plus_runs.csv`.
+
+## EXP-053 — Horizon sweep: the mechanism does not pay off further out
+- **Date:** 2026-09-23
+- **Who:** Praveen De Silva
+- **Commit:** `606c121`
+- **Notebook / script:** `analysis/_build/horizon_sweep.py`
+- **Hardware:** Local CPU, 6 workers
+- **Config:** horizons 3 / 6 / 12 weeks, window 3, 9 disjoint origins x 3 seeds, physics vs the same encoder without SEIR vs persistence; 162 models
+- **Question:** at three weeks the forecast is mostly the incubation pipeline draining and the fitted model is subcritical (R_eff ~ 0.42) - does the mechanism pull ahead once the pipeline empties?
+- **Result:**
+
+  | horizon | physics | persistence | no physics | physics - persistence | origins won | p |
+  |---|---|---|---|---|---|---|
+  | 3 | 29.60 | 28.54 | 47.76 | +1.06 | 4/9 | 0.32 |
+  | 6 | 38.32 | 36.04 | 50.44 | +2.29 | 3/9 | 0.055 |
+  | 12 | 46.31 | 45.08 | 55.34 | +1.23 | 5/9 | 0.30 |
+
+  Persistence is ahead at every horizon and the two degrade at the same rate (1.56x against 1.58x from 3 to 12 weeks). The SEIR layer still beats the no-physics control at every horizon: -18.16, -12.11, -9.02, 8/9 origins each, p <= 0.012.
+- **Verdict:** answered, prediction falsified. The limit is not the horizon.
+- **Notes:** CSV at `analysis/results/seir_gnn/s5_v2/horizon_sweep_runs.csv`.
+
+## EXP-052 — The SEIR layer is worth 39% of the error
+- **Date:** 2026-09-23
+- **Who:** Praveen De Silva
+- **Commit:** `f104646`
+- **Notebook / script:** `analysis/_build/run_s5_seir_gnn_v2.py --arm v2 v2_mech`, `analysis/_build/phys_lab.py --variant v2_direct`
+- **Hardware:** Local CPU, 6 workers
+- **Config:** identical encoder, loss, normalisation and 400-epoch budget, with and without the SEIR simulator in the prediction path; 9 origins x 3 seeds
+- **Question:** does the physics earn its place, or was it only ever a handicap?
+- **Result:** with SEIR 30.04 test RMSE, without it 49.45 - **-19.41, better on 8/9 origins, p = 0.0078**, a 39% lower error. The no-physics arm scores 38.23 on validation and 49.45 on test, so it fits what it has seen and extrapolates badly; the mechanism removes that freedom. Freezing the encoder instead (`v2_mech`, physics with one learned transmission rate) scores the same as the full model, p = 0.97.
+- **Verdict:** answered. The mechanism is the single largest source of accuracy in the model; the graph network on top of it is worth nothing measurable.
+- **Notes:** the original arm lost to its own `direct` control because a *mis-specified* mechanism is a hard constraint pointing the wrong way.
+
+## EXP-051 — Four defects in the Stage-S5 physics, corrected
+- **Date:** 2026-09-23
+- **Who:** Praveen De Silva
+- **Commit:** `757f98d`, replication `6440a9c`
+- **Notebook / script:** `analysis/_build/run_s5_seir_gnn_v2.py` (new; `run_s5_seir_gnn.py` untouched and reproduced by `--arm baseline`)
+- **Hardware:** Local CPU, 6 workers, pinned stack built by `reproduction/verify_local.py --env-only`
+- **Config:** STGAT, window 3 -> horizon 3, `rebuilt`, 3 and 9 origin protocols, seeds 0/1/2 and 3/4/5, MSE loss, training-only normalisation, 400 epochs, early stopping on validation RMSE
+- **Question:** the physics arm lost to its own no-physics control - is the physics wrong, or is physics the wrong idea?
+- **Result:** four defects, each tested alone. (1) compartments built from weekly flows rather than standing stocks, a structural factor-of-two under-prediction: 28.16 -> 25.28 validation RMSE. (2) ten years of cumulative cases subtracted from S, which assumes lifelong immunity to a four-serotype disease: 24.03 -> 19.29, and the prediction bias disappears (39.6 predicted against 40.5 true, from 17.4). (3) no mass action, so no epidemic growth: 25.28 -> 24.03. (4) reporting rate frozen at 1/11 against a published range of 1/2.5 to 1/30: 19.29 -> 17.90. Plus learned stock factors and rates, 17.68 -> 17.29, and squared error instead of SMAPE.
+
+  Confirmatory, 9 disjoint origins x 3 seeds: **test RMSE 50.13 -> 29.86, better on 9/9 origins, p = 0.0039**. Replicated on `reordered` (451 weeks, artifact windows excluded): 55.70 -> 30.65, better on all three origins, with the persistence floor computed there matching the published 31.089.
+- **Verdict:** answered. Still not better than persistence (+1.3 RMSE, 7/9 origins, p = 0.92).
+- **Notes:** ~40 variants, failures included, in `docs/PHYSICS_IMPROVEMENT_LOG.md`; per-run CSV in `analysis/results/seir_gnn/s5_v2/`.
+
 ## EXP-050 — The whole study, re-run from original sources in one Kaggle notebook
 - **Date:** 2026-09-25
 - **Who:** Group 05

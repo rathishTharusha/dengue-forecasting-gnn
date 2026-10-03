@@ -1,0 +1,24 @@
+{
+  "device": "cuda",
+  "gpu": "NVIDIA GeForce RTX 3050 Laptop GPU",
+  "torch": "2.1.2+cu121",
+  "origins": [
+    0.9
+  ],
+  "arms": [
+    "base",
+    "policy",
+    "policy_mobility"
+  ],
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "epochs": 400,
+  "device_change_only": true,
+  "original_cpu_results_preserved": true,
+  "cpu_runner_sha256": "027233ec39599eeb100883dbd0eae81bd00fd234f743862b2db03c2c8b4ef47f",
+  "gpu_runner_sha256": "a468a1636eaf256635264256bbb0536979d42904f10cd95a13f18251fe583f62",
+  "covid_source_sha256": "51c6efbd7a9f6df06634dd3723df7e004ef05fefa91cd8955cde4d63c2d8b8e6"
+}

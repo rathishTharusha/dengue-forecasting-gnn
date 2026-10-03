@@ -1,0 +1,11 @@
+{
+  "torch": "2.1.2+cu121",
+  "gpu": "NVIDIA GeForce RTX 3050 Laptop GPU",
+  "epochs": 20,
+  "origin": 0.9,
+  "cpu_seconds": 19.2,
+  "gpu_seconds": 10.1,
+  "forward_max_case_error": 0.0235595703125,
+  "peak_gpu_memory_mb": 57.1552734375,
+  "scientific_result": false
+}

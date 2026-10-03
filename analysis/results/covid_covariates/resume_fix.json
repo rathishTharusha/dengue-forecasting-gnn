@@ -1,0 +1,5 @@
+{
+  "reason": "Normalize tuple/list representation in config comparison; training and model AST unchanged",
+  "initial_runner_sha256": "5338b0f1ce9fb1a542b0796eb39a2cd79d78ce713e97615cac3e1272f48d46b3",
+  "resumed_runner_sha256": "027233ec39599eeb100883dbd0eae81bd00fd234f743862b2db03c2c8b4ef47f"
+}

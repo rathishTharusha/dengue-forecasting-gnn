@@ -1,0 +1,87 @@
+%=============================================================================
+% OPTIONAL SUBSECTION --- the corrected mechanistic arm
+%
+% NOT wired into main.tex. To include it, add after the results section:
+%     \input{sections/05b_mechanism_corrected}
+%
+% Protocol note: these numbers come from the *corrected* case series (559 weeks,
+% `rebuilt`) under nine disjoint origins, not the 459-week array and three
+% origins used in the rest of the paper. The first paragraph says so explicitly,
+% because a reviewer will otherwise ask. Every figure is reproducible from
+% analysis/_build/ and is logged as EXP-032 to EXP-037.
+%=============================================================================
+
+\subsection{The mechanism, specified correctly}
+\label{sec:mechanism-corrected}
+
+A natural objection to a negative result about mechanistic structure is that the
+mechanism was built wrong. We tested that directly. The arm reported here runs on
+the date-ordered case series (559 weeks, 25 districts) under nine disjoint
+rolling origins spanning 0.50--0.90 of the record, three seeds each; the protocol
+is otherwise that of \S\ref{sec:setup}. We state the change of dataset and fold
+count plainly because the comparison inside this subsection is internally paired
+and should not be read across to Figure~\ref{fig:results}.
+
+Four defects in the compartmental arm were found and corrected, each tested in
+isolation: compartments initialised from weekly flows rather than standing stocks,
+which caps the attainable prediction at roughly half the observed count;
+subtraction of ten years of cumulative cases from the susceptible pool, which
+assumes lifelong immunity to a four-serotype disease; a force of infection with
+no dependence on current prevalence, so the model contains no epidemic growth;
+and a reporting rate fixed at $1/11$ against a published range of $1/2.5$ to
+$1/30$. Corrected, the arm improves from test RMSE 50.13 to 29.86, better on
+\textbf{9 of 9} origins, $p = 0.0039$ by a sign-flip permutation test clustered
+by origin. The improvement replicates on a second construction of the dataset.
+
+\textbf{The compartmental layer earns its place.} The decisive control is the
+identical encoder, loss, normalisation and training budget with the simulator
+removed from the prediction path, the network predicting counts directly:
+\textbf{30.04 with the mechanism against 49.45 without}, better on 8 of 9
+origins, $p = 0.0078$ --- a 39\% reduction in error attributable to the structure
+alone. It holds at every horizon tested, by 18.2 RMSE at three weeks, 12.1 at six
+and 9.0 at twelve, with $p \le 0.012$ in each case. The no-mechanism arm scores
+38.23 on validation and 49.45 on test: it fits the periods it has seen and
+extrapolates badly, and the compartmental layer removes exactly that freedom.
+
+\textbf{The graph does not.} Freezing the encoder and replacing it with a single
+learned transmission rate changes nothing ($p = 0.97$). Replacing border
+adjacency with a population-gravity graph does not help either, and the learned
+import weight $\alpha$ converges to exactly zero in all 108 runs, for both
+graphs: given a free non-negative parameter for its neighbours' prevalence, the
+model declines it.
+
+\textbf{And the ceiling holds.} The corrected arm remains level with persistence
+rather than ahead of it ($+1.3$ RMSE over nine origins, $p = 0.92$; the best
+variant reaches 28.74 against the floor's 28.54). The mechanism for that is
+measurable: the corrected forecast correlates with last-value persistence at
+$r = 0.97$--$0.99$, differing by 12--15\% of the level, and a learned convex
+blend of the two settles at $w = 0.53$--$0.66$ on persistence while changing the
+score by 0.04. Trained on squared error, the mechanism rediscovers persistence
+and adds a correction worth one to two RMSE, which is the whole margin available.
+
+A fitted $R_{\mathrm{eff}} = \beta S / \gamma$ of $0.40$--$0.44$ explains why.
+At a three-week horizon the forecast is dominated by the incubation and reporting
+pipeline draining --- people already infected at the origin --- rather than by new
+transmission. Two consequences follow, and both are observed. Forecasting further
+ahead does not help: persistence stays ahead at six and twelve weeks and the two
+degrade at indistinguishable rates, $1.56\times$ against $1.58\times$ from three
+weeks to twelve. And an intervention covariate cannot repair the one window where
+the record collapses for a non-epidemiological reason. In 2020 national
+notifications fall from 3057 to 299 a week under movement restrictions; supplying
+the OxCGRT stringency index two ways leaves that window where it was. As a
+learned exposure coefficient it is not estimable, because no fold that fails
+contains a single lockdown week in its training data, and the arm reproduces the
+baseline to within $10^{-5}$ RMSE. Imposed instead as a mechanistic prior,
+$\beta \mapsto \beta(1 - s/100)^{\gamma}$ with $\gamma$ fixed rather than fitted,
+a 30\% reduction in the contact rate moves the window from 63.45 to 63.20 and
+makes the adjacent window worse. A measure that acts on transmission cannot
+change a forecast that transmission barely drives.
+
+\textbf{What the mechanism is for.} Two roles survive. It constrains: the 39\%
+reduction above is obtained by forbidding the network to emit counts that no
+compartmental flow could produce. And it supplies quantities a point forecast
+cannot --- a transmission rate, an implied $R_{\mathrm{eff}}$, a calibrated
+reporting rate and compartment states, one of which is the largest single
+contributor to ranking which districts breach an alert threshold
+(\S\ref{sec:results}). Neither role asks the mechanism to predict the count, and
+that is the distinction this paper draws.

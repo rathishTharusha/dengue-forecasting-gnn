@@ -1,0 +1,391 @@
+﻿Title,Authors,URL,DOI,Published Date,Assumptions And Extensions,Citation,Exact Differential Equations,Extraction Status,Parameter Definitions,Relevance,State Variables,Summary
+Fuzzy Approach Analyzing SEIR‐SEI Dengue Dynamics,"Gauri Bhuju, Ganga Ram Phaijoo, Dil Bahadur Gurung",https://doi.org/10.1155/2020/1508613,,2020-01-01,Constant human population (dN_h/dt = 0); mosquito population recruited at A and removed at μ_m; mosquitoes do not recover; transmission and recovery are uncertain functions of virus load; nonnegative initial conditions and positively invariant state space are imposed.,"Bhuju, Phaijoo & Gurung (2020), Fuzzy Approach Analyzing SEIR-SEI Dengue Dynamics, BioMed Research International, DOI 10.1155/2020/1508613",dS_h/dt = μ_h N_h − β_h(v)b S_h I_m/N_h − μ_h S_h; dE_h/dt = β_h(v)b S_h I_m/N_h − (k_h + μ_h)E_h; dI_h/dt = k_h E_h − (γ_h(v) + μ_h)I_h; dR_h/dt = γ_h(v)I_h − μ_h R_h; dS_m/dt = A − β_m b S_m I_h/N_h − μ_m S_m; dE_m/dt = β_m b S_m I_h/N_h − (k_m + μ_m)E_m; dI_m/dt = k_m E_m − μ_m I_m.,Full equations and definitions available.,"μ_h: human birth/death rate; μ_m: mosquito death rate; β_h(v): vector-to-human transmission coefficient, dependent on virus load v; β_m: human-to-vector transmission coefficient; γ_h(v): human recovery rate, dependent on v; b: mosquito biting rate; k_h: human incubation rate; k_m: mosquito incubation rate; A: mosquito recruitment rate.",Direct match; deterministic SEIR–SEI equations are extended by making the human-to-human-labelled transmission coefficient and recovery rate functions of virus load.,"Humans: S_h (susceptible), E_h (exposed), I_h (infectious), R_h (recovered); mosquitoes: S_m (susceptible), E_m (exposed), I_m (infectious). N_h = S_h + E_h + I_h + R_h; N_m = S_m + E_m + I_m.","# Fuzzy Approach Analyzing SEIR‐SEI Dengue Dynamics
+
+BioMed Research International. Published: 2020-01-01. 32 citations.
+
+## Authors
+
+- Gauri Bhuju (Bhaktapur Cancer Hospital): h-index 4; 69 citations; corresponding author
+- Ganga Ram Phaijoo (Kathmandu University): h-index 11; 309 citations
+- Dil Bahadur Gurung (Kathmandu University): h-index 16; 689 citations
+
+## Topics
+
+- Mathematical and Theoretical Epidemiology and Ecology Models
+- COVID-19 epidemiological studies
+- Mosquito-borne diseases and control
+
+---
+
+# Fuzzy Approach Analyzing SEIR-SEI Dengue Dynamics
+
+## Abstract
+
+Dengue fever is a mosquito-borne infectious disease threatening more than a hundred tropical countries of the world. The heterogeneity of mosquito bites of human during the spread of dengue virus is an important factor that should be considered while modeling the dynamics of the disease. However, traditional models assumed homogeneous transmission between host and vectors which is inconsistent with reality. Mathematically, we can describe the heterogeneity and uncertainty of the transmission of the disease by introducing fuzzy theory. In the present work, we study transmission dynamics of dengue with the fuzzy SEIR-SEI compartmental model. The transmission rate and recovery rate of the disease are considered as fuzzy numbers. The dynamical behavior of the system is discussed with different amounts of dengue viruses. Also, the fuzzy basic reproduction number for a group of infected individuals with different virus loads is calculated using Sugeno integral. Simulations are made to illustrate the mathematical results graphically.
+
+## Introduction
+
+Dengue is one of the major public health concerns. It is a mosquito-borne fastest growing tropical disease in the world. Dengue cases have been increasing from 2.2 million (in 2010) to over 3.2 million (in 2015) across the America, Southeast Asia, and Western Pacific. More than one-third of the world's population, approximately 3.9 billion people, are living in the dengue risk area of 128 countries [1] . Annually, about 390 million new dengue infections are occurring worldwide [2] . There is no licensed vaccine and no specific antiviral drugs for the disease. About 2.5% of those that are infected by dengue die [1] .
+
+Dengue is one of the emerging diseases in Nepal. The outbreak of dengue usually occurs in Nepal during June to October. Dengue case was first reported in Nepal 2004, and major outbreaks have occurred on 2006, 2010, 2013, 2016, and 2019 [3] . In the year 2019, more than 14,662 DENV infection cases were confirmed in 67 districts of Nepal. Among them, six people were reported to die due to dengue disease infection [4] . Dengue fever is caused by one of the four closely related dengue viruses of different serotypes: DENV-1, DENV-2, DENV-3, DENV-4, which circulate simultaneously in an endemic area. Dengue viruses are single-stranded RNA viruses of the Flaviviridae family. It is transmitted by the day-feeding mosquito Aedes Aegypti and the Asian Tiger mosquito, Aedes Albopictus [5] .
+
+Mathematical models are more effective tools to understand transmission dynamics of the disease, to identify the influential parameters in spreading the disease, and to propose strategies for the control of the disease. There is long and distinguished history of using mathematical models for the study of the evolution and transmission dynamics of infectious diseases. Kermack and Mckendrick formulated an SIR compartmental model to study infectious diseases mathematically [6] . Esteva and Vargas remodeled it to use for vector host dynamics of dengue disease taking constant [7] and variable human population [8] . Since then, many researchers have studied dengue disease transmission dynamics. Gakkhar and Chavda and Phaijoo and Gurung studied the impact of awareness on the spread of dengue infection in a human population [9, 10] . Mobility of human population causes the spread of the disease in new human populations, so impact of these mobility parameters has been studied through mathematical models [11] .
+
+In the modeling of the transmission of dengue disease, several nonlinear models of ordinary differential equations have been used [6, 7, [10] [11] [12] . In these models, the variables commonly represent subpopulations of susceptible ðSÞ, exposed ðEÞ, infectious ðIÞ, and recovered ðRÞ.
+
+Most of the researchers have used deterministic models with constant model parameters. Generally, they assumed that each individual can transmit the disease and recover from the disease in a constant rate. But these assumptions conflicted with real epidemic. The model parameters like transmission rates, biting rates, and recovery rates are uncertain. Zadeh [13] had introduced the uncertainty in a biological model. To study this uncertainty, mathematically, he defined the fuzzy set and fuzzy theory. Mondal et al. modified the epidemic SIS model by considering the disease transmission parameter and treatment control parameter as fuzzy number [14] . De Barros et al. applied fuzzy theory technique on a SI epidemiological model while considering different degrees of infectivity. Also, they used the transmission coefficient as a fuzzy set [15] . Djam and Wajiga presented a fuzzy expert system for management of malaria, to provide the decision support platform to malaria researchers [16] . Emokhare and Igbape proposed a fuzzy logic-based approach for the early diagnosis of Ebola hemorrhagic fever [17] .
+
+Recently, fuzzy theory has been introduced in many models of engineering, banking, public health, and biology. Also, the theory has been used to study the diagnosis of the diseases. Previous studies regarding the general epidemic models (SI, SIR) of infectious disease have been developed with a fuzzy transmission parameter for the diseases which are transmitted to human from human directly [14, 15, 18] . Dengue is an infectious disease which cannot be transmitted to human from human directly without the intermediate vector, the Aedes mosquito. In the disease dynamics, the transmission rate and recovery rate of the disease are not deterministic; they are uncertain. So, in the present work, we consider these parameters as fuzzy numbers. We compute fuzzy basic reproduction number to study the stability of the equilibrium points.
+
+This paper is organized as follows. Fuzzy set and fuzzy expected value are defined in Subsections 1.1 and 1.2. In Section 2, we present the analysis of the fuzzy epidemiological model. Also, positivity and boundedness of the solution of the model are described in Subsection 2.2. In Section 3, we perform stability analysis with basic reproduction number of the dengue disease, using a next-generation matrix method. We present a fuzzy basic reproduction number and compare it with the deterministic basic reproduction number with different virus loads of dengue disease in Subsection 3.3. In Section 4, numerical results and discussion about the work are presented.
+
+1.1. Fuzzy Set. Let X be a nonempty crisp set. A fuzzy subset S of X is denoted by S and is defined as
+
+S = x, μ S x ð Þ ð Þ : x ∈ X f g , ð1Þ
+
+where μ S : X ⟶ ½0, 1 is a membership function associated with a fuzzy set S which describes the degree of belongingness of x with X.
+
+Here, we use the membership function μðxÞ to indicate the fuzzy subset S. Also, μðxÞ is called fuzzy number if X is the set of real numbers.
+
+1.2. Fuzzy Measure and Fuzzy Expected Value. Let Ω be a nonempty set and PðΩÞ denote the set of all subsets of Ω. Then, μ : PðΩÞ ⟶ ½0, 1 is a fuzzy measure [19] if (i) μðϕÞ = 0 and μðΩÞ = 1
+
+(ii) for A, B ∈ PðΩÞ, μðAÞ ≤ μðBÞ if A ⊂ B
+
+Let u : Ω ⟶ ½0, 1 be an uncertain variable; i.e., u is a fuzzy subset and μ a fuzzy measure on Ω. Then, fuzzy expected value (FEV) of u is the real number, defined by the Sugeno integral [19] ,
+
+FEV u ð Þ = ð Ω u dμ = sup inf α, k α ð Þ ð Þ f g , 0 ≤ α ≤ 1, ð2Þ
+
+k α ð Þ = μ ω ∈ Ω : u ω ð Þ ≥ α f g : ð3Þ
+
+## Fuzzy SEIR-SEI Model of Dengue
+
+In this paper, we propose a SEIR-SEI model for dengue transmission by incorporating the fuzzy number. The model describes the interaction between susceptible, exposed, infected, and recovered human population and susceptible, exposed, and infected mosquito population by the system of nonlinear ordinary differential equations [11] . In the deterministic model proposed in [11] , we use the fuzzy number. Among the individuals of the population, there are different degrees of susceptibility and infectivity, so the concept of susceptible and infectious is uncertain. Focusing on the population heterogeneity, we consider the disease transmission coefficient β h between susceptible and infected individuals as a fuzzy number. The recovery of the infection of the disease is also uncertain. The infected individual will recover from the disease, when the amount of virus is reducing from the body. So, we consider that the recovery rate γ h is also a fuzzy number. To describe the virus load on these parameters, we use the membership function β h ðvÞ and γ h ðvÞ for the transmission rate and recovery rate, respectively. Then, the fuzzy SEIR-SEI model of dengue disease is described by the following system of differential equations:
+
+dS h dt = μ h N h - β h v ð Þb N h S h I m -μ h S h , 2 BioMed Research International dE h dt = β h v ð Þb N h S h I m -k h + μ h ð ÞE h , dI h dt = k h E h -γ h v ð Þ + μ h ð Þ I h , dR h dt = γ h v ð ÞI h -μ h R h , dS m dt = A - β m b N h S m I h -μ m S m , dE m dt = β m b N h S m I h -k m + μ m ð Þ E m , dI m dt = k m E m -μ m I m : ð4Þ
+
+Here, N h = S h + E h + I h + R h and N m = S m + E m + I m
+
+, where N h is the host (human) population size, S h is number of susceptibles in the host population, I h is the number of infectives in the host population, R h number of immunes (recovered) in the host population, N m is the vector (mosquito) population size, S m is the number of susceptibles in the vector population, I m is the number of infectives in the vector population, μ h is the birth/death rate in the host population, μ m is the death rate in the vector population, β h is the transmission coefficient from vector to host, β m is the transmission coefficient from host to vector, γ h is the recovery rate in the host population, b is the biting rate of vector, k h is the host's incubation rate, and k m is the vector's incubation rate.
+
+## Membership Function
+
+The fuzzy membership function of the transmission parameter β h ðvÞ which depends on the amount of virus load v is given by [15, 20]
+
+β h v ð Þ = 0, if v < v min , v -v min v M -v min , if v min ≤ v ≤ v M , 1 i f v M ≤ v ≤ v max 8 > > > < > > > : ð5Þ
+
+Here, v min represents the minimum amount of virus needed for the disease transmission to occur. When the amount of virus in an individual is less than v min , the chance of transmission of disease is negligible. Moreover, for the certain amount of virus v M , the transmission rate of the disease is maximum and equal to 1. Furthermore, we suppose that for the dengue disease, the individual's amount of virus is always limited by v max . The diagram of β h ðvÞ is given in Figure 1 .
+
+Here, γ h ðvÞ represents the recovery rate from the infection of the disease which depends on the amount of virus load. When the virus load is higher, it will take a longer time to recovery from the disease. Thus, the fuzzy membership function of recovery rate γ h ðvÞ is given by [18]
+
+γ h v ð Þ = γ 0 -1 ð Þ v max v + 1, if 0 < v < v max , ð6Þ
+
+where 0 < γ 0 < 1 is the lowest recovery rate. The diagram of γ h ðvÞ is given in Figure 2 .
+
+We assume that the amount of virus of the studied group V may be different for different individuals. So, with the classification of the studied group given by an expert, it can be seen as a linguistic variable such as weak, medium, and strong. Each classification of the linguistic variable with membership function ΓðvÞ is given by [15]
+
+Γ v ð Þ = 0, if v < v -δ, v -v + δ δ , if v -δ ≤ v ≤ v, -v -v -δ ð Þ δ , if v < v ≤ v + δ, 1, if v > v + δ: 8 > > > > > > > < > > > > > > > : ð7Þ
+
+The parameter v represents a central value, and δ is the dispersion of each one of the fuzzy set assumed by V. The diagram of ΓðvÞ is given in Figure 3 .
+
+## Nonnegativity and Boundedness
+
+Theorem 1. The solutions of the system (4) are nonnegative for all t > 0.
+
+Proof. Suppose D = fðS h , E h , I h , R h , S m , E m , I m Þ ∈ ℝ 7 : 0 ≤ S h , E h , I h , R h , S m , E m , I m g:
+
+We show that D should be positively invariant. To prove it, we examine the behavior of the state variables at the boundaries of D.
+
+(a) At the boundary S h = 0, we get
+
+S h ′ = μ h N h > 0 ð8Þ
+
+Thus, the solution cannot exit D by crossing this boundary.
+
+E h ′ = β h v ð Þb N h S h I m ð9Þ
+
+Case 1. If E h = 0, S h > 0, and I m ðtÞ > 0, then E h ′ > 0.
+
+Case 2. If E h = 0, S h > 0, and I m = 0, then E h ′ = 0:
+
+Case 3. If E h = 0, S h = 0, and I m > 0, then E h ′ = 0:
+
+In each of these cases, E h ′ ≥ 0, so the solution cannot exit D, by crossing the boundary E h = 0.
+
+## (c) At the boundary
+
+I h = 0, we have I h ′ = k h E h If I h = 0, E h > 0, then I h ′ > 0.
+
+Thus, the solution cannot exit D, by crossing the boundary I h = 0.
+
+In the similar manner, we can show that the solution of the system cannot exit D by crossing the boundary of any of the state variables.
+
+Theorem 2. The solutions of the system (4) are bounded on ½ 0, bÞ for some b > 0.
+
+Proof. We have from the system (4) N h = S h + E h + I h + R h and dN h /dt = 0. Thus, N h is constant for all t ∈ ½0, bÞ for some b > 0. Therefore, S h ðtÞ, E h ðtÞ, I h ðtÞ, R h ðtÞ are all bounded on ½0, bÞ.
+
+N m = S m + E m + I m , ð10Þ
+
+dN m dt = A -μ m N m , N m = A μ m + N m 0 ð Þ - A μ m e -μ m t : ð11Þ
+
+lim sup t→∞ N m ≤ A μ m : ð12Þ
+
+Therefore, S m ðtÞ, E m ðtÞ, and I m ðtÞ are bounded above by A/μ m on ½0, bÞ for some b > 0. Since all the variables are nonnegative, these are bounded below by 0. Hence, the solution of the system (4) are bounded on ½0, bÞ for some b > 0 [21] .
+
+## Existence and Uniqueness
+
+Here, we show the existence and uniqueness of solutions of the model (4). We assume that the system has the initial conditions as follows:
+
+S h 0 ð Þ > 0, E h 0 ð Þ ≥ 0, I h 0 ð Þ > 0, R h 0 ð Þ ≥ 0, S m 0 ð Þ > 0, E m 0 ð Þ ≥ 0, I m 0 ð Þ ≥ 0: ð13Þ
+
+Theorem 3. Consider the system (4) with nonnegative initial condition (13) . Solutions to the system (4) with initial conditions (13) exist and are unique for all t ≥ 0.
+
+Proof. Let xðtÞ = ðS h ðtÞ, E h ðtÞ, I h ðtÞ, R h ðtÞ, S m ðtÞ, E m ðtÞ, I m ðt ÞÞ ∈ ℝ 7 . The system (4) is written in the form x ′ = f ðxÞ. Let f i , i = 1, 2, 3, 4, 5, 6, 7 denote the components of the vector field f; we have
+
+f 1 = μ h N h - β h v ð Þb N h S h I m -μ h S h , f 2 = β h v ð Þb N h S h I m -k h + μ h ð ÞE h , f 3 = k h E h -γ h v ð Þ + μ h ð Þ I h ,
+
+f 4 = γ h v ð ÞI h -μ h R h , f 5 = A - β m b N h S m I h -μ m S m , f 6 = β m b N h S m I h -k m + μ m ð Þ E m , f 7 = k m E m -μ m I m : ð14Þ
+
+The vector field f consists of the algebraic polynomials of state variables. Thus, f i are continuous autonomous functions on ℝ 7 and partial derivatives
+
+∂f i /∂S h , ∂f i /∂E h , ∂f i /∂I h , ∂f i /∂ R h , ∂f i /∂S m , ∂f i /∂E m ,
+
+## Stability Analysis of the Model
+
+3.1. Basic Reproduction Number. Basic reproduction number is defined as the average number of secondary infections caused by a single infectious individual during their entire infectious lifetime [23, 24] . The number is denoted by R 0 .
+
+Assume that F is the matrix of transmission terms and V is the matrix of transition terms of the system (4). R 0 is defined as the spectral radius of the matrix FV -1 , i.e., ρðF V -1 Þ. R 0 is obtained by using the next-generation matrix method [23, 24] . For the model (4), , ,
+
+F = 0 0 0 β h v ð Þb N h S h 0 0 β m b N h S m 0 0 0 0 0 0 0 0 0 2
+
+V = p 0 0 0 0 α 0 0 -k h 0 q 0 0 -k m 0 μ m
+
+p = k h + μ h , α = k m + μ m , and q = γ h v ð Þ + μ h : ð15Þ
+
+Thus, the basic reproduction number is
+
+R 0 v ð Þ = ρ FV -1 À Á = ffiffiffiffiffiffiffiffiffiffiffiffiffiffiffiffiffiffiffiffiffiffiffiffiffiffiffiffiffiffiffiffiffiffiffi β h v ð Þβ m b 2 k m k h A μ 2 m αpqN h : s ð16Þ
+
+## Equilibrium Points
+
+There are two equilibrium points of the system of differential equations ( 4 ), the disease-free equilibrium point P 0 ðN h , 0, 0, 0, A/μ m , 0, 0Þ and endemic
+
+equilibrium point P 1 ðS * h , E * h , I * h , R * h , S * m , E * m , I * m Þ.
+
+S * h = N h R 2 0 μ h μ m N h α + β h v ð ÞbAk m Â Ã R 2 0 μ h μ m N h α + β h v ð ÞbAk m ð Þ , E * h = R 2 0 -1 À Á μ h μ 2 m N 2 h qα β m bk h β h v ð ÞbAk m + μ h μ m N h α ð Þ , I * h = R 2 0 -1 À Á μ h μ 2 m N 2 h α β h v ð Þb 2 Aβ m k m + μ h μ m N h αβ m b À Á , R * h = R 2 0 -1 À Á γ h v ð Þμ 2 m N 2 h α β m b β h v ð ÞbAk m + μ h μ m N h α ð Þ , S * m = A β h v ð ÞbAk m + μ h μ m N h α ð Þ R 2 0 μ h μ 2 m N h α + μ m β h v ð ÞbAk m , E * m = R 2 0 -1 À Á μ h N h Aμ m R 2 0 μ h μ m N h α + β h v ð ÞbAk m Â Ã , I * m = R 2 0 -1 À Á μ h N h Ak m R 2 0 μ h μ m N h α + β h v ð ÞbAk m Â Ã : ð17Þ
+
+Theorem 4. The disease-free equilibrium point P 0 ðN h , 0, 0, 0 , A/μ m , 0, 0Þ is locally asymptotically stable when R 0 < 1 and unstable when R 0 > 1.
+
+Proof. The Jacobian matrix of system of Equation ( 4 ) is
+
+J = - β h v ð Þb N h I m -μ h 0 0 0 0 0 - β h v ð Þb N h S h β h v ð Þb N h I m -p 0 0 0 0 β h v ð Þb N h S h 0 k h -q 0 0 0 0 0 0 γ h v ð Þ -μ h 0 0 0 0 0 - β m b N h S m 0 β m b N h I h -μ m 0 0 0 0 β m b N h S m 0 β m b N h I h -α 0 0 0 0 0 0 k m -μ
+
+The characteristic equation at the disease-free equilibrium point is
+
+|J -λI| = 0 ⇒ μ h + λ ð Þ 2 μ m + λ ð Þ-p + λ ð Þ q + λ ð Þ α + λ ð Þ ½ Á μ m + λ ð Þ+ β m b 2 β h v ð Þk h k m A N h μ m # = 0: ð19Þ
+
+Therefore, λ = -μ h ,-μ h ,-μ m , λ 4 + A 1 λ 3 + A 2 λ 2 + A 3 λ + A 4 = 0, ð20Þ
+
+5 BioMed Research International where A 1 = p + q + α + μ m , A 2 = p q + αμ m + p + q ð Þ α + μ m ð Þ, A 3 = p q α + μ m ð Þ+ α μ m p + q ð Þ, A 4 = p q α μ m 1 -R 2 0 À Á : ð21Þ
+
+β h ðvÞ and γ h ðvÞ have different values for different virus loads. Thus, we have the following three cases for virus loads ðvÞ.
+
+Case 1. v < v min , β h v ð Þ = 0 ⇒ R 2 0 = 0, γ h v ð Þ = γ 0 -1 ð Þ/v max v + 1 > 0: ð22Þ
+
+Since the parameters p, q, α, and μ m are all positive, in the above condition,
+
+A 1 > 0, A 3 > 0, A 4 > 0, A 1 A 2 -A 3 = p + q + α + μ m ð Þ pq + αμ m + p + q ð Þ α + μ m ð Þ ½ -pq α + μ m ð Þ+ αμ m p + q ð Þ ½ = p + q ð Þpq + αμ m α + μ m ð Þ + p + q + α + μ m ð Þp + q ð Þ α + μ m ð Þ> 0, A 1 A 2 A 3 = p + q + α + μ m ð Þ pq + αμ m + p + q ð Þ α + μ m ð Þ ½ Á pq α + μ m ð Þ+ αμ m p + q ð Þ ½ = p 2 q 2 p + q ð Þ α + μ m ð Þ+ p 2 q 2 α + μ m ð Þ 2 + 2pqαμ m p + q ð Þ α + μ m ð Þ + pqαμ m α + μ m ð Þ 2 + pq p + q ð Þ 2 α + μ m ð Þ 2 + pq p + q ð Þ α + μ m ð Þ 3 + pqαμ m p + q ð Þ 2 + α 2 μ 2 m p + q ð Þ 2 + α 2 μ 2 m p + q ð Þ α + μ m ð Þ + αμ m p + q ð Þ 3 α + μ m ð Þ+ αμ m p + q ð Þ 2 α + μ m ð Þ 2 , A 2 3 = p 2 q 2 α + μ m ð Þ 2 + α 2 μ 2 m p + q ð Þ 2 + 2pqαμ m p + q ð Þ α + μ m ð Þ, A 4 A 2 1 = pqαμ m p + q ð Þ 2 + α + μ m ð Þ 2 Â + 2 p + q ð Þ α + μ m ð Þ, A 1 A 2 A 3 -A 2 3 -A 4 A 2 1 = p + q ð Þ α + μ m ð Þ pq -αμ m ð Þ 2 Â + pq p + q ð Þ α + μ m ð Þ+ pq α + μ m ð Þ 2 Ã + p + q ð Þ α + μ m ð Þ αμ m p + q ð Þ 2 Â + αμ m p + q ð Þ α + μ m ð Þ> 0: ð23Þ
+
+Therefore, A 1 > 0, A 4 > 0, A 3 > 0, A 1 A 2 -A 3 > 0, and A 1 A 2 A 3 -A 2 3 -A 4 A 2 1 > 0. Case 2. v min ≤ v ≤ v M , β h v ð Þ = v -v min v M -v min , γ h v ð Þ = γ 0 -1 ð Þ v max v + 1 > 0: ð24Þ
+
+We have A 1 > 0, A 3 > 0, A 1 A 2 -A 3 > 0, A 4 > 0 if 1 -R 2 0 > 0, R 2 0 < 1, and R 0 < 1 and A 1 A 2 A 3 -A 2 3 - A 4 A 2 1 > 0 if 1 -R 2 0 > 0, R 2 0 < 1, and R 0 < 1: Case 3. v M ≤ v ≤ v max β h v ð Þ = 1, γ v ð Þ = γ 0 -1 ð Þ v max v + 1 > 0: ð25Þ
+
+A 1 > 0, A 1 A 2 -A 3 > 0, A 3 > 0, and A 4 ≥ 0 and A 1 A 2 A 3 -A 2 3 -A 4 A 2 3 = A 1 A 2 A 3 -A 2 3 > 0.
+
+According to the Routh-Hurwitz criterion [25] , the roots of Equation ( 20 ) have negative roots or roots with negative real parts. Hence, the disease-free equilibrium point is asymptotically stable in all cases.
+
+Theorem 5. The system has an endemic equilibrium point
+
+P 1 ðS * h , E * h , I * h , R * h , S * m , E * m , I * m Þ which exists only when R 0 > 1.
+
+Proof. We have endemic equilibrium point
+
+P 1 ðS * h , E * h , I * h , R * h , S * m , E * m , I * m Þ,
+
+I * h = R 2 0 -1 À Á μ h μ 2 m N 2 h α β h v ð Þb 2 Aβ m k m + μ h μ m N h αβ m b À Á : ð26Þ (a) When v < v min , we have
+
+β h v ð Þ = 0 R 2 0 = 0 ð27Þ
+
+I * h = -μ m N h β m b < 0: ð28Þ
+
+So, the disease dies out.
+
+(b) When v min ≤ v ≤ v M , we have
+
+β h v ð Þ = v -v min v M -v min > 0, R 2 0 = v -v min ð Þ β m k m k h b 2 A v M -v min ð Þ pqαμ 2 m N h > 0: ð29Þ
+
+So, I * h > 0 if R 0 > 1.
+
+Thus, the disease is endemic.
+
+(c) When v M ≤ v ≤ v max , we have
+
+β h v ð Þ = 1, R 2 0 = β m k m k h b 2 A pqαμ 2 m N h > 0: ð30Þ
+
+So, I * h > 0 if R 0 > 1.
+
+Thus, the disease is endemic. Hence, the endemic equilibrium point exists if virus load v ≥ v min .
+
+## Fuzzy Basic Reproduction Number
+
+Since the transmission rate of disease and recovery rate of infection of disease are assumed as a function of the virus load, the basic reproduction number will be a function of the virus load. The classical basic reproduction number R 0 ðvÞ is increasing with virus load v. It is not a fuzzy set, and it can be greater than 1, but γ 0 is always a positive fraction with the highest value 1, so 0 ≤ γ 0 R 0 ðvÞ ≤ 1. Thus, γ 0 R 0 ðv Þ is a fuzzy set and hence, FEVðγ 0 R 0 ðvÞÞ is well defined. Under this view, we introduce the fuzzy basic reproduction number of the fuzzy SEIR-SEI model [18] .
+
+The fuzzy basic reproduction number is given by
+
+R f 0 = 1 γ 0 FEV γ 0 R 0 v ð Þ ð Þ , ð31Þ
+
+FEV γ 0 R 0 v ð Þ ð Þ= sup inf α, k α ð Þ ð Þ f g , 0 ≤ α ≤ 1, k α ð Þ = μ v : γ 0 R 0 v ð Þ ≥ α f g = μ X ð Þ, ð32Þ
+
+which is a fuzzy measure.
+
+## BioMed Research International
+
+We have to define fuzzy measure μ to obtain FEVðγ 0 R 0 ðvÞÞ. For this, the possibility measure [15]
+
+μ X ð Þ = sup Γ v ð Þ, ∀v ∈ X, X ⊂ R: ð33Þ
+
+We know that R 0 ðvÞ is not decreasing with v; from FEV ðγ 0 R 0 ðvÞÞ, we have X = ½ v, v max , where v is the solution of the equation
+
+γ 0 β h v ð Þβ m b 2 k m k h A μ 2 m αpqN h = α: ð34Þ
+
+Thus, kðαÞ = μ½v′, v max = sup ΓðvÞ with v′ ≤ v ≤ v max , where kð0Þ = 1 and kð1Þ = Γðv max Þ.
+
+The amount of virus v in the population was assumed as a linguistic meaning which is classified into three states: weak virus load, medium virus load, and strong virus load. Each state has a fuzzy behavior based on values v min , v M , and v max described in Figure 4 .
+
+Case 1. Weak virus load when v + δ ≤ v min ; we have
+
+β h v ð Þ = 0, R 0 v ð Þ = 0: ð35Þ
+
+So, FEVðγ 0 R 0 ðvÞÞ = 0 < γ 0 ⇔ R f 0 < 1.
+
+Then, the disease will die out.
+
+Case 2. Medium virus load when v -δ ≥ v min and v + δ ≤ v M ; we have
+
+β h v ð Þ = v -v min v M -v min , R 0 v ð ÞÞ = β h v ð Þβ m b 2 k m k h A μ 2 m αpq v ð ÞN h , k α ð Þ = 1 i f 0 < α ≤ γ 0 R 0 v ð Þ, Γ v ′ , if γ 0 R 0 v ð Þ < α ≤ γ 0 R 0 v + δ ð Þ 0 i fγ 0 R 0 v + δ ð Þ< α ≤ 1 8 > > > < > > > : ð36Þ
+
+Thus, if δ > 0, kðαÞ is continuous and a decreasing function with kð0Þ = 1 and kð1Þ = 0. Hence, the FEVðγ 0 R 0 ðvÞÞ is the fixed point of k and As a function R 0 ð vÞ is increasing and a continuous function, by intermediate value theorem, there exist
+
+γ 0 R 0 v ð Þ ≤ FEV γ 0 R 0 v ð Þ ð Þ≤ γ 0 R 0 v + δ ð Þ, R 0 v ð Þ ≤ R f 0 ≤ R 0 v + δ ð Þ: ð37Þ
+
+v with v < v < v + δ such that R f 0 = R 0 v ð Þ > R 0 v ð Þ: ð38Þ
+
+Thus, there exists a virus load v such that R f 0 = R 0 ðvÞ; i.e., R f 0 and R 0 ðvÞ coincide. Furthermore, R f 0 > R 0 ð vÞ. Therefore, the fuzzy average number of secondary infection R f 0 is higher than the number of secondary infection R 0 ð vÞ due to the medium amount of virus.
+
+Case 3. Strong virus load when v -δ ≤ v M and v + δ ≤ v max ; we have
+
+β h v ð Þ = 1, R 0 v ð Þ = β m b 2 k m k h A μ 2 m αpq v ð ÞN h , k α ð Þ = 1, if 0 < α ≤ γ 0 R 0 v ð Þ, Γ v ′ , if γ 0 R 0 v ð Þ < α ≤ γ 0 R 0 v + δ ð Þ, 0, if γ 0 R 0 v + δ ð Þ< α 1: 8 > > > > < > > > > : ð39Þ
+
+As in Case 2, we have
+
+γ 0 R 0 v ð Þ ≤ γ 0 R 0 v ð Þ ð Þ≤ γ R 0 v + δ ð Þ, β m b 2 k m k h A μ 2 m αpq v ð ÞN h ≤ 1 γ 0 FEV γ 0 R 0 v ð Þ ð Þ≤ β m b 2 k m k h A μ 2 m αpq v + δ ð ÞN h , R 0 v ð Þ ≤ R f 0 ≤ R 0 v + δ ð Þ: ð40Þ
+
+Thus, R f 0 > 1; the disease will be endemic.
+
+## Numerical Results and Discussion
+
+We explore the influence of dengue virus load with the fuzzy behavior on the transmission dynamics of the dengue disease. We have simulated the fuzzy SEIR-SEI model with different values of dengue virus loads, 357, 5 × 10 7 , and 1:04 × 10 10 RNA per ml [26, 27] .
+
+As virus load v increases, the infection rate increases. It causes the increase in an infectious human population. So, the susceptible human population decreases. Figures 5 6 7 describe the dynamics of susceptible, infectious, and recovered host, respectively, for different virus loads. When the virus load is minimum (357 RNA per ml), the infectivity of the disease is negligible, so there is no transmission of the disease at this moment of virus load (Figure 5 ). It is noted that when the virus load is maximum (1:04 × 10 10 RNA per ml), the susceptible human population decreases significantly to its least value (Figure 5 ), due to significant increases in transmission rate. Initially, the infectious human population increases due to high transmission rate. Later on, the population starts decreasing due to recovery from the disease and natural death (Figures 6 and 7 ).
+
+To illustrate the dynamics of dengue disease transmission with the fuzzy behavior, different values of parameters are needed (Table 1 ).
+
+Basic reproduction number indicates whether the dengue disease will vanish or persists in the population over time. When the fuzzy transmission rate of the disease increases, the infectious population increases, so the basic reproduction number also increases (Figure 8 ). The basic reproduction 9 BioMed Research International number decreases with the increase of the recovery rate of the disease. From maximum to the medium virus loads (10 7 RNA per ml), the basic reproduction number decreases slightly, since at that situation, infection of the disease will be very high. After that, it decreases very sharply (Figure 9 ); because the recovery rate is very high, it means the virus load is very low. Thus, when transmission rate increases, the disease will be endemic and when recovery rate increases, the disease will die out (Figure 10 ).
+
+Different phenomena of transmission dynamics of the dengue disease are observed due to of the model parameters which are considered functions of virus loads. These phenomena cannot be observed in deterministic models. Thus, the fuzzy model can describe transmission dynamics of dengue in a more realistic than deterministic model of the disease.
+
+## Conclusion
+
+In this paper, we have studied the SEIR-SEI epidemic model of dengue disease in a crisp and fuzzy system. We have studied the dynamical behavior of the system. We considered the two parameters, transmission rate of disease and recovery rate, from infection as a function of virus loads and defined their fuzzy membership functions. Also, we analyzed the stability of the model at disease-free equilibrium point with different virus loads. We computed the fuzzy basic reproduction number.
+
+Dengue disease cannot be spread among the population if the amount of dengue virus is very low due to the natural immunity. It will be endemic if the amount of the virus is high. In the fuzzy system, these phenomena could be considered, but it cannot be considered in the crisp system. In the classical system, the basic reproduction number is the function of system parameters only, whereas in the fuzzy system, the basic reproduction number is a function of diseasespreading virus. Thus, the fuzzy model is more realistic, flexible, and balanced than the crisp model of the dengue disease.
+
+The uncertain model parameters, transmission rate and recovery rate, play a crucial role in the disease transmission dynamics. So, we have considered only these parameters as a function of dengue virus loads. We may consider the other uncertain parameters of the model as the function of virus.
+
+Figure 1: Membership function β h ðvÞ:
+
+Figure 2: Membership function γ h ðvÞ.
+
+and ∂f i /∂I m exist and are continuous. Hence, by existence and uniqueness theorem, a unique solution of the system x ′ = f ðxÞ exists for any initial condition xð0Þ ∈ ℝ 7 [22] .
+
+Figure 4: Weak, medium, and strong virus load with transmission rate β h ðvÞ.
+
+Figure 6: Infectious human population. 14000 12000 10000 8000 6000 Recovered human populations 4000 2000 0 0 5 10 15 Time (in days) 20 25 30
+
+Figure 7: Recovered human population.
+
+Figure 5: Susceptible human population.
+
+Figure 8: Basic reproduction number with transmission rate of disease.
+
+Figure 9: Basic reproduction number with recovery rate of disease.
+
+Parameters and their values. Parameters | μ h | k h | N h | μ m | k m | b | β m | A Values | 1/(70 * 365) | 0.5 | 160000 | 0.02941 | 0.1428 | 0.75 | 0.375 | 250000 Units | Day -1 | Day -1 | Number | Day -1 | Day -1 | Day -1 | Dimensionless | Number/day
+
+## References
+
+World Health Organization, Dengue and severe dengue 2018 World Health Organization, Dengue and severe dengue, 2018.
+
+The global distribution and burden of dengue S Bhatt P W Gething O J Brady Nature 496 7446 2013 S. Bhatt, P. W. Gething, O. J. Brady et al., ""The global distribu- tion and burden of dengue,"" Nature, vol. 496, no. 7446, pp. 504-507, 2013.
+
+Dengue periodic outbreak and epidemiological trends in Nepal B P Gupta R Tuladhar R Kurmi K D Manandhar Annals of Clinical Microbiology and Antimicrobials 17 6 2018 B. P. Gupta, R. Tuladhar, R. Kurmi, and K. D. Manandhar, ""Dengue periodic outbreak and epidemiological trends in Nepal,"" Annals of Clinical Microbiology and Antimicrobials, vol. 17, no. 6, 2018.
+
+Annual Record of EDCD 2019. June to October. 2019 Government of Nepal, Ministry of Health and Population, Department of Health Service, and Epidemiology and Disease Control Division Government of Nepal, Ministry of Health and Population, Department of Health Service, and Epidemiology and Disease Control Division, Dengue disease 2019 from June to October, Annual Record of EDCD, 2019.
+
+Understanding the dengue viruses and progress towards their control R Rodriguez-Roche E A Gould BioMed Research International 2013 20 2013 R. Rodriguez-Roche and E. A. Gould, ""Understanding the dengue viruses and progress towards their control,"" BioMed Research International, vol. 2013, Article ID 690835, 20 pages, 2013.
+
+Contributions to the mathematical theory of epidemics-I W O Kermack A G Mckendrick Bulletin of Mathematical Biology 53 1-2 1927. 1991 W. O. Kermack and A. G. McKendrick, ""Contributions to the mathematical theory of epidemics-I. 1927,"" Bulletin of Mathe- matical Biology, vol. 53, no. 1-2, pp. 33-55, 1991.
+
+A model for dengue disease with variable human population L Esteva C Vargas Journal of Mathematical Biology 38 3 1999 L. Esteva and C. Vargas, ""A model for dengue disease with variable human population,"" Journal of Mathematical Biology, vol. 38, no. 3, pp. 220-240, 1999.
+
+Analysis of a dengue disease transmission model L Esteva C Vargas Mathematical Biosciences 150 2 1998 L. Esteva and C. Vargas, ""Analysis of a dengue disease transmission model,"" Mathematical Biosciences, vol. 150, no. 2, pp. 131-151, 1998.
+
+Impact of awareness on the spread of dengue infection in human population S Gakkhar N C Chavda Applied Mathematics 4 8 2013 S. Gakkhar and N. C. Chavda, ""Impact of awareness on the spread of dengue infection in human population,"" Applied Mathematics, vol. 4, no. 8, pp. 142-147, 2013.
+
+Mathematical model of dengue disease transmission dynamics with control measures G R Phaijoo D B Gurung Journal of Advances in Mathematics and Computer Science 23 3 2017 G. R. Phaijoo and D. B. Gurung, ""Mathematical model of den- gue disease transmission dynamics with control measures,"" Journal of Advances in Mathematics and Computer Science, vol. 23, no. 3, pp. 1-12, 2017.
+
+Sensitivity analysis of SEIR-SEI model of dengue disease G R Phaijoo D B Gurung GAMS Journal of Mathematics and Mathematical Bioscience 6 2018 G. R. Phaijoo and D. B. Gurung, ""Sensitivity analysis of SEIR- SEI model of dengue disease,"" GAMS Journal of Mathematics and Mathematical Bioscience, vol. 6, pp. 41-50, 2018.
+
+Within-host dengue virus dynamic model with a fuzzy infection rate S Perera S M S N Perera International Journal of Pure and Applied Mathematics 117 2017 S. Perera and S. M. S. N. Perera, ""Within-host dengue virus dynamic model with a fuzzy infection rate,"" International Journal of Pure and Applied Mathematics, vol. 117, pp. 245- 251, 2017.
+
+Fuzzy sets L A Zadeh Information and Control 8 3 1965 L. A. Zadeh, ""Fuzzy sets,"" Information and Control, vol. 8, no. 3, pp. 338-353, 1965.
+
+Dynamical behavior of an epidemic model in a fuzzy transmission P K Mondal S Jana P Haldar T K Kar International Journal of Uncertainty, Fuzziness and Knowledge-Based Systems 23 5 2015 P. K. Mondal, S. Jana, P. Haldar, and T. K. Kar, ""Dynamical behavior of an epidemic model in a fuzzy transmission,"" Inter- national Journal of Uncertainty, Fuzziness and Knowledge- Based Systems, vol. 23, no. 5, pp. 651-665, 2015.
+
+The SI epidemiological models with a fuzzy transmission parameter L C De Barros M B Ferreira Leite R C Bassanez An International Journal Computer and Mathematics with Application 45 10-11 2003 L. C. De Barros, M. B. Ferreira Leite, and R. C. Bassanez, ""The SI epidemiological models with a fuzzy transmission parame- ter,"" An International Journal Computer and Mathematics with Application, vol. 45, no. 10-11, pp. 1619-1628, 2003.
+
+A fuzzy expert system for the management of malaria X Y Djam G M Wajiga Y H Kimbi N V Blamah International Journal of Pure and Applied Science and Technology 5 2 2011 X. Y. Djam, G. M. Wajiga, Y. H. Kimbi, and N. V. Blamah, ""A fuzzy expert system for the management of malaria,"" Interna- tional Journal of Pure and Applied Science and Technology, vol. 5, no. 2, pp. 84-108, 2011.
+
+Fuzzy logic base approach to early diagnosis of Ebola hemorrhogic fever B O Emokhare E M Igbape Proceedings of the World Congress on Engineering and Computer Science 2015 the World Congress on Engineering and Computer Science 2015 San Francisco, CA, USA October 2015 II B. O. Emokhare and E. M. Igbape, ""Fuzzy logic base approach to early diagnosis of Ebola hemorrhogic fever,"" in Proceedings of the World Congress on Engineering and Computer Science 2015 Vol II, San Francisco, CA, USA, October 2015.
+
+Dynamical behaviour of fuzzy SIR epidemic model R Verma S P Tiwari U Ranjit Advances in Intelligent System and Computing Cham Springer 2018 643 R. Verma, S. P. Tiwari, and U. Ranjit, ""Dynamical behaviour of fuzzy SIR epidemic model,"" in Advances in Intelligent System and Computing, vol. 643, pp. 482-492, Springer, Cham, 2018.
+
+Fuzzy Logic in Action: Application in Epidemiology and Beyond E Massad N R S Ortega L C De Barros C J Struchiner Studies in Fuzzyness and Soft Cimputing 232 2008 Springer E. Massad, N. R. S. Ortega, L. C. De Barros, and C. J. Struchi- ner, ""Fuzzy Logic in Action: Application in Epidemiology and Beyond,"" in Studies in Fuzzyness and Soft Cimputing 232, Springer, 2008.
+
+Epidemiological models of directly transmitted diseases: an approach via fuzzy sets theory L C Barros R Z G Oliveira M B F Leite R C Bassanezi International journal of University, Fuzzyness and Knowledge-Based Systems 22 5 2014 L. C. Barros, R. Z. G. Oliveira, M. B. F. Leite, and R. C. Bassa- nezi, ""Epidemiological models of directly transmitted diseases: an approach via fuzzy sets theory,"" International journal of University, Fuzzyness and Knowledge-Based Systems, vol. 22, no. 5, pp. 769-781, 2014.
+
+Assessing the impact of treatment on the dynamics of dengue fever: a case study of India A K Srivastav M Ghosh Applied Mathematics and Computation 362 124533 2019 A. K. Srivastav and M. Ghosh, ""Assessing the impact of treat- ment on the dynamics of dengue fever: a case study of India,"" Applied Mathematics and Computation, vol. 362, article 124533, 2019.
+
+Introduction to applied nonlinear dynamical systems and chaos S Wiggins Texts in Applied Mathematics 2003 Springer Second edition S. Wiggins, ""Introduction to applied nonlinear dynamical systems and chaos,"" in Texts in Applied Mathematics, Springer, Second edition, 2003.
+
+On the definition and the computation of the basic reproduction ratio R_o in models for infectious diseases in heterogeneous populations O Diekmann J A P Heesterbeek J A J Metz Journal of Mathematical Biology 28 4 1990 O. Diekmann, J. A. P. Heesterbeek, and J. A. J. Metz, ""On the definition and the computation of the basic reproduction ratio R_o in models for infectious diseases in heterogeneous populations,"" Journal of Mathematical Biology, vol. 28, no. 4, pp. 365-382, 1990.
+
+Reproduction numbers and sub-threshold endemic equilibria for compartmental models of disease transmission P Van Den Driessche J Watmough Mathematical Bioscience 180 1-2 2002 P. van den Driessche and J. Watmough, ""Reproduction num- bers and sub-threshold endemic equilibria for compartmental models of disease transmission,"" Mathematical Bioscience, vol. 180, no. 1-2, pp. 29-48, 2002.
+
+Mathematical models in population biology and epidemiology F Brauer C Castillo-Chavez Texts in Applied Mathematics 2 2012 F. Brauer and C. Castillo-Chavez, ""Mathematical models in population biology and epidemiology,"" Texts in Applied Mathematics, vol. 2, 2012.
+
+Modelling original antigenic sin in dengue viral infection R N Beers S M Ciupe Mathematical Medicine and Biology 35 2 2018 R. N. Beers and S. M. Ciupe, ""Modelling original antigenic sin in dengue viral infection,"" Mathematical Medicine and Biology, vol. 35, no. 2, pp. 257-272, 2018.
+
+Impact of spatially heterogeneous temperature on the dynamics of dengue disease N K Vaidya X Li F B Wang Discrete and Continuous Dynamical System Series B 24 1 321 2019 BioMed Research International N. K. Vaidya, X. Li, and F. B. Wang, ""Impact of spatially heterogeneous temperature on the dynamics of dengue disease,"" Discrete and Continuous Dynamical System Series B, vol. 24, no. 1, p. 321, 2019. 11 BioMed Research International"
+SEIR-SEI-EnKF: a new model for estimating and forecasting dengue outbreak dynamics,"Chunlin Yi, L. Cohnstaedt, Caterina M. Scoglio",https://ieeexplore.ieee.org/ielx7/6287639/6514899/09624940.pdf,10.1109/ACCESS.2021.3129997,2021,Forecasting/assimilation model; validated first on synthetic outbreaks and then applied to historical cases in three cities.,"Yi, Cohnstaedt & Scoglio (2021), SEIR-SEI-EnKF: a new model for estimating and forecasting dengue outbreak dynamics",Not safely extractable from the retrieved source record; the abstract confirms the compartment structure but does not print the equations.,Direct-match paper; equation-level extraction incomplete because full text was not retrievable in the current pass.,Not stated in the retrieved abstract; likely model-specific definitions require the full paper equation/table block.,Direct match; the paper explicitly adopts SEIR for hosts and SEI for vectors and embeds the model in an ensemble Kalman-filter forecasting framework.,"SEIR human and SEI mosquito compartments are stated, but the retrieved record did not expose the individual variable symbols or equation block.","Dengue fever is an acute mosquito-borne viral infection that results in a heavy social burden in many tropical and subtropical regions. Accurate forecasts of dengue outbreak allow the local health officials to take proactive action such as positioning mosquito control equipment or preparing medical resources. We developed a new model for dengue outbreak estimation and forecast that adopts the vector-borne disease model SEIR-SEI with compartments Susceptible-Exposed-Infectious-Recovered (for host) and Susceptible-Exposed-Infectious (for vector) into the ensemble Kalman filtering (EnKF) assimilation method. The SEIR-SIR-EnKF model was first validated using synthetic dengue outbreak in twin experiments. Then, the model produced good performance when applied to estimate and forecast the dengue outbreak dynamics with real historical time-series cases in 3 different cities. Furthermore, we compared the accuracy of the real-time predictions between SEIR-SEI-EnKF model, SEIR-EnKF model, and SIR-EnKF model; we found the SEIR-SEI-EnKF model had the most accurate predictions."
+Analysis of Vector-host SEIR-SEI Dengue Epidemiological Model,"M. Hasan, A. Hobiny, Ahmed Alshehri",http://etamaths.com/index.php/ijaa/article/download/2660/742,10.28924/2291-8639-20-2022-57,2022,"Positivity and boundedness are established; the human model includes panic, stress, or anxiety as additional removal/mortality effects in susceptible, exposed, and infected classes; disease-free stability is reported for R0 < 1 and endemic stability for R0 > 1.","Hasan, Hobiny & Alshehri (2022), Analysis of Vector-host SEIR-SEI Dengue Epidemiological Model, International Journal of Analysis and Applications 20:57, DOI 10.28924/2291-8639-20-2022-57",The retrieved HTML/full-text representation references the nonlinear system and its initial conditions but omits the displayed equation block. Do not infer the exact right-hand sides from the parameter list; consult the linked PDF for verbatim transcription.,"Direct-match paper; equation image/PDF block not machine-readable in the retrieved text, so exact equations are withheld rather than reconstructed.","The available extraction identifies μ_2 as the natural mosquito death rate and reports β_1 as vector-to-host infection, β_4 as human-to-vector infection, β_5 as vector extrinsic incubation, with additional human recruitment, natural-death, panic/tension/anxiety, recovery and incubation parameters in the paper's tables.","Direct match; the authors state that humans are divided into SEIR classes and mosquitoes into SEI classes, with panic/stress/anxiety terms added to human dynamics.","S_h, E_h, I_h, R_h for humans and S_m, E_m, I_m for mosquitoes; N_h and N_m are the corresponding totals.","Approximately worldwide 50 nations are still infected with the deadly dengue virus. This mosquito-borne illness spreads rapidly. Epidemiological models can provide fundamental recommendations for public health professionals, allowing them to analyze variables impacting disease prevention and control efforts. In this paper, we present a host-vector mathematical model that depicts the Dengue virus transmission dynamics utilizing a susceptible-exposed-infected-recovered (SEIR) model for the human interacting with a susceptible-exposed-infected (SEI) model for the mosquito. Using the Next Generation Technique, the basic reproduction number of the model is calculated. The local stability shows that if R0<1 the system is asymptotically stable and the disease dies out, otherwise unstable. The Lyapunov function is also used to evaluate the global stability of disease-free and endemic equilibrium points. To analyze the effect of the crucial aspects of the disease's transmission and to validate the analytical findings, numerical simulations of a variety of compartments have been constructed using MATLAB. The sensitivity analysis of the epidemic model is performed to establish the relative significance of the model parameters to disease transmission."
+Mathematical Modeling of Dengue Virus Transmission Using a Host-Vector SEIR-SEI Model,"A. Foisal, K. Begum, Md. Nowros Raihan Sayel, Abdullah Al Mamun",https://saspublishers.com/article/22691/download/,10.36347/sjpms.2025.v12i07.001,2025,Constant total populations in the simplified epidemic system; no vertical transmission; no loss of human immunity; mosquitoes do not recover; exposed compartments represent latent infection.,"Foisal, Begum, Sayel & Al Mamun (2025), Mathematical Modeling of Dengue Virus Transmission Using a Host-Vector SEIR-SEI Model, Scholars Journal of Physics, Mathematics and Statistics 12(7):246–253, DOI 10.36347/sjpms.2025.v12i07.001",Human: dS_h/dt = Λ_h − β_h S_h I_m/N_m − μ_h S_h; dE_h/dt = β_h S_h I_m/N_m − (k_h + μ_h)E_h; dI_h/dt = k_h E_h − (γ_h + μ_h)I_h; dR_h/dt = γ_h I_h − μ_h R_h. Mosquito: dS_m/dt = Λ_m − β_m S_m I_h/N_h − μ_m S_m; dE_m/dt = β_m S_m I_h/N_h − (k_m + μ_m)E_m; dI_m/dt = k_m E_m − μ_m I_m.,"Full equations and definitions available, although the article's PDF-to-text rendering drops some equation glyphs; notation was normalized to the definitions printed immediately below the system.",Λ_h: human recruitment rate; Λ_m: mosquito recruitment rate; β_h: human infection rate from infectious mosquitoes; β_m: mosquito infection rate from infectious humans; k_h: human incubation rate (inverse incubation period); k_m: mosquito incubation rate; γ_h: human recovery rate; μ_h: human natural mortality rate; μ_m: mosquito mortality rate.,Direct match; an ODE model combines human SEIR and mosquito SEI compartments and analyzes disease-free/endemic equilibria and R0.,"Humans: S_h, E_h, I_h, R_h; mosquitoes: S_m, E_m, I_m; N_h = S_h + E_h + I_h + R_h and N_m = S_m + E_m + I_m.","Dengue fever has emerged as a significant public health concern in Bangladesh, with a marked increase in fatalities in recent years. To analyze its transmission dynamics, this study introduces a compartmental mathematical model combining the SIER (Susceptible–Exposed–Infectious–Recovered) framework for the human population and the SEI (Susceptible–Exposed–Infectious) model for the mosquito vector population. The model identifies equilibrium points and calculates the basic reproduction number (R₀), a critical threshold parameter that determines whether the disease will spread or die out. Conditions leading to both disease-free and endemic equilibria are established, with the stability of these points shown to be dependent on the value of R₀ to estimate the infection rate, data on infected individuals were collected from various health institutions across Bangladesh. Using MATLAB, numerical simulations were conducted to explore the impact of key parameters on disease transmission and to validate the analytical findings. The study concludes by identifying the most sensitive parameter influencing R₀, providing insights for targeted intervention strategies."

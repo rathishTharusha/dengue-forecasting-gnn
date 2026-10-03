@@ -3,6 +3,26 @@
 Append-only. Newest entries at the top. Every run whose numbers might reach the report goes
 here — a number without a reproducible config does not go in the report.
 
+## EXP-039 — Movement restriction as a fixed mechanistic prior, not a fitted coefficient
+
+- **Date:** 2026-10-03
+- **Who:** Claude
+- **Script:** `analysis/_build/run_stringency_prior.py`; results `analysis/results/seir_gnn/s5_v2/stringency_prior_runs.csv` (108 rows, 0 failures).
+- **Config:** corrected v2 SEIR-STGAT, `rebuilt`, 9 disjoint origins x 3 seeds, window 3 -> horizon 3, training-only normalisation, squared error, early stopping on validation. Arms `base`, `prior_g0.5`, `prior_g1`, `prior_g2`.
+- **Question:** every learned policy arm so far is unidentifiable exactly where it is needed, because the folds that fail contain no lockdown week in training (0, 0, 0, 0, 8, 35, 63, 91, 118 across the nine origins). So impose the effect instead of fitting it: `beta -> beta * (1 - s/100)^gamma` with **gamma fixed in advance**, never selected on test. Stringency is taken at week *i*-1, strictly before the origin, held across the horizon. At s = 0 the multiplier is exactly 1, so every pre-2020 window is unchanged by construction.
+- **Result:** the prior is **significantly worse**, monotonically in gamma.
+
+  | arm | val RMSE | test RMSE | test MAE | vs base | better | p |
+  |---|---|---|---|---|---|---|
+  | base | 26.5162 | **30.0744** | 14.7997 | — | — | — |
+  | prior_g0.5 | 26.8790 | 30.5934 | 14.9659 | +0.52 | 3/9 | 0.1406 |
+  | prior_g1 | 27.3442 | 31.2768 | 15.2368 | +1.20 | 1/9 | **0.0469** |
+  | prior_g2 | 28.0836 | 32.4286 | 15.8815 | +2.35 | 1/9 | **0.0312** |
+
+- **Design check passed:** origins 0.50 and 0.55 are **bit-identical** across all four arms (20.012 and 48.851), as they must be where stringency is zero throughout.
+- **Verdict:** this is the strongest available form of the negative, because it has no identifiability objection left to make. The prior does exactly what the epidemiology says it should, and loses anyway. It *helps* the window it was built for, monotonically -- origin 0.60 goes 63.448, 63.283, 63.119, 62.799, with over-prediction bias falling +21.41 -> +19.88 -- and it destroys the recovery window immediately after: origin 0.65 goes 11.536, 13.446, 15.612, 18.345, with bias flipping +0.09 -> -6.41 from over- to heavy under-prediction. Stringency stayed high into 2022 while notifications were already rebounding, so a multiplier that correctly suppresses transmission in April 2020 goes on suppressing it for two years after that stopped being true. Net: it buys 0.65 RMSE on the target window and costs 6.81 on the next.
+- **Notes:** the decision to test policy at all was prompted by the 2020 failure, which is design-level hindsight and is reported as such; the functional form and the gamma grid were fixed before running. Supersedes the claim previously in `paper/sections/05b_mechanism_corrected.tex`, which described this prior but quoted numbers from the learned-coefficient arm of `run_stringency_test.py` -- see `fef26bf`. Separately worth keeping in mind as a methods warning: in that learned arm the fitted coefficient is 0.6930 at every pre-2020 origin with standard deviation exactly zero, i.e. `ln 2`, its own initialisation, never moved. Its apparent gain at origin 0.60 was an untrained constant reaching a test window, not a fitted response.
+
 ## EXP-038 — Lagged COVID policy and workplace mobility (completed exploratory test)
 
 - **Date:** 2026-10-03

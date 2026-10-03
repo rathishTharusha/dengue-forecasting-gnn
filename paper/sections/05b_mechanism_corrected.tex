@@ -67,24 +67,28 @@ ahead does not help: persistence stays ahead at six and twelve weeks and the two
 degrade at indistinguishable rates, $1.56\times$ against $1.58\times$ from three
 weeks to twelve. And an intervention covariate cannot repair the one window
 where the record collapses for a non-epidemiological reason. In 2020 national
-notifications fall from 3057 to 299 a week under movement restrictions. We
-supplied the OxCGRT stringency index three ways and added Google workplace
-mobility, in 81 further matched evaluations on the same nine origins and seeds;
-none of them moves that window. Where such a covariate is needed it is not
-estimable: across all 24 runs whose training data contain no lockdown week both
-fitted weights remain at exactly zero, so the arm is formally incapable of acting
-on the 2020 collapse. Pooled over nine origins the learned arms are marginally
-\emph{worse} --- 30.05 against 30.06 and 30.07, Holm $p = 1.0$ --- and those gaps
-fall below what the design can resolve, since arms that are identical by
-construction already differ by up to 0.109 RMSE through early-stopping
-sensitivity alone. Two details explain the rest. Stringency earns the
-epidemiologically correct sign, $-0.44$, while inverted workplace mobility earns
-$+0.66$; as both exposures rise together under restriction, the two terms very
-nearly cancel. And a variant with a learned multiplicative coefficient appears to
-improve the 2020 window, 63.45 to 63.20, only because that coefficient never left
-its initialisation of $\ln 2$ --- an untrained constant, which makes the adjacent
-window worse, 11.53 to 12.87. A measure that acts on transmission cannot change a
-forecast that transmission barely drives.
+notifications fall from 3057 to 299 a week under movement restrictions. We gave
+the model the OxCGRT stringency index three ways, once with Google workplace
+mobility alongside, over 189 further matched evaluations on the same nine origins
+and seeds. Learned from the data it cannot act where it is needed: in all 24 runs
+whose training data hold no lockdown week both fitted weights stay at exactly
+zero, and pooled over nine origins the learned arms are marginally worse than the
+cases-only model, 30.05 against 30.06 and 30.07 at Holm $p = 1.0$, by margins
+under the pipeline's own run-to-run spread of 0.109 RMSE. Imposing it as a prior
+removes that objection: $\beta \mapsto \beta(1 - \sigma/100)^{\gamma}$ with
+$\gamma$ fixed in advance at $0.5$, $1$ and $2$ needs no training exposure, since
+restricting movement reducing contact is knowledge from outside this series. It
+behaves as the mechanism predicts and still loses. On the 2020 collapse it helps,
+monotonically in $\gamma$ --- 63.45 to 63.28, 63.12 and 62.80, over-prediction
+bias falling from $+21.4$ to $+19.9$; on the recovery window straight after it is
+destroyed --- 11.54 to 13.45, 15.61 and 18.34, bias flipping from $+0.1$ to
+$-6.4$. Pooled it is significantly worse, 30.59, 31.28 and 32.43 against 30.07,
+better on 1 of 9 origins at $\gamma \ge 1$ ($p = 0.047$, $p = 0.031$).
+Stringency stayed high into 2022 while notifications were already rebounding, so a
+multiplier that correctly suppresses transmission in April 2020 goes on
+suppressing it for two years too long. A correctly signed, correctly placed,
+externally supplied intervention term buys 0.65 RMSE on the window it was built
+for and costs 6.81 on the next.
 
 \textbf{What the mechanism is for.} Two roles survive. It constrains: the 39\%
 reduction above is obtained by forbidding the network to emit counts that no

@@ -67,11 +67,24 @@ ahead does not help: persistence stays ahead at six and twelve weeks and the two
 degrade at indistinguishable rates, $1.56\times$ against $1.58\times$ from three
 weeks to twelve. And an intervention covariate cannot repair the one window where
 the record collapses for a non-epidemiological reason. In 2020 national
-notifications fall from 3057 to 299 a week under movement restrictions; supplying
-the OxCGRT stringency index two ways leaves that window where it was. As a
-learned exposure coefficient it is not estimable, because no fold that fails
-contains a single lockdown week in its training data, and the arm reproduces the
-baseline to within $10^{-5}$ RMSE. Imposed instead as a mechanistic prior,
+notifications fall from 3057 to 299 a week under movement restrictions. We
+supplied the OxCGRT stringency index three ways and added Google workplace
+mobility, in 81 further matched evaluations over the same nine origins and three
+seeds. None of them moves that window. As a learned exposure coefficient the
+covariate is not estimable where it is needed: in all 24 runs whose training data
+contain no lockdown week both fitted weights remain at exactly zero, so the arm is
+formally incapable of acting on the 2020 collapse, and it reproduces the baseline
+to within $10^{-5}$ RMSE there. Pooled over all nine origins the learned arms are
+marginally \emph{worse} --- 30.05 against 30.06 for stringency and 30.07 with
+mobility added, Holm $p = 1.0$. Those differences are below what the experiment
+can resolve: arms that are the same model by construction, on the origins with no
+covariate coverage at all, already differ by up to 0.109 RMSE through
+early-stopping sensitivity alone, so effects of $+0.015$ and $+0.021$ sit at a
+fifth of the pipeline's own reproducibility floor. The fitted weights also show
+why a second covariate does not rescue the first: stringency earns $-0.44$, the
+epidemiologically correct sign, while inverted workplace mobility earns $+0.66$,
+and since both exposures are positive under restriction the two terms very nearly
+cancel. Imposed instead as a mechanistic prior,
 $\beta \mapsto \beta(1 - s/100)^{\gamma}$ with $\gamma$ fixed rather than fitted,
 a 30\% reduction in the contact rate moves the window from 63.45 to 63.20 and
 makes the adjacent window worse. A measure that acts on transmission cannot

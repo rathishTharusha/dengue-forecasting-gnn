@@ -75,13 +75,9 @@ MU_V_OFFSET = -0.5
 
 def observed_growth(repo: Path) -> np.ndarray:
     """Absolute weekly log growth of reported cases, per district-week."""
-    from dengue_gnn.experiment import load_dataset
+    from dengue_gnn.data import load_cases
 
-    raw = load_dataset(
-        str(repo / "notebooks" / "baseline" / "sri_lanka_2013-2022_shifted.npy"),
-        str(repo / "notebooks" / "baseline" / "sri_lanka_adj_list.json"),
-    )[0]
-    cases = raw[:, :, 5]
+    cases = load_cases(repo / "notebooks" / "baseline" / "sri_lanka_2013-2022_shifted.npy")
     return np.abs(np.diff(np.log1p(np.clip(cases, 0, None)), axis=0))
 
 

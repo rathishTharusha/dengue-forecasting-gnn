@@ -1,7 +1,7 @@
 # Roadmap
 
 Derived from `Group05_Proposal.pdf` §4–5 and `PROJECT_PROPOSAL_GUIDE.md`, revised
-2026-08-30 after `docs/PHASE2_REVIEW.md`. Each stage has a **falsifiable success
+2026-08-30 after `docs/PHASE2_REVIEW.md` (tag `phase23-archive`). Each stage has a **falsifiable success
 criterion** — if a stage misses it, we report that honestly and fall back rather
 than quietly moving the goalposts.
 
@@ -31,7 +31,7 @@ are unrelated, and a Stage can span Phases.
 
 Phase-3 marks are capped by publication outcome: accepted 95–100%, **rejected but
 submitted 84%, never submitted 50%**. Submitting is the largest single lever in
-the project. See [`PHASE3_PLAN.md`](PHASE3_PLAN.md) §1 and §2.3 — including why
+the project. See `PHASE3_PLAN.md` (tag `phase23-archive`) §1 and §2.3 — including why
 the handout's date is not trustworthy.
 
 ---
@@ -108,7 +108,7 @@ over-constrains the unobserved compartments.
 Required by the handout's paper structure, and absent today. Port the notebook-02
 GNN baselines (STGAT, A3TGCN, ASTGCN, DCRNN, AAGCN) and the notebook-01 classical
 baselines onto our protocol, and add parameter counts, training time and inference
-latency. Detail in [`PHASE3_PLAN.md`](PHASE3_PLAN.md) §5.1–5.2.
+latency. Detail in `PHASE3_PLAN.md` (tag `phase23-archive`) §5.1–5.2.
 
 ### ☐ Stage 5 — GAN augmentation (Contribution b) — optional
 Conditional time-series GAN with WGAN-GP, judged on **downstream** accuracy against
@@ -166,10 +166,10 @@ Regenerate with `python scripts/make_tables.py`. Never type these values.
 
 | Risk | Likelihood | Mitigation |
 |---|---|---|
-| Phase-3 deadline is not ≈20 Sep | High | Confirm with the lecturer before planning — `PHASE3_PLAN.md` §1 |
+| Phase-3 deadline is not ≈20 Sep | High | Confirm with the lecturer before planning — `PHASE3_PLAN.md` §1 (tag `phase23-archive`) |
 | No conference deadline clears 15 Nov | Medium | Choose the venue in week 1; a workshop or regional venue is appropriate for a strong-protocol negative result |
 | Contributions never beat the persistence floor | **Realised** | Already the paper's framing. A well-run negative result with the ablation intact is a valid deliverable |
-| Results produced by code that is not committed | **Realised in Phase 2** | Never `scratch/`; see `PHASE2_REVIEW.md` F1 and rule D3 |
+| Results produced by code that is not committed | **Realised in Phase 2** | Never `scratch/`; see `PHASE2_REVIEW.md` F1 (tag `phase23-archive`) and rule D3 |
 | Effects smaller than fold-to-fold variance | **Realised** | Move to 6–8 origins; report paired tests, not means |
 | SEIR–SEI residual over-constrains unobserved compartments | High | Measure magnitudes first; λ sweep; EINN-style latent transfer as fallback |
 | GAN instability on a 459×25 dataset | High | WGAN-GP; fall back to jittering/window-warping and report it |

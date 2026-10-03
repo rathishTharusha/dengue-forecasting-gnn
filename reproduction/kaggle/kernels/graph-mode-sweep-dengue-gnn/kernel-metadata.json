@@ -1,0 +1,13 @@
+{
+  "id": "tharushaperera16/graph-mode-sweep-dengue-gnn",
+  "title": "Graph mode sweep dengue GNN",
+  "code_file": "graph_mode_sweep_dengue_gnn.ipynb",
+  "language": "python",
+  "kernel_type": "notebook",
+  "is_private": true,
+  "enable_gpu": false,
+  "enable_internet": true,
+  "dataset_sources": [],
+  "competition_sources": [],
+  "kernel_sources": []
+}

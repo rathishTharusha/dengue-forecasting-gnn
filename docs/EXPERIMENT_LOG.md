@@ -19,6 +19,343 @@ Copy this block for a new entry:
 - **Notes:** anything surprising
 ```
 
+> **EXP-001 – EXP-014 ran on code that is no longer in the working tree.** The
+> Phase-2/3 implementation (`src/dengue_gnn/{experiment,models,losses,augment,
+> baselines,provenance,results_logger,mechanistic}.py`, `scripts/run_phase2.py`,
+> `scripts/run_phase3.py`, `notebooks/03_proposed.ipynb`,
+> `notebooks/04_kaggle_search.ipynb`) and its `results/phase*.csv` outputs were
+> removed once EXP-015 onward rebuilt on architectures verified against the
+> published papers. Every entry keeps its config and unrounded numbers inline, so
+> nothing here is uncitable — but to *re-run* any of those experiments, check out
+> the tag `phase23-archive`:
+>
+> ```bash
+> git checkout phase23-archive
+> ```
+>
+> The derived growth ceiling those experiments turned on (`MAX_WEEKLY_LOG_GROWTH`,
+> `CEILING_R0_MAX`) survived the cleanup and now lives in `dengue_gnn.seir`, still
+> asserted by `tests/test_seir.py` and reproduced by `scripts/verify_seir_paper.py`.
+
+## EXP-025 — Outbreak detection is tractable; the point forecast is provably not
+- **Date:** 2026-09-10
+- **Who:** Group 05
+- **Commit:** `5adb595` (working tree dirty; scripts committed alongside this entry)
+- **Scripts:** `analysis/_build/outbreak_signal.py`, `analysis/_build/response_diagnosis.py`
+- **Config:** No training for the ranking tests (ordinary least squares / logistic regression, rolling origin, thresholds fitted on training weeks only, contiguous blocks, never shuffled). The damping and response measurements train A3TGCN over 3 origins × 2 seeds × 150 epochs and capture held-out predictions. All figures artifact-free.
+- **Question:** EXP-024 closed off *anticipating* outbreaks through the mechanistic route. Two questions remained: is an outbreak **rankable** three weeks ahead even if it cannot be counted, and does the model **respond** to an outbreak already visible in its own input?
+
+### 1. Outbreak detection is tractable
+
+Outbreak = district-week above that district's training-set 90th percentile, anywhere in the 3-week horizon. Base rate 14.4% (5.8% to 25.0% across origins).
+
+| scorer | AUC | AvgPrec | lift vs base rate |
+|---|---|---|---|
+| current level / threshold | **0.807** | 0.598 | 4.16× |
+| level × growth | 0.793 | 0.548 | 3.82× |
+| neighbour pressure | 0.773 | 0.472 | 3.28× |
+| `R_hat` (renewal) | 0.611 | 0.206 | 1.43× |
+| recent growth | 0.580 | 0.189 | 1.32× |
+| temperature | 0.405 | 0.125 | 0.87× |
+| precipitation | 0.364 | 0.121 | 0.84× |
+
+Incremental value over the trivial baseline, logistic regression fitted on training weeks:
+
+| model | AUC | AvgPrec | ΔAUC |
+|---|---|---|---|
+| level only | 0.807 | 0.598 | — |
+| level + growth | 0.811 | 0.602 | +0.004 |
+| **level + `R_hat`** | **0.826** | **0.608** | **+0.019** |
+| level + neighbours | 0.813 | 0.581 | +0.006 |
+| level + `R_hat` + neighbours | 0.826 | 0.593 | +0.019 |
+| everything incl. climate | 0.820 | 0.595 | +0.013 |
+
+**`R_hat` is the largest single addition** — the first time in this project that the mechanistic quantity has measurably added anything. Climate makes the model worse, consistently with EXP-024.
+
+Around outbreak onset (305 onsets), mean `R_hat` runs 1.13–1.24 for the six weeks before the first week above threshold, against a global median of 0.911, then jumps to 3.109 at onset. Sustained `R > 1` is the textbook definition of a growing epidemic and it is visible before the outbreak is — a modest, noisy precursor, but a real and mechanistic one.
+
+### 2. The point forecast is flat, and that is optimal
+
+| | A3TGCN |
+|---|---|
+| slope of predicted log-growth on **true** log-growth | **0.002** |
+| slope of predicted log-growth on `log R_hat` | −0.007 |
+
+The network's growth predictions carry **no information about growth at all**. This is not under-reaction; it is persistence. And it is the correct answer under squared error: the target is a residual over persistence, lag-1 already explains r² = 0.85, and the conditional mean of what remains is approximately zero. **Flatness is what MSE is asking for**, which is why the asymmetric loss (EXP-021), the renewal penalty and the renewal decoder (EXP-023) all traded RMSE for responsiveness in the same direction.
+
+Response conditional on what the model can already see:
+
+| `R_hat` at forecast time | n | bias | RMSE | mean true growth |
+|---|---|---|---|---|
+| < 0.8 | 4220 | −1.91 | 22.65 | +0.060 |
+| 0.8–1.2 | 2802 | −0.09 | 30.87 | −0.036 |
+| 1.2–1.5 | 1160 | −2.44 | 37.84 | −0.033 |
+| 1.5–2.5 | 1330 | −2.29 | 39.21 | −0.062 |
+| ≥ 2.5 | 388 | +4.89 | 31.42 | −0.138 |
+
+**True growth is negative in every elevated-`R_hat` band.** High `R_hat` means last week spiked relative to recent history, and the following weeks revert.
+
+### 3. Why the renewal penalty had to fail
+
+| correlation of `log R_hat(t)` with | value |
+|---|---|
+| **past** 3-week log growth | **+0.722** |
+| **future** 3-week log growth | **−0.319** |
+| **\|future\|** 3-week log growth | −0.219 |
+
+`R_hat` is a backward-looking descriptor. Pushing a forecast toward `R_hat · force` pushes it the wrong way, which is exactly the monotonic damage EXP-023 measured. A physics-informed *variance* model fails for the same reason with the same sign: growth volatility is **highest** at low `R_hat` (sd 1.011) and lowest at high `R_hat` (sd 0.749).
+
+### 4. Two structural facts for future design
+
+Variance decomposition of `log R` (total variance 1.2919):
+
+| component | share |
+|---|---|
+| common weekly national factor | **33.5%** |
+| district fixed effect | 6.8% |
+| residual | 66.1% |
+
+The common weekly factor has lag-1 autocorrelation **0.590**, against 0.483 for district-level `log R`. Pooling across all 25 districts is therefore 25× the effective data for the component of `R` that is actually persistent.
+
+Spatial structure, Moran's I on the district graph: **log1p(cases) 0.274, log R 0.005.** `R` has essentially no *local* spatial structure — the apparent neighbour signal is a shared national component, not a graph effect. A Laplacian smoothness penalty on `R` is therefore not supported, and the retired `losses.smoothness_loss`, which penalised neighbouring differences in predicted **counts**, was penalising geography: counts differ by orders of magnitude across districts while `R` is scale-free.
+
+Outbreak episode counts, for any future generative work: **309 distinct episodes** across 25 districts, median length 1 week, **110 lasting ≥ 3 weeks**, 1117 district-weeks above threshold (9.7%).
+
+> **Correction, added while preparing the paper.** The lead/lag correlations and
+> the variance decomposition in sections 3 and 4 above were computed on a `log R`
+> series in which zero-case weeks were clipped to `log(1e-3)`. That clip is an
+> artefact of the floor, not a low reproduction number, and it inflates
+> `sd(log R)` from **0.749** to 1.137. The inflated value was then being paired
+> with an r² measured on the *other* subset (`cases > 0`, from `mechanistic_r.py`),
+> which made the derived multiplicative error wrong. Recomputed on the consistent
+> `(force >= 5) & (cases > 0)` subset by `analysis/_build/paper_measurements.py`:
+>
+> | quantity | as logged above | corrected |
+> |---|---|---|
+> | corr. `log R_hat` with past 3-week growth | +0.722 | **+0.798** |
+> | corr. with future 3-week growth | −0.319 | **−0.217** |
+> | corr. with \|future\| growth | −0.219 | **−0.106** |
+> | common weekly factor share | 33.5% | **44.0%** |
+> | district effect share | 6.8% | **3.0%** |
+> | weekly factor lag-1 autocorr | 0.590 | **0.670** |
+> | `sd(log R)` | — | **0.749** |
+>
+> Every qualitative conclusion is unchanged and two are strengthened: `R_hat` is
+> even more strongly a description of past growth, and the shared national
+> component is larger. The `sd = 0.749`, r² = 0.263 and 1.90× figures the paper
+> quotes are the corrected, mutually consistent set. Caught by the paper
+> notebook, which recomputes the arithmetic rather than restating it.
+
+- **Verdict:** answered. Detection is tractable (AUC 0.807, and 0.826 with the mechanistic quantity added); point forecasting is at its information limit and no loss term can move it without costing RMSE. The project's physics contribution is therefore state estimation and generative constraint, not point forecasting.
+- **Notes:** Two bugs were found and fixed while producing this. `cases[i-4:i]` with `i = 3` wraps to an empty slice and yields NaN, which ranked arbitrarily and showed up as a below-chance AUC of 0.324; and an unstandardised logistic regression did not converge on features of differing magnitude. Both were caught because a below-chance AUC from a *fitted* model is impossible and was treated as a bug rather than a finding.
+
+---
+
+## EXP-024 — Why the physics cannot help here: R is only 26% predictable
+- **Date:** 2026-09-10
+- **Who:** Group 05
+- **Commit:** `967b676` (working tree dirty; scripts committed alongside this entry)
+- **Scripts:** `analysis/_build/r_predictability.py`, `analysis/_build/mechanistic_r.py`
+- **Config:** No training. Ordinary least squares on `log R_t`, back-solved from observed cases through the SEIR-SEI generation-interval kernel, over the whole 459-week record. `mechanistic_r.py` scores **out-of-sample** on five contiguous time blocks, never shuffled.
+- **Question:** EXP-023 showed every causally available renewal anchor loses to persistence, which localises the entire problem in `R_t`. Is `R_t` predictable from anything — its own past, climate, susceptible depletion, or neighbours?
+- **Result:** `log R_t` is usable on 8040 of 11475 district-weeks (70%), `sd(log R) = 0.749`.
+
+  Out-of-sample r², contiguous time blocks (`analysis/results/mechanistic_r.json`):
+
+  | predictor of `log R_t` | r² |
+  |---|---|
+  | `log R_{t-1}` (own past) | **0.263** |
+  | climate, linear (4 channels) | −0.025 |
+  | climate + thermal curvature + T×rain + T×NDVI | −0.028 |
+  | susceptible depletion, 8wk trailing | −0.011 |
+  | susceptible depletion, 26wk trailing | −0.029 |
+  | susceptible depletion, 52wk trailing | −0.021 |
+  | all three depletion windows | −0.022 |
+  | own past + depletion | 0.263 |
+  | own past + depletion + thermal structure | 0.258 |
+
+  In-sample, for reference (`r_predictability.py`, `analysis/results/r_predictability.json`): own past 0.276, all ten covariates 0.008, covariates + own past 0.279, neighbours' **same-week** mean `log R` 0.322, neighbours' **lagged** mean `log R` 0.171.
+
+- **Two mechanisms tested, both taken from the cited papers, both inert:**
+
+  1. **Susceptible depletion** (`papers/09_SEIR_model.pdf`: `ds/dt = -beta*i*s`, so `R_eff = R0*s`). Adds exactly nothing on top of own past (0.263 → 0.263). The magnitude explains why:
+
+     | ascertainment | implied infections | % of 21.9M population | Δ`log R` from depletion |
+     |---|---|---|---|
+     | 1 in 1 | 504,722 | 2.3% | 0.023 |
+     | 1 in 5 | 2,523,610 | 11.5% | 0.122 |
+     | 1 in 10 | 5,047,220 | 23.0% | 0.262 |
+     | 1 in 20 | 10,094,440 | 46.1% | 0.618 |
+
+     Those are **cumulative over 8.8 years**, spread across 460 weeks. Weekly `sd(log R)` is 0.749. Even at 1-in-20 under-ascertainment the depletion drift is roughly 0.0013 per week against 0.749 of weekly variation — swamped by about 500×. Sri Lankan dengue is endemic with a susceptible pool that does not meaningfully deplete on a 3-week horizon.
+
+  2. **The R0 sensitivity structure** (Phaijoo & Gurung; indices reproduced in `dengue_gnn.seir` and validated in EXP-014: `b` +1.000, `mu_v` −0.818, `beta_h` +0.500, `beta_v` +0.500, `m` +0.500, `gamma_h` −0.500, `nu_v` +0.318). Biting rate and extrinsic incubation rate rise with temperature while mosquito survival falls past an optimum, so R0's thermal response is structurally **hump-shaped** and a linear fit must miss it. Allowing curvature and interaction moves r² from −0.025 to −0.028. The structure the model predicts is not present in these covariates.
+
+- **Verdict:** answered, negatively and with a mechanism. `sd(log R) = 0.749` at r² = 0.26 leaves a residual multiplicative error of **exp(0.64) = 1.90×** per step, compounding over the 3-week horizon. Persistence carries no such factor: cases at *t−1* explain r² = 0.85 of cases at *t* directly. **Reconstructing a forecast through `R` re-injects a factor-of-two error where persistence had none.** That single fact explains EXP-023's anchor table, EXP-023's decoder result, and — retrospectively — why EXP-004, EXP-005, EXP-008 and EXP-014 all failed to find a useful physics term.
+
+- **Notes:** The in-sample climate figure of +0.008 in `r_predictability.py` is **overfit**; out-of-sample it is −0.025. Cite the out-of-sample number. Neighbours' same-week `log R` (0.322) beats own past, but same-week neighbour data is not available at forecast time; the lagged version (0.171) is worse than own past. **No entomological temperature-response curves were invented** — neither paper supplies `b(T)` or `mu_v(T)`, and fabricating them is precisely the EXP-014 error. A published *Aedes aegypti* thermal-response curve (e.g. Mordecai et al. 2017) is the one remaining way to test the climate-to-R0 route honestly, and it is not in `papers/`.
+
+---
+
+## EXP-023 — Physics-informed renewal: soft penalty and mechanistic decoder
+- **Date:** 2026-09-10
+- **Who:** Group 05
+- **Commit:** `967b676` (working tree dirty; scripts committed alongside this entry)
+- **Scripts:** `analysis/_build/run_physics.py`, `analysis/lib/renewal.py`, `analysis/lib/physics.py`, `analysis/_build/renewal_feasibility.py`
+- **Config:** STGAT backbone, 3 origins × 3 seeds, 150 epochs, patience 30, window 3 → horizon 3. Arms: `base`, `penalty_λ` for λ in {0.1, 0.3, 1.0}, `decoder`. Generation-interval kernel from Phaijoo & Gurung section-4 stage durations via `dengue_gnn.seir`. Results in `analysis/results/physics_STGAT.json` and `renewal_feasibility.json`.
+- **Question:** EXP-014 retired the growth *ceiling* because it is slack against a model that under-reacts. Does a two-sided renewal constraint — one that can push a flat forecast *upward* — help, either as a soft penalty or as a structural decoder?
+- **Feasibility, before any training** (`renewal_feasibility.py`): generation interval mean **3.30 weeks** (weights 0.060 / 0.261 / 0.288 / 0.196 / 0.106 / 0.090 over lags 1–6). Back-solved `R_t` over 91% of the record: median 0.911, p75 1.411, p95 2.871, 44.2% above 1.0 — the endemic-around-threshold shape the epidemiology predicts. A 3-week replay with **oracle** `R_t` scores RMSE **13.44** where persistence scores 55.03 on the same windows. The equation describes this data well in hindsight.
+- **Result** (artifact-free unless stated; persistence floor 29.52):
+
+  | arm | RMSE (all) | RMSE_clean | max abs weekly log growth |
+  |---|---|---|---|
+  | `base` | 44.53 | **29.35** | 0.07 |
+  | `penalty_0.1` | 44.78 | 29.49 | 0.09 |
+  | `penalty_0.3` | 45.53 | 29.97 | 0.13 |
+  | `penalty_1.0` | 46.13 | 30.32 | 0.40 |
+  | `decoder` | 45.76 | 35.32 | **4.14** |
+
+  **The decoder does what it was built to do on the growth axis** — 4.14 against the baseline's 0.07, so the 17× under-reaction of EXP-021 is gone and the observed range (3.638) is reachable. It loses on RMSE anyway.
+
+  Causally available physics anchors, no network at all, artifact-free by origin:
+
+  | anchor | 0.55 | 0.70 | 0.85 | mean |
+  |---|---|---|---|---|
+  | persistence | 26.88 | 38.89 | 22.80 | **29.52** |
+  | `force` (R = 1) | 31.59 | 51.23 | 23.52 | 35.45 |
+  | `R_hat · force` | 38.60 | 69.60 | 41.83 | 50.01 |
+  | geometric blend with last week | 28.07 | 44.37 | 25.28 | 32.57 |
+  | ratio form, damp 0.5 | 28.34 | 41.16 | 29.67 | 33.05 |
+  | ratio form, damp 1.0 | 39.61 | 62.13 | 69.48 | 57.07 |
+  | ratio form, damp 1.5 | 124.19 | 189.10 | 653.06 | 322.12 |
+
+- **Verdict:** answered, negatively. The soft penalty degrades RMSE monotonically in λ while barely moving growth (0.07 → 0.40 at λ=1, still 10× short of the observed 3.638) — too weak to fix under-reaction and not free. The decoder fixes under-reaction and loses 6 RMSE, because **every causally available renewal anchor is worse than persistence**. The renewal kernel de-weights lag 1 to 0.060, which is epidemiologically correct — a case cannot infect anyone during the week it is reported — but throws away the strongest predictor available (lag-1 r = 0.92). The ratio form, which restores the lag-1 level anchor and takes only the momentum from the physics, is worse still and diverges when amplified: this series' momentum does not persist.
+- **Notes:** `R0 = 0.783` at the paper's section-4 parameters, below the epidemic threshold, so their absolute calibration is not Sri Lanka's. Only the stage durations are used for the kernel, never their `R0` — the generation interval is disease biology and transfers; transmission intensity is local and does not. `analysis/lib/renewal.py` is pinned by 12 tests in `tests/test_renewal.py`, including that the penalty is zero on a renewal-consistent forecast and that its gradient points *upward* when `R > 1`. Diagnosed further in EXP-024.
+
+---
+
+## EXP-022 — Adaptive graph, with the missing self-path restored
+- **Date:** 2026-09-10
+- **Who:** Group 05
+- **Commit:** `967b676` (working tree dirty; scripts committed alongside this entry)
+- **Script:** `analysis/lib/adaptive.py` (`STGNN.self_path`), 4 graph modes × 3 origins × 3 seeds, 60 epochs
+- **Question:** EXP-018 and EXP-020 both found the adaptive graph negative, and the E2 notebook put `none` (identity) ahead of the real district adjacency. Is that a fact about geography, or a defect in the implementation?
+- **Diagnosis:** propagation was `relu(A @ W h)` with no separate route for a node's own state. `none` and `fixed` both carry a diagonal — `fixed` is built with self-loops — so they keep it. `adaptive` is `softmax(ReLU(E1 E2ᵀ))`, which at small initialisation is close to **uniform over 25 districts**: an averaging matrix that erases the node's own signal exactly where lag-1 autocorrelation (r = 0.92) carries almost all the information. Graph WaveNet avoids this because its diffusion convolution includes a `k = 0` identity term.
+- **Result** (artifact-free, n = 9 per mode, 60 epochs):
+
+  | mode | `self_path=False` (as EXP-018 ran it) | `self_path=True` |
+  |---|---|---|
+  | `none` | 29.16 | 28.90 |
+  | `fixed` | 29.03 | 28.97 |
+  | `adaptive` | 29.29 | 29.16 |
+  | `hybrid` | **28.79** | **28.55** |
+
+- **Verdict:** partially answered; needs the full sweep. The self-path helps every mode by roughly 0.2–0.3 RMSE and removes the `none > fixed` ordering. **`hybrid` (0.5·fixed + 0.5·adaptive) is the best arm in both columns**, and `adaptive` alone remains the worst — the learned graph helps only when it *augments* the hand-built prior, never when it replaces it, which is exactly how Graph WaveNet uses it. At n = 9, 60 epochs and a 0.42 RMSE spread this is suggestive, not settled: 28.55 against the 29.52 floor is a 3.3% margin.
+- **Notes:** `self_path=False` reproduces the earlier numbers, so EXP-018 and EXP-020 remain reproducible. The self-transform is created unconditionally in every mode so all arms draw the same number of RNG samples at initialisation. Full Kaggle sweep at 150 epochs × 3 seeds × 5 architectures still outstanding.
+
+---
+
+## EXP-021 — Where the baseline error actually lives
+- **Date:** 2026-09-10
+- **Who:** Group 05
+- **Commit:** `967b676` (working tree dirty; scripts committed alongside this entry)
+- **Script:** `analysis/_build/diagnose_errors.py`
+- **Config:** A3TGCN and STGAT (the two arms that beat the floor artifact-free in EXP-019), 3 origins × 3 seeds, 150 epochs, held-out predictions captured. All figures artifact-free — including week 395 would diagnose a reporting backlog rather than the model. Results in `analysis/results/error_diagnosis.json`.
+- **Question:** A physics term can only help if it constrains a failure mode the model actually has. EXP-014 established that the growth ceiling was slack on the 8-origin protocol against a hand-rolled baseline. What is the failure mode on the current protocol, with verified architectures?
+- **Result:**
+
+  | | A3TGCN | STGAT |
+  |---|---|---|
+  | predicted abs weekly log growth, p99 | 0.334 | 0.186 |
+  | predicted abs weekly log growth, max | 0.336 | 0.242 |
+  | **observed** max | **3.638** | **3.638** |
+  | sd ratio, true / predicted | **7.70×** | **17.16×** |
+  | outbreak windows, share of data | 12.6% | 12.6% |
+  | outbreak windows, share of squared error | **61.7%** | **60.7%** |
+  | RMSE, outbreak / quiet | 66.44 / 19.83 | 66.65 / 20.31 |
+  | signed bias, outbreak / quiet | **−12.92** / +0.38 | **−7.32** / +0.67 |
+  | RMSE by horizon (h1 / h2 / h3) | 23.78 / 29.25 / 35.71 | 23.79 / 29.52 / 36.33 |
+
+  "Outbreak" means the target week is in the top decile of that district's own history, so the label is per-district and not dominated by Colombo's scale.
+
+- **Verdict:** answered. **The verified baselines are sophisticated persistence.** They cannot express an outbreak — predicted growth tops out 7–17× below observed — and they systematically under-forecast by 7–13 cases precisely where the error is concentrated. If outbreak windows were forecast as well as quiet ones, RMSE would fall from about 29 to about 20, roughly **30% below the persistence floor**. That is the headroom, and it is far larger than the 1.6% the EXP-019 table appears to offer.
+- **Follow-up that failed** (same protocol, A3TGCN and STGAT; κ is the under-prediction penalty multiplier): an asymmetric loss attacking the bias directly.
+
+  | arch | κ | RMSE_clean | outbreak bias |
+  |---|---|---|---|
+  | STGAT | 1.0 | **29.34** | −8.09 |
+  | STGAT | 2.0 | 30.32 | −3.90 |
+  | STGAT | 3.0 | 31.16 | −4.38 |
+  | STGAT | 5.0 | 31.32 | −3.79 |
+  | A3TGCN | 1.0 | **28.98** | −10.58 |
+  | A3TGCN | 2.0 | 30.32 | −2.52 |
+  | A3TGCN | 3.0 | 31.82 | +1.21 |
+  | A3TGCN | 5.0 | 32.74 | +1.67 |
+
+  It *fixes the bias* (−10.58 → +1.21) and *loses accuracy* (28.98 → 31.82), because the model cannot tell which windows are outbreaks and so inflates everywhere. **The problem is outbreak detection, not loss asymmetry.** That motivated EXP-023 and EXP-024, which asked whether the mechanistic model can supply the detection. It cannot.
+- **Notes:** This re-confirms EXP-014 on the current protocol and sharpens it — the derived ceiling of 2.3884 sits 7× above anything these models predict, so an upper bound on growth remains exactly zero gradient. Cross-reference: EXP-019's verdict names `probabilistic` "the strongest increment", but its paired tests are p = 0.785 (all windows) and p = 0.304 (artifact-free); the point-RMSE ranking there is within seed noise, and only the interval calibration (PICP 0.947–0.962) is a real result.
+
+---
+
+## EXP-020 — AAGCN adaptive-graph switch under reproduced baseline
+- **Date:** 2026-09-10
+- **Who:** Group 05
+- **Commit:** `967b676`
+- **Script:** `analysis/_build/run_reproduced_baseline.py`
+- **Config:** 5 reproduced architectures + AAGCN adaptive switch (`STGAT`, `A3TGCN`, `ASTGCN`, `DCRNN`, `AAGCN`, `AAGCN+adaptive`), 3 origins (0.55, 0.70, 0.85) x 3 seeds (0, 1, 2), 150 epochs, early stopping on validation RMSE. Window 3 -> Horizon 3, residual over persistence in log1p space. Output written to `analysis/results/reproduced_baseline.json` and `reproduced_baseline.csv`.
+- **Question:** Does enabling the adaptive adjacency in AAGCN (`AAGCN+adaptive`) improve performance over the fixed graph (`AAGCN`) under the frozen protocol across matched seeds and origins?
+- **Result:**
+  Floor: persistence RMSE 44.80 (clean: 29.52)
+
+  | arm | RMSE (all) | sd | RMSE_clean | clean_sd | MAE | n |
+  |---|---|---|---|---|---|---|
+  | persistence | 44.80 | 17.54 | 29.52 | 6.83 | 15.72 | 3 |
+  | STGAT | 44.53 | 17.30 | 29.35 | 6.74 | 15.65 | 9 |
+  | A3TGCN | 44.15 | 16.95 | 29.05 | 6.51 | 15.47 | 9 |
+  | ASTGCN | 42.37 | 12.85 | 29.68 | 7.14 | 15.41 | 9 |
+  | DCRNN | 46.06 | 16.03 | 31.14 | 8.34 | 16.07 | 9 |
+  | AAGCN | 41.07 | 10.03 | 29.99 | 7.47 | 15.03 | 9 |
+  | AAGCN+adaptive | 43.70 | 8.25 | 32.75 | 9.53 | 16.21 | 9 |
+
+- **Verdict:** Answered, clean negative on adaptive graph. Fixed `AAGCN` (41.07) outperforms `AAGCN+adaptive` (43.70) by 2.63 RMSE on all windows, and 29.99 vs 32.75 on artifact-free evaluation. Adaptive graph adds parameter variance without predictive gain.
+- **Notes:** Records are per `(arch, origin, seed)`; this runner aggregates over the 3-step forecast horizon and does not emit per-horizon rows.
+
+## EXP-019 — Improved architecture sweep across verified models
+- **Date:** 2026-09-10
+- **Who:** Group 05
+- **Commit:** `967b676`
+- **Kaggle Kernels / Script:** `reproduction/kaggle/kernels/improved-architecture-sweep-*` -> merged via `analysis/_build/merge_sweep.py`
+- **Config:** 5 increments (`base`, `per_horizon_heads`, `temporal_attention`, `huber`, `probabilistic`) across verified architectures on Kaggle CPU, 3 origins x 3 seeds, early stopping patience 30. Results in `analysis/results/improved_sweep.json` and `improved_sweep.csv`.
+- **Question:** Which increments measurably improve upon the base models under paired testing, evaluated both on all windows and artifact-free?
+- **Result:**
+  Floor: persistence RMSE 44.80 (clean: 29.52). All 5/5 architectures complete (STGAT, A3TGCN, ASTGCN, DCRNN, AAGCN):
+
+  Pooled RMSE, all windows:
+  | architecture | base | per_horizon_heads | temporal_attention | huber | probabilistic |
+  |---|---|---|---|---|---|
+  | STGAT | 44.53 | 44.30 | 44.57 | 44.65 | 43.94 |
+  | A3TGCN | 44.15 | 44.28 | 44.49 | 44.22 | 44.36 |
+  | ASTGCN | 43.44 | 43.81 | 43.31 | 43.20 | 42.69 |
+  | DCRNN | 47.35 | 47.34 | 47.33 | 46.86 | 47.37 |
+  | AAGCN | 40.99 | 43.68 | 41.15 | 41.33 | 41.44 |
+
+  Pooled RMSE, artifact-free:
+  | architecture | base | per_horizon_heads | temporal_attention | huber | probabilistic |
+  |---|---|---|---|---|---|
+  | STGAT | 29.35 | 29.18 | 29.39 | 29.52 | 29.12 |
+  | A3TGCN | 29.05 | 29.29 | 29.03 | 29.02 | 28.93 |
+  | ASTGCN | 29.77 | 29.93 | 30.02 | 29.44 | 29.89 |
+  | DCRNN | 31.30 | 32.50 | 32.19 | 32.02 | 32.99 |
+  | AAGCN | 29.84 | 31.04 | 29.90 | 29.95 | 29.77 |
+
+  Paired against base:
+  - `probabilistic`: mean dRMSE = -0.130 (all, 26/45 better) / +0.280 (clean, 28/45 better). Calibrated 95% intervals across all architectures (ASTGCN PICP=0.947, STGAT PICP=0.956, DCRNN PICP=0.952, AAGCN PICP=0.959).
+  - `huber`: mean dRMSE = -0.038 (all, 23/45 better) / +0.128 (clean, 21/45 better). ASTGCN+huber achieves 29.44 clean (beating floor); DCRNN+huber achieves 46.86 all (best DCRNN arm).
+  - `temporal_attention`: mean dRMSE = +0.078 (all, 21/45 better) / +0.245 (clean, 21/45 better, within seed noise).
+  - `per_horizon_heads`: mean dRMSE = +0.594 (all, 20/45 better) / +0.526 (clean, 18/45 better). Degrades stability on small sample sizes.
+- **Verdict:** `probabilistic` is the strongest increment (lowest RMSE on ASTGCN 42.69 and STGAT 43.94 + calibrated intervals); `huber` provides robust outlier resistance on clean evaluations and improves DCRNN to 46.86. `AAGCN` is the best overall architecture at 40.99.
+- **Notes:** Records are per `(arch, increment, origin, seed)`; does not emit per-horizon rows.
+
 ---
 
 ## EXP-018 - Adaptive graph re-tested under the frozen protocol: no improvement
@@ -64,8 +401,16 @@ Copy this block for a new entry:
   25 districts. F5 the 2017 outbreak is in test for Weng's segment 0.6 and train for
   the rest, explaining ASTGCN's +-19.85 MAE. F6 cases r2=0.85 at lag 1 vs best
   covariate r2=0.02. F7 the adjacency has two one-way edges; Jaffna has degree 1.
-  F8 neighbours r=0.62 vs non-neighbours r=0.55 (p=0.0002). F9 bimodal seasonality
+  F8 neighbours r=0.62 vs non-neighbours r=0.55 (p=0.0002). ~~F9 bimodal seasonality~~
   (2.9x) that no model is given a feature for.
+- **F9 RETRACTED 2026-09-10.** The 2.9x peak/trough came from averaging a
+  seasonal profile across years whose totals span 6.8x, so it measured the
+  timing of the 2017 outbreak rather than a recurring cycle. Sharper tests:
+  amplitude-normalised yearly shapes correlate at r=-0.065 (chance), 0/25
+  districts show a week-of-year effect at p<0.05, and week-of-year explains
+  R2=0.03 of national log-incidence against 0.86 from the previous week.
+  **EXP-012 reached the correct conclusion first** and is vindicated.
+  A week-of-year feature is not a cheap win and should not be prioritised.
 - **Verdict:** answered. The ceiling looks temporal, not architectural.
 - **Notes:** F6/F8 are *pooled linear* correlations and F3 attenuates them -- "the
   covariates are useless" is not established, only "no linear signal on this array
@@ -334,6 +679,9 @@ Copy this block for a new entry:
   4. **On that footing every model in their Table I loses to persistence**: STGAT
      44.78, ASTGCN 47.72, A3TGCN 58.52, RF 84.66, LSTM 131.36, ARIMA 189.22, all
      against persistence at 38.46. They do not report persistence.
+- **Corrected in EXP-015 (2026-09-10):** 38.46 is persistence on the held-out
+  test slices; Table I's Cross Validated column uses the training-inclusive
+  `full` loader, whose matching comparator is **34.67**. Conclusion unchanged.
   5. **The residual parameterisation is not a ceiling.** Ablation on folds 1/4/6,
      seed 0, with the temporal encoder: residual+log **85.32**; absolute+log
      187.57; absolute without log 70,318. ADR-0001 stands -- removing the residual

@@ -29,6 +29,7 @@ NOTEBOOK_GLOBS = (
     "crosscheck/notebooks/**/*.ipynb",
     "reproduction/kaggle/kernels/**/*.ipynb",
     "analysis/notebooks/**/*.ipynb",
+    "paper/**/*.ipynb",
 )
 
 

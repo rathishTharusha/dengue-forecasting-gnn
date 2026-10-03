@@ -44,7 +44,7 @@ Edit `cells_*.py`, never the `.ipynb`.
 | F6 | cases r²=0.85 at lag 1; best covariate r²=0.02 | Persistence is strong by construction |
 | F7 | The adjacency has two one-way edges; Jaffna has degree 1 | A hand-built graph carrying defects a learned one would not |
 | F8 | Neighbours r=0.62 vs non-neighbours r=0.55 (p=0.0002) | The graph is real but weak — argues for a learned adjacency |
-| F9 | Bimodal seasonality, 2.9× peak/trough, no seasonal feature anywhere | A 3-week window cannot represent a 52-week cycle |
+| ~~F9~~ | **RETRACTED** — there is no usable annual cycle | Shape r=−0.065 (chance), 0/25 districts significant, R²=0.03 vs 0.86 from last week. EXP-012 had this right. |
 
 ### What caps accuracy
 

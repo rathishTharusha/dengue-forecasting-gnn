@@ -33,7 +33,7 @@ EDA question, and this notebook answers it with five findings:
 | F5 | The 2017 outbreak lands in **test** for one CV fold and **train** for the other four |
 | F7 | The hand-built adjacency has two one-way edges; Jaffna has degree 1 |
 | F8 | Neighbours correlate at 0.62, non-neighbours at 0.55 — the graph adds only +0.07 |
-| F9 | Seasonality is bimodal (2.9x), and no model is given a seasonal feature |
+| F9 | **RETRACTED.** There is no usable annual cycle -- see the corrected section |
 
 and one measurement that frames everything else: the covariates carry almost no
 linear signal, while the target's own history carries a great deal.
@@ -601,15 +601,76 @@ plt.tight_layout(); plt.show()
     ),
     md(
         """
-The profile is **bimodal** — a large peak around weeks 11–14 and a second around
-week 31 — with a ~2.9× peak-to-trough ratio. Two monsoon-driven transmission
-seasons rather than one.
+The mean profile looks bimodal, with a ~2.9x peak-to-trough ratio. **An earlier
+version of this notebook read that as evidence of a seasonal cycle and
+recommended adding a week-of-year feature. That was wrong, and the cell below is
+the retraction.**
 
-None of the five reproduced GNNs is given any seasonal encoding: with
-`use_disease_only=True` and a 3-week window, the model sees three consecutive
-case counts and nothing that tells it where in the year it is. A 3-week window
-cannot represent a 52-week cycle. That is a concrete, cheap gap — a
-week-of-year feature costs nothing and is not in any model here.
+The mean profile is not evidence of a *recurring* cycle when annual amplitude is
+non-stationary. Annual totals here range over 6.8x, so the mean profile is
+dominated by whichever weeks the largest outbreaks happened to occupy — it
+measures the timing of 2017, not a cycle that repeats.
+
+`docs/EXPERIMENT_LOG.md` EXP-012 reached the correct conclusion independently
+("no annual cycle") from a near-zero lag-52 autocorrelation. Three sharper tests
+below agree with it.
+"""
+    ),
+    code(
+        """
+from scipy import stats
+
+years = T // 52
+Y = np.array([national[y * 52 : (y + 1) * 52] for y in range(years)])
+print(f"{years} complete years; annual totals {Y.sum(1).round(0)}")
+print(f"  max/min annual total = {Y.sum(1).max() / Y.sum(1).min():.1f}x  <- amplitude is non-stationary")
+
+# 1. Does the seasonal SHAPE repeat, once amplitude is removed?
+L = np.log1p(Y)
+L = L - L.mean(1, keepdims=True)
+pairs = [np.corrcoef(L[i], L[j])[0, 1] for i in range(years) for j in range(i + 1, years)]
+print(f"\\n"
+      f"1. de-meaned log yearly shapes: mean pairwise r = {np.mean(pairs):+.3f} "
+      f"({sum(1 for r in pairs if r > 0)}/{len(pairs)} positive) -- chance")
+
+# 2. Does week-of-year explain anything within a district?
+woy = np.arange(T) % 52
+significant = 0
+for i in range(D):
+    x = np.log1p(cases[:, i])
+    x = (x - x.mean()) / (x.std() + 1e-9)
+    _, pval = stats.kruskal(*[x[woy == w] for w in range(52)])
+    significant += pval < 0.05
+print(f"2. districts with a week-of-year effect at p<0.05: {significant}/{D} "
+      f"(expect ~1 by chance)")
+
+# 3. How much variance does it explain, against the obvious alternative?
+x = np.log1p(national)
+prof = np.array([x[woy == w].mean() for w in range(52)])
+ss_tot = ((x - x.mean()) ** 2).sum()
+ss_woy = sum(((prof[w] - x.mean()) ** 2) * np.sum(woy == w) for w in range(52))
+print(f"3. R^2 from week-of-year alone: {ss_woy / ss_tot:.3f}")
+print(f"   R^2 from last week alone   : {np.corrcoef(x[:-1], x[1:])[0, 1] ** 2:.3f}")
+"""
+    ),
+    md(
+        """
+### F9, corrected
+
+**There is no usable annual cycle in this dataset.** The seasonal shape does not
+repeat once amplitude is normalised (mean pairwise r = -0.065, at chance);
+**zero of 25 districts** show a week-of-year effect at p < 0.05, where one would
+be expected by chance alone; and week-of-year explains **R^2 = 0.03** of national
+log-incidence against **0.86** from the previous week.
+
+A week-of-year feature is therefore *not* the cheap win the earlier version of
+this notebook claimed. It should not be prioritised.
+
+**Why the first analysis went wrong, since the mistake is instructive.** Averaging
+a seasonal profile across years assumes the years are comparable. With annual
+totals spanning 6.8x they are not, and the mean profile inherits the shape of the
+largest year rather than the shape common to all of them. The peak/trough ratio of
+a mean profile is not a test of seasonality; the tests above are.
 """
     ),
     md("## Verdict, and what it implies for the contributions"),
@@ -632,8 +693,8 @@ findings = [
      "hand-built graph carries defects a learned graph would not inherit"),
     ("F8", "neighbour r=0.62 vs non-neighbour r=0.55 (p=0.0002)",
      "graph is real but weak; argues for a learned adjacency"),
-    ("F9", "bimodal seasonality, 2.9x peak/trough, no seasonal feature in any model",
-     "a 3-week window cannot represent a 52-week cycle"),
+    ("F9", "RETRACTED: no usable annual cycle (shape r=-0.065, 0/25 districts, R2=0.03)",
+     "a week-of-year feature is NOT a cheap win; EXP-012 had this right"),
 ]
 import csv as _csv
 with open(RESULTS / "eda_findings.csv", "w", newline="", encoding="utf-8") as fh:

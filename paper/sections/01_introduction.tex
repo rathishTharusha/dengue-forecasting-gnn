@@ -1,72 +1,63 @@
 %=============================================================================
-% INTRODUCTION — BUDGET: 370 words  (MEASURED. See docs/PHASE2_PLAN.md §5.)
-% The ENTIRE body of this paper is ~1,500 words. Write tight from sentence one.
-%
-% DRAFT v1 — 372 words. Within budget.
-%
-% Structure follows the lecture slides: by the end the reader must know what the
-% problem is, why it matters, why it is hard, what is wrong with prior work, what
-% we do, and what we contribute.
-%
-% TODO(writer): wrap your own paragraphs in \cA{..}..\cF{..} for the highlighted
-% build, and add \credit{} where the implementer differs from the writer.
+% INTRODUCTION
 %=============================================================================
 \section{Introduction}
 \label{sec:intro}
 
-% --- (a)+(b) Problem and why it matters -- 75 words ------------------------
-Dengue is the fastest-spreading mosquito-borne viral disease in the world, and Sri
-Lanka carries a heavy and growing burden: the 2017 epidemic alone produced more
-than 186{,}000 reported cases and 440 deaths~\cite{tissera2020severe}. Because
-roughly three weeks separate infection from diagnosis, district-level forecasts
-issued several weeks ahead are directly actionable. They give the National Dengue
-Control Unit and regional health teams time to pre-position resources, intensify
-larval-source reduction, and issue warnings before an outbreak peaks.
+\cA{Dengue is the fastest-spreading mosquito-borne viral disease globally, and Sri
+Lanka faces recurring severe epidemics: the 2017 outbreak alone recorded over
+186{,}000 cases and 440 deaths~\cite{tissera2020severe}. Roughly three weeks
+separate infection from clinical diagnosis, so district-level forecasts issued
+$H=3$ weeks ahead carry actionable lead time for pre-positioning clinical capacity
+and intensifying vector control.}
 
-% --- (c) Why it is hard -- 80 words ---------------------------------------
-Three difficulties make this forecasting task hard. Transmission is spatially
-coupled: incidence in one district depends both on its own climatic and
-epidemiological history and on infection spilling in from neighbours through human
-movement, which non-spatial models cannot represent. The data are scarce --- 25
-districts of weekly counts over roughly a decade, against the 207 nodes of a
-standard traffic benchmark --- so deep models overfit readily. Finally, the target
-is heavy-tailed, with a median of 13 weekly cases against a maximum of 2{,}631.
+\cB{Three properties of this task shape everything that follows. Transmission is
+spatially coupled, which motivates a graph. The panel is small---25 districts over
+459 weeks, against the hundreds of nodes typical in traffic benchmarks---so
+parameters are cheap to overfit. And the target is severely heavy-tailed
+(skewness 8.6; the top 1\% of district-weeks hold 18.3\% of all cases), which
+makes squared error a measurement of a few dozen windows.}
 
-% --- (d) What is wrong with prior work -- 85 words. THE KEY PARAGRAPH. -----
-% This paragraph is the paper's motivation and it comes from the predecessor's own
-% admission. See docs/PHASE2_PLAN.md §1.1. Paraphrased, not quoted -- the lecture
-% slides note that scientific writing rarely uses direct quotation.
-Graph neural networks address the first difficulty, and Weng et
-al.~\cite{weng2024graph} show that they outperform traditional early-warning
-systems on this exact dataset. The same work, however, reports that its forecasts
-in one district are driven by neighbouring districts even where no transmission
-occurred, producing spurious spikes that the authors attribute to an inherent
-limitation of graph models. Nothing in a purely data-driven objective prevents
-this: the network is never told that its forecasts must correspond to a
-physically realisable epidemic.
+\cC{A fourth property is easy to miss and dominates the rest: weekly incidence is
+strongly autocorrelated. Cases at $t-1$ explain $r^2=0.85$ of cases at $t$. Any
+model is therefore competing against a naive persistence forecast
+$\hat{y}_{t+h}=y_t$ that is already close to optimal, and a benchmark that omits
+that baseline cannot tell whether its architecture contributed anything. Weng
+et al.~\cite{weng2024graph}, the reference benchmark for this dataset, omit it.}
 
-% --- (e) Our approach in brief -- 66 words --------------------------------
-We present \modelname, which attacks the first of these directly. Connectivity is
-learned from the series themselves rather than fixed by inter-district distance,
-then blended with the geographic graph under a learned gate so the model can fall
-back on geography where the data does not support departing from it. We evaluate
-under leakage-free rolling-origin cross-validation~\cite{hyndman2021forecasting}
-against a matched fixed-graph control and against naive persistence. We also test
-whether spatial smoothness regularisation curbs the spurious-spike failure mode.
+\cD{We set out to add three contributions to an ST-GNN baseline---a learned
+adaptive graph, a physics-informed loss derived from an SEIR--SEI compartmental
+model, and GAN augmentation. Establishing what the baseline actually was turned
+out to be the harder and more informative problem, and this paper reports that.
+We reproduce the published results exactly, re-evaluate them honestly, identify a
+data artifact that distorts the evaluation, and then test the mechanistic prior to
+destruction---reporting not only that it fails but the quantity that makes failure
+inevitable.}
 
-% --- (f) Contributions -- 78 words. One line each. -------------------------
-% Two of these are negative results. That is deliberate: the lecture slides note
-% that a paper's contribution is what it establishes, not what it hoped for.
 \noindent\textbf{Contributions.}
-\begin{itemize}
-  \item We benchmark against a naive persistence forecast --- a comparison absent
-        from prior work on this dataset --- and find that no graph configuration
-        we tested clears it.
-  \item We learn district connectivity end-to-end without assuming a mobility law,
-        and isolate its effect against a control sharing the same propagation
-        operator.
-  \item We report that spatial smoothness regularisation degrades accuracy at
-        every weight tested, and that its non-negativity term cannot bind at all.
-  \item We show that peak-timing displacement, not error magnitude, is where these
-        models fall furthest short of a naive baseline.
+\begin{itemize}\itemsep2pt
+  \item \textbf{Exact reproduction, and what it reveals.} We reproduce five
+        published ST-GNNs to within 7.3\% across twenty comparisons, two to four
+        decimal places, and show that the reported column is computed with
+        training data included and averaged per window rather than pooled. Naive
+        persistence beats every model in it (\S\ref{sec:repro}).
+  \item \textbf{An artifact-aware protocol.} We identify a 19$\times$ reporting
+        backlog at week~395 spanning 18 of 25 districts. It falls in one fold's
+        test split and no training split, contributes $\sim$90\% of that fold's
+        squared error, and inverts fold difficulty. We score every arm and the
+        baseline with and without it (\S\ref{sec:setup}).
+  \item \textbf{A null result, stated as one.} Five verified architectures and
+        four evidence-led increments, over 3 origins $\times$ 3 seeds. Against the
+        artifact-free floor of 29.52, no increment differs from its own baseline
+        at $p<0.05$ (\S\ref{sec:results}).
+  \item \textbf{Why the mechanistic prior cannot help.} A renewal equation seeded
+        by a validated SEIR--SEI generation interval reconstructs the record given
+        oracle $R_t$ but loses as a forecaster. We trace this to a single
+        measurement---$R_t$ is 26\% predictable, implying a 1.90$\times$ error per
+        step---and rule out the two mechanisms that could have supplied the
+        missing predictability (\S\ref{sec:physics}).
+  \item \textbf{The target that is tractable.} Outbreaks are rankable three weeks
+        ahead (AUC 0.826) even though they are not countable, and the mechanistic
+        quantity is the largest single contributor to that ranking
+        (\S\ref{sec:detection}).
 \end{itemize}

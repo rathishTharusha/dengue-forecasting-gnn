@@ -19,10 +19,10 @@ changed the plan, and both are documented here with the evidence.
 | 1 | GCN/GAT baseline, rolling-origin CV | ✅ Done — matches the persistence floor |
 | **R** | **Exact reproduction of the source papers** | ✅ **Done — see below** |
 | **E** | **Dataset EDA and cap analysis** | ✅ **Done — 9 findings** |
-| 2 | Adaptive graph | ⚠️ **Tested — no improvement.** See [`analysis/`](analysis/) |
-| 3 | Physics-informed SEIR–SEI loss | ☐ Re-aimed by the EDA |
-| 4 | GAN augmentation | ☐ Blocked on data cleaning (see F3/F4) |
-| 5 | Full stacked ablation + write-up | ☐ |
+| 2 | Adaptive graph | ⚠️ **Tested.** Pure adaptive does not help; `hybrid` is ahead at n=9 and a full sweep is built but not yet run |
+| 3 | Physics-informed SEIR–SEI loss | ⚠️ **Tested — negative, with a measured mechanism.** See below |
+| 4 | GAN augmentation | ☐ Re-aimed: physics as a *generative* constraint, where R only has to be plausible |
+| 5 | Full stacked ablation + write-up | ☐ In progress |
 
 ---
 
@@ -83,6 +83,54 @@ A genuine negative result, reported as one.
 
 ---
 
+### 5. The physics cannot help the point forecast — and we can say why
+
+The project's promised contribution was a physics-informed loss from the SEIR–SEI
+model. It was built, tested six ways, and does not work. The reason is a number:
+
+| | |
+|---|---|
+| `R_t` predictability, out of sample | **26%** — from its own past, and nothing else |
+| implied error per step | **1.90×** multiplicative, compounding over 3 weeks |
+| persistence, for comparison | cases at *t−1* explain **r² = 0.85** directly |
+
+Routing a forecast through `R` re-injects a factor-of-two error where persistence
+had none. Climate explains **−0.03** of `log R` even with the hump-shaped thermal
+response R₀'s own sensitivity indices imply; susceptible depletion is ~**500×**
+too slow to register on a 3-week horizon in an endemic population of 21.9M.
+
+The deeper finding is that the point forecast is at its information limit. The
+slope of predicted log-growth on true log-growth is **0.002** — the models are
+persistence, and under squared error that is *correct*, because the conditional
+mean of a near-unpredictable residual is zero.
+
+### 6. Outbreaks are detectable even though they are not countable
+
+| model | AUC, 3 weeks ahead |
+|---|---|
+| current level ÷ district threshold | 0.807 |
+| **+ `R̂` (the renewal quantity)** | **0.826** |
+| + climate | 0.820 (worse) |
+
+`R̂` is the largest single addition — the first time the mechanistic quantity has
+measurably helped. Sustained `R > 1` is visible for ~6 weeks before an outbreak
+crosses the threshold. This is where the physics belongs.
+
+---
+
+## New to this project? Start with the handbook
+
+[`docs/handbook/`](docs/handbook/00_START_HERE.md) is a complete twelve-chapter
+course on this project — the disease, the mathematics, the machine learning, the
+code, and every decision behind them. It assumes you can read Python and nothing
+else, and builds up epidemiology, graph neural networks and forecasting
+evaluation from first principles.
+
+It is written so that you could delete this repository and rebuild it from
+scratch using only official library documentation.
+
+---
+
 ## Quick start
 
 ```bash
@@ -127,10 +175,36 @@ the exact error that forces it.
 ### Verify our own code
 
 ```bash
-pytest                       # project tests
+pytest                       # project tests, incl. 12 tests pinning the renewal physics
 cd crosscheck && pytest      # independent reimplementation, incl. cross-agreement test
 python tools/check_notebooks.py
+python scripts/verify_seir_paper.py   # SEIR-SEI vs Phaijoo & Gurung Table 1
 ```
+
+### Re-run the analyses behind the recent findings
+
+**Need torch only** (`pip install torch --index-url https://download.pytorch.org/whl/cpu`).
+These train nothing and finish in seconds:
+
+```bash
+python analysis/_build/renewal_feasibility.py       # renewal equation vs the data (EXP-023)
+python analysis/_build/r_predictability.py          # is R predictable at all (EXP-024)
+python analysis/_build/mechanistic_r.py             # depletion + thermal structure (EXP-024)
+python analysis/_build/outbreak_signal.py           # outbreak detectability (EXP-025)
+```
+
+**Need the full pinned stack** — torch 2.1.2 / PyG 2.4.0 / torch-geometric-temporal
+0.54.0, built by `python reproduction/verify_local.py --env-only`. These train, so
+budget minutes to tens of minutes:
+
+```bash
+python analysis/_build/run_reproduced_baseline.py   # the five verified architectures
+python analysis/_build/diagnose_errors.py           # where the error lives (EXP-021)
+python analysis/_build/response_diagnosis.py        # damping and response (EXP-025)
+python analysis/_build/run_physics.py --quick       # the physics arms (EXP-023)
+```
+
+Each writes a JSON under `analysis/results/` and prints its table.
 
 ---
 
@@ -140,17 +214,26 @@ python tools/check_notebooks.py
 .
 ├── notebooks/            Phase-1 baseline + Weng et al. reproduction notebooks
 │   └── baseline/         the tracked data files live here
-├── src/dengue_gnn/       shared library: metrics, models, losses, SEIR, augmentation
-├── scripts/              phase runners, table builders, Kaggle staging
+├── src/dengue_gnn/       torch-free shared library: metrics, SEIR, data loader
+├── scripts/              verify_seir_paper.py — SEIR reproduction against the paper
 ├── paper/                the write-up, by section
 │
 ├── reproduction/         run the AUTHORS' code to get the AUTHORS' numbers
 ├── crosscheck/           an independent reimplementation — is our code right?
 ├── analysis/             EDA, cap analysis, and contribution experiments
 │
-├── docs/                 setup, data, roadmap, experiment log, ADRs
-├── results/              committed metric tables
-└── tests/                unit tests for src/
+├── docs/                 setup, data, roadmap, experiment log, ADRs, handbook
+├── results/              index + the SEIR validation table
+└── tests/                unit tests for src/ and the renewal physics
+```
+
+The Phase-2/3 implementation that backed EXP-001 – EXP-014 was removed once the
+work moved to architectures verified against the published papers. It is at tag
+**`phase23-archive`**; every one of those log entries keeps its config and
+unrounded numbers inline, so they stay citable without it.
+
+```bash
+git checkout phase23-archive     # to re-run any of EXP-001..014
 ```
 
 ### Why three separate workspaces

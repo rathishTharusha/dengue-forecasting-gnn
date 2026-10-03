@@ -21,8 +21,10 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
-from dengue_gnn.mechanistic import CEILING_R0_MAX, MAX_WEEKLY_LOG_GROWTH
+
 from dengue_gnn.seir import (
+    CEILING_R0_MAX,
+    MAX_WEEKLY_LOG_GROWTH,
     PAPER_SECTION4,
     Params,
     growth_rate,
@@ -139,14 +141,11 @@ def test_ceiling_admits_the_growth_actually_present_in_the_record():
     growth rates. This asserts the replacement is not making that mistake again;
     it is a property of the constant, checked against real data.
     """
-    from dengue_gnn.experiment import load_dataset
+    from dengue_gnn.data import load_cases
 
     repo = Path(__file__).resolve().parent.parent
-    raw = load_dataset(
-        str(repo / "notebooks" / "baseline" / "sri_lanka_2013-2022_shifted.npy"),
-        str(repo / "notebooks" / "baseline" / "sri_lanka_adj_list.json"),
-    )[0]
-    g = np.abs(np.diff(np.log1p(np.clip(raw[:, :, 5], 0, None)), axis=0))
+    cases = load_cases(repo / "notebooks" / "baseline" / "sri_lanka_2013-2022_shifted.npy")
+    g = np.abs(np.diff(np.log1p(np.clip(cases, 0, None)), axis=0))
 
     assert (g > 0.70).mean() > 0.15, "the old constant should still look bad"
     assert (g > MAX_WEEKLY_LOG_GROWTH).mean() < 0.03

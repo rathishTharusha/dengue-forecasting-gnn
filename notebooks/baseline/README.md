@@ -3,14 +3,16 @@
 Everything needed to run the **GCN/GAT baseline** for the CS3631 project.
 
 ## Files
-- `dengue_baseline_GNN.ipynb` — the notebook (run top-to-bottom in Colab).
+- `dengue_baseline_GNN_v2.ipynb` — the notebook (run top-to-bottom in Colab).
+  v1 was kept for provenance only and was removed in the Phase-2/3 cleanup;
+  it is at tag `phase23-archive` if you need it.
 - `sri_lanka_2013-2022_shifted.npy` — data array `(459 weeks, 25 districts, 11 features)`. Target = weekly cases at feature index 5.
 - `sri_lanka_adj_list.json` — district adjacency (25 nodes) used to build the graph.
 
 ## Setup (2 minutes)
 1. Create a folder in Google Drive, e.g. `MyDrive/dengue_baseline/`.
 2. Upload **both** data files (`.npy` and `.json`) into that folder.
-3. Open `dengue_baseline_GNN.ipynb` in Google Colab.
+3. Open `dengue_baseline_GNN_v2.ipynb` in Google Colab.
 4. In **Cell 2**, keep `USE_DRIVE = True` and set
    `DATA_DIR = "/content/drive/MyDrive/dengue_baseline"` to match your folder.
    *(Or set `USE_DRIVE = False` to auto-download the two files from GitHub instead — no Drive needed.)*

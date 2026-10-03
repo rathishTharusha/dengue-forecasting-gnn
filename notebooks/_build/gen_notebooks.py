@@ -63,9 +63,7 @@ if __name__ == "__main__":
     import _cells_00
     import _cells_01
     import _cells_02
-    import _cells_04
 
     write_nb("00_data_setup_eda.ipynb", _cells_00.CELLS)
     write_nb("01_baselines_classical.ipynb", _cells_01.CELLS)
     write_nb("02_baselines_gnn.ipynb", _cells_02.CELLS)
-    write_nb("04_kaggle_search.ipynb", _cells_04.CELLS)

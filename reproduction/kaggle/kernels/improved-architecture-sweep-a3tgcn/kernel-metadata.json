@@ -1,0 +1,13 @@
+{
+  "id": "tharushaperera16/improved-architecture-sweep-a3tgcn",
+  "title": "Improved architecture sweep A3TGCN",
+  "code_file": "improved_architecture_sweep_a3tgcn.ipynb",
+  "language": "python",
+  "kernel_type": "notebook",
+  "is_private": true,
+  "enable_gpu": false,
+  "enable_internet": true,
+  "dataset_sources": [],
+  "competition_sources": [],
+  "kernel_sources": []
+}

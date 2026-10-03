@@ -1,21 +1,29 @@
 %=============================================================================
-% ABSTRACT — 149 words.
-%
-% Structure: problem, what we did, significance WITH NUMBERS.
-% No citations, no equations. Rewritten for Phase 3 against
-% results/phase3_final.csv and results/stage3_search.csv.
+% ABSTRACT
 %=============================================================================
 \begin{abstract}
-Spatio-temporal graph neural networks are the default choice for district-level
-epidemic forecasting, but on small graphs their advantage is rarely tested against
-naive baselines. We benchmark them on Sri Lankan dengue --- 25 districts, 459
-weeks --- under leakage-free rolling-origin cross-validation with eight disjoint
-origins, and report three findings. First, no graph configuration we tested beats
-a persistence forecast; the best is statistically indistinguishable from it and
-the rest are significantly worse. Second, a learned adaptive adjacency appears to
-help at 24 paired runs and does not replicate at 64, while a gated temporal
-convolution improves RMSE from 61.8 to 56.8 and a constraint derived from the
-generation interval improves it further, both at $p<0.001$. Third, a conditional
-GAN for data augmentation is significantly worse than jittering. Peak-timing error
-exposes a gap that squared error conceals.
+Spatio-temporal graph neural networks (ST-GNNs) are widely applied to
+district-level epidemic forecasting, yet their advantage over naive temporal
+baselines is rarely verified under a leak-free protocol. We reproduce five
+published ST-GNNs on Sri Lanka's national dengue record (25 districts, 459 weeks)
+to within 7.3\% across twenty comparisons, and find that the reported gains are
+measured with training data included; naive persistence beats every model in the
+column the source paper reports. Re-evaluating under rolling-origin
+cross-validation, we identify an administrative reporting backlog at week~395 that
+occupies one fold's test split and carries $\sim$90\% of its squared error,
+inverting which fold appears hardest. Scoring every arm with and without those
+windows, the persistence floor moves from RMSE 44.80 to 29.52, and the
+best-looking architecture's 3.8-point lead disappears. Against the artifact-free
+floor no architecture and none of four evidence-led increments differ from their
+own baseline at $p<0.05$. We then test the mechanistic prior the task invites: a
+renewal equation whose generation interval is derived from a validated SEIR--SEI
+model. It reconstructs the record almost exactly given oracle $R_t$ (RMSE 13.44)
+and fails as a forecaster, because $R_t$ is only 26\% predictable out of sample,
+so routing a forecast through it re-injects a 1.90$\times$ multiplicative error
+where persistence carries none. The ceiling is informational rather than
+architectural: the models' predicted growth carries no information about realised
+growth (regression slope 0.002), and under squared error that is optimal. The
+mechanistic quantity is nonetheless the single largest contributor to a different
+and tractable target---ranking which districts will exceed an alert threshold
+three weeks ahead (AUC $0.807 \rightarrow 0.826$).
 \end{abstract}

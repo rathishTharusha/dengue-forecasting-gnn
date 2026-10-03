@@ -1,0 +1,13 @@
+weeks_in_year,figure,provisional
+2013,Census 2012 count (DCS district reports),False
+2014,Census 2012 count (DCS district reports),False
+2015,DCS mid-year estimate 2014,False
+2016,DCS mid-year estimate 2015,False
+2017,DCS mid-year estimate 2016,False
+2018,DCS mid-year estimate 2017,False
+2019,DCS mid-year estimate 2018,True
+2020,DCS mid-year estimate 2019,True
+2021,DCS mid-year estimate 2020,True
+2022,DCS mid-year estimate 2021,True
+2023,DCS mid-year estimate 2022,True
+2024,DCS mid-year estimate 2023,True

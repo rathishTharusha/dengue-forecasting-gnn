@@ -1,0 +1,15 @@
+{
+ "id": "tharushaperera16/dengue-physics-gnn-reproduction",
+ "title": "dengue physics gnn reproduction",
+ "code_file": "dengue_physics_gnn.ipynb",
+ "language": "python",
+ "kernel_type": "notebook",
+ "is_private": true,
+ "enable_gpu": false,
+ "enable_internet": false,
+ "dataset_sources": [
+  "tharushaperera16/dengue-physics-gnn-sources"
+ ],
+ "competition_sources": [],
+ "kernel_sources": []
+}

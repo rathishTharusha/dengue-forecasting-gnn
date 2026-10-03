@@ -182,9 +182,23 @@ def impute_missing(
     return filled, was_missing
 
 
+class MisalignedCovariatesError(ValueError):
+    """Raised when the processed array's climate channels are requested."""
+
+
 def load_multivariate(npy_path: str | Path, adj_path: str | Path, features="cases",
-                      with_missing_indicator: bool = True):
+                      with_missing_indicator: bool = True, allow_misaligned: bool = False):
     """Load the array as ``(weeks, districts, k)`` plus the graph.
+
+    .. warning::
+       **Do not use the climate channels of the processed array for modelling.**
+       ``docs/ARRAY_AUDIT.md`` shows they sit on a different timeline from the
+       case column (findings 2 and 6), and that channels 6-10 -- documented as
+       lagged -- hold values from 12-17 weeks in the **future** (finding 7). Any
+       feature set beyond ``cases`` therefore raises, unless
+       ``allow_misaligned=True`` is passed to reproduce an old result on purpose.
+       Use the dated covariates in ``data/corrected/`` through
+       ``corrected_data.py`` instead.
 
     Args:
         npy_path: The processed ``.npy``.
@@ -192,6 +206,7 @@ def load_multivariate(npy_path: str | Path, adj_path: str | Path, features="case
         features: A key of :data:`FEATURE_SETS` or an explicit index tuple.
         with_missing_indicator: Append one indicator channel per imputed GLDAS
             channel that actually had a gap.
+        allow_misaligned: Reproduction only. Permits the misaligned channels.
 
     Returns:
         ``(cases, stack, adjacency, names)`` where ``cases`` is
@@ -200,6 +215,12 @@ def load_multivariate(npy_path: str | Path, adj_path: str | Path, features="case
         first. Nothing here is normalised; the folds do that from training weeks
         only.
     """
+    if resolve_set(features) != (CASES_INDEX,) and not allow_misaligned:
+        raise MisalignedCovariatesError(
+            "the processed array's climate channels are misaligned with its cases and "
+            "channels 6-10 carry future values (docs/ARRAY_AUDIT.md, findings 2, 6, 7); "
+            "use data/corrected/ via corrected_data.py, or pass allow_misaligned=True "
+            "only to reproduce an old result")
     raw = np.nan_to_num(np.load(Path(npy_path), allow_pickle=True)).astype(np.float64)
 
     # The graph is built first because imputation needs it: one district is

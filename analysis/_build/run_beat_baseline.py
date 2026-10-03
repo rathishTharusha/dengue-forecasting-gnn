@@ -441,6 +441,8 @@ def run_fold(arch_name, fold, cases, edge_index, seeds, head, epochs, in_width=W
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--dataset", choices=("original", "reordered", "rebuilt"), default="original",
+                    help="Dataset version to evaluate (original, reordered, rebuilt).")
     ap.add_argument("--arch", nargs="*", default=["A3TGCN"])
     ap.add_argument("--n-origins", type=int, default=9)
     ap.add_argument("--origin-lo", type=float, default=0.50)
@@ -467,7 +469,12 @@ def main() -> int:
     n_origins = 2 if args.quick else args.n_origins
 
     origins, test_frac = make_origins(n_origins, args.origin_lo, args.origin_hi)
-    if args.features == "cases":
+    if args.dataset != "original":
+        import run_corrected_benchmark as rcb
+        cases, adjacency, artifact, missing = rcb.load(args.dataset)
+        folds = rcb.build_folds_masked(cases, missing)
+        in_width, chan_names = WINDOW, ["cases"]
+    elif args.features == "cases":
         cases, adjacency, _ = base.load_dataset(NPY, ADJ)
         folds = base.build_folds(cases, WINDOW, HORIZON, origins=origins, test_frac=test_frac)
         in_width, chan_names = WINDOW, ["cases"]

@@ -1,0 +1,223 @@
+58 source files verified (SHA-256) in /kaggle/input/datasets/tharushaperera16/dengue-physics-gnn-sources
+  graph/sri_lanka_adj_list.json                                   2,250 B  <- https://raw.githubusercontent.com/MLOpenSourceOpenScience/disease_modeling_MLOS2
+  graph/gadm41_LKA_1.json                                       185,199 B  <- https://raw.githubusercontent.com/MLOpenSourceOpenScience/disease_modeling_MLOS2
+  graph/disease_config.json                                         613 B  <- https://raw.githubusercontent.com/MLOpenSourceOpenScience/disease_modeling_MLOS2
+  benchmark/sri_lanka_2013-2022_shifted.npy                   1,009,928 B  <- https://raw.githubusercontent.com/MLOpenSourceOpenScience/disease_modeling_MLOS2
+  cases/output_Dengue Fever.csv                               3,524,434 B  <- received from the benchmark authors (no public URL)
+  cases/vol_48_no_02-english_1.pdf                            1,174,084 B  <- https://web.archive.org/web/20260627214326id_/https://www.epid.gov.lk/storage/po
+  population/Mid-year_population_by_district_and_sex_2024.pdf    452,438 B  <- https://www.statistics.gov.lk/Resource/en/Population/Vital_Statistics/Mid-year_p
+  wheels/pymupdf-1.28.2-cp310-abi3-manylinux_2_28_x86_64.whl 25,762,500 B  <- https://pypi.org/project/PyMuPDF/1.28.2/
+  + 25 Census 2012 district PDFs and 25 ERA5 district responses
+  files whose hash equals the one recorded at first retrieval: 27
+PyMuPDF 1.28.2
+source table: 14,931 rows -> 552 reports x 25 districts
+Consider using the pymupdf_layout package for a greatly improved page layout analysis.
+row A (printed 'cases this week'): districts sum 7,165, national cell 35, 15/24 cells = sum of the two before
+row B (year to date = week 1):     districts + Kalmunai = 351 = national 351
+rebuilt series: 559 weeks, 2013-W26 .. 2024-W10, 7 weeks with no report (left missing)
+integrity: districts + Kalmunai equal the Unit's own national total in 432 of 552 reports
+climate: (559, 25, 6) (weeks, districts, variables) from 25 daily ERA5 series
+population: census 2012 sums to 20,359,439; mid-year estimates 2014-2024; each week uses an earlier year's figure
+graph: 25 districts, 116 directed edges plus self-loops, 4 one-way entries
+origin 0.55: train 252, val 30, test 83 windows; test weeks 2019-05-04 .. 2020-11-28
+origin 0.7: train 335, val 30, test 75 windows; test weeks 2020-12-05 .. 2022-07-02
+origin 0.85: train 410, val 30, test 77 windows; test weeks 2022-07-09 .. 2024-02-03
+benchmark array: (459, 25, 11) (rows, districts, channels)
+rows matched exactly to a published report: 454 of 459; unmatched rows: [48, 49, 50, 54, 434]
+identical consecutive rows (one week stored twice): [444]
+rows 0-47 are dated 2022-12-24 .. 2023-11-18; rows 51 onward run 2013-05-15 .. 2022-03-26
+reports inside the array's 2013-2022 span that never reached it: 48
+  benchmark fold 0.55: 45 rows from 2023 in TRAINING; test rows dated 2018-03 .. 2019-07
+  benchmark fold 0.7: 45 rows from 2023 in TRAINING; test rows dated 2019-07 .. 2020-10
+  benchmark fold 0.85: 45 rows from 2023 in TRAINING; test rows dated 2020-11 .. 2022-03
+array temperature vs ERA5: best at climate row 0 = 2013-05-19 (r = 0.951); on the dates the CASE rows carry, r = 0.445
+'lag 12' precipitation channel vs ERA5 rain later by k weeks: best at k = +12 (r = 0.681); at the documented k = -12, r = 0.186
+array row 395: districts sum 7,165 (printed row A 7,165); the corrected week sums to 349
+persistence on the array (mean over the 3 origins): 44.80 over all test windows, 29.52 without the windows touching row 395
+        targets below the lambda=0 floor (%)  cells needing lambda = 0 (%)  r2 of log lambda* on log cases[t-1]  r2 of log cases[t] on log cases[t-1]  S at its 0.01 clamp (%)
+origin                                                                                                                                                                        
+0.55                                  14.344                        40.270                                0.216                                 0.806                    0.698
+0.70                                  13.994                        39.439                                0.254                                 0.824                    2.496
+0.85                                  16.306                        41.112                                0.259                                 0.824                    4.859
+69 configurations x 3 origins x 3 seeds + 7 x 9 x 3  =  810 training runs
+0 runs already on disk, 810 to train with 4 worker(s)
+  25/810 runs    21.2 min elapsed, ~ 666.0 min left
+  50/810 runs    58.4 min elapsed, ~ 887.8 min left
+  75/810 runs    68.0 min elapsed, ~ 666.6 min left
+  100/810 runs    75.8 min elapsed, ~ 538.0 min left
+  125/810 runs    84.8 min elapsed, ~ 464.9 min left
+  150/810 runs    92.3 min elapsed, ~ 406.2 min left
+  175/810 runs   103.1 min elapsed, ~ 374.1 min left
+  200/810 runs   106.6 min elapsed, ~ 325.1 min left
+  225/810 runs   111.2 min elapsed, ~ 289.1 min left
+  250/810 runs   113.3 min elapsed, ~ 253.8 min left
+  275/810 runs   115.9 min elapsed, ~ 225.4 min left
+  300/810 runs   120.6 min elapsed, ~ 205.0 min left
+  325/810 runs   126.0 min elapsed, ~ 188.0 min left
+  350/810 runs   127.7 min elapsed, ~ 167.8 min left
+  375/810 runs   129.9 min elapsed, ~ 150.6 min left
+  400/810 runs   130.7 min elapsed, ~ 134.0 min left
+  425/810 runs   132.5 min elapsed, ~ 120.0 min left
+  450/810 runs   138.3 min elapsed, ~ 110.6 min left
+  475/810 runs   140.1 min elapsed, ~  98.8 min left
+  500/810 runs   141.7 min elapsed, ~  87.9 min left
+  525/810 runs   143.8 min elapsed, ~  78.1 min left
+  550/810 runs   144.7 min elapsed, ~  68.4 min left
+  575/810 runs   146.4 min elapsed, ~  59.8 min left
+  600/810 runs   147.9 min elapsed, ~  51.8 min left
+  625/810 runs   149.4 min elapsed, ~  44.2 min left
+  650/810 runs   150.8 min elapsed, ~  37.1 min left
+  675/810 runs   154.6 min elapsed, ~  30.9 min left
+  700/810 runs   157.1 min elapsed, ~  24.7 min left
+  725/810 runs   162.2 min elapsed, ~  19.0 min left
+  750/810 runs   166.3 min elapsed, ~  13.3 min left
+  775/810 runs   171.3 min elapsed, ~   7.7 min left
+  800/810 runs   175.9 min elapsed, ~   2.2 min left
+  810/810 runs   180.1 min elapsed, ~   0.0 min left
+training finished: 810 runs in 3.00 h this session
+cases(t-1) -> cases(t): r2 = 0.889;  best climate variable (lags 2-8): r2 = 0.029
+persistence, three origins: val 17.86  test 36.02
+persistence, nine origins:  val 41.21  test 31.76
+mean validation / test RMSE; persistence 17.86 / 36.02
+               direct   SEIR decoder     gated SEIR
+AAGCN   16.71 / 35.15  24.01 / 49.54  17.43 / 35.58
+ASTGCN  16.83 / 35.61  24.21 / 51.75  17.51 / 35.71
+LSTM    16.91 / 35.10  24.32 / 50.26  17.69 / 35.52
+STGAT   22.93 / 62.00  25.53 / 52.37  17.63 / 35.84
+A3TGCN  28.63 / 60.40  25.55 / 52.92  17.68 / 35.50
+DCRNN   34.64 / 73.52  25.75 / 52.26  17.67 / 35.52
+each SEIR head against the same encoder's direct head:
+encoder    head  val delta val wins     p  test delta test wins
+  AAGCN     foi      7.297      0/9 0.004      14.391       0/9
+  AAGCN foi_res      0.722      4/9 0.109       0.434       2/9
+ ASTGCN     foi      7.382      0/9 0.004      16.145       0/9
+ ASTGCN foi_res      0.682      2/9 0.020       0.103       4/9
+   LSTM     foi      7.413      0/9 0.004      15.166       0/9
+   LSTM foi_res      0.779      0/9 0.004       0.424       2/9
+  STGAT     foi      2.596      6/9 0.250      -9.623       8/9
+  STGAT foi_res     -5.299      9/9 0.004     -26.158       9/9
+ A3TGCN     foi     -3.084      6/9 0.035      -7.481       9/9
+ A3TGCN foi_res    -10.952      9/9 0.004     -24.898       9/9
+  DCRNN     foi     -8.884      9/9 0.004     -21.264       9/9
+  DCRNN foi_res    -16.965      9/9 0.004     -38.006       9/9
+        direct  residual  gated  foi_res
+AAGCN   16.709    16.718 16.568   17.431
+ASTGCN  16.826    16.852 16.758   17.508
+LSTM    16.906    16.955 16.940   17.685
+STGAT   22.932    17.848 16.977   17.633
+A3TGCN  28.630    17.474 17.682   17.679
+DCRNN   34.637    17.521 18.352   17.672
+encoder  SEIR - gated (val) wins     p  SEIR - gated (test) test wins  share of repair from anchor+gate  p_adj
+  AAGCN               0.863  1/9 0.008                2.050       0/9                            -0.196    NaN
+ ASTGCN               0.750  0/9 0.004                0.954       3/9                            -0.099    NaN
+   LSTM               0.746  0/9 0.004               -0.326       6/9                             0.043    NaN
+  STGAT               0.656  1/9 0.008               -0.619       8/9                             1.124  0.023
+ A3TGCN              -0.003  6/9 0.984               -1.655       9/9                             1.000  0.984
+  DCRNN              -0.680  3/9 0.250               -3.502       9/9                             0.960  0.375
+encoders whose repair is credited to the SEIR simulator: none
+             group                                     lever  val delta wins     p  test delta  p_adj  consistent gain
+            worked          NB likelihood (vs squared error)     -0.763  9/9 0.004       1.608  0.014             True
+            worked                         seasonal features     -0.759  6/9 0.105       0.699  0.185            False
+            worked               best model B vs persistence     -2.346  9/9 0.004       1.527  0.014             True
+graph/architecture         graph (GCN vs no message passing)     -0.062  3/9 0.422      -0.072  0.501            False
+graph/architecture                         learned adjacency     -0.145  5/9 0.102      -0.334  0.185            False
+graph/architecture                  district seasonal curves     -0.052  6/9 0.676       0.111  0.757            False
+graph/architecture                      nonlinear (MLP) head      0.278  1/9 0.012      -0.310  0.027            False
+graph/architecture              MLP head + climate lags 2-13      0.135  3/9 0.379      -0.698  0.482            False
+graph/architecture                       global context node      0.022  3/9 0.844      -1.396  0.844            False
+graph/architecture                        residual head + NB      0.465  2/9 0.137      -2.956  0.207            False
+graph/architecture             combined architecture changes      0.553  2/9 0.039       0.595  0.078            False
+ literature remedy                                     RevIN      1.466  0/9 0.004      -0.420  0.014            False
+ literature remedy               district identity embedding      0.186  3/9 0.156       0.980  0.219            False
+ literature remedy                            STID-style MLP      0.843  0/9 0.004      -1.216  0.014            False
+ literature remedy                       NB-GLM (no network)      1.459  0/9 0.004       5.306  0.014            False
+ literature remedy               k-NN analogues (no network)      1.005  0/9 0.004      -3.200  0.014            False
+ literature remedy                ensemble B + NB-GLM + k-NN      0.065  4/9 0.430      -1.793  0.501            False
+              data                 half the training windows      0.392  2/9 0.023       0.467  0.050            False
+              data                      TimeGAN augmentation      0.600  0/9 0.004       0.519  0.014            False
+              data               SEIR-simulated pre-training      0.027  6/9 0.793       0.919  0.822            False
+              data                         climate, lags 2-4      0.183  2/9 0.121       0.507  0.199            False
+              data                        climate, lags 2-13      0.185  2/9 0.227      -0.048  0.302            False
+              data                        climate, lags 2-25      0.473  0/9 0.004      -0.472  0.014            False
+           physics                    SEIR as auxiliary loss      0.017  4/9 0.754      -0.325  0.812            False
+           physics SEIR simulator vs no-physics twin (AAGCN)      0.863  1/9 0.008       2.050  0.020            False
+           physics                   spatial physics penalty     -0.060  6/9 0.141      -0.021  0.207            False
+           physics         metapopulation vs gated SEIR head      0.200  1/9 0.008       0.041  0.020            False
+           physics               gated SEIR-GNN vs SEIR-LSTM     -0.140  8/9 0.008       0.021  0.020             True
+trees gain from climate: -0.539 (6/9, p 0.031)
+learning curve 25% vs 100%: +0.249 (3/9, p 0.195)
+learning curve 75% vs 100%: +0.108 (3/9, p 0.180)
+                                      comparison        unit  val delta val wins  val p  test delta test wins  test p
+                     B vs persistence, 3 origins origin_seed     -2.346      9/9  0.004       1.527       3/9   0.230
+                     B vs persistence, 9 origins      origin     -2.578      8/9  0.105       2.239       4/9   0.293
+ gated SEIR-GNN (ASTGCN) vs SEIR-LSTM, 3 origins origin_seed     -0.535      9/9  0.004       0.136       5/9   0.594
+  gated SEIR-GNN (AAGCN) vs SEIR-LSTM, 3 origins origin_seed     -0.140      8/9  0.008       0.021       5/9   0.855
+           AAGCN vs LSTM, direct head, 3 origins origin_seed     -0.273      6/9  0.082       1.957       1/9   0.012
+ gated SEIR-GNN (ASTGCN) vs SEIR-LSTM, 9 origins      origin     -0.618      8/9  0.012       0.067       6/9   0.883
+  gated SEIR-GNN (AAGCN) vs SEIR-LSTM, 9 origins      origin      0.183      6/9  0.797      -0.303       5/9   0.078
+ metapopulation SEIR-GNN vs SEIR-LSTM, 9 origins      origin      0.487      4/9  0.398      -0.010       4/9   0.961
+           AAGCN vs LSTM, direct head, 9 origins      origin     -0.720      6/9  0.516      -0.877       5/9   0.820
+gated SEIR-GNN (AAGCN) vs persistence, 9 origins      origin     -1.982      8/9  0.137      -0.590       6/9   0.680
+           AAGCN  ASTGCN  LSTM  STGAT  A3TGCN  SEIR-LSTM  k-NN
+AAGCN      1.000   0.959 0.972  0.657   0.582      0.913 0.912
+ASTGCN     0.959   1.000 0.969  0.655   0.557      0.920 0.912
+LSTM       0.972   0.969 1.000  0.609   0.529      0.925 0.932
+STGAT      0.657   0.655 0.609  1.000   0.555      0.595 0.579
+A3TGCN     0.582   0.557 0.529  0.555   1.000      0.621 0.470
+SEIR-LSTM  0.913   0.920 0.925  0.595   0.621      1.000 0.925
+k-NN       0.912   0.912 0.932  0.579   0.470      0.925 1.000
+             bias on rising weeks  bias on falling weeks  share of squared error in the top 5% of cells
+model                                                                                                  
+AAGCN                     -11.464                 10.131                                          0.593
+ASTGCN                    -11.494                 10.616                                          0.614
+LSTM                      -11.457                 11.079                                          0.618
+STGAT                      -5.708                 11.448                                          0.542
+A3TGCN                     -6.361                 10.949                                          0.587
+SEIR-LSTM                 -12.810                 11.613                                          0.673
+k-NN                      -11.566                 13.033                                          0.635
+persistence               -14.661                 13.708                                          0.654
+AAGCN       0.066
+ASTGCN      0.032
+LSTM        0.063
+STGAT       0.479
+A3TGCN      0.604
+SEIR-LSTM   0.063
+largest weekly count: TimeGAN samples 2,036, real training windows 2,631
+P1 spatial penalty                       vs B                            -0.060  6/9  p 0.1406
+P2 spatial penalty (log)                 vs B                            +0.079  2/9  p 0.0391
+P4 metapopulation SEIR                   vs AAGCN+foi_res, NB+season     +0.200  1/9  p 0.0078
+P5 metapopulation + penalty + season     vs AAGCN+foi_res, NB+season     +0.063  5/9  p 0.2383
+Moran's I on the district graph, mean over weeks: log cases 0.287, weekly log growth -0.029
+              family  configs  rank corr (val, test)        picked by validation  its test             best on test  best test  persistence test
+    encoders x heads       30                  0.873                 AAGCN+gated    33.531              AAGCN+gated     33.531            36.016
+              screen        4                 -0.200                 feat=season    35.200           graph=adaptive     34.167            36.016
+likelihood and heads        7                 -0.893                           B    37.543  LSTM+foi_res, NB+season     34.966            36.016
+        architecture        7                 -0.107 A2 district seasonal curves    37.654         A1 residual head     34.587            36.016
+            remedies        8                 -0.071                           B    37.543                 R4b k-NN     34.343            36.016
+                data       12                 -0.175                           B    37.543         B, squared error     35.935            36.016
+             physics        7                 -0.679          P1 spatial penalty    37.522  LSTM+foi_res, NB+season     34.966            36.016
+        nine origins        7                  0.214   ASTGCN+foi_res, NB+season    31.542 AAGCN+foi_res, NB+season     31.172            31.762
+families where validation's pick is worse than persistence on test: 5 of 8
+families whose best-on-test configuration is anchored to last week: 6 of 8
+SUMMARY
+  data: 559 weeks rebuilt from 58 verified source files; lag-1 r2 0.89, best climate r2 0.03
+  benchmark array: persistence 44.80 (all windows) / 29.52 (without row 395); 2023 rows inside every training split
+  persistence (3 origins): val 17.86, test 36.02
+  best model B: val 15.51, test 37.54
+  NB likelihood: -0.76 (9/9)
+  SEIR repair credited to physics: none
+  gated SEIR-GNN vs SEIR-LSTM, 9 origins: val +0.18, test -0.30
+  finished in 3.01 h; outputs in /kaggle/working/outputs
+/usr/local/lib/python3.12/dist-packages/mistune.py:435: SyntaxWarning: invalid escape sequence '\|'
+  cells[i][c] = re.sub('\\\\\|', '|', cell)
+/usr/local/lib/python3.12/dist-packages/nbconvert/filters/filter_links.py:36: SyntaxWarning: invalid escape sequence '\_'
+  text = re.sub(r'_', '\_', text) # Escape underscores in display text
+[NbConvertApp] Converting notebook __notebook__.ipynb to notebook
+[NbConvertApp] Writing 550927 bytes to __notebook__.ipynb
+[NbConvertApp] Converting notebook __notebook__.ipynb to html
+[NbConvertApp] Support files will be in __results___files/
+[NbConvertApp] Making directory __results___files
+[NbConvertApp] Making directory __results___files
+[NbConvertApp] Making directory __results___files
+[NbConvertApp] Making directory __results___files
+[NbConvertApp] Writing 1061896 bytes to __results__.html

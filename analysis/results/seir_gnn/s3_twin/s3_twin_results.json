@@ -1,0 +1,16 @@
+{
+  "F-win": {
+    "r_lambda": -0.06010236638467624,
+    "rmse_cases": 266.98516845703125,
+    "noise_floor_rmse": 17.5810489654541,
+    "noise_ratio": 15.185963532758711,
+    "gate_g3_pass": false
+  },
+  "F-seq": {
+    "r_lambda": -0.01804500712049081,
+    "rmse_cases": 297.1662292480469,
+    "noise_floor_rmse": 17.5810489654541,
+    "noise_ratio": 16.902644991886657,
+    "gate_g3_pass": false
+  }
+}

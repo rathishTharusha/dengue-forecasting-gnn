@@ -1,0 +1,48 @@
+{
+  "s_star": {
+    "arch": "STGAT",
+    "input_level": "cases+era5+ndvi",
+    "coupling": "implicit",
+    "head_type": "direct",
+    "val_RMSE": 25.084056430392796,
+    "test_RMSE": 68.3427022298177
+  },
+  "b_star_test_RMSE": 34.837,
+  "persistence_test_RMSE": 36.016,
+  "seir_lstm_test_RMSE": 62.608,
+  "family_hypothesis_tests": [
+    {
+      "test_name": "S* vs B* (ASTGCN base)",
+      "raw_p_value": 0.5,
+      "bh_adjusted_p_value": 0.83333,
+      "significant_at_0.05": false
+    },
+    {
+      "test_name": "S* vs Persistence",
+      "raw_p_value": 0.5,
+      "bh_adjusted_p_value": 0.83333,
+      "significant_at_0.05": false
+    },
+    {
+      "test_name": "S* vs Direct Control",
+      "raw_p_value": 1.0,
+      "bh_adjusted_p_value": 1.0,
+      "significant_at_0.05": false
+    },
+    {
+      "test_name": "S* vs SEIR-LSTM",
+      "raw_p_value": 1.0,
+      "bh_adjusted_p_value": 1.0,
+      "significant_at_0.05": false
+    },
+    {
+      "test_name": "Early-Warning AUC of S* vs B*",
+      "raw_p_value": 0.04,
+      "bh_adjusted_p_value": 0.2,
+      "significant_at_0.05": false
+    }
+  ],
+  "wins_on_origins": "1/9",
+  "beats_baseline_claim_satisfied": false,
+  "summary": "Confirmatory hypothesis testing complete under R1-R10 rules."
+}

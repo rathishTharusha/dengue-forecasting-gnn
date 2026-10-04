@@ -46,9 +46,31 @@ import backbones  # noqa: E402
 import seir_sim  # noqa: E402
 
 HEADS = ("direct", "residual", "gated", "foi", "foi_res", "foi_meta")
-BACKBONES = ("none", "gcn", "gat", "adaptive", "hybrid", "linear", *backbones.REAL)
-LAM_PARAMS = ("sigmoid", "log")
+#: ``gat`` is a literal alias of ``gcn`` kept so old result files still load; it is
+#: not an attention model. ``uniform`` is a fixed 1/N matrix: the control that says
+#: whether a learned graph beats plain mean pooling over all districts.
+BACKBONES = ("none", "gcn", "gat", "adaptive", "hybrid", "uniform", "linear", *backbones.REAL)
+TOY_BACKBONES = ("none", "gcn", "gat", "adaptive", "hybrid", "uniform")
+#: How the force of infection is formed from the head output ``raw``.
+#: ``sigmoid`` / ``log`` -- a free per-capita rate with one global scale; the net
+#: has to produce the ``-log(pop * S)`` offset per district without seeing either.
+#: ``anchor`` -- ``lambda_persist * exp(raw)``, where ``lambda_persist`` is the rate
+#: that sustains last week's reported count, so ``raw = 0`` is about persistence
+#: and the scale comes from the data rather than the network.
+#: ``mass`` -- ``beta * I / N`` recomputed every day (Liu et al. 2025 write
+#: ``lambda ~ a b h A I / N``); the encoder predicts ``beta``, which needs no
+#: per-district scale. Same simulator as ``foi_meta`` without the coupling.
+LAM_PARAMS = ("sigmoid", "log", "anchor", "mass")
 SEEDS = ("lagged", "recent", "decon")
+#: ``state_fit``: ``False``; ``True`` (one global E0 multiplier); ``"encoder"`` (a
+#: multiplier per district-window from the encoding, so the lambda = 0 floor can
+#: follow the series instead of sitting on the stalest week).
+STATE_FITS = (False, True, "encoder")
+#: Adaptive-graph initialisation. ``small`` is the original (std 0.05, 16 dims),
+#: under which softmax(ReLU(E1 E2^T)) is uniform to four decimals at the start.
+#: ``gwn`` follows Graph WaveNet: randn embeddings of 10 dimensions.
+ADJ_INITS = ("small", "gwn")
+GWN_EMB = 10
 
 #: Output distribution. ``point`` trains a squared error on log1p and scores
 #: counts, which is biased low by construction: for ``log(1+y) = m + e``,
@@ -75,33 +97,55 @@ LOG_LAMBDA_MAX = -1.95  # log(1/7), the original bound, kept as a hard clamp
 META_LOG_BETA0 = -0.69  # log(0.5/day): the foi_meta transmission-rate centre at initialisation
 
 
+def adaptive_embeddings(n_nodes: int, adj_init: str = "small",
+                        emb: int = 16) -> tuple[nn.Parameter, nn.Parameter]:
+    """``(E1, E2)`` for the Graph WaveNet adjacency, drawn E1 first."""
+    if adj_init == "gwn":
+        return (nn.Parameter(torch.randn(n_nodes, GWN_EMB)),
+                nn.Parameter(torch.randn(n_nodes, GWN_EMB)))
+    return (nn.Parameter(torch.randn(n_nodes, emb) * 0.05),
+            nn.Parameter(torch.randn(n_nodes, emb) * 0.05))
+
+
+def learned_adjacency(e1: torch.Tensor, e2: torch.Tensor) -> torch.Tensor:
+    """Graph WaveNet's self-adaptive adjacency ``softmax(ReLU(E1 E2^T))``, rows sum to 1."""
+    return torch.softmax(torch.relu(e1 @ e2.T), dim=-1)
+
+
 class GraphLayer(nn.Module):
     """One message-passing step over a chosen adjacency.
 
-    ``none`` is the control -- 25 independent series. ``adaptive`` is the Graph
-    WaveNet construction ``softmax(ReLU(E1 E2^T))``; ``hybrid`` averages it with
-    the hand-built district graph, which is how Graph WaveNet actually uses it.
-    The node embeddings are allocated in every mode so the arms consume
-    identical RNG draws and differ only by the graph.
+    ``none`` is the control -- 25 independent series; ``uniform`` mean-pools all
+    districts. ``adaptive`` is the Graph WaveNet construction
+    ``softmax(ReLU(E1 E2^T))``. ``hybrid`` is a simplification: a 0.5/0.5 average
+    of the learned and border graphs through one shared weight. Graph WaveNet
+    instead sums a separate diffusion term per adjacency, each with its own
+    weights, over K = 2 hops. The node embeddings are allocated in every mode so
+    the arms consume identical RNG draws and differ only by the graph; when the
+    network shares one adaptive matrix across layers it passes it in as ``learned``.
     """
 
-    def __init__(self, dim: int, n_nodes: int, mode: str, emb: int = 16):
+    def __init__(self, dim: int, n_nodes: int, mode: str, emb: int = 16,
+                 adj_init: str = "small"):
         super().__init__()
         self.mode = mode
         self.lin = nn.Linear(dim, dim)
-        self.e1 = nn.Parameter(torch.randn(n_nodes, emb) * 0.05)
-        self.e2 = nn.Parameter(torch.randn(n_nodes, emb) * 0.05)
+        self.e1, self.e2 = adaptive_embeddings(n_nodes, adj_init, emb)
 
-    def adjacency(self, fixed: torch.Tensor) -> torch.Tensor:
+    def adjacency(self, fixed: torch.Tensor, learned: torch.Tensor | None = None) -> torch.Tensor:
         if self.mode == "none":
             return torch.eye(fixed.shape[0], device=fixed.device, dtype=fixed.dtype)
+        if self.mode == "uniform":
+            return torch.full_like(fixed, 1.0 / fixed.shape[0])
         if self.mode == "gcn" or self.mode == "gat":
             return fixed
-        learned = torch.softmax(torch.relu(self.e1 @ self.e2.T), dim=-1)
+        if learned is None:
+            learned = learned_adjacency(self.e1, self.e2)
         return learned if self.mode == "adaptive" else 0.5 * fixed + 0.5 * learned
 
-    def forward(self, h: torch.Tensor, fixed: torch.Tensor) -> torch.Tensor:
-        return torch.relu(self.lin(self.adjacency(fixed) @ h))
+    def forward(self, h: torch.Tensor, fixed: torch.Tensor,
+                learned: torch.Tensor | None = None) -> torch.Tensor:
+        return torch.relu(self.lin(self.adjacency(fixed, learned) @ h))
 
 
 class Net(nn.Module):
@@ -147,10 +191,20 @@ class Net(nn.Module):
                  window: int = 3, edge_index: torch.Tensor | None = None,
                  dist: str = "point", norm: str = "fold", node_emb: int = 0,
                  aux_phys: float = 0.0, head_mlp: int = 0, dseason: bool = False,
-                 global_ctx: bool = False):
+                 global_ctx: bool = False, adj_init: str = "small", adj_shared: bool = False):
         super().__init__()
         if norm not in NORMS:
             raise ValueError(f"unknown norm {norm!r}; expected one of {NORMS}")
+        if lam_param not in LAM_PARAMS:
+            raise ValueError(f"unknown lam_param {lam_param!r}; expected one of {LAM_PARAMS}")
+        if state_fit not in STATE_FITS:
+            raise ValueError(f"unknown state_fit {state_fit!r}; expected one of {STATE_FITS}")
+        if adj_init not in ADJ_INITS:
+            raise ValueError(f"unknown adj_init {adj_init!r}; expected one of {ADJ_INITS}")
+        if adj_shared and backbone not in TOY_BACKBONES:
+            raise ValueError("adj_shared applies to the toy graph backbones only")
+        if lam_param == "mass" and head == "foi_meta":
+            raise ValueError("foi_meta is already mass-action; lam_param='mass' is for foi/foi_res")
         if (norm != "fold" or aux_phys) and head != "direct":
             raise ValueError("norm and aux_phys are defined for the direct head only")
         if (head_mlp or global_ctx) and head not in ("direct", "residual"):
@@ -174,8 +228,14 @@ class Net(nn.Module):
         else:
             self.real = None
             self.in_proj = nn.Sequential(nn.Linear(in_dim, hidden), nn.ReLU(), nn.Dropout(dropout))
-            self.graph = nn.ModuleList(GraphLayer(hidden, n_nodes, backbone) for _ in range(layers))
+            self.graph = nn.ModuleList(GraphLayer(hidden, n_nodes, backbone, adj_init=adj_init)
+                                       for _ in range(layers))
             feat = hidden
+        # Graph WaveNet computes one adaptive matrix and uses it in every layer.
+        # Drawn after the layers so the default (unshared) RNG stream is untouched.
+        self.adj_e1 = self.adj_e2 = None
+        if adj_shared:
+            self.adj_e1, self.adj_e2 = adaptive_embeddings(n_nodes, adj_init)
         if global_ctx:
             feat *= 2
         self.node_emb = (nn.Parameter(torch.randn(n_nodes, node_emb) * 0.1)
@@ -208,6 +268,17 @@ class Net(nn.Module):
             # let the fit lower that floor rather than fight it.
             self.e_scale = nn.Parameter(torch.tensor(0.0))
             self.rho_scale = nn.Parameter(torch.tensor(0.0))
+            if lam_param == "mass":
+                # Steady state needs beta * S = gamma; with S ~ 0.32 that is ~0.45/day,
+                # the same neighbourhood as META_LOG_BETA0.
+                self.mass_bias = nn.Parameter(torch.tensor(float(META_LOG_BETA0)))
+        self.e_head = None
+        if state_fit == "encoder":
+            # Zero-initialised: 2 * sigmoid(0) = 1, so training starts from the
+            # same seeding as state_fit=True does.
+            self.e_head = nn.Linear(feat, 1)
+            nn.init.zeros_(self.e_head.weight)
+            nn.init.zeros_(self.e_head.bias)
         self.dseason = (nn.Parameter(torch.zeros(n_nodes, N_SEASON, horizon))
                         if dseason else None)
         if head == "foi_meta":
@@ -235,40 +306,76 @@ class Net(nn.Module):
             h = x
         else:
             h = self.in_proj(x)
+            learned = (learned_adjacency(self.adj_e1, self.adj_e2)
+                       if self.adj_e1 is not None else None)
             for layer in self.graph:
-                h = h + self.drop(layer(h, fixed))
+                h = h + self.drop(layer(h, fixed, learned))
         if self.global_ctx:
             h = torch.cat([h, h.mean(1, keepdim=True).expand_as(h)], dim=-1)
         if self.node_emb is not None:
             h = torch.cat([h, self.node_emb.expand(h.shape[0], -1, -1)], dim=-1)
         return h
 
-    def _physics(self, raw: torch.Tensor, st0: torch.Tensor, pop: torch.Tensor,
-                 mean: float, std: float) -> torch.Tensor:
-        """Head output -> per-week force of infection -> SEIR incidence, in fold-z log1p."""
-        if self.lam_param == "log":
-            lam = torch.exp((raw + self.lam_bias).clamp(-25.0, LOG_LAMBDA_MAX))
+    def learned_adjacencies(self) -> list[torch.Tensor]:
+        """The adaptive matrices this network uses: one if shared, else one per layer."""
+        if self.adj_e1 is not None:
+            return [learned_adjacency(self.adj_e1, self.adj_e2)]
+        return [learned_adjacency(layer.e1, layer.e2) for layer in self.graph]
+
+    def _seed(self, st0: torch.Tensor | None, h: torch.Tensor | None) -> torch.Tensor | None:
+        """Rescale E0 (mass moved to/from R) -- globally, or per district-window."""
+        if not self.state_fit or st0 is None:
+            return st0
+        s, e, i, r = st0.unbind(-1)
+        if self.e_head is not None:
+            scaled = e * torch.sigmoid(self.e_head(h).squeeze(-1)) * 2.0
         else:
-            lam = self.lambda_max * torch.sigmoid(raw)
-        if self.state_fit and st0 is not None:
-            s, e, i, r = st0.unbind(-1)
             scaled = e * torch.sigmoid(self.e_scale) * 2.0
-            st0 = torch.stack([s, scaled, i, (r + e - scaled).clamp_min(0.0)], dim=-1)
-        if st0 is not None:
-            # Spatial import, scaled by the *log* of the neighbour infected
-            # fraction so the term is not numerically inert. The original added
-            # alpha * mean(I/N) directly, with I/N ~ 1e-4 against lambda ~ 7e-2,
-            # a relative contribution of ~1e-4 -- which is why its explicit and
-            # implicit coupling arms agreed to five decimal places.
-            imp = st0[..., 2].clamp_min(1e-9).log().unsqueeze(-1)
-            lam = lam * torch.exp(self.beta * (imp - imp.mean()) * 0.1)
-        _, inc = seir_sim.simulate_weeks(st0, lam, omega=0.7 / 7.0, gamma=1.0 / 7.0, substeps=7)
+        return torch.stack([s, scaled, i, (r + e - scaled).clamp_min(0.0)], dim=-1)
+
+    def _physics(self, raw: torch.Tensor, st0: torch.Tensor, pop: torch.Tensor,
+                 mean: float, std: float, fixed: torch.Tensor, h: torch.Tensor | None = None,
+                 p_z: torch.Tensor | None = None) -> torch.Tensor:
+        """Head output -> per-week force of infection -> SEIR incidence, in fold-z log1p.
+
+        Rates follow Liu et al. 2025: omega = 0.1/day lumps the human intrinsic
+        incubation (mean 5.9 days, Chan & Johansson 2012) with the vector stage this
+        human-only model omits, so E + I spans roughly a dengue generation interval.
+        """
+        st0 = self._seed(st0, h)
         rho = self.rho * torch.exp(self.rho_scale) if self.state_fit else self.rho
+        if self.lam_param == "mass":
+            beta = torch.exp((raw + self.mass_bias).clamp(-12.0, 2.0))         # (B,N,H) per day
+            _, inc, _ = seir_sim.simulate_closed_loop(st0, beta, omega=0.7 / 7.0,
+                                                      gamma=1.0 / 7.0, substeps=7)
+        else:
+            if self.lam_param == "log":
+                lam = torch.exp((raw + self.lam_bias).clamp(-25.0, LOG_LAMBDA_MAX))
+            elif self.lam_param == "anchor":
+                # The rate whose daily infections, reported at rho, sum to last
+                # week's count: c / (7 rho N S). Floored so a zero week can still grow.
+                last = torch.expm1(p_z[..., :1] * std + mean).clamp_min(0.5)
+                lam_hat = last / (7.0 * rho * pop.unsqueeze(-1) * st0[..., :1])
+                lam = lam_hat * torch.exp(raw.clamp(-10.0, 10.0))
+            else:
+                lam = self.lambda_max * torch.sigmoid(raw)
+            if st0 is not None:
+                # Spatial import from the border neighbourhood, on the *log* of its
+                # infected fraction so the term is not numerically inert, centred
+                # over districts within each window -- never across the batch, which
+                # would make a forecast depend on which other windows share it.
+                nb = st0[..., 2] @ fixed.T                                       # sum_j A_ij I_j
+                imp = nb.clamp_min(1e-9).log()
+                imp = (imp - imp.mean(-1, keepdim=True)).unsqueeze(-1)
+                lam = lam * torch.exp(self.beta * imp * 0.1)
+            _, inc = seir_sim.simulate_weeks(st0, lam, omega=0.7 / 7.0, gamma=1.0 / 7.0,
+                                             substeps=7)
         counts = (inc * rho * pop.unsqueeze(-1)).clamp_min(0.0)
         return (torch.log1p(counts) - mean) / std
 
     def _meta_physics(self, raw: torch.Tensor, st0: torch.Tensor, pop: torch.Tensor,
-                      mean: float, std: float, fixed: torch.Tensor) -> torch.Tensor:
+                      mean: float, std: float, fixed: torch.Tensor,
+                      h: torch.Tensor | None = None) -> torch.Tensor:
         """Metapopulation SEIR: daily force of infection beta_i * sum_j C_ij I_j.
 
         C starts as the row-normalised border graph with self-loops; log of it is
@@ -276,10 +383,7 @@ class Net(nn.Module):
         border start at ~0 weight (log 1e-9) but can be learned if the data want it.
         """
         beta = torch.exp((raw + self.beta_bias).clamp(-12.0, 2.0))               # (B,N,H) per day
-        if self.state_fit and st0 is not None:
-            s, e, i, r = st0.unbind(-1)
-            scaled = e * torch.sigmoid(self.e_scale) * 2.0
-            st0 = torch.stack([s, scaled, i, (r + e - scaled).clamp_min(0.0)], dim=-1)
+        st0 = self._seed(st0, h)
         coupling = torch.softmax(torch.log(fixed.clamp_min(1e-9)) + self.c_logit, dim=-1)
         _, inc, _ = seir_sim.simulate_closed_loop(st0, beta, omega=0.7 / 7.0, gamma=1.0 / 7.0,
                                                   substeps=7, coupling=coupling)
@@ -312,7 +416,7 @@ class Net(nn.Module):
         if self.dseason is not None:
             raw = raw + torch.einsum("bnk,nkh->bnh", season, self.dseason)
         disp = self.disp(h) if self.disp is not None else None
-        aux = (self._physics(self.out_phys(h), st0, pop, mean, std)
+        aux = (self._physics(self.out_phys(h), st0, pop, mean, std, fixed, h, p_z)
                if self.out_phys is not None else None)
 
         if self.head == "direct":
@@ -327,10 +431,10 @@ class Net(nn.Module):
         if self.head == "gated":
             return p_z + torch.sigmoid(self.alpha) * (raw - p_z), disp, aux
         if self.head == "foi_meta":
-            phys_z = self._meta_physics(raw, st0, pop, mean, std, fixed)
+            phys_z = self._meta_physics(raw, st0, pop, mean, std, fixed, h)
             gate = torch.sigmoid(self.alpha)
             return p_z + gate * (phys_z - p_z), disp, aux
-        phys_z = self._physics(raw, st0, pop, mean, std)
+        phys_z = self._physics(raw, st0, pop, mean, std, fixed, h, p_z)
         if self.head == "foi":
             return phys_z, disp, aux
         gate = torch.sigmoid(self.alpha)

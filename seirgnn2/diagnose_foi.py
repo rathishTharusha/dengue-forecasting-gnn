@@ -91,6 +91,19 @@ def r2(x: np.ndarray, y: np.ndarray) -> float:
     return float(1.0 - resid.var() / y.var())
 
 
+def r2_multi(cols: list[np.ndarray], y: np.ndarray, mask: np.ndarray | None = None) -> float:
+    """``r2`` with several regressors, optionally on a subset of cells."""
+    x = np.stack([np.asarray(c, dtype=float).ravel() for c in cols], 1)
+    y = np.asarray(y, dtype=float).ravel()
+    ok = np.isfinite(x).all(1) & np.isfinite(y)
+    if mask is not None:
+        ok &= np.asarray(mask).ravel()
+    x, y = x[ok], y[ok]
+    a = np.concatenate([x, np.ones((len(y), 1))], 1)
+    resid = y - a @ np.linalg.lstsq(a, y, rcond=None)[0]
+    return float(1.0 - resid.var() / y.var())
+
+
 def build(origin: float):
     data = cd.load()
     fold = next(f for f in core.build_folds(data.cases, data.missing) if f.origin == origin)
@@ -182,6 +195,19 @@ def main() -> None:
     tgt = lg.ravel()
     res = tgt - both @ np.linalg.lstsq(both, tgt, rcond=None)[0]
     print(f"    both together                     r2 = {1 - res.var() / tgt.var():6.3f}")
+    # lambda multiplies S * pop, so the oracle carries a -log(pop) offset per
+    # district. The network sees neither pop nor a district identity.
+    log_pop = np.broadcast_to(np.log(pop.numpy()), last.shape)
+    per_cap = np.log1p(last) - log_pop
+    reach = (frac[..., 0] > 1e-6) & (frac[..., 0] <= 1.0)
+    print("\n  adding population (never an input to the net):")
+    for label, cols in (("log pop", [log_pop]),
+                        ("log cases[t-1] + log pop", [np.log1p(last), log_pop]),
+                        ("log cases + log pop + log S", [np.log1p(last), log_pop, np.log(s.numpy())]),
+                        ("log per-capita cases[t-1]", [per_cap])):
+        print(f"    {label:32s}  r2 = {r2_multi(cols, lg):6.3f}"
+              f"   (reachable cells only: {r2_multi(cols, lg, reach):6.3f})")
+    print(f"    {'log cases[t-1], reachable only':32s}  r2 = {r2_multi([np.log1p(last)], lg, reach):6.3f}")
     print("\n  for contrast, the target the other heads regress on:")
     print(f"    log cases[t] on log cases[t-1]    r2 = "
           f"{r2(np.log1p(last), np.log1p(y[..., 0].numpy())):6.3f}")

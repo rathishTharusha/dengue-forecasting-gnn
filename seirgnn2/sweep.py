@@ -27,9 +27,12 @@ SEEDS = (0, 1, 2)
 
 
 def _origins(spec: dict) -> tuple[tuple[float, ...], float]:
-    """Which origin set a config runs on -- the frozen three or the confirmatory nine."""
+    """Which origin set a config runs on: the frozen three, the confirmatory nine,
+    or ``frozen9`` -- the docs/PROTOCOL.md nine every new result is quoted on."""
     if spec.get("origins") == "nine":
         return core.ORIGINS_9, core.TEST_FRAC_9
+    if spec.get("origins") == "frozen9":
+        return core.ORIGINS_F9, core.TEST_FRAC_F9
     return core.ORIGINS, core.TEST_FRAC
 
 

@@ -42,6 +42,13 @@ TEST_FRAC = 0.15
 ORIGINS_9 = tuple(round(0.40 + k / 15.0, 4) for k in range(9))
 TEST_FRAC_9 = 1.0 / 15.0
 
+#: The project-wide frozen protocol of docs/PROTOCOL.md (fingerprint e9afbdfb0528):
+#: nine origins 0.50..0.90, each testing the next 5% of windows, so the test spans
+#: tile 0.50 -> 0.95 once. Persistence on it is 28.5410, which
+#: analysis/_build/protocol_check.py prints and tests/test_seir_adaptive_audit.py pins.
+ORIGINS_F9 = tuple(round(0.50 + 0.05 * k, 2) for k in range(9))
+TEST_FRAC_F9 = 0.05
+
 
 @dataclass
 class Fold:

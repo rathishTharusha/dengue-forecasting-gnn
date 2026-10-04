@@ -57,9 +57,12 @@ def simulate_weeks(state0: torch.Tensor, foi: torch.Tensor, omega: float, gamma:
     """Run the SEIR forward, one force of infection per district per week.
 
     Args:
-        state0: ``(..., 4)`` compartment counts ``(S, E, I, R)`` at the start.
+        state0: ``(..., 4)`` compartments ``(S, E, I, R)`` at the start, as counts or
+            as population fractions -- the flows are linear in the state, so either
+            works. The SEIR-GNN passes fractions and multiplies by population after.
         foi: ``(..., weeks)`` force of infection per day, held constant within a week.
-            Must be non-negative; the SEIR-GNN guarantees it with a bounded sigmoid.
+            Must be non-negative; every SEIR-GNN parameterisation is non-negative
+            by construction.
         omega: E -> I rate per day (1 / intrinsic incubation period).
         gamma: I -> R rate per day (1 / infectious period).
         substeps: Steps per week. The default steps one day at a time.

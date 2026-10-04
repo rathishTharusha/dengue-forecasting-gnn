@@ -13,10 +13,8 @@
 
 \title{Does Epidemic Physics Help a Graph Network Forecast Dengue? A Leakage-Controlled Test Against Persistence}
 
-% TODO(authors): names, affiliation and e-mail addresses were left as placeholders in the plan (decision D1).
-\author{\IEEEauthorblockN{[AUTHOR NAMES]}
-\IEEEauthorblockA{[DEPARTMENT, UNIVERSITY OF MORATUWA, COUNTRY]\\
-\relax[E-MAIL ADDRESSES]}}
+% TODO(authors): decision D1 still has placeholders. VENUE: [VENUE]. PAGE LIMIT: [6 + references / 6 including references].
+\author{\IEEEauthorblockN{[NAMES, AFFILIATION, EMAILS]}}
 
 \maketitle
 
@@ -29,7 +27,7 @@ Selection on validation can mislead: one model reaches an adjusted $p$ of 0.023 
 An SEIR output head that learns its force of infection from scratch is 12.2 cases worse than persistence. % EV-109
 On validation, the repair of three failing encoders by a gated SEIR head is explained by its persistence anchor and not by the epidemic equations, although the SEIR version is lower on test. % EV-037, EV-159, EV-160, EV-161
 A learned adjacency, GAN and simulator augmentation, longer climate lags and COVID-19 policy covariates gave no measurable test gain.
-A 95\% interval built from past persistence residuals covers 96.0\% of targets with a mean width of 99 cases, narrower than every Gaussian-head interval we tested (123 to 250 cases). % EV-142, EV-144, EV-145, EV-146, EV-147, EV-148
+A 95\% interval built from past persistence residuals covers 96.0\% of targets with a mean width of 99 cases, narrower than every Gaussian-head interval we tested (123 to 250 cases; legacy-array folds). % EV-142, EV-144, EV-145, EV-146, EV-147, EV-148
 We recommend that dengue forecasting studies report persistence at every horizon, use paired tests over many forecast origins, and show test results next to validation results.
 \end{abstract}
 
@@ -48,25 +46,24 @@ A forecast is useful only if it beats a trivial baseline.
 For weekly counts, the trivial baseline is persistence: repeat last week's value.
 On our data, last week's count explains 89\% of the variance in this week's count. % EV-004
 The benchmark paper for this dataset reports no persistence baseline~\cite{weng2024graph}.
-On that paper's protocol and the same test slices, persistence scores an RMSE of 34.67, while our reproduction of its STGAT model scores 42.31. % EV-089
+On that paper's protocol and the same test slices, persistence scores an RMSE of 34.67, while our reproduction of its STGAT model~\cite{huang2019stgat} scores 42.31. % EV-089
 Two further problems make published gains hard to read.
 The widely used data array contains one week of backlogged reports, and persistence scores 44.80 with that week and 29.52 without it. % EV-006
 Studies with few forecast origins also cannot produce small $p$-values: an exact sign-flip test on three origins cannot return $p$ below 0.25. % EV-181
 
 We therefore ask a narrow question.
 We test which additions help weekly district-level forecasting under a protocol with no future information, persistence reported at every horizon, and paired tests over nine forecast origins.
-The additions are a graph over districts, a learned adjacency, an SEIR output head, generated training data, and climate and policy covariates.
 Our contributions are as follows.
 \begin{enumerate}
 \item A leakage-controlled rolling-origin protocol with persistence at every horizon, causal input lags, and paired tests over nine origins (Sections~\ref{sec:data} and~\ref{sec:setup}).
 \item A measurement of how one backlog week changes the persistence baseline, and of how a small number of origins limits testing (Sections~\ref{sec:data} and~\ref{sec:results}).
-\item A controlled comparison of output heads showing that the gain of a gated SEIR head over failing encoders comes from its persistence anchor, and that a bare SEIR head with a population-scaled force of infection is close to, but not below, persistence (Section~\ref{sec:results}).
+\item A controlled comparison of output heads. On validation, the gain of a gated SEIR head over failing encoders is explained by its persistence anchor, although on test the SEIR version is lower. A bare SEIR head with a population-scaled force of infection on an adaptive graph is 1.26 cases worse than persistence, and the effect of the scaling alone is untested for the bare head (Section~\ref{sec:results}). % EV-111
 \item Negative results for four common additions, each tested against its own control: a learned adjacency, generated training data, climate lags and policy covariates, and spatial priors (Section~\ref{sec:results}).
 \end{enumerate}
 
 %=====================================================================
 \section{Related Work}
-Weng et al.~\cite{weng2024graph} benchmark five spatio-temporal graph networks, STGAT, A3T-GCN, ASTGCN, DCRNN and AAGCN, on weekly Sri Lankan dengue counts~\cite{guo2019astgcn,bai2021a3tgcn,shi2019aagcn,li2018dcrnn}.
+Weng et al.~\cite{weng2024graph} benchmark five spatio-temporal graph networks, STGAT, A3T-GCN, ASTGCN, DCRNN and AAGCN, on weekly Sri Lankan dengue counts~\cite{huang2019stgat,guo2019astgcn,bai2021a3tgcn,shi2019aagcn,li2018dcrnn}.
 Their comparison set has no naive baseline.
 DengueGNN~\cite{gulmohamed2026denguegnn} builds a dynamic adjacency from an assumed gravity-mobility law and adds no mechanistic constraint.
 Graph WaveNet~\cite{wu2019graphwavenet} supplies the adaptive adjacency that we reuse.
@@ -150,6 +147,7 @@ A_{\mathrm{ad}}=\mathrm{softmax}\!\left(\mathrm{ReLU}\!\left(E_1E_2^{\top}\right
 with node embeddings $E_1,E_2\in\mathbb{R}^{25\times 10}$ drawn from a standard normal distribution, shared by both layers and exempt from weight decay. % EV-177
 A small initialization gives an almost uniform $A_{\mathrm{ad}}$, which is plain averaging over all districts, and weight decay pulls the embeddings back toward it; we therefore use the standard-normal draw and the exemption, and we did not ablate the exemption alone. % EV-050
 We also use five published encoders, STGAT, A3T-GCN, ASTGCN, AAGCN and DCRNN, transcribed from the reference code and checked against it, and Liu et al.'s LSTM~\cite{weng2024graph,liu2025seirlstm}.
+Our STGAT is the dengue adaptation in that code, a graph-attention layer followed by two LSTM layers, and not the original pedestrian model~\cite{huang2019stgat}.
 They replace the graph layers and output a 64-dimensional representation per district.
 
 \subsection{Output heads}
@@ -236,7 +234,8 @@ The test weeks differ between protocols, so persistence has a different RMSE in 
 
 \subsection{Baselines, selection and tests}
 Persistence is the first baseline, reported at every horizon.
-The baseline GNN is a GCN encoder with a direct head.
+The baseline GNN is a GCN encoder with a residual head on log counts, which predicts a correction to persistence.
+It follows the design of our first tuned baseline, which matched persistence where a GCN trained on absolute counts lost to it, and we retrain it here under the new protocol. % EV-191
 Models are selected on validation RMSE only, and test RMSE is read afterwards.
 We compare each arm with persistence using the exact paired sign-flip test on the nine origin means, with seeds averaged within each origin, and adjust $p$-values over all 30 arms with the Benjamini-Hochberg procedure. % EV-149
 With three origins, the smallest attainable $p$ is 0.25, so three-origin gaps are reported but not tested; with nine origins it is 0.0039. % EV-181
@@ -255,12 +254,12 @@ We report all of them next to the 24 grid arms and correct over all 30, but thei
 Table~\ref{tab:main} compares the arms with persistence on the nine-origin protocol.
 No learned arm is significantly better than persistence on test, and eight are significantly worse. % EV-150
 The lowest test RMSE is 27.45, against 28.54 for persistence, shared by the two anchored gated SEIR arms with an adaptive graph (adjusted $p$ is 0.576). % EV-100, EV-113, EV-114
-The baseline GNN, a GCN with a direct head, scores 28.17, which is 0.37 below persistence (adjusted $p$ of 0.984). % EV-101
-At the three horizons it is lower than persistence by 0.38, 0.12 and 0.58 cases. % EV-151
+The baseline GNN, a GCN with a residual head, scores 28.12, which is 0.42 below persistence (adjusted $p$ of 0.781). % EV-102
+At the three horizons it is lower than persistence by 0.23, 0.15 and 0.79 cases. % EV-165
+The same encoder with a direct head scores 28.17 (adjusted $p$ of 0.984). % EV-101
 The anchored gated SEIR arm with an adaptive graph is lower than persistence by 0.97, 0.85 and 1.41 cases, so the gap grows with the horizon, but it stays small beside a persistence RMSE of 33.26 at $h=3$. % EV-152, EV-100
-Published encoders with a direct head are 0.19 to 0.72 cases above persistence (LSTM, ASTGCN, AAGCN), and STGAT with a direct head fails at 44.71. % EV-103, EV-104, EV-105, EV-106
+STGAT with a direct head fails at 44.71. % EV-106
 
-The mass-action variant scores 28.39, which is 0.16 below persistence. % EV-190
 
 Validation tells a different story.
 On validation, seven arms are significantly better than persistence and eight are significantly worse. % EV-149
@@ -330,7 +329,8 @@ WGAN-GP augmentation raised RMSE on the middle fold to 124.13, against 43.71 wit
 
 \subsection{Interval forecasts}
 A Gaussian output head gives a predictive interval.
-On the legacy-array folds, its nominal 95\% intervals cover 94.7\% to 96.2\% of targets, with mean widths of 123 to 250 cases. % EV-144, EV-145, EV-146, EV-147, EV-148
+These comparisons use the legacy-array folds, which include the backlog week, because the Gaussian-head results exist only there.
+On those folds, the nominal 95\% intervals of the Gaussian head cover 94.7\% to 96.2\% of targets, with mean widths of 123 to 250 cases. % EV-144, EV-145, EV-146, EV-147, EV-148
 A simple interval needs no network: persistence plus the 2.5th and 97.5th percentiles of training-window residuals, per horizon. % EV-188
 It covers 96.0\% of targets with a mean width of 99 cases, and a version scaled by $\sqrt{1+c_{t-1}}$ covers 96.3\% with a mean width of 74 cases. % EV-142, EV-143
 The simple intervals are narrower than every Gaussian-head interval at similar coverage.
@@ -360,9 +360,7 @@ Its strongest edges do not follow geography.
 Examples are Kalutara from Kandy and Jaffna from Kegalle, which are not neighbors. % EV-185
 We believe the graph encodes shared outbreak timing rather than adjacency, but we did not test this, and the encoder gains nothing measurable over no graph on three origins. % EV-117, EV-118, EV-116
 
-Selecting on validation misleads at this effect size.
 The arm with the lowest validation RMSE in Table~\ref{tab:main}, ASTGCN with a residual head at 25.23, is 0.11 above persistence on test, and in five of eight comparison families the validation pick lost to persistence on test. % EV-107, EV-039
-We did not test why validation and test disagree, and we treat the disagreement itself as the finding.
 
 \subsection{Limitations}
 The nine origins give 9 paired units, which allows $p$ down to 0.0039 but gives low power for differences of one case. % EV-181
@@ -375,14 +373,13 @@ We study one country, one disease and a horizon of three weeks.
 %=====================================================================
 \section{Conclusion}
 On a leakage-controlled nine-origin protocol, no learned model is significantly better than persistence on test, whose RMSE is 28.54 cases per district-week against a best learned 27.45. % EV-100, EV-114, EV-150
-On validation, the gain of an SEIR head over failing encoders is explained by its persistence anchor, and a validation-selected model reached an adjusted $p$ of 0.023 on validation and 0.694 on test. % EV-037, EV-108
+On validation, the gain of an SEIR head over failing encoders is explained by its persistence anchor, although on test the SEIR version is lower, and a validation-selected model reached an adjusted $p$ of 0.023 on validation and 0.694 on test. % EV-037, EV-108
 Future dengue forecasting studies should report persistence at every horizon, test with many origins, and show validation and test results together.
 
 \section*{Acknowledgment}
 % TODO(authors): funding, course and supervisor acknowledgments.
 [Funding and course acknowledgments to be completed.]
-AI tools were used in this work: a coding assistant (Claude Code) helped audit the repository, write analysis scripts and draft text.
-The authors checked every reported number against the saved result files and take responsibility for the content.
+AI use: a coding assistant (Claude Code) helped audit the repository, write analysis scripts and draft text, and the authors checked every number against the saved result files.
 
 \bibliographystyle{IEEEtran}
 \bibliography{refs}

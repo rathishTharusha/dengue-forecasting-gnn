@@ -64,7 +64,7 @@ def fig_data() -> dict:
 
 
 FOREST = [
-    ("gcn+direct", "GCN, direct (baseline GNN)"), ("gcn+residual", "GCN, residual"),
+    ("gcn+direct", "GCN, direct"), ("gcn+residual", "GCN, residual (baseline GNN)"),
     ("LSTM+direct", "LSTM, direct"), ("ASTGCN+direct", "ASTGCN, direct"), ("AAGCN+direct", "AAGCN, direct"),
     ("ASTGCN+residual", "ASTGCN, residual"), ("adaptive_gwn+residual", "Adaptive GCN, residual"),
     ("gcn+foi_res", "GCN, gated SEIR, free rate"),

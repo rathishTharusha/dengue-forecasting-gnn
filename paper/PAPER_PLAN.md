@@ -104,6 +104,7 @@ Source lists: `full_paper/overleaf/refs.bib` (36 entries, used below), `paper/re
 | liu2025seirlstm | Liu et al., explainable covariate compartmental model, PLoS Comput. Biol. 21, 2025 | 10.1371/journal.pcbi.1013540 | SEIR-LSTM design, SEIR constants, 11x reporting scale | OK |
 | phaijoo2018sensitivity | Phaijoo and Gurung, Sensitivity analysis of SEIR-SEI model of dengue, GAMS J. 6, 2018 | none | SEIR-SEI model | NEEDS CHECK |
 | seirsei2022 | Hasan et al., Vector-host SEIR-SEI dengue model, Int. J. Anal. Appl. 20, 2022 | none | SEIR-SEI | NEEDS CHECK |
+| huang2019stgat | Huang et al., STGAT: Modeling Spatial-Temporal Interactions for Human Trajectory Prediction, ICCV 2019 (surnames Huang, Bi, Li, Mao, Wang as listed in `literature/manifest.csv`) | openaccess.thecvf.com/content_ICCV_2019/papers/Huang_STGAT_Modeling_Spatial-Temporal_Interactions_for_Human_Trajectory_Prediction_ICCV_2019_paper.pdf | STGAT encoder (our code transcribes the dengue adaptation in Weng et al.: a graph-attention layer then two LSTM layers) | NEEDS CHECK (given names of authors are not in the repo; added after the user's decision, item 6) |
 | guo2019astgcn | Guo et al., ASTGCN, AAAI 33, 2019 | ojs.aaai.org/index.php/AAAI/article/download/3881/3759 | Encoder | OK |
 | bai2021a3tgcn | Bai et al., A3T-GCN, ISPRS IJGI 10, 2021 | arxiv.org/abs/2006.11583 | Encoder | OK |
 | shi2019aagcn | Shi et al., Two-stream adaptive GCN, CVPR 2019 | arxiv.org/abs/1805.07694 | Encoder (AAGCN) | OK |

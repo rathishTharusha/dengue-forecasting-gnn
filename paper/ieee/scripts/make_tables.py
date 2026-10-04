@@ -41,8 +41,8 @@ def signed(x: float) -> str:
 # ---------------------------------------------------------------- Table: P9 main
 P9_ROWS = [  # (arm name in file, display name)
     ("persistence", "Persistence (last week)"),
-    ("gcn+direct", "GCN, direct (baseline GNN)"),
-    ("gcn+residual", "GCN, residual"),
+    ("gcn+direct", "GCN, direct"),
+    ("gcn+residual", "GCN, residual (baseline GNN)"),
     ("LSTM+direct", "LSTM, direct"),
     ("ASTGCN+direct", "ASTGCN, direct"),
     ("AAGCN+direct", "AAGCN, direct"),
@@ -296,6 +296,9 @@ def derived() -> None:
        f"{v['n_configs']}, {v['n_below_persistence_val']}, {v['of_those_test_above_persistence']}; "
        f"{v['lowest_val']} ({v['lowest_val_point'][0]:.2f}, {v['lowest_val_point'][1]:.2f})", "P3",
        "kaggle_run/runs.jsonl, results.json (figure_values.json)")
+    gaps = [h("persistence", f"RMSE_h{k}") - h("gcn+residual", f"RMSE_h{k}") for k in (1, 2, 3)]
+    ev("Persistence minus gcn+residual (baseline GNN) test RMSE at h=1, 2, 3 (positive = model better)",
+       ", ".join(f"{g:+.4f}" for g in gaps), "P9", "frozen9_plus_audit.json (arithmetic)")
 
 
 def write_evidence() -> None:

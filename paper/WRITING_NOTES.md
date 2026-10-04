@@ -60,3 +60,14 @@ cd paper/ieee && latexmk -pdf main.tex
 ```
 
 `make_tables.py` rewrites Part C of `paper/EVIDENCE.md` (between the BEGIN/END GENERATED markers). Part D (code constants) is written by hand.
+
+## Update after your answers (round 2)
+
+- **Baseline GNN (item 2).** ADR 0001 and the v2 notebook define the original baseline as a GCN that predicts a residual over persistence on log1p targets (the v1 plain GCN on absolute counts lost to persistence). The paper now calls **GCN with a residual head** the baseline GNN (Table II, EV-102, per-horizon gaps EV-165) and retrains it under the new protocol; the direct-head GCN is shown as a separate row. Hyperparameters differ from the old notebook (legacy array, other learning rate), so the paper says "design" and "retrain", not "the original numbers".
+- **Contribution 3, validation vs test (items 3, 4).** The Abstract, Introduction (contribution 3) and Conclusion now say: on validation the repair is explained by the anchor, on test the SEIR version is lower, and the anchored bare head is 1.26 cases worse than persistence with the scaling effect untested for the bare head. Nothing stronger than Section VI-B.
+- **STGAT (item 6).** The code (`analysis/lib/reproduced.py::_STGAT`) is Weng et al.'s dengue adaptation (graph-attention layer, two LSTM layers) of Huang et al., ICCV 2019. The paper cites Huang et al. and says ours is the adaptation, not the pedestrian model. Added to PAPER_PLAN.md section 7 and `refs.bib`. Author given names are NOT in the repo, so the bib entry lists surnames only (NEEDS CHECK).
+- **Counts (item 7).** All places agree: validation 7 better and 8 worse, test 0 better and 8 worse (EV-149, EV-150).
+- **Intervals (item 8).** The text, the abstract and the check script now state that the interval comparison uses the legacy-array folds, which include the backlog week.
+- **Placeholders (item 1).** Authors are `[NAMES, AFFILIATION, EMAILS]`, venue and page limit are in a TODO comment. With "6 + references" the draft fits (6 pages of body, references on page 7). With "6 including references" about 0.9 page must be cut.
+- **Week index (item 5): NOT changed, waiting for you.** See the message to the user. The paper still says only "559 weeks" and Fig. 1b still plots the index dates.
+- **Codex review (item 3, second block).** Codex is not installed here, so it was not run. `paper/ieee/REVIEW_PROMPT.md` holds the prompt with the `paper/ieee/` paths and your extra focus items.

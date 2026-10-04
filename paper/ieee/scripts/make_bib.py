@@ -10,9 +10,16 @@ KEYS = ["tissera2020severe", "weng2024graph", "gulmohamed2026denguegnn", "liu202
         "wu2019graphwavenet", "kipf2017gcn", "rodriguez2023einns", "wang2022causalgnn", "cao2023mepognn",
         "deng2020colagnn", "raissi2019pinn", "krishnapriyan2021failure", "yoon2019timegan", "kim2022revin",
         "shao2022stid", "salinas2020deepar", "bracher2021evaluating"]
+# Added after the user approved it (PAPER_PLAN.md section 7); metadata from literature/manifest.csv only.
+EXTRA = """@inproceedings{huang2019stgat,
+  title     = {{STGAT}: Modeling Spatial-Temporal Interactions for Human Trajectory Prediction},
+  author    = {Huang and Bi and Li and Mao and Wang},
+  booktitle = {IEEE/CVF International Conference on Computer Vision (ICCV)},
+  year      = {2019}
+}"""  # NEEDS CHECK: given names of the authors
 entries = {m.group(2): e for e in re.split(r"\n(?=@)", SRC.read_text(encoding="utf-8"))
            if (m := re.match(r"@(\w+)\{([^,]+),", e))}
 missing = [k for k in KEYS if k not in entries]
 assert not missing, missing
-OUT.write_text("\n\n".join(entries[k].strip() for k in KEYS) + "\n", encoding="utf-8")
+OUT.write_text("\n\n".join([entries[k].strip() for k in KEYS] + [EXTRA]) + "\n", encoding="utf-8")
 print("wrote", len(KEYS), "entries")

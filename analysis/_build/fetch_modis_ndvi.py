@@ -134,8 +134,11 @@ def fetch(workers: int = 4) -> None:
 
 def composites() -> pd.DataFrame:
     """One NDVI value per (district, composite date): mean of valid pixels in the box."""
+    files = sorted(RAW.glob("*__[0-9][0-9][0-9].json"))
+    if not files:                      # the raw subsets are git-ignored; the composites table is committed
+        return pd.read_csv(OUT / "modis_ndvi_composites_by_district.csv")
     recs = []
-    for path in sorted(RAW.glob("*__[0-9][0-9][0-9].json")):
+    for path in files:
         name = path.name.split("__")[0]
         for s in json.loads(path.read_text(encoding="utf-8")).get("subset", []):
             vals = np.asarray(s["data"], dtype=float)

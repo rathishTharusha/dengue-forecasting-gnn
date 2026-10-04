@@ -118,9 +118,11 @@ def population(index: pd.DataFrame, cen: pd.DataFrame) -> tuple[np.ndarray, pd.D
 
 def main() -> int:
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    climate_only = "--climate-only" in sys.argv     # the raw census workbook is git-ignored; population does not read dates
     index = pd.read_csv(CORRECTED / "rebuilt_index.csv")
-    cen = census()
-    cen.to_csv(EXTERNAL / "district_census_2012.csv", index=False)
+    if not climate_only:
+        cen = census()
+        cen.to_csv(EXTERNAL / "district_census_2012.csv", index=False)
 
     cube = climate(index)
     np.save(CORRECTED / "rebuilt_climate_era5.npy", cube)
@@ -132,6 +134,9 @@ def main() -> int:
         "source": "ERA5 (Hersbach et al. 2023, doi:10.24381/cds.adbb2d47) via Open-Meteo, CC BY 4.0",
     }, indent=2), encoding="utf-8")
 
+    if climate_only:
+        print(f"climate: {cube.shape} rewritten; census and population left as committed")
+        return 0
     pop, used = population(index, cen)
     np.save(CORRECTED / "rebuilt_population.npy", pop)
     used.to_csv(CORRECTED / "rebuilt_population_sources.csv", index=False)

@@ -1,0 +1,37 @@
+{
+ "rows_changed": [
+  0,
+  209,
+  297,
+  346,
+  378,
+  388,
+  537,
+  554
+ ],
+ "cells_changed": 1184,
+ "cells_total": 83850,
+ "max_abs_change": {
+  "temperature_2m_mean": 1.8142871856689453,
+  "temperature_2m_min": 2.1000003814697266,
+  "temperature_2m_max": 2.828571319580078,
+  "precipitation_sum": 167.10000610351562,
+  "relative_humidity_2m_mean": 15.428565979003906,
+  "soil_moisture_0_to_7cm_mean": 0.4100000262260437
+ },
+ "best_climate_old": [
+  [
+   "soil_moisture_0_to_7cm_mean",
+   5
+  ],
+  0.029095073030809937
+ ],
+ "best_climate_new": [
+  [
+   "soil_moisture_0_to_7cm_mean",
+   5
+  ],
+  0.029339884116315336
+ ],
+ "lag1": 0.8893102643909847
+}

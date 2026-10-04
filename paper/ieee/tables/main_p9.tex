@@ -1,0 +1,30 @@
+\begin{table*}[t]
+\centering
+\caption{Main results on the nine-origin protocol (rebuilt data, 25 districts, window 3, horizon 3, 3 seeds per origin). RMSE in cases per district-week. Horizon columns and test RMSE are means over 27 runs; $\pm$ is the standard deviation over those runs and is dominated by differences between origins. $\Delta$ is test RMSE minus persistence, averaged over origins (negative is better); Wins counts origins out of nine; $p_{\mathrm{adj}}$ is the Benjamini-Hochberg adjusted exact sign-flip $p$-value of the test difference on the nine origin means, over all 30 arms compared. Val is validation RMSE, used for selection.}
+\label{tab:main}
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}lrrrrrrrr@{}}
+\toprule
+Model & Val & $h{=}1$ & $h{=}2$ & $h{=}3$ & Test RMSE & $\Delta$ & Wins & $p_{\mathrm{adj}}$ \\
+\midrule
+Persistence (last week) & 27.04 & 23.47 & 27.94 & 33.26 & 28.54 $\pm$ 12.71 & -- & -- & -- \\ % EV-100
+\midrule
+GCN, direct (baseline GNN) & 25.64 & 23.10 & 27.82 & 32.68 & 28.17 $\pm$ 13.04 & $-$0.37 & 5/9 & 0.984 \\ % EV-101
+GCN, residual & 25.55 & 23.24 & 27.79 & 32.47 & 28.12 $\pm$ 12.77 & $-$0.42 & 6/9 & 0.781 \\ % EV-102
+LSTM, direct & 25.45 & 23.65 & 28.22 & 33.38 & 28.73 $\pm$ 14.27 & +0.19 & 6/9 & 0.984 \\ % EV-103
+ASTGCN, direct & 25.35 & 23.92 & 28.54 & 33.45 & 28.94 $\pm$ 13.77 & +0.40 & 6/9 & 0.984 \\ % EV-104
+AAGCN, direct & 25.46 & 24.11 & 29.10 & 33.66 & 29.26 $\pm$ 14.51 & +0.72 & 5/9 & 0.965 \\ % EV-105
+STGAT, direct & 35.99 & 42.60 & 44.55 & 46.75 & 44.71 $\pm$ 25.47 & +16.17 & 1/9 & 0.033 \\ % EV-106
+ASTGCN, residual & 25.23 & 23.07 & 28.08 & 33.66 & 28.65 $\pm$ 13.78 & +0.11 & 6/9 & 0.984 \\ % EV-107
+Adaptive GCN, residual & 25.42 & 23.07 & 27.78 & 32.15 & 27.94 $\pm$ 12.91 & $-$0.60 & 7/9 & 0.694 \\ % EV-108
+GCN, SEIR, free rate & 38.08 & 27.58 & 40.81 & 50.14 & 40.77 $\pm$ 22.01 & +12.23 & 1/9 & 0.033 \\ % EV-109
+GCN, gated SEIR, free rate & 26.92 & 22.86 & 28.04 & 33.29 & 28.43 $\pm$ 13.08 & $-$0.11 & 5/9 & 0.984 \\ % EV-110
+Adaptive GCN, SEIR, anchored & 27.99 & 23.99 & 28.81 & 35.29 & 29.80 $\pm$ 14.74 & +1.26 & 3/9 & 0.781 \\ % EV-111
+Adaptive GCN, gated SEIR, mass-action & 26.93 & 22.90 & 28.02 & 33.19 & 28.39 $\pm$ 12.94 & $-$0.16 & 5/9 & 0.984 \\ % EV-190
+GCN, gated SEIR, anchored & 25.83 & 22.49 & 27.38 & 32.04 & 27.62 $\pm$ 12.26 & $-$0.92 & 7/9 & 0.576 \\ % EV-112
+Adaptive GCN, gated SEIR, anchored & 25.74 & 22.51 & 27.09 & 31.85 & 27.45 $\pm$ 12.24 & $-$1.09 & 8/9 & 0.576 \\ % EV-113
+Adaptive GCN, gated SEIR, anchored, learned $E_0$ & 25.53 & 22.45 & 27.07 & 31.88 & 27.45 $\pm$ 11.98 & $-$1.10 & 7/9 & 0.576 \\ % EV-114
+\bottomrule
+\end{tabular}
+\end{table*}

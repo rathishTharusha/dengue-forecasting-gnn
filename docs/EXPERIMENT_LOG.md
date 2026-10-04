@@ -37,6 +37,20 @@ Copy this block for a new entry:
 > `CEILING_R0_MAX`) survived the cleanup and now lives in `dengue_gnn.seir`, still
 > asserted by `tests/test_seir.py` and reproduced by `scripts/verify_seir_paper.py`.
 
+## EXP-062 — Week-index fix: re-run of every result that read a mis-dated week (pending)
+
+- **Date:** 2026-10-05 (opened)
+- **Who:** Claude Code, on branch `fix/week-index`, decisions by the project owner
+- **Commit:** index fix `ac89792`, covariate rebuild `e2360c8`, Kaggle notebook `04df34b`; results to be added
+- **Notebook / script:** `full_paper/kaggle/dengue_physics_gnn.ipynb` (full profile, as EXP-050); `analysis/_build/run_covid_covariates.py`, `analysis/_build/run_stringency_prior.py`
+- **Hardware:** Kaggle CPU for the notebook; local CPU for the COVID and stringency-prior arms
+- **Config:** protocol, seeds, epochs and every arm exactly as EXP-050 (810 runs: 69 configurations x 3 origins x 3 seeds, 7 configurations x 9 origins x 3 seeds) and as EXP-056 / EXP-057 (nine origins, seeds 0/1/2, 400 epochs). Only the week index differs.
+- **Question:** eight rows of `rebuilt_index.csv` had a wrong `week_start` (right year, wrong month; shifts of 1 to 31 days). Every covariate and the seasonal features join through it. Which results change once it is fixed?
+- **Pre-commitment (written before the re-run starts):** **This rerun replaces the earlier results whatever it shows. No arm is re-tuned, added or dropped after seeing it.** The 315 runs that read no date-joined input (35 configurations on three origins) are a reproducibility check; if any moves by more than seed-level noise, no new number is used until that is explained.
+- **Affected inputs:** seasonal features (row i), ERA5 climate lags 2-4, 2-13, 2-25 (rows i-25 .. i-2), COVID policy and mobility (row i-2), stringency prior (row i-1), NDVI weekly table. Affected EXP-050 arms: 28 season-only and 6 climate configurations on three origins (306 runs) and all 7 nine-origin configurations (189 runs). Impact counts per split: `analysis/results/week_index_impact.json`.
+- **Result:** pending.
+- **Verdict:** pending. EXP-050, EXP-056 and EXP-057 numbers for affected arms are SUPERSEDED once this entry is completed.
+
 ## EXP-061 — seir-adaptive audit: fixed scale-carrying physics head and adaptive graph, quick grid
 
 - **Date:** 2026-10-04

@@ -70,6 +70,38 @@ def _jitter(batch: dict, fold: core.Fold, g: torch.Generator) -> dict:
     return b
 
 
+def _optimizer(net: nn.Module, lr: float, weight_decay: float,
+               adj_init: str) -> torch.optim.Optimizer:
+    """Adam; under ``adj_init="gwn"`` the adaptive-graph embeddings get no weight decay.
+
+    Adam's L2 term pulls the embeddings towards zero, where softmax(ReLU(E1 E2^T))
+    is the uniform matrix -- decay would quietly turn the learned graph back into
+    mean pooling. The default path is left exactly as it was.
+    """
+    if adj_init != "gwn":
+        return torch.optim.Adam(net.parameters(), lr=lr, weight_decay=weight_decay)
+    emb = [p for n, p in net.named_parameters() if n.split(".")[-1] in ("e1", "e2", "adj_e1", "adj_e2")]
+    ids = {id(p) for p in emb}
+    rest = [p for p in net.parameters() if id(p) not in ids]
+    return torch.optim.Adam([{"params": rest, "weight_decay": weight_decay},
+                             {"params": emb, "weight_decay": 0.0}], lr=lr)
+
+
+def adjacency_summary(net: nn.Module, names: list[str], k: int = 5) -> dict:
+    """Normalised row entropy of the learned graph (1.0 = uniform) and its top edges."""
+    with torch.no_grad():
+        mats = net.learned_adjacencies()
+        n = mats[0].shape[0]
+        ent = float(np.mean([(-(a * a.clamp_min(1e-12).log()).sum(-1)).mean().item()
+                             for a in mats])) / float(np.log(n))
+        a = mats[0].clone()
+        a.fill_diagonal_(0.0)
+        top = torch.topk(a.flatten(), k)
+    edges = [f"{names[int(i) // n]}<-{names[int(i) % n]}:{float(v):.3f}"
+             for v, i in zip(top.values, top.indices)]
+    return {"adj_entropy": ent, "adj_top": edges}
+
+
 def to_counts(pred_z: torch.Tensor, mean: float, std: float) -> np.ndarray:
     return torch.expm1(torch.clamp(pred_z * std + mean, -1.0, 12.0)).clamp_min(0.0).detach().numpy()
 
@@ -86,6 +118,7 @@ def run_fold(data, fold: core.Fold, *, backbone: str, head: str, loss: str = "ms
              clim_blocks=(), clim_anom: bool = False, case_window: int | None = None,
              head_mlp: int = 0, dseason: bool = False, global_ctx: bool = False,
              spatial: float = 0.0, spatial_kind: str = "ratio",
+             adj_init: str = "small", adj_shared: bool = False,
              keep: bool = False) -> dict:
     """Train one (fold, seed) and return its test scores plus the raw predictions."""
     torch.manual_seed(seed)
@@ -151,8 +184,9 @@ def run_fold(data, fold: core.Fold, *, backbone: str, head: str, loss: str = "ms
                      layers=layers, dropout=dropout, lam_param=lam_param, state_fit=state_fit,
                      window=fold.window, edge_index=edge, dist=dist, norm=norm,
                      node_emb=node_emb, aux_phys=aux_phys, head_mlp=head_mlp,
-                     dseason=dseason, global_ctx=global_ctx)
-    opt = torch.optim.Adam(net.parameters(), lr=lr, weight_decay=weight_decay)
+                     dseason=dseason, global_ctx=global_ctx, adj_init=adj_init,
+                     adj_shared=adj_shared)
+    opt = _optimizer(net, lr, weight_decay, adj_init)
     sched = torch.optim.lr_scheduler.CosineAnnealingLR(opt, T_max=epochs)
     stopper = core.EarlyStop(net, patience=patience)
 
@@ -176,7 +210,7 @@ def run_fold(data, fold: core.Fold, *, backbone: str, head: str, loss: str = "ms
                 _loss(loss, pred, b, fold.mean, fold.std, disp).backward()
                 torch.nn.utils.clip_grad_norm_(net.parameters(), 5.0)
                 opt.step()
-        opt = torch.optim.Adam(net.parameters(), lr=lr, weight_decay=weight_decay)
+        opt = _optimizer(net, lr, weight_decay, adj_init)
         sched = torch.optim.lr_scheduler.CosineAnnealingLR(opt, T_max=epochs)
 
     if spatial:
@@ -242,9 +276,12 @@ def run_fold(data, fold: core.Fold, *, backbone: str, head: str, loss: str = "ms
                clim_anom=clim_anom, case_window=case_window or fold.window,
                head_mlp=head_mlp, dseason=dseason, global_ctx=global_ctx,
                spatial=spatial, spatial_kind=spatial_kind,
+               adj_init=adj_init, adj_shared=adj_shared,
                n_train=len(fold.idx["train"]), n_val=len(fold.idx["val"]),
                n_test=len(fold.idx["test"]),
                epochs_ran=ran, best_epoch=ran - stopper.waited, stopped_early=halted)
+    if backbone in ("adaptive", "hybrid"):
+        out.update(adjacency_summary(net, data.names))
     if keep:
         # Everything a post-hoc diagnosis needs, per split: the forecast, the
         # truth, the persistence anchor and the last observed week. Test is

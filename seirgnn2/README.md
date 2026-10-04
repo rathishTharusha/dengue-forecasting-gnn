@@ -171,9 +171,15 @@ they sit downstream of the encoder, so A3TGCN inherits them unchanged.
   E matures within the week, so with transmission switched *entirely off* the
   simulator still emits more cases than truth. Those cells are unreachable at any
   network output. 39% of cells need λ pinned at 0.
-- **λ is much less learnable than the direct target.** log λ* has r² = 0.22–0.26
-  from case history; the direct target has r² = 0.81–0.82. This is the project's
-  own published R_t result (26% predictable) reappearing inside the head.
+- **λ is much less learnable than the direct target** — but the headline figure
+  is mostly the floor above, not unpredictability. log λ* has r² = 0.22–0.26 from
+  case history over *all* cells; the direct target has r² = 0.81–0.82. About 40%
+  of cells are pinned at λ = 0, and those dominate the variance. On the
+  **reachable** cells, log cases alone gives 0.35–0.38, adding log population
+  0.44–0.52, and adding log S 0.59–0.67 (`diagnose_foi.py` section 3, origins
+  0.55/0.70/0.85; seir-adaptive audit). The free `log` parameterisation never
+  shows the network population or S, so part of the deficit is a
+  parameterisation defect — `lam_param="anchor"` / `"mass"` supply that scale.
 - **Susceptible depletion is *not* the problem** — only 2.5% of cells hit the
   S clamp, and holding S at `s0` changes nothing. This was the obvious
   hypothesis and it is wrong.

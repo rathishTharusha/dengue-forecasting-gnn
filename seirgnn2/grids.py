@@ -314,6 +314,66 @@ def physics9(epochs: int = 400) -> list[dict]:
     return [_c(name, origins="nine", **arms[name]) for name in keep]
 
 
+def audit(epochs: int = 300) -> list[dict]:
+    """docs/EXPERIMENT_LOG.md (seir-adaptive audit): the corrected SEIR head and
+    adaptive graph, on the docs/PROTOCOL.md frozen nine origins.
+
+    Fixed before running. Encoders: the border GCN; the adaptive graph as it was
+    (``small`` init, uniform at the start) and as Graph WaveNet builds it (randn
+    init, one matrix shared by both layers, no weight decay on the embeddings);
+    the uniform-matrix control with the same flags so its RNG matches; and the two
+    reference encoders, Liu et al.'s LSTM and AAGCN. Heads: ``residual`` as the
+    no-physics control, then ``foi_res`` and ``foi`` under each lambda
+    parameterisation -- ``log`` (as before), ``anchor`` (scaled to last week) and
+    ``mass`` (beta * I / N). Then the per-window E0 fit on the anchor arms of the
+    two graph encoders the question is about.
+    """
+    encoders = {
+        "gcn": dict(backbone="gcn"),
+        "adaptive": dict(backbone="adaptive"),
+        "adaptive_gwn": dict(backbone="adaptive", adj_init="gwn", adj_shared=True),
+        "uniform": dict(backbone="uniform", adj_init="gwn", adj_shared=True),
+        "LSTM": dict(backbone="LSTM"),
+        "AAGCN": dict(backbone="AAGCN"),
+    }
+    base = dict(loss="mse_z", epochs=epochs, origins="frozen9")
+    out = []
+    for tag, enc in encoders.items():
+        out.append(_c(f"{tag}+residual", head="residual", **enc, **base))
+        for head in ("foi_res", "foi"):
+            for lam in ("log", "anchor", "mass"):
+                out.append(_c(f"{tag}+{head} {lam}", head=head, lam_param=lam, state_fit=True,
+                              **enc, **base))
+    for tag in ("gcn", "adaptive_gwn"):
+        for head in ("foi_res", "foi"):
+            out.append(_c(f"{tag}+{head} anchor E0enc", head=head, lam_param="anchor",
+                          state_fit="encoder", **encoders[tag], **base))
+    return out
+
+
+def audit_quick(epochs: int = 300) -> list[dict]:
+    """The six ``audit`` arms judged most likely to lower RMSE, run first.
+
+    Same loss, epochs and frozen-nine origins as the pre-fix frozen9 grid (EXP-059)
+    so every arm pairs with it. The Graph WaveNet adaptive graph carries the SEIR
+    head under the scale-carrying parameterisations; its residual arm says what
+    the graph does without physics, and gcn + foi_res anchor says how much of any
+    gain is the parameterisation rather than the graph.
+    """
+    gwn = dict(backbone="adaptive", adj_init="gwn", adj_shared=True)
+    phys = dict(state_fit=True, loss="mse_z", epochs=epochs, origins="frozen9")
+    base = dict(loss="mse_z", epochs=epochs, origins="frozen9")
+    return [
+        _c("adaptive_gwn+residual", head="residual", **gwn, **base),
+        _c("adaptive_gwn+foi_res anchor", head="foi_res", lam_param="anchor", **gwn, **phys),
+        _c("adaptive_gwn+foi_res anchor E0enc", head="foi_res", lam_param="anchor",
+           **gwn, **{**phys, "state_fit": "encoder"}),
+        _c("adaptive_gwn+foi anchor", head="foi", lam_param="anchor", **gwn, **phys),
+        _c("adaptive_gwn+foi_res mass", head="foi_res", lam_param="mass", **gwn, **phys),
+        _c("gcn+foi_res anchor", backbone="gcn", head="foi_res", lam_param="anchor", **phys),
+    ]
+
+
 def rescue(epochs: int = 300) -> list[dict]:
     """docs/RESCUE_PLAN.md: is the gated SEIR head's rescue of STGAT, A3TGCN and
     DCRNN (EXP-034) physics, or just the persistence anchor?

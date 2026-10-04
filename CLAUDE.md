@@ -137,7 +137,7 @@ difference is attributable:
 
 - `HEADS = ("direct", "residual", "gated", "foi", "foi_res", "foi_meta")` — `foi` routes through a force-of-infection
   decoder against SEIR state from `seir_state()`; `foi_res` gates it onto the persistence anchor.
-- `BACKBONES` — the toy controls `("none", "gcn", "gat", "adaptive", "hybrid")` **plus** the five
+- `BACKBONES` — the toy controls `("none", "gcn", "gat", "adaptive", "hybrid", "uniform")` **plus** the five
   published architectures and Liu et al.'s LSTM via `backbones.py`. Note `gat` is a literal alias
   for `gcn` in the toy set and is *not* an attention model; the real ones come from
   `analysis/lib/reproduced.py`.
@@ -181,9 +181,13 @@ its measured effect. Read that before designing a SEIR-GNN experiment; most of t
 have now been run and several are negative.
 
 The short version as of EXP-032..035: the bare `foi` head loses to `direct` by ~7 RMSE and that
-survives swapping in the real architectures; the deficit is structural (the λ=0 floor is
-unreachable for 14–16% of targets, and λ is only r² ≈ 0.25 predictable against 0.82 for the
-direct target), not an optimisation-budget problem. The best stacked arm beats persistence by
+survives swapping in the real architectures; it is not an optimisation-budget problem. Whether
+it is *structural* is reopened by the seir-adaptive audit (EXP-059/060): the r² ≈ 0.25 figure is
+dominated by the ~40% of cells pinned at the λ=0 floor, and on reachable cells adding population
+and S lifts it from ~0.37 to 0.59–0.67 — scale the free `log` parameterisation never shows the
+network. The same audit found the spatial import term centred across the batch (fixed) and the
+`adaptive` graph initialised exactly uniform. Use `lam_param="anchor"|"mass"`,
+`state_fit="encoder"`, `adj_init="gwn", adj_shared=True` and quote the `audit` grid. The best stacked arm beats persistence by
 −2.20 (9/9, p_adj = 0.010), and the graph beats Liu et al.'s LSTM **only** in the physics
 formulation (−0.62, 9/9, p_adj = 0.009), not the direct one. Two caveats travel with those
 numbers: validation and test disagree at this spread, and three origins cannot reach

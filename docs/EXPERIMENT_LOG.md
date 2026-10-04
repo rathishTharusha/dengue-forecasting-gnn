@@ -37,6 +37,75 @@ Copy this block for a new entry:
 > `CEILING_R0_MAX`) survived the cleanup and now lives in `dengue_gnn.seir`, still
 > asserted by `tests/test_seir.py` and reproduced by `scripts/verify_seir_paper.py`.
 
+## EXP-061 — seir-adaptive audit: fixed scale-carrying physics head and adaptive graph, quick grid
+
+- **Date:** 2026-10-04
+- **Who:** Claude Code (seir-adaptive audit, requested by the user before running any adaptive+SEIR combo)
+- **Commit:** see this entry's commit
+- **Notebook / script:** `seirgnn2/sweep.py audit_quick` (`seirgnn2/grids.py::audit_quick`)
+- **Hardware:** Local CPU, torch 2.14, 6 workers
+- **Config:** docs/PROTOCOL.md frozen nine origins (0.50:0.05:0.90, test_frac 0.05), window 3 → horizon 3, seeds 0/1/2, `loss="mse_z"`, `epochs=300`. Six arms, all post-fix code: `adaptive_gwn+residual` (Graph WaveNet init, one shared adjacency, no weight decay on embeddings, no physics); `adaptive_gwn+foi_res anchor` / `+foi anchor` (gated / bare SEIR head, `lam_param="anchor"` — λ scaled to the rate that sustains last week's count, carrying the population/S offset the old `log` parameterisation left to the network); `adaptive_gwn+foi_res anchor E0enc` (as above, E0 fit per district-window instead of one global scalar); `adaptive_gwn+foi_res mass` (β·I/N mass-action λ); `gcn+foi_res anchor` (same head fix on the unchanged graph, to separate the parameterisation gain from the graph gain).
+- **Question:** after fixing S1 (λ had no population scale), S2 (spatial import centred over the whole batch, not per window) and A1 (adaptive graph initialised to exact uniform softmax, Adam decay pulling it back there) — does the SEIR head or the adaptive graph move off the persistence floor?
+- **Result:** merged with EXP-059's 24 arms into `seirgnn2/results/frozen9_plus_audit.json` (819 rows), `python seirgnn2/stats.py frozen9_plus_audit`, origin unit (n=9), unrounded:
+
+  | arm | val RMSE | Δval | test RMSE | Δtest | p_adj (val) |
+  |---|---|---|---|---|---|
+  | persistence | 28.54 | — | 28.54 | — | — |
+  | adaptive_gwn+residual | 25.42 | **−1.62** | 27.94 | −0.60 | 0.023 * |
+  | adaptive_gwn+foi_res anchor E0enc | 25.53 | **−1.51** | 27.45 | −1.10 | 0.047 * |
+  | adaptive_gwn+foi_res anchor | 25.74 | −1.30 | 27.45 | −1.09 | 0.090 |
+  | gcn+foi_res anchor | 25.83 | −1.20 | 27.62 | −0.92 | 0.158 |
+  | adaptive_gwn+foi_res mass | 26.93 | −0.11 | 28.39 | −0.16 | 1.000 |
+  | adaptive_gwn+foi anchor | 27.99 | +0.95 | 29.80 | +1.26 | 0.591 |
+
+  `adaptive_gwn` adjacency entropy (1.0 = uniform): mean **0.469**, range 0.315–0.618 across all 135 trained runs — confirms it now learns a non-trivial graph (was exactly 1.0000 before the fix).
+- **Verdict:** inconclusive, logged honestly. The corrected adaptive graph (`adaptive_gwn+residual`) is now the best-or-tied arm on validation (−1.62, p_adj 0.023) in this family, ahead of every pre-fix arm in EXP-059 — but it beats persistence through the **graph**, not the physics: adding the fixed SEIR head on top (`+foi_res anchor`) does not improve on plain `adaptive_gwn+residual`, and the per-window E0 fit (`E0enc`) is the only physics variant that reaches its own significance (test Δ −1.10), roughly matched by `gcn+foi_res anchor` with no graph change. The previously-broken bare `foi` head (`anchor` param) is no longer catastrophic — 27.99–29.80 vs 40.6+ pre-fix — but still does not beat `residual` or clear persistence. **None of the six reach significance at both val and test together**, and none were compared against a `uniform` or `gcn+residual` control under identical origins/epochs in the same run (the `gcn+residual` figure quoted above is from EXP-059's pre-fix sweep, which the regression check in this commit confirmed the fix leaves bit-for-bit identical). Three origins' worth of real signal at this spread is not enough to separate "the graph moved" from "init got lucky" — the audit's own `audit()` grid (30 configs, not yet run) adds the `uniform`, `LSTM`, `AAGCN` controls and the `log` vs `anchor` vs `mass` contrast on every encoder needed to settle that.
+- **Notes:** This is the smoke-tested half of the pre-registered `audit()` grid (`seirgnn2/grids.py`), requested as "a few models you think are effective" rather than the full 46-config grid, so it is a convenience sample, not the frozen comparison — do not treat the ranking above as final. Test numbers were examined before val in one respect (the quick-pick choice of six arms was made from engineering judgement, not blind to likely RMSE), which is itself a deviation from plan R6 worth flagging: these six were chosen by the person auditing the code, not pre-registered blind. Full `audit()` grid (46 configs incl. `uniform`/`LSTM`/`AAGCN` controls and the `log`/`mass` lambda contrasts) is the next step before any of this reaches the paper.
+
+## EXP-060 — Population and susceptible fraction in the SEIR head's learnability regression
+
+- **Date:** 2026-10-04
+- **Who:** Claude Code (seir-adaptive audit)
+- **Commit:** see this entry's commit
+- **Notebook / script:** `seirgnn2/diagnose_foi.py` (section 3, extended)
+- **Hardware:** Local CPU, no training
+- **Config:** origins 0.55 / 0.70 / 0.85 (the pre-frozen-protocol three, unchanged from the existing diagnostic), training windows only, oracle λ inverted by bisection as before.
+- **Question:** CLAUDE.md and `seirgnn2/README.md` state the `foi` head's deficit is "structural" because oracle log λ has r² ≈ 0.22–0.26 against case history. That regression never included population or S, even though λ multiplies both (new infections = λ·S·pop). Does adding them change the picture?
+- **Result:** at each origin (0.55 / 0.70 / 0.85):
+
+  | regressor | r² (all cells) | r² (reachable cells only) |
+  |---|---|---|
+  | log cases[t-1] | 0.216 / 0.254 / 0.259 | 0.363 / 0.384 / 0.353 |
+  | log cases[t-1] + log pop | 0.218 / 0.257 / 0.260 | 0.512 / 0.515 / 0.444 |
+  | log cases + log pop + log S | 0.224 / 0.266 / 0.273 | 0.589 / 0.660 / 0.674 |
+  | log pop alone | 0.058 / 0.066 / 0.074 | 0.001 / 0.004 / 0.005 |
+
+  39–41% of cells are pinned at λ = 0 (unreachable from below) at every origin.
+- **Verdict:** answered — the "structural, r² ≈ 0.25" framing in CLAUDE.md / `seirgnn2/README.md` was misleading, not wrong about the number. Across *all* cells, adding population barely moves r² (0.216→0.218) because the λ=0-pinned ~40% dominates the variance and population cannot move a floor-pinned point. Restricted to the **reachable** cells only, log pop lifts r² from ~0.37 to ~0.51, and adding log S (which the network never sees either) to ~0.59–0.67 — well above the original headline figure. The deficit is real but was previously conflated: part reach (λ=0 floor, S3, untouched by this entry), part a genuine parameterisation gap (S1) where the free `log`/`sigmoid` lambda asks the network to reproduce an offset of roughly `-log(pop·S)` it is never shown. `lam_param="anchor"`/`"mass"` (this commit) supply that scale directly instead of asking the network to learn it.
+- **Notes:** This is a diagnostic re-measurement, not a new model run — no training, `diagnose_foi.py --origin <o>` for each of the three origins. CLAUDE.md and `seirgnn2/README.md` updated in this commit to point at this entry instead of restating the old, population-blind figure as settled.
+
+## EXP-059 — Pre-fix SEIR head + adaptive graph, full backbone x head grid on the frozen protocol
+
+- **Date:** 2026-10-04
+- **Who:** Claude Code (session work predating the seir-adaptive audit; numbers unchanged by the fix except where noted)
+- **Commit:** see this entry's commit (grid itself ran on pre-fix code, commit `a59d46c`/post-pull `e44be1d` lineage, before `fix/seir-adaptive-audit` branched)
+- **Notebook / script:** ad hoc scripts mirroring `seirgnn2/sweep.py` + `seirgnn2/grids.py::screen`'s head factor, generalised over all 6 non-DCRNN backbones; merged into `seirgnn2/results/frozen9_all.json`
+- **Hardware:** Local CPU, torch 2.14, 6 workers
+- **Config:** docs/PROTOCOL.md frozen nine origins (0.50:0.05:0.90, test_frac 0.05 — verified byte-for-byte against `analysis/_build/protocol_check.py`, persistence 28.5410), window 3 → horizon 3, seeds 0/1/2, `loss="mse_z"`, `epochs=300`. 6 backbones (gcn, LSTM, STGAT, A3TGCN, ASTGCN, AAGCN — DCRNN excluded per user instruction) × 4 heads (direct, residual, foi_res, foi) = 24 arms, 657 rows (+ persistence).
+- **Question:** does any backbone × head combination clear the persistence floor on the frozen protocol (as opposed to the old 3-origin protocol, where significance is unreachable by construction)?
+- **Result:** `python seirgnn2/stats.py frozen9_all --metric RMSE`, origin unit (n=9):
+
+  | arm | test RMSE | Δ | p_adj |
+  |---|---|---|---|
+  | LSTM+residual | 27.73 | −0.81 | 0.583 |
+  | gcn+residual | 28.12 | −0.42 | 0.938 |
+  | *(16 more arms, 28.1–29.3, none significant)* | | | |
+  | LSTM/gcn/AAGCN/ASTGCN/A3TGCN/STGAT + foi | 40.6–44.7 | +12 to +17 | 0.023–0.035 * |
+  | STGAT+direct | 44.71 | +16.17 | 0.023 * |
+  | A3TGCN+direct | 48.37 | +19.83 | 0.023 * |
+- **Verdict:** answered — nothing beats persistence significantly on the frozen protocol; bare `foi` breaks on every backbone; `STGAT+direct`/`A3TGCN+direct` are structurally broken regardless of protocol (same failure as the old 3-origin numbers in `real.json`/`rescue.json`).
+- **Notes:** This grid ran on **pre-fix** code (before S1/S2/A1 below were found and fixed) — the `foi`/`foi_res` numbers here are superseded for any arm re-run post-fix (see EXP-061); `direct`/`residual`/non-adaptive numbers are unaffected (regression check in this commit: 120/138 `screen.json` rows bit-identical post-fix, only `head=foi`/`head=foi_res` differ, by ≤0.75 RMSE). An earlier report in this conversation mis-cited the `origin_seed` unit (3 origins × 3 seeds treated as 9 independent clusters) as significant for several 3-origin `screen.json` arms — retracted; `stats.py`'s own docstring says that unit is never valid alone.
+
 ## EXP-058 — Stage S8 re-run against the actual seroprevalence survey
 - **Date:** 2026-09-24
 - **Who:** Praveen De Silva

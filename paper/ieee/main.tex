@@ -48,7 +48,7 @@ On our data, last week's count explains 89\% of the variance in this week's coun
 The benchmark paper for this dataset reports no persistence baseline~\cite{weng2024graph}.
 On that paper's protocol and the same test slices, persistence scores an RMSE of 34.67, while our reproduction of its STGAT model~\cite{huang2019stgat} scores 42.31. % EV-089
 Two further problems make published gains hard to read.
-The widely used data array contains one week of backlogged reports, and persistence scores 44.80 with that week and 29.52 without it. % EV-006
+The widely used data array contains one week that is wrong because of a formula error in the source table, and persistence scores 44.80 with that week and 29.52 without it. % EV-006
 Studies with few forecast origins also cannot produce small $p$-values: an exact sign-flip test on three origins cannot return $p$ below 0.25. % EV-181
 
 We therefore ask a narrow question.
@@ -56,7 +56,7 @@ We test which additions help weekly district-level forecasting under a protocol 
 Our contributions are as follows.
 \begin{enumerate}
 \item A leakage-controlled rolling-origin protocol with persistence at every horizon, causal input lags, and paired tests over nine origins (Sections~\ref{sec:data} and~\ref{sec:setup}).
-\item A measurement of how one backlog week changes the persistence baseline, and of how a small number of origins limits testing (Sections~\ref{sec:data} and~\ref{sec:results}).
+\item A measurement of how one mis-computed week changes the persistence baseline, and of how a small number of origins limits testing (Sections~\ref{sec:data} and~\ref{sec:results}).
 \item A controlled comparison of output heads. On validation, the gain of a gated SEIR head over failing encoders is explained by its persistence anchor, although on test the SEIR version is lower. A bare SEIR head with a population-scaled force of infection on an adaptive graph is 1.26 cases worse than persistence, and the effect of the scaling alone is untested for the bare head (Section~\ref{sec:results}). % EV-111
 \item Negative results for four common additions, each tested against its own control: a learned adjacency, generated training data, climate lags and policy covariates, and spatial priors (Section~\ref{sec:results}).
 \end{enumerate}
@@ -89,13 +89,14 @@ Fig.~\ref{fig:data}b shows the national series, including the large epidemic of 
 \begin{figure}[t]
 \centering
 \includegraphics[width=\columnwidth]{figures/fig_data.pdf}
-\caption{National weekly dengue cases (sum over 25 districts). (a) The legacy benchmark array, with the week-395 reporting backlog marked. (b) The rebuilt series used in all main experiments.}
+\caption{National weekly dengue cases (sum over 25 districts). (a) The legacy benchmark array, with the mis-computed week 395 marked. (b) The rebuilt series used in all main experiments.}
 \label{fig:data}
 \end{figure}
 
 An earlier benchmark array, which we call the legacy array, has 459 weeks~\cite{weng2024graph}. % EV-002
 In it, the national total is 7165 cases in week 395, against 396 and 414 in the weeks on either side (Fig.~\ref{fig:data}a). % EV-162
-We attribute this jump to a reporting backlog.
+The jump is not a real surge.
+The published table for that week (Volume 48, No.~2) has a spreadsheet formula error: 15 of the 24 inner cells of the weekly row equal the sum of the two cells before them, while the table's year-to-date row, which equals the weekly count in the first week of the year, sums, with the Kalmunai division, to 351, which is the published national total. % EV-192
 Persistence has an RMSE of 44.80 on the legacy array and 29.52 once that week is excluded. % EV-006
 We use the legacy array only in Section~\ref{sec:results} to label older results.
 
@@ -323,13 +324,13 @@ Two more tests used the nine-origin setting of earlier experiment code with case
 Lagged policy and workplace-mobility covariates give test RMSE of 30.06 and 30.07 against 30.05 for the cases-only model, with Holm-adjusted $p$ of 1.0 for both. % EV-068
 A movement-restriction prior with fixed exponents of 0.5, 1 and 2 gives 30.59, 31.28 and 32.43 against 30.07, and is significantly worse at the two larger exponents. % EV-069
 
-Older results on the legacy array, which includes the backlog week, are not comparable with the tables above.
+Older results on the legacy array, which includes the week-395 error, are not comparable with the tables above.
 A physics-style spatial loss and an adaptive graph gave a pooled RMSE of 44.64 against 45.47 for the fixed graph and 44.80 for persistence, and a paired $t$-test against the fixed graph gave $p$ of about 0.10 to 0.14. % EV-083
 WGAN-GP augmentation raised RMSE on the middle fold to 124.13, against 43.71 with no augmentation and 41.74 with jitter and warping. % EV-086
 
 \subsection{Interval forecasts}
 A Gaussian output head gives a predictive interval.
-These comparisons use the legacy-array folds, which include the backlog week, because the Gaussian-head results exist only there.
+These comparisons use the legacy-array folds, which include the week-395 error, because the Gaussian-head results exist only there.
 On those folds, the nominal 95\% intervals of the Gaussian head cover 94.7\% to 96.2\% of targets, with mean widths of 123 to 250 cases. % EV-144, EV-145, EV-146, EV-147, EV-148
 A simple interval needs no network: persistence plus the 2.5th and 97.5th percentiles of training-window residuals, per horizon. % EV-188
 It covers 96.0\% of targets with a mean width of 99 cases, and a version scaled by $\sqrt{1+c_{t-1}}$ covers 96.3\% with a mean width of 74 cases. % EV-142, EV-143
@@ -367,7 +368,7 @@ The nine origins give 9 paired units, which allows $p$ down to 0.0039 but gives 
 Six of the 30 main arms were hand-picked after earlier results, the 46-arm grid planned for them was not run, and the Benjamini-Hochberg family therefore does not describe a clean selection. % EV-184
 The static graph in all main runs contains two edges that are not real borders, Kandy to Ampara and Kegalle to Kalutara; a corrected file exists, and we did not repeat the main runs with it. % EV-010
 Fixed epidemic constants (reporting fraction, latent and infectious rates) are taken from the literature and not fitted by district. % EV-011
-The interval comparison and the older WGAN-GP and adaptive-graph results use the legacy array, which contains the backlog week.
+The interval comparison and the older WGAN-GP and adaptive-graph results use the legacy array, which contains the week-395 error.
 We study one country, one disease and a horizon of three weeks.
 
 %=====================================================================

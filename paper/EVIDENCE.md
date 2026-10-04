@@ -282,6 +282,8 @@ Each row was read from the file named; nothing was run. Status VERIFIED (code).
 
 | EV-191 | Baseline GNN design: residual over persistence, log1p target, rolling-origin CV, grad clip 5, training-fold normalisation (the v2 baseline). The v1 plain GCN on absolute counts lost to persistence on every metric. The v2 baseline matched, not beat, the persistence floor | as stated | `docs/decisions/0001-baseline-training-refinements.md`; `notebooks/baseline/dengue_baseline_GNN_v2.ipynb` | LOG-ONLY (document) |
 
+| EV-192 | Week 395 of the legacy array is a source-table error, not a backlog: in the published table for Vol. 48 No. 2 (26 Dec 2020 to 1 Jan 2021) the weekly row has 15 of its 24 inner cells equal to the sum of the two cells before them (a spreadsheet formula error); its district sum is 7165; the year-to-date row, which equals the weekly count in the first week of the year, sums with the Kalmunai division to 351, the published national total | 15 of 24; 7165; 351 | `data/external/report_corrections.json` (fields evidence, reason); `analysis/_build/build_corrected_cases.py` docstring and `extract_week1_correction` | VERIFIED (saved file) |
+
 <!-- BEGIN GENERATED -->
 
 # Part C. Rows derived by paper/ieee/scripts (IEEE draft)

@@ -42,7 +42,7 @@ def fig_data() -> dict:
     fig, ax = plt.subplots(2, 1, figsize=(W, 2.45))
     ax[0].plot(np.arange(len(legacy)), legacy, color=OI["blue"])
     ax[0].axvline(BACKLOG, color=OI["vermillion"], lw=0.7, ls="--")
-    ax[0].annotate("week 395\n(reporting backlog)", xy=(BACKLOG, legacy[BACKLOG]),
+    ax[0].annotate("week 395:\nsource-table error", xy=(BACKLOG, legacy[BACKLOG]),
                    xytext=(228, 7700), fontsize=6.5, color=OI["vermillion"],
                    arrowprops=dict(arrowstyle="->", color=OI["vermillion"], lw=0.6))
     ax[0].set_xlabel("Week index in the legacy array (0 = first week)")

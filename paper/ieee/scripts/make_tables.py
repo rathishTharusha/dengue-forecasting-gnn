@@ -218,7 +218,7 @@ def p3() -> None:
             "results.json; frozen9_plus_audit.json")
     t = ("\\begin{table}[t]\n\\centering\n\\caption{Evaluation protocols, 3 seeds each. Persistence test RMSE "
          "(cases per district-week) differs between protocols because the test weeks differ, so numbers from "
-         "different rows are never compared. Legacy array: with / without the backlog week.}\n"
+         "different rows are never compared. Legacy array: with / without the week-395 error.}\n"
          "\\label{tab:protocols}\n\\footnotesize\n\\setlength{\\tabcolsep}{3pt}\n"
          "\\begin{tabular}{@{}lccr@{}}\n\\toprule\n"
          "Protocol & Origins & Test share & Persistence \\\\\n\\midrule\n"

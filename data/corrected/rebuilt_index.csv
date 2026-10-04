@@ -1,5 +1,5 @@
 row,year,week_no,week_start,status,is_artifact
-0,2013,26,2013-05-15,observed,False
+0,2013,26,2013-06-15,observed,False
 1,2013,27,2013-06-22,observed,False
 2,2013,28,2013-06-29,observed,False
 3,2013,29,2013-07-06,missing,False
@@ -208,7 +208,7 @@ row,year,week_no,week_start,status,is_artifact
 206,2017,23,2017-05-27,observed,False
 207,2017,24,2017-06-03,observed,False
 208,2017,25,2017-06-10,observed,False
-209,2017,26,2017-05-17,observed,False
+209,2017,26,2017-06-17,observed,False
 210,2017,27,2017-06-24,observed,False
 211,2017,28,2017-07-01,observed,False
 212,2017,29,2017-07-08,observed,False
@@ -296,7 +296,7 @@ row,year,week_no,week_start,status,is_artifact
 294,2019,7,2019-02-02,observed,False
 295,2019,8,2019-02-09,observed,False
 296,2019,9,2019-02-16,observed,False
-297,2019,10,2019-01-26,observed,False
+297,2019,10,2019-02-23,observed,False
 298,2019,11,2019-03-02,observed,False
 299,2019,12,2019-03-09,observed,False
 300,2019,13,2019-03-16,observed,False
@@ -345,7 +345,7 @@ row,year,week_no,week_start,status,is_artifact
 343,2020,4,2020-01-11,observed,False
 344,2020,5,2020-01-18,observed,False
 345,2020,6,2020-01-25,observed,False
-346,2020,7,2020-01-01,observed,False
+346,2020,7,2020-02-01,observed,False
 347,2020,8,2020-02-08,observed,False
 348,2020,9,2020-02-15,observed,False
 349,2020,10,2020-02-22,observed,False
@@ -377,7 +377,7 @@ row,year,week_no,week_start,status,is_artifact
 375,2020,36,2020-08-22,observed,False
 376,2020,37,2020-08-29,observed,False
 377,2020,38,2020-09-05,observed,False
-378,2020,39,2020-09-11,observed,False
+378,2020,39,2020-09-12,observed,False
 379,2020,40,2020-09-19,observed,False
 380,2020,41,2020-09-26,observed,False
 381,2020,42,2020-10-03,observed,False
@@ -387,7 +387,7 @@ row,year,week_no,week_start,status,is_artifact
 385,2020,46,2020-10-31,observed,False
 386,2020,47,2020-11-07,observed,False
 387,2020,48,2020-11-14,observed,False
-388,2020,49,2020-12-21,observed,False
+388,2020,49,2020-11-21,observed,False
 389,2020,50,2020-11-28,observed,False
 390,2020,51,2020-12-05,observed,False
 391,2020,52,2020-12-12,observed,False
@@ -536,7 +536,7 @@ row,year,week_no,week_start,status,is_artifact
 534,2023,38,2023-09-09,observed,False
 535,2023,39,2023-09-16,observed,False
 536,2023,40,2023-09-23,observed,False
-537,2023,41,2023-08-31,observed,False
+537,2023,41,2023-09-30,observed,False
 538,2023,42,2023-10-07,observed,False
 539,2023,43,2023-10-14,observed,False
 540,2023,44,2023-10-21,observed,False
@@ -553,7 +553,7 @@ row,year,week_no,week_start,status,is_artifact
 551,2024,3,2024-01-06,observed,False
 552,2024,4,2024-01-13,observed,False
 553,2024,5,2024-01-20,observed,False
-554,2024,6,2023-12-27,observed,False
+554,2024,6,2024-01-27,observed,False
 555,2024,7,2024-02-03,observed,False
 556,2024,8,2024-02-10,observed,False
 557,2024,9,2024-02-17,observed,False

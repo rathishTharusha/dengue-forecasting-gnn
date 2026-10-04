@@ -157,6 +157,22 @@ def load_reports(raw_csv: Path) -> tuple[pd.DataFrame, pd.DataFrame]:
     return table, nat
 
 
+def snap_to_weekly_grid(dates: pd.Series) -> pd.Series:
+    """Force the report dates onto one weekly grid, anchored where most rows already sit.
+
+    ``rebuilt`` has one row per consecutive report week, so row ``i`` starts exactly
+    ``7 * i`` days after row 0. ``report_dates`` only checks that a parsed date's *year*
+    agrees with the volume year, so a parsed date with the right year and the wrong
+    month passed unchanged (eight rows in the first build, e.g. 2013-05-15 for a report
+    that starts 2013-06-15). Every date joined to climate, NDVI, policy and the seasonal
+    features comes from here, so the grid is enforced rather than trusted.
+    """
+    d = pd.Series(pd.to_datetime(dates.to_numpy()))
+    steps = pd.to_timedelta(7 * np.arange(len(d)), unit="D")
+    anchor = (d - steps).mode().iloc[0]
+    return pd.Series(anchor + steps, index=dates.index)
+
+
 def report_dates(table: pd.DataFrame) -> pd.Series:
     """One start date per report, repairing the dump's few wrong parsed dates.
 
@@ -223,6 +239,7 @@ def build_rebuilt(table: pd.DataFrame, nat: pd.DataFrame,
             j = min(known.index, key=lambda kk: abs(pos[kk] - pos[k]))
             dates.loc[k] = known.loc[j] + pd.Timedelta(weeks=pos[k] - pos[j])
 
+    dates = snap_to_weekly_grid(dates)
     index = pd.DataFrame({
         "row": range(len(wide)),
         "year": [k[0] for k in wide.index],

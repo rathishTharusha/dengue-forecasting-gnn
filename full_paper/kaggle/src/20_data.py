@@ -147,7 +147,15 @@ if dates.isna().any():                   # a missing week at either end: step fr
         dates.loc[k] = known.loc[j] + pd.Timedelta(weeks=pos[k] - pos[j])
 CASES = wide.to_numpy(dtype=np.float64)
 MISSING = ~observed
-WEEK_START = pd.Series(pd.to_datetime(dates.to_numpy()))
+# The rows are consecutive report weeks, so the dates are one weekly grid. report_dates only checks the
+# year, and eight parsed dates had the right year and the wrong month; those would read another week's
+# weather and season. Snap every date to the grid anchored where most rows already sit, and assert it.
+_steps = pd.to_timedelta(7 * np.arange(len(dates)), unit="D")
+_anchor = (pd.Series(pd.to_datetime(dates.to_numpy())) - _steps).mode().iloc[0]
+WEEK_START = pd.Series(_anchor + _steps)
+assert (WEEK_START.diff().dropna().dt.days == 7).all(), "week_start is not a weekly grid"
+print(f"week index: {WEEK_START.iloc[0]:%Y-%m-%d} .. {WEEK_START.iloc[-1]:%Y-%m-%d}; "
+      f"{int((pd.Series(pd.to_datetime(dates.to_numpy())) != WEEK_START).sum())} parsed dates were off the weekly grid")
 YEARS = np.array([k[0] for k in wide.index])
 T = len(CASES)
 

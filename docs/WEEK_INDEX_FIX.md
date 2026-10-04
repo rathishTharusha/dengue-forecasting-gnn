@@ -59,3 +59,32 @@ See EXP-062 in `docs/EXPERIMENT_LOG.md`. Nine-origin arms of the frozen protocol
 only (`seirgnn2/results/frozen9_*`) are not affected.
 
 Older `seirgnn2/results/*.json` grids that used seasonal features or climate (for example `screen`, EXP-032 to EXP-049) were also trained on mis-dated rows by the same few windows. The paper does not use them, and they are not re-run.
+
+## Starting the Kaggle re-run (EXP-062)
+
+The Kaggle CLI and credentials are not usable from the machine that prepared this branch, so
+the run is started by whoever has them. The notebook source is fixed and the kernel folder is
+rebuilt (`python scripts/build_kaggle_notebook.py`). The source dataset
+`tharushaperera16/dengue-physics-gnn-sources` does not change.
+
+```bash
+kaggle kernels push -p full_paper/kaggle/kernel          # full profile, about 3 hours on Kaggle CPU
+kaggle kernels output tharushaperera16/dengue-physics-gnn-reproduction -p full_paper/outputs/kaggle_run_weekfix
+python analysis/_build/compare_exp062.py full_paper/outputs/kaggle_run_weekfix/runs.jsonl
+```
+
+Do not write over `full_paper/outputs/kaggle_run`: EXP-050 stays on disk until EXP-062 replaces it
+in the entry. `compare_exp062.py` first checks that the 35 three-origin configurations that read no
+date-joined input (315 runs) reproduce EXP-050 and flags any whose largest test-RMSE difference
+exceeds the seed-level spread; stop and explain any flag before using a new number. Then it prints
+old and new means for the 34 + 7 affected configurations (495 runs).
+
+## COVID and stringency-prior arms (EXP-056, EXP-057)
+
+Run locally from a worktree of this branch, to new output directories, torch 2.13 CPU:
+`analysis/_build/run_covid_covariates.py --out analysis/results/covid_covariates_weekfix` (81 runs:
+base, policy, policy_mobility, 9 origins, 3 seeds) and
+`analysis/_build/run_stringency_prior.py --out analysis/results/seir_gnn/s5_v2_weekfix` (108 runs:
+base and three fixed exponents). Each run takes about 30 to 150 seconds on one core. The base arms
+read no covariate, so they check that this machine reproduces the old numbers (the old runs used
+torch 2.1.2 and, for origin 0.90, a GPU, so seed-level differences of about 0.1 RMSE are expected).

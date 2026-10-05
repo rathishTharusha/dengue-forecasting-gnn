@@ -1,0 +1,170 @@
+"""Build the case series for the weeks after 2024-W10 from the downloaded weekly reports.
+
+Every rule below was fixed and committed BEFORE this script was run on the new reports
+(``docs/NEW_WEEKS_RULES.md``). Rules are applied automatically; every correction and every
+missing week is logged in ``data/new_weeks/corrections.json``. No model is run on these weeks.
+
+Outputs (``data/new_weeks/``): ``cases.npy`` (weeks, 25, 1) with NaN for missing weeks,
+``index.csv`` (one row per expected report), ``corrections.json``, ``qc_report.json``.
+
+    python analysis/_build/parse_new_weeks.py
+"""
+from __future__ import annotations
+
+import csv
+import datetime as dt
+import json
+import re
+import sys
+from pathlib import Path
+
+import numpy as np
+
+REPO = Path(__file__).resolve().parent.parent.parent
+sys.path.insert(0, str(REPO / "analysis" / "_build"))
+RAW = REPO / "data" / "raw" / "wer_new"
+MANIFEST = REPO / "data" / "external" / "wer_new_manifest.csv"
+OUT = REPO / "data" / "new_weeks"
+
+# ---- frozen rules (docs/NEW_WEEKS_RULES.md) -------------------------------------------------
+FIRST, LAST = (51, 11), (53, 33)            # expected reports, volume and number
+FORMULA_CELL_THRESHOLD = 8                  # of 24 inner cells equal to the sum of the two before
+MAX_GAP_FROM_PREVIOUS = (5, 9)              # days between consecutive printed week starts
+TABLE_TITLE = re.compile(
+    r"(\d{1,2})(?:st|nd|rd|th)\s*[^\w\s]+\s*(\d{1,2})(?:st|nd|rd|th)\s+([A-Za-z]{3,9})\s+(\d{4})\s*\((\d+)", re.S)
+MONTHS = {m: i for i, m in enumerate(
+    ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"], 1)}
+
+
+def expected_reports() -> list[tuple[int, int]]:
+    out, (v, n) = [], FIRST
+    while (v, n) <= LAST:
+        out.append((v, n))
+        n += 1
+        if n > 52:
+            v, n = v + 1, 1
+    return out
+
+
+def wer_columns() -> list[str]:
+    from build_corrected_cases import WER_COLUMNS
+
+    return list(WER_COLUMNS)
+
+
+def parse_pdf(path: Path, columns: list[str]) -> dict:
+    import pymupdf
+
+    doc = pymupdf.open(path)
+    for page in doc:
+        text = page.get_text()
+        if "Table 1" not in text or "Dengue" not in text:
+            continue
+        m = TABLE_TITLE.search(text)
+        tables = page.find_tables().tables
+        if not tables or m is None:
+            continue
+        grid = tables[0].extract()
+        header = next((r for r in grid if r and r[0] == "RDHS"), None)
+        i = next((k for k, r in enumerate(grid) if r and r[0] and str(r[0]).startswith("Dengue")), None)
+        if header is None or i is None or str(grid[i][1]) != "B" or str(grid[i + 1][1]) != "A":
+            continue
+        if len(header[2:]) != len(columns):
+            return {"error": f"column count {len(header[2:])}"}
+        end_day, month, year = int(m.group(2)), MONTHS[m.group(3)[:3].lower()], int(m.group(4))
+        end = dt.date(year, month, end_day)
+        try:
+            b = [int(str(x).replace(",", "")) for x in grid[i][2:]]
+            a = [int(str(x).replace(",", "")) for x in grid[i + 1][2:]]
+        except ValueError as exc:
+            return {"error": f"non-integer cell: {exc}"}
+        return {"A": a, "B": b, "end": end, "start": end - dt.timedelta(days=6), "week_label": int(m.group(5))}
+    return {"error": "dengue table not found"}
+
+
+def checks(a: list[int]) -> dict:
+    districts, kalmunai, national = sum(a[:25]), a[25], a[26]
+    formula = sum(1 for k in range(2, 26) if abs(a[k] - (a[k - 1] + a[k - 2])) <= 1)
+    return {"sum_ok": districts + kalmunai == national, "district_sum": districts, "national": national,
+            "formula_cells": formula, "formula_flag": formula >= FORMULA_CELL_THRESHOLD}
+
+
+def main() -> int:
+    columns = wer_columns()
+    files = {}
+    for r in csv.DictReader(MANIFEST.open(encoding="utf-8")):
+        files.setdefault((int(r["volume"]), int(r["number"])), []).append(RAW / r["file"])
+    reports = expected_reports()
+    cases = np.full((len(reports), 25, 1), np.nan, dtype=np.float32)
+    rows, log, prev = [], [], None
+    for k, key in enumerate(reports):
+        row = {"row": k, "volume": key[0], "number": key[1], "status": "missing", "week_start": "",
+               "week_end": "", "printed_week": "", "gap_days": "", "check": ""}
+        paths = files.get(key, [])
+        parsed = [parse_pdf(p, columns) for p in paths]
+        ok = [p for p in parsed if "A" in p]
+        if not ok:
+            log.append({"report": key, "action": "missing", "reason": "no file" if not paths else
+                        "; ".join(p.get("error", "?") for p in parsed)})
+            rows.append(row)
+            prev = None if prev is None else prev
+            continue
+        if len({tuple(p["A"]) for p in ok}) > 1:
+            log.append({"report": key, "action": "missing", "reason": "two files disagree"})
+            rows.append(row)
+            continue
+        p = ok[0]
+        a, b = p["A"], p["B"]
+        c = checks(a)
+        vec, status = None, "observed"
+        # B-derived weekly vector: week 1 of a volume -> B itself; otherwise B minus the previous report's B
+        b_week = None
+        if key[1] == 1:
+            b_week = b
+        elif prev is not None and prev["key"] == (key[0], key[1] - 1):
+            b_week = [x - y for x, y in zip(b, prev["B"])]
+        if c["sum_ok"] and not c["formula_flag"]:
+            vec = a
+            if b_week is not None:
+                bad = [columns[j] for j in range(26) if a[j] != b_week[j]]
+                if bad:
+                    log.append({"report": key, "action": "warning", "reason": "row A differs from the cumulative "
+                                "difference", "columns": bad[:10], "n": len(bad)})
+        elif b_week is not None and checks(b_week)["sum_ok"] and not checks(b_week)["formula_flag"]:
+            vec, status = b_week, "corrected"
+            log.append({"report": key, "action": "corrected", "reason": "row A failed " + (
+                "the district sum" if not c["sum_ok"] else "the formula-pattern test"), "checks": c,
+                "replacement": "cumulative difference"})
+        else:
+            log.append({"report": key, "action": "missing", "reason": "row A failed and no valid replacement",
+                        "checks": c})
+        gap = (p["start"] - prev["start"]).days if prev is not None else None
+        regular = gap is None or MAX_GAP_FROM_PREVIOUS[0] <= gap <= MAX_GAP_FROM_PREVIOUS[1]
+        if not regular:
+            log.append({"report": key, "action": "warning", "reason": f"printed start date {p['start']} is {gap} days "
+                        "after the previous week"})
+        row.update(week_start=p["start"].isoformat(), week_end=p["end"].isoformat(), printed_week=p["week_label"],
+                   gap_days="" if gap is None else gap, check="ok" if c["sum_ok"] else "row A sum failed")
+        if vec is not None:
+            cases[k, :, 0] = np.array(vec[:25], dtype=np.float32)
+            row["status"] = status
+        rows.append(row)
+        prev = {"key": key, "B": b, "start": p["start"]}
+    OUT.mkdir(parents=True, exist_ok=True)
+    np.save(OUT / "cases.npy", cases)
+    with (OUT / "index.csv").open("w", newline="", encoding="utf-8") as fh:
+        w = csv.DictWriter(fh, fieldnames=list(rows[0]))
+        w.writeheader()
+        w.writerows(rows)
+    (OUT / "corrections.json").write_text(json.dumps(log, indent=1, default=str), encoding="utf-8")
+    counts = {s: sum(r["status"] == s for r in rows) for s in ("observed", "corrected", "missing")}
+    gaps = sorted({int(r["gap_days"]) for r in rows if r["gap_days"] != ""})
+    qc = {"expected_reports": len(reports), **counts, "gap_days_seen": gaps, "log_entries": len(log)}
+    (OUT / "qc_report.json").write_text(json.dumps(qc, indent=1), encoding="utf-8")
+    print(qc)
+    return 0
+
+
+if __name__ == "__main__":
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    raise SystemExit(main())

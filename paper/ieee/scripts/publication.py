@@ -125,13 +125,13 @@ def statistics():
     p=REPO/"paper/EVIDENCE.md";txt=p.read_text(encoding="utf-8").split("\n# Part E. Codex publication audit")[0]
     p.write_text(txt.rstrip()+"\n"+"\n".join(ev)+"\n",encoding="utf-8")
     lines=[r"\begin{table*}[t]",r"\centering",
-           r"\caption{Test results on the rebuilt series (nine rolling origins, three seeds). RMSE and MAE are in cases per district-week, averaged over origins and seeds; horizon columns report RMSE. $\Delta$ is the seed-averaged paired RMSE difference from persistence with a 95\% t interval over origins (negative is better). $p_{\rm adj}$ is the exact sign-flip test with Holm adjustment over all thirty learned arms. Bold marks the lowest test RMSE (the proposed Adaptive SEIR-GNN); no difference is significant after adjustment.}",
+           r"\caption{Test results on the rebuilt series (nine rolling origins, three seeds). RMSE and MAE are in cases per district-week, averaged over origins and seeds; horizon columns report RMSE. $\Delta$ is the seed-averaged paired RMSE difference from persistence with a 95\% t interval over origins (negative is better). Bold marks the lowest test RMSE (the proposed Adaptive SEIR-GNN); an interval that includes zero shows no clear difference from persistence.}",
            r"\label{tab:main}",r"\small\setlength{\tabcolsep}{3pt}",r"\begin{tabular}{@{}p{2.85in}rrrrrr@{}}",r"\toprule",
-           r"Model & $h=1$ & $h=2$ & $h=3$ & RMSE & MAE & $\Delta$ [95\% CI]; $p_{\rm adj}$ \\",r"\midrule"]
+           r"Model & $h=1$ & $h=2$ & $h=3$ & RMSE & MAE & $\Delta$ [95\% CI] \\",r"\midrule"]
     best="adaptive_gwn+foi_res anchor E0enc"   # lowest test RMSE; bolded, not a significance mark
     for i,(name,label) in enumerate(P9_ROWS,200):
         s=out[name];h=[np.mean([r[f"RMSE_h{k}"] for r in by[name]]) for k in (1,2,3)]
-        last="--" if name=="persistence" else f"{s['delta']:+.2f} [{s['ci'][0]:+.2f}, {s['ci'][1]:+.2f}]; {s['p_holm']:.3f}"
+        last="--" if name=="persistence" else f"{s['delta']:+.2f} [{s['ci'][0]:+.2f}, {s['ci'][1]:+.2f}]"
         cells=[label]+[f"{v:.2f}" for v in h+[s["rmse"],s["mae"]]]+[last]
         if name==best:
             cells=[r"\textbf{"+c+"}" for c in cells]

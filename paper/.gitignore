@@ -13,3 +13,6 @@ main-highlighted.tex
 main-highlighted.pdf
 supplement.pdf
 ieee/results/preview/
+
+# Publish the reviewed paper PDF alongside its sources.
+!/main.pdf

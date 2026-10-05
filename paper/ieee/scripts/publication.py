@@ -23,7 +23,7 @@ from scipy.stats import t
 from common import FIG, RES, REPO, TAB, P9_FILE, LEGACY, REBUILT, load_json, project_stats as ps
 from historical_tables import P9_ROWS
 
-plt.rcParams.update({"font.family": "sans-serif", "font.sans-serif": ["Arial", "DejaVu Sans"],
+plt.rcParams.update({"font.family": "serif", "font.serif": ["Times New Roman", "STIXGeneral"], "mathtext.fontset": "stix",
                      "font.size": 9, "axes.labelsize": 9, "xtick.labelsize": 9,
                      "ytick.labelsize": 9, "legend.fontsize": 9, "pdf.fonttype": 42,
                      "axes.linewidth": .6, "lines.linewidth": .9})

@@ -40,3 +40,8 @@ The final main manuscript contains Figure 1 (architecture, double column), Figur
 ## Follow-up diagram redesign
 
 At the user's request, the architecture and evaluation chronology were redesigned with editable native draw.io sources (`ieee/diagrams/architecture.drawio` and `ieee/diagrams/evaluation_protocol.drawio`). Rounded boxes, consistent spacing, restrained fill colors and routed arrows improve the hierarchy. The architecture distinguishes forecasting, conditional inputs and training-only loss; the protocol explicitly retains target overlap and pending confirmation. `drawio_diagrams.py` reads the editable XML and exports vector PDFs; the normal figure entrypoint delegates to it and preserves existing source edits. Both diagrams and their grayscale previews were inspected, followed by the compiled pages 3 and 4. Main remains six pages, warning-free, with 9-point diagram labels and no raster images. Stored scientific results are unchanged.
+
+
+## Typography and arrow correction
+
+All four included figures now use Times New Roman serif labels, with STIX mathematical glyphs in plots, matching the manuscript?s Times-style text. This supersedes the earlier Arial font notes. Both editable draw.io files were updated along with their generator defaults. Diagram arrows now use dark 1.15-point strokes, larger filled heads rendered above box borders, and the protocol has wider inter-box gaps. Color previews of all four figures and the compiled protocol page were visually inspected. Main PDF remains six pages with no LaTeX warnings; vector/text checks pass.

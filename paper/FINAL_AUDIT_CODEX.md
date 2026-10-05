@@ -52,3 +52,8 @@ The saved nine-origin source SHA-256 is `9e30a1d4d665bb00a86a441d9b49bb91d495393
 6. `EVIDENCE.md`, `ieee/results/development_statistics.csv`, `ieee/results/partition_overlap.json` and `ieee/results/publication_checks.json`: claim provenance and machine-readable checks.
 
 Before submission, the authors must resolve the fold embargo and final evaluation protocol, complete the corrected and untouched-period experiments, verify the manuscript independently, approve the AI-use statement, and check ICITR instructions. None of these unresolved scientific decisions is silently assumed complete.
+
+
+## Follow-up diagram redesign
+
+At the user's request, the architecture and evaluation chronology were redesigned with editable native draw.io sources (`ieee/diagrams/architecture.drawio` and `ieee/diagrams/evaluation_protocol.drawio`). Rounded boxes, consistent spacing, restrained fill colors and routed arrows improve the hierarchy. The architecture distinguishes forecasting, conditional inputs and training-only loss; the protocol explicitly retains target overlap and pending confirmation. `drawio_diagrams.py` reads the editable XML and exports vector PDFs; the normal figure entrypoint delegates to it and preserves existing source edits. Both diagrams and their grayscale previews were inspected, followed by the compiled pages 3 and 4. Main remains six pages, warning-free, with 9-point diagram labels and no raster images. Stored scientific results are unchanged.

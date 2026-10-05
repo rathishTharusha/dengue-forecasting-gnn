@@ -26,7 +26,7 @@ Then run from the repository root:
 python paper/ieee/scripts/audit_publication.py
 ```
 
-`publication.py` is the canonical generator for the included figures and nine-origin table. It reads only existing saved results, preserves the project sign-flip/BH calculations, and adds descriptive paired t intervals. No training or new-period case inspection occurs. Input hashes, unrounded statistics, and partition-overlap evidence are saved under `results/`. The dates in the data figure use the verified repaired calendar; historical model scores retain their original data/graph provenance.
+`publication.py` is the canonical entrypoint for the included figures and nine-origin table. The architecture and protocol diagrams are rendered from editable native draw.io files in `diagrams/` by `scripts/drawio_diagrams.py`; see `diagrams/README.md`. It reads only existing saved results, preserves the project sign-flip/BH calculations, and adds descriptive paired t intervals. No training or new-period case inspection occurs. Input hashes, unrounded statistics, and partition-overlap evidence are saved under `results/`. The dates in the data figure use the verified repaired calendar; historical model scores retain their original data/graph provenance.
 
 `historical_figures.py` and `historical_tables.py` preserve the old generators for traceability; do not run them as final publication entrypoints. The current wrappers prevent included figures and tables from reverting to the old designs. Omitted negative-ablation and interval tables remain historical artifacts. The supplementary `tables/seed_variability.tex` and CSV statistics separate within-origin seed variation from between-origin uncertainty; the optional table is not included in the space-limited main manuscript.
 

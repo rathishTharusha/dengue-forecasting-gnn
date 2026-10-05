@@ -63,46 +63,13 @@ def data_plot():
 
 
 def architecture():
-    fig, ax = plt.subplots(figsize=(7.16, 2.55))
-    fig.subplots_adjust(left=.01, right=.99, bottom=.02, top=.98)
-    ax.set(xlim=(0, 10), ylim=(0, 4.2)); ax.axis("off")
-    def box(x, y, w, h, label, dashed=False):
-        ax.add_patch(Rectangle((x,y),w,h,fill=False,lw=.7,ls="--" if dashed else "-"))
-        ax.text(x+w/2,y+h/2,label,ha="center",va="center",fontsize=9)
-    def arr(a,b,dashed=False):
-        ax.add_patch(FancyArrowPatch(a,b,arrowstyle="->",mutation_scale=9,lw=.7,
-                                    linestyle="--" if dashed else "-"))
-    box(.1,2.8,1.5,1.0,"Past cases\nTraining-scale\nlog transform")
-    box(2,2.8,1.6,1.0,"Encoder\nStatic / adaptive\nrepresentation")
-    box(4,2.8,1.35,1.0,"Read-out\n(per horizon)")
-    box(5.85,2.8,1.8,1.0,"Selected head\nDirect / residual\nGated / SEIR")
-    box(8.1,2.8,1.75,1.0,"Inverse transform\nCase forecasts")
-    for a,b in [((1.6,3.3),(2,3.3)),((3.6,3.3),(4,3.3)),((5.35,3.3),(5.85,3.3)),((7.65,3.3),(8.1,3.3))]:arr(a,b)
-    box(.1,1.1,2.25,1.0,"Last observed cases\nPersistence anchor")
-    box(3.05,1.1,2.3,1.0,"SEIR heads only\nPopulation + initial state\nDaily compartment flows")
-    arr((2.35,1.6),(2.65,1.6)); arr((2.65,1.6),(2.65,2.5)); arr((2.65,2.5),(6.75,2.5));arr((6.75,2.5),(6.75,2.8))
-    arr((5.35,1.6),(6.75,1.6));arr((6.75,1.6),(6.75,2.5))
-    box(8.1,.9,1.75,1.2,"Training only\nTargets + loss\nSquared error / NB",True)
-    arr((8.98,2.8),(8.98,2.1),True)
-    ax.text(.1,.35,"SEIR: susceptible, exposed, infectious, recovered.  NB: negative binomial.",fontsize=9)
-    save(fig,"fig_arch.pdf")
+    from drawio_diagrams import architecture as export_architecture
+    export_architecture()
 
 
 def protocol():
-    fig, ax = plt.subplots(figsize=(3.5,2.0)); fig.subplots_adjust(left=.025,right=.975,bottom=.03,top=.97)
-    ax.set(xlim=(0,10),ylim=(0,5));ax.axis("off")
-    for x,w,label,hatch in [(0,4.6,"Training",""),(4.6,2.5,"Validation","//"),(7.1,2.9,"Development\nevaluation","xx")]:
-        ax.add_patch(Rectangle((x,3.25),w,1.05,fill=False,lw=.7,hatch=hatch))
-        ax.text(x+w/2,3.77,label,ha="center",va="center",fontsize=9,
-                bbox={"facecolor":"white","edgecolor":"none","pad":1})
-    ax.text(0,4.6,"Existing period: rolling origins",fontsize=9)
-    ax.text(0,2.5,"Model selection uses validation only.",fontsize=9)
-    ax.annotate("",xy=(9.9,2.15),xytext=(.1,2.15),arrowprops={"arrowstyle":"->","lw":.7})
-    ax.text(0,1.62,"Freeze settings",fontsize=9)
-    ax.add_patch(Rectangle((4.8,.4),5.2,1.1,fill=False,lw=.7,ls="--"))
-    ax.text(7.4,.95,"New-period confirmation\nPending; no results reported",ha="center",va="center",fontsize=9)
-    ax.annotate("",xy=(4.6,.95),xytext=(3.15,1.68),arrowprops={"arrowstyle":"->","lw":.7})
-    save(fig,"evaluation_protocol.pdf")
+    from drawio_diagrams import protocol as export_protocol
+    export_protocol()
 
 
 def statistics():

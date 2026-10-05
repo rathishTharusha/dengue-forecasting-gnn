@@ -185,6 +185,8 @@ Persistence has RMSE 28.54 and MAE 13.94; the GCN with a residual head, our base
 The Adaptive SEIR-GNN has the lowest test RMSE of all models, 27.45, a paired difference from persistence of -1.10 with interval [-2.84, 0.65]. % EV-215
 Its raw sign-flip $p$ is 0.199 and its Holm-adjusted $p$ is 1.000, so the improvement is not significant. % EV-219
 No learned model differs significantly from persistence after adjustment, in either direction. % EV-219
+The best result reported by Weng et al.~on the benchmark dataset is A3T-GCN with MAE 18.65 and RMSE 30.55; the Adaptive SEIR-GNN has lower error on both, 13.29 and 27.45. % EV-228, EV-215
+The two numbers come from different data representations, so we treat this as a reference point and not as a paired test.
 Fig.~\ref{fig:forest} shows that the intervals of the strongest models all lie mostly below zero but include it.
 Fig.~\ref{fig:origins} shows why: the Adaptive SEIR-GNN is below persistence at 7 of the 9 origins, but the origins differ far more from each other than the models do. % EV-114
 

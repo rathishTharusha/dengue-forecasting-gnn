@@ -35,8 +35,6 @@ def main() -> None:
     # (a) horizon
     ax = axs[0]
     series = [("persistence", "Persistence", BLACK, "o", "--"),
-              ("gcn+residual", "GCN, residual", SKY, "s", "-"),
-              ("adaptive_gwn+residual", "Adaptive GCN, residual", GREEN, "^", "-"),
               ("adaptive_gwn+foi_res anchor E0enc", "Adaptive SEIR-GNN", VERM, "D", "-")]
     for key, label, colour, marker, ls in series:
         s = arms[key]
@@ -46,7 +44,7 @@ def main() -> None:
     ax.set_xlabel("Forecast horizon (weeks)")
     ax.set_ylabel("Test RMSE (cases)")
     ax.legend(frameon=False, loc="upper left", handlelength=1.6, borderaxespad=0)
-    ax.set_ylim(21, 41)
+    ax.set_ylim(21, 37)
     ax.set_title("(a) Error by horizon", fontsize=8.5, loc="left")
 
     # (b) SEIR-head variants
@@ -107,7 +105,6 @@ def origins_figure() -> None:
     fig, ax = plt.subplots(figsize=(3.5, 2.05))
     fig.subplots_adjust(left=.14, right=.98, bottom=.2, top=.97)
     for name, label, colour, marker, ls in [("persistence", "Persistence", BLACK, "o", "--"),
-                                            ("gcn+residual", "GCN, residual", SKY, "s", "-"),
                                             ("adaptive_gwn+foi_res anchor E0enc", "Adaptive SEIR-GNN", VERM, "D", "-")]:
         ax.plot(origins, per_origin(name), ls=ls, marker=marker, ms=3.5, color=colour, label=label)
     ax.set_xticks(origins, [f"{o:.2f}" for o in origins], fontsize=7.5)

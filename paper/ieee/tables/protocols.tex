@@ -1,16 +1,10 @@
-\begin{table}[t]
-\centering
-\caption{Evaluation protocols, 3 seeds each. Persistence test RMSE (cases per district-week) differs between protocols because the test weeks differ, so numbers from different rows are never compared. Legacy array: with / without the backlog week.}
+\begin{table}[!ht]
+\centering\small
+\caption{Stored rebuilt-data development protocols. Each neural arm uses three seeds; persistence is deterministic. Both use 30 validation forecast starts. Test shares describe forecast starts, whose target weeks overlap partition boundaries.}
 \label{tab:protocols}
-\footnotesize
-\setlength{\tabcolsep}{3pt}
-\begin{tabular}{@{}lccr@{}}
-\toprule
-Protocol & Origins & Test share & Persistence \\
-\midrule
-Nine origins (main) & 0.50 to 0.90 by 0.05 & 5\% & 28.54 \\ % EV-141
-Three origins & 0.55, 0.70, 0.85 & 15\% & 36.02 \\ % EV-141
-Legacy array & 0.55, 0.70, 0.85 & 15\% & 44.80 / 29.52 \\ % EV-141
-\bottomrule
-\end{tabular}
-\end{table}
+\begin{tabular}{@{}lll@{}}\toprule
+Protocol & Origin fractions & Test share \\\midrule
+Nine-origin & 0.50--0.90, step 0.05 & 5\% \\
+Three-origin & 0.55, 0.70, 0.85 & 15\% \\
+\bottomrule\end{tabular}\end{table}
+% EV-141

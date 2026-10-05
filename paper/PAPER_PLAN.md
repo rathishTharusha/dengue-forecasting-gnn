@@ -1,3 +1,5 @@
+> **Codex status, 2026-10-05:** Earlier narrative and decisions below are historical. The current IEEE draft reports development evidence only. Corrected-graph/calendar reruns and untouched-period confirmation remain pending; target windows overlap partition boundaries (EV-218). Read `CODEX_HANDOVER_AUDIT.md`, `FIGURE_AUDIT.md` and `FINAL_AUDIT_CODEX.md` for the latest status. No replacement result is invented.
+
 # Paper plan (IEEE conference, IEEEtran)
 
 Written for: the project owner (Praveen De Silva) to approve before any paper text is written.
@@ -162,3 +164,10 @@ Not proposed for citation: keys in the bib that the full paper does not cite (xi
 | liu2025seirlstm | Liu et al., PLOS Comput. Biol. 21(9): e1013540, 2025 (already in the list) | Crossref record matches authors, volume, article number, year | SEIR design; the 11x reporting scale and the rates omega and gamma |
 
 No entry was added for Chan and Johansson 2012 or for Yi et al. 2021 because the paper does not yet rely on them.
+
+## Codex presentation continuation
+
+The current title and contributions are deliberately narrower than the older core story above. Pooled association is not explained predictive variance; gated-versus-SEIR results are mixed; date-dependent additions are pending replacement. No final scientific conclusion is frozen by the presentation revision. Previously approved citations remain approved; metadata corrections and primary-source links are recorded in REFERENCE_AUDIT.md. The proposed eighteen-block new-period design remains pending. Author resolution of the newly verified target-overlap issue is required before freezing a fresh evaluation.
+
+
+Final handoff: supplied ICITR authors incorporated; main is six pages including references, historical supplement two pages. See FINAL_AUDIT_CODEX.md for authoritative final status and blockers.

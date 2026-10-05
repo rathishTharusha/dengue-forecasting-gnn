@@ -1,0 +1,20 @@
+{
+  "data_plot": {
+    "first": "2013-06-15",
+    "last": "2024-02-24",
+    "weeks": 559,
+    "missing": 7,
+    "legacy_error_total": 7165.0
+  },
+  "figure_widths_inches": {
+    "fig_data": 3.5,
+    "fig_arch": 7.16,
+    "fig_forest": 3.5,
+    "evaluation_protocol": 3.5
+  },
+  "inputs": {
+    "notebooks\\baseline\\sri_lanka_2013-2022_shifted.npy": "9711aa448f7cb932a13927d4d2b59f43851afd996a185ffb1e67cde276493f9e",
+    "data\\corrected\\rebuilt_cases.npy": "b55260c0a13297222261ea1f77433a379f1485400c499c5d3de56a4815470716",
+    "seirgnn2\\results\\frozen9_plus_audit.json": "9e30a1d4d665bb00a86a441d9b49bb91d4953931db100f5e0fa8b2a3ce632584"
+  }
+}

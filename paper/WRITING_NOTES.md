@@ -1,3 +1,5 @@
+> **Codex status, 2026-10-05:** Earlier narrative and decisions below are historical. The current IEEE draft reports development evidence only. Corrected-graph/calendar reruns and untouched-period confirmation remain pending; target windows overlap partition boundaries (EV-218). Read `CODEX_HANDOVER_AUDIT.md`, `FIGURE_AUDIT.md` and `FINAL_AUDIT_CODEX.md` for the latest status. No replacement result is invented.
+
 # Writing notes for the IEEE draft (paper/ieee/)
 
 Compiled with `latexmk -pdf main.tex` (MiKTeX, IEEEtran). No errors, no overfull boxes, no undefined references or citations. Body is 6 pages, references start on page 7. The folder compiles on Overleaf as-is (`main.tex`, `refs.bib`, `figures/*.pdf`, `tables/*.tex`; the scripts are not needed to compile).
@@ -71,3 +73,10 @@ cd paper/ieee && latexmk -pdf main.tex
 - **Placeholders (item 1).** Authors are `[NAMES, AFFILIATION, EMAILS]`, venue and page limit are in a TODO comment. With "6 + references" the draft fits (6 pages of body, references on page 7). With "6 including references" about 0.9 page must be cut.
 - **Week index (item 5): NOT changed, waiting for you.** See the message to the user. The paper still says only "559 weeks" and Fig. 1b still plots the index dates.
 - **Codex review (item 3, second block).** Codex is not installed here, so it was not run. `paper/ieee/REVIEW_PROMPT.md` holds the prompt with the `paper/ieee/` paths and your extra focus items.
+
+## Codex continuation
+
+Current entrypoints are documented in `ieee/README_CODEX.md`. The canonical figure/statistics generator is `ieee/scripts/publication.py`; older generators are kept under historical names. The current manuscript omits date-dependent table rows and claims, uses GCN residual as the baseline, cites the source-table-error report and preserves historical scores. It labels all existing evaluations development and documents target overlap and shuffled training minibatches. The pending workflow requires author approval of boundary treatment; no experiment was launched. The supplementary seed table and complete statistics CSV are generated but not included in the main body. Final reviewer decisions and actual build status are in FINAL_AUDIT_CODEX.md.
+
+
+Final handoff: supplied ICITR authors incorporated; main is six pages including references, historical supplement two pages. See FINAL_AUDIT_CODEX.md for authoritative final status and blockers.

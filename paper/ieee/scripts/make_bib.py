@@ -1,5 +1,6 @@
 """Copy the approved reference entries (PAPER_PLAN.md section 7) from full_paper/overleaf/refs.bib."""
 import re
+import json
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[3]
@@ -93,4 +94,23 @@ entries = {m.group(2): e for e in re.split(r"\n(?=@)", SRC.read_text(encoding="u
 missing = [k for k in KEYS if k not in entries]
 assert not missing, missing
 OUT.write_text("\n\n".join([entries[k].strip() for k in KEYS] + [EXTRA]) + "\n", encoding="utf-8")
+corrections = json.loads((OUT.parent / "scripts/reference_corrections.json").read_text(encoding="utf-8"))
+text = OUT.read_text(encoding="utf-8")
+blocks = re.split(r"\n(?=@)", text)
+for i, block in enumerate(blocks):
+    match = re.match(r"@\w+\{([^,]+),", block)
+    if not match or match.group(1) not in corrections:
+        continue
+    # Target fields are simple balanced values in these entries. Preserve
+    # untouched author spellings and source entries, and append checked fields.
+    for field, value in corrections[match.group(1)].items():
+        pattern = re.compile(r"(?m)^\s*" + field + r"\s*=\s*\{[^}]*\},?\s*$")
+        block = pattern.sub("", block)
+        end = block.rfind("}")
+        prefix = block[:end].rstrip()
+        if not prefix.endswith(","):
+            prefix += ","
+        block = prefix + "\n  " + field + " = {" + value + "}\n" + block[end:]
+    blocks[i] = block
+OUT.write_text("\n".join(blocks), encoding="utf-8")
 print("wrote", len(KEYS), "entries")

@@ -1,0 +1,22 @@
+\begin{table}[!ht]\centering
+\caption{Additional descriptive statistics for the historical development comparison. Skill is the mean over origins of one minus model RMSE divided by persistence RMSE. Seed SD is the mean within-origin standard deviation over neural seeds; persistence is deterministic. Neither statistic is a significance test.}
+\label{tab:seed}\small
+\begin{tabular}{@{}p{1.8in}rr@{}}\toprule
+Model & Skill & Seed SD \\\midrule
+Persistence (last week) & +0.000 & 0.000 \\ % EV-200
+GCN, direct & +0.019 & 0.617 \\ % EV-201
+GCN, residual (baseline GNN) & +0.019 & 0.507 \\ % EV-202
+LSTM, direct & +0.014 & 0.412 \\ % EV-203
+ASTGCN, direct & -0.012 & 0.912 \\ % EV-204
+AAGCN, direct & -0.007 & 1.429 \\ % EV-205
+STGAT, direct & -0.600 & 4.733 \\ % EV-206
+ASTGCN, residual & +0.009 & 0.536 \\ % EV-207
+Adaptive GCN, residual & +0.028 & 0.743 \\ % EV-208
+GCN, SEIR, free rate & -0.404 & 0.171 \\ % EV-209
+GCN, gated SEIR, free rate & +0.008 & 0.190 \\ % EV-210
+Adaptive GCN, SEIR, anchored & -0.027 & 0.843 \\ % EV-211
+Adaptive GCN, gated SEIR, mass-action & +0.008 & 0.098 \\ % EV-212
+GCN, gated SEIR, anchored & +0.033 & 0.292 \\ % EV-213
+Adaptive GCN, gated SEIR, anchored & +0.040 & 0.419 \\ % EV-214
+Adaptive GCN, gated SEIR, anchored, learned $E_0$ & +0.035 & 0.448 \\ % EV-215
+\bottomrule\end{tabular}\end{table}

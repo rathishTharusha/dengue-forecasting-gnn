@@ -39,6 +39,7 @@ import numpy as np
 import pandas as pd
 
 REPO = Path(__file__).resolve().parent.parent.parent
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 ADJ = REPO / "notebooks" / "baseline" / "sri_lanka_adj_list.json"
 CORRECTED = REPO / "data" / "corrected"
 EXTERNAL = REPO / "data" / "external"
@@ -120,6 +121,16 @@ def main() -> int:
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     climate_only = "--climate-only" in sys.argv     # the raw census workbook is git-ignored; population does not read dates
     index = pd.read_csv(CORRECTED / "rebuilt_index.csv")
+    if "--population-only" in sys.argv:
+        # Population by publication date (population_vintages.py): a figure is used only from the day its
+        # document was published. Replaces the earlier "previous year's estimate" rule.
+        import population_vintages as pv
+
+        pop, audit = pv.population_for_dates(pd.read_csv(CORRECTED / "rebuilt_index.csv")["week_start"])
+        np.save(CORRECTED / "rebuilt_population.npy", pop)
+        audit.to_csv(CORRECTED / "rebuilt_population_sources.csv", index=False)
+        print(f"population: {pop.shape} by publication date; pre-availability weeks: {int(audit.pre_availability.sum())}")
+        return 0
     if not climate_only:
         cen = census()
         cen.to_csv(EXTERNAL / "district_census_2012.csv", index=False)

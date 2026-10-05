@@ -29,8 +29,8 @@ processing and release, before the week's first day. Nothing is interpolated.
 Interpolating between composites would both invent values and read the *next*
 composite, which lies in the future relative to the week.
 
-``AVAILABILITY_DAYS`` is an assumption, not a measured release latency, and is set
-conservatively to one full composite period (16 days).
+``AVAILABILITY_DAYS`` is 14, above the 95th percentile of the measured gap between the end of a
+composite window and its processing date (see the constant below).
 
 Run::
 
@@ -152,8 +152,12 @@ def composites() -> pd.DataFrame:
 
 
 #: Days after a composite's 16-day window ends before it counts as available.
-#: Conservative assumption (one composite period); not a measured release latency.
-AVAILABILITY_DAYS = 16
+#: Measured, not assumed: the ORNL subset service reports each composite's processing date
+#: (``proc_date``). For the 70 most recent MOD13Q1 v061 composites (checked 2026-10-05) the
+#: processing date is 1 to 11 days after the window ends in 67 of them (median 3, 90th percentile 7,
+#: 95th percentile 10.5); the other three (20, 36 and 58 days) are reprocessed granules.
+#: 14 days is above the 95th percentile. The earlier value (16) was an unmeasured assumption.
+AVAILABILITY_DAYS = 14
 
 
 def weekly() -> pd.DataFrame:

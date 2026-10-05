@@ -111,9 +111,10 @@ See [`decisions/0001-baseline-training-refinements.md`](decisions/0001-baseline-
 
 ### Graph
 
-Districts are nodes. Edges encode inter-district adjacency built from district-to-district
-distances (reliable human-mobility data is unavailable for Sri Lanka at this resolution).
-With self-loops: **141 directed edges**. Replacing this hand-built adjacency with a learned
+Districts are nodes. Edges are shared borders (reliable human-mobility data is unavailable for Sri Lanka
+at this resolution). `tests/test_adjacency_borders.py` checks the list against the GADM 4.1 polygons:
+57 undirected borders, no more and no fewer.
+With self-loops: **139 directed edges** (141 before two non-border edges were removed; see docs/WEEK_INDEX_FIX.md). Replacing this hand-built adjacency with a learned
 adaptive one is Contribution (c).
 
 ---

@@ -88,3 +88,7 @@ base, policy, policy_mobility, 9 origins, 3 seeds) and
 base and three fixed exponents). Each run takes about 30 to 150 seconds on one core. The base arms
 read no covariate, so they check that this machine reproduces the old numbers (the old runs used
 torch 2.1.2 and, for origin 0.90, a GPU, so seed-level differences of about 0.1 RMSE are expected).
+
+## District graph (second fix on this branch)
+
+`notebooks/baseline/sri_lanka_adj_list.json` listed two one-directional edges that are not borders (Kandy to Ampara, Kegalle to Kalutara). The corrected file from commit 6273b45 is now here. `analysis/_build/build_district_borders.py` derives the 57 shared borders from the GADM 4.1 polygons (50 m buffer) into `data/external/district_borders_gadm41.json`, and `tests/test_adjacency_borders.py` requires the adjacency to equal that list and to be symmetric. 139 directed edges with self-loops (141 before).

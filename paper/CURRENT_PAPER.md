@@ -1,6 +1,6 @@
 # Current research paper
 
-Current title: **Data Quality and Evaluation Design in Graph-Based Dengue Forecasting**.
+Current title: **Can Epidemic Mechanics Guide Graph Networks? SEIR-Informed Spatio-Temporal Forecasting of Weekly Dengue in Sri Lanka** (research framing; branch paper/seir-research).
 
 Open `paper/main.pdf` or `paper/ieee/main.pdf`. The root `main.tex` routes to the canonical source `ieee/main.tex`; both build the same IEEE paper. The old ACM entrypoint and bibliography are preserved as `main_acm_archive.tex` and `refs_acm_archive.bib` with their original section/assets still in place. They are historical and are not this submission.
 

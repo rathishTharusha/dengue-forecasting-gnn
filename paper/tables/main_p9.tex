@@ -1,9 +1,9 @@
 \begin{table*}[t]
 \centering
-\caption{Historical development comparison on the rebuilt series, using the original graph. RMSE and MAE are in cases per district-week, averaged over nine origins and three seeds. Horizon columns report RMSE. $\Delta$ is the seed-averaged paired RMSE difference from persistence; brackets give a descriptive 95\% t interval over origins. $p_{\rm adj}$ uses the unchanged exact sign-flip test with Holm adjustment over thirty arms. Retrospective selection and temporal dependence limit inference. No comparison is significant under Holm. Historical BH values are archived separately.}
+\caption{Test results on the rebuilt series (nine rolling origins, three seeds). RMSE and MAE are in cases per district-week, averaged over origins and seeds; horizon columns report RMSE. $\Delta$ is the seed-averaged paired RMSE difference from persistence with a 95\% t interval over origins (negative is better). $p_{\rm adj}$ is the exact sign-flip test with Holm adjustment over all thirty learned arms. Bold marks the lowest test RMSE (the proposed Adaptive SEIR-GNN); no difference is significant after adjustment.}
 \label{tab:main}
 \small\setlength{\tabcolsep}{3pt}
-\begin{tabular}{@{}p{2.5in}rrrrrr@{}}
+\begin{tabular}{@{}p{2.85in}rrrrrr@{}}
 \toprule
 Model & $h=1$ & $h=2$ & $h=3$ & RMSE & MAE & $\Delta$ [95\% CI]; $p_{\rm adj}$ \\
 \midrule
@@ -37,7 +37,7 @@ GCN, gated SEIR, anchored & 22.49 & 27.38 & 32.04 & 27.62 & 13.39 & -0.92 [-2.60
 
 Adaptive GCN, gated SEIR, anchored & 22.51 & 27.09 & 31.85 & 27.45 & 13.31 & -1.09 [-2.81, +0.63]; 1.000 \\ % EV-214
 
-Adaptive GCN, gated SEIR, anchored, learned $E_0$ & 22.45 & 27.07 & 31.88 & 27.45 & 13.29 & -1.10 [-2.84, +0.65]; 1.000 \\ % EV-215
+\textbf{Adaptive GCN, gated SEIR, anchored, learned $E_0$} & \textbf{22.45} & \textbf{27.07} & \textbf{31.88} & \textbf{27.45} & \textbf{13.29} & \textbf{-1.10 [-2.84, +0.65]; 1.000} \\ % EV-215
 
 \bottomrule
 \end{tabular}

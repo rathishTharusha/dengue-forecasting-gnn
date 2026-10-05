@@ -286,6 +286,9 @@ Each row was read from the file named; nothing was run. Status VERIFIED (code).
 
 | EV-192 | Week 395 of the legacy array is a source-table error, not a backlog: in the published table for Vol. 48 No. 2 (26 Dec 2020 to 1 Jan 2021) the weekly row has 15 of its 24 inner cells equal to the sum of the two cells before them (a spreadsheet formula error); its district sum is 7165; the year-to-date row, which equals the weekly count in the first week of the year, sums with the Kalmunai division to 351, the published national total | 15 of 24; 7165; 351 | `data/external/report_corrections.json` (fields evidence, reason); `analysis/_build/build_corrected_cases.py` docstring and `extract_week1_correction` | VERIFIED (saved file) |
 
+| EV-226 | Smallest attainable adjusted p on the nine-origin protocol: the exact two-sided sign-flip test on 9 origins has a minimum p of 2/512 = 0.0039; Holm over 30 arms multiplies the smallest p by 30, giving 0.117, so no arm can reach 0.05 | 0.0039; 0.117 | P9 | arithmetic from EV-181 and the 30-arm family (EV-219) | derived |
+| EV-227 | Origin designs used during development before the nine-origin protocol was fixed: three origins 0.55/0.70/0.85 with 15% test blocks (EXP-032 to EXP-050, from 2026-09-23); nine origins 0.40 + k/15 with 1/15 blocks (EXP-038, EXP-047, EXP-050); the nine origins 0.50 to 0.90 by 0.05 with 5% blocks were introduced with EXP-051 (2026-09-23) and frozen in docs/PROTOCOL.md | as stated | development history | docs/EXPERIMENT_LOG.md; seirgnn2/core.py ORIGINS, ORIGINS_9, ORIGINS_F9; REVIEW_EXTERNAL_CHECK.md Q2 | LOG-ONLY |
+
 <!-- BEGIN GENERATED -->
 
 # Part C. Rows derived by paper/ieee/scripts (IEEE draft)

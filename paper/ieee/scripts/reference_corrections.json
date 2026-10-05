@@ -3,7 +3,9 @@
     "doi": "10.3201/eid2604.190435"
   },
   "weng2024graph": {
-    "doi": "10.1109/BigData62323.2024.10825335"
+    "doi": "10.1109/BigData62323.2024.10825335",
+    "author": "Weng, Jiaqi and Qiu, David and Cruz, Ethan and Magdon-Ismail, Malik and Munasinghe, Thilanka and Wei, Jennifer C. and Pathirana, Ashan and Pasarkar, Mahi",
+    "pages": "4448--4456"
   },
   "guo2019astgcn": {
     "doi": "10.1609/aaai.v33i01.3301922"
@@ -35,7 +37,9 @@
     "doi": "10.1371/journal.pcbi.1008618"
   },
   "bai2021a3tgcn": {
-    "url": "https://www.mdpi.com/2220-9964/10/7/485"
+    "url": "https://www.mdpi.com/2220-9964/10/7/485",
+    "author": "Bai, Jiandong and Zhu, Jiawei and Song, Yujiao and Zhao, Ling and Hou, Zhixiang and Du, Ronghua and Li, Haifeng",
+    "doi": "10.3390/ijgi10070485"
   },
   "cao2023mepognn": {
     "url": "https://arxiv.org/abs/2306.14857"
@@ -48,5 +52,8 @@
   },
   "shi2019aagcn": {
     "url": "https://arxiv.org/abs/1805.07694"
+  },
+  "gulmohamed2026denguegnn": {
+    "number": "1"
   }
 }

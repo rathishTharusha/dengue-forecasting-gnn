@@ -45,3 +45,8 @@ At the user's request, the architecture and evaluation chronology were redesigne
 ## Typography and arrow correction
 
 All four included figures now use Times New Roman serif labels, with STIX mathematical glyphs in plots, matching the manuscript?s Times-style text. This supersedes the earlier Arial font notes. Both editable draw.io files were updated along with their generator defaults. Diagram arrows now use dark 1.15-point strokes, larger filled heads rendered above box borders, and the protocol has wider inter-box gaps. Color previews of all four figures and the compiled protocol page were visually inspected. Main PDF remains six pages with no LaTeX warnings; vector/text checks pass.
+
+
+## Final review layout and content (authoritative)
+
+The methodological-audit paper has four main figures: source series (single column), architecture (double column), observed/recommended protocol (single column), and paired-difference forest (single column). Architecture now separates non-SEIR and SEIR/gated-SEIR branches and shows S?E?I?R. The protocol explicitly labels its lower sequence as a recommendation with no confirmation result reported. Existing serif labels, vector export and dark arrows are retained. Main Table I reports historical scores with Holm rather than BH values; no incompatible protocols are pooled. The supplement now contains historical interval, protocol, three-origin ablation and seed-statistic tables, without duplicating the source-series figure. Both PDF entrypoints compile the same six-page main paper.

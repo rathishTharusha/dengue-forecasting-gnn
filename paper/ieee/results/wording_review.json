@@ -1,0 +1,47 @@
+[
+  {
+    "line": 31,
+    "text": "The study covers a legacy array and a rebuilt series of 559 reporting weeks for 25 districts, with seven missing reports retained as missing. % EV-163, EV-216",
+    "disposition": "Retained: missing-report handling, statistical proximity, or explicitly unavailable matched control; not a promise of a completed experiment."
+  },
+  {
+    "line": 84,
+    "text": "The rebuilt series contains 559 reporting weeks for 25 districts, from June 15, 2013, to February 24, 2024; seven reports are missing. % EV-216",
+    "disposition": "Retained: missing-report handling, statistical proximity, or explicitly unavailable matched control; not a promise of a completed experiment."
+  },
+  {
+    "line": 85,
+    "text": "Missing reports remain missing, and windows touching missing case inputs or targets are excluded.",
+    "disposition": "Retained: missing-report handling, statistical proximity, or explicitly unavailable matched control; not a promise of a completed experiment."
+  },
+  {
+    "line": 94,
+    "text": "\\caption{National district sums in the legacy array and rebuilt series. The legacy horizontal axis is array position, not a verified calendar. The marked row contains a source-table error. Missing reports interrupt the rebuilt curve; correcting plot dates does not update historical model scores.}",
+    "disposition": "Retained: missing-report handling, statistical proximity, or explicitly unavailable matched control; not a promise of a completed experiment."
+  },
+  {
+    "line": 109,
+    "text": "The mask removes six starts from the last origin and changes neither the split boundaries nor the remaining forecasts. % EV-220",
+    "disposition": "Retained: missing-report handling, statistical proximity, or explicitly unavailable matched control; not a promise of a completed experiment."
+  },
+  {
+    "line": 171,
+    "text": "The susceptible fraction is $\\mathrm{clip}(0.318-C_{<t}/(\\rho N_i),0.01,1)$, where $C_{<t}$ sums available earlier reports, with missing contributions set to zero in this state calculation. % EV-170",
+    "disposition": "Retained: missing-report handling, statistical proximity, or explicitly unavailable matched control; not a promise of a completed experiment."
+  },
+  {
+    "line": 192,
+    "text": "Starts touching missing reports are dropped after setting boundaries.",
+    "disposition": "Retained: missing-report handling, statistical proximity, or explicitly unavailable matched control; not a promise of a completed experiment."
+  },
+  {
+    "line": 240,
+    "text": "\\subsection{Historical models remain close to persistence}",
+    "disposition": "Retained: missing-report handling, statistical proximity, or explicitly unavailable matched control; not a promise of a completed experiment."
+  },
+  {
+    "line": 271,
+    "text": "The missing matched adaptive gated control prevents that attribution here.",
+    "disposition": "Retained: missing-report handling, statistical proximity, or explicitly unavailable matched control; not a promise of a completed experiment."
+  }
+]

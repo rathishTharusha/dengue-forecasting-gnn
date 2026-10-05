@@ -8,16 +8,8 @@
 
 \section{Scope}
 These materials preserve historical analyses omitted from the six-page manuscript.
-They are development or legacy evidence, not results of the pending corrected-data or untouched-period evaluation.
+They are development or legacy evidence, not results of a corrected final or untouched-period evaluation.
 The supplementary file is provided for author review; its eligibility for submission requires a venue decision.
-
-\section{Source-series comparison}
-\begin{figure}[h]
-\centering
-\includegraphics[width=\columnwidth]{figures/fig_data.pdf}
-\caption{National weekly dengue notifications, summed over districts. (a) Legacy benchmark array; the dashed line marks the source-table formula error. (b) Rebuilt case series displayed on the repaired report calendar; missing reports interrupt the line. Repairing plot dates does not imply that historical model scores were rerun.}
-\label{fig:data}
-\end{figure}
 
 \section{Legacy interval comparison}
 The Gaussian-head results exist only on legacy-array folds containing the source-table error.
@@ -47,14 +39,14 @@ Validation and test disagree.
 These mixed results do not isolate an accuracy gain from the simulator.
 Equal validation-only tuning and matched adaptive-encoder controls are missing.
 
-The best three-origin arm is AAGCN with a gated head, at 33.53 against 36.02 for persistence. % EV-120, EV-115
+Among the displayed head controls, the lowest three-origin error is from AAGCN with a gated head, at 33.53 against 36.02 for persistence. % EV-120, EV-115
 This gap is untested.
 The nine-origin protocol contains no gated head without physics, and its ASTGCN arm with a residual head is 0.11 above persistence. % EV-107
 
 
 \section{Seed variation and normalized skill}
 Table~\ref{tab:seed} separates initialization variation from the between-origin variation underlying the paired intervals in the manuscript.
-The complete CSV summary records all thirty stored non-persistence arms, including MAE, skill, paired intervals and mean within-origin seed standard deviation.
+The CSV summary records all stored arms, including horizon errors, MAE, skill, paired intervals, both BH and Holm corrections, and mean within-origin seed standard deviation.
 The displayed subset follows the main manuscript; no claim of significance is inferred from a positive skill.
 \input{tables/seed_variability.tex}
 \end{document}

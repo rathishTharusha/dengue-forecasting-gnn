@@ -1,0 +1,51 @@
+{
+  "legacy_floor": {
+    "all_windows": 44.79531573322547,
+    "excluded_windows": 29.521009708925252
+  },
+  "folds": [
+    {
+      "origin": 0.55,
+      "all_windows": 26.882223151529477,
+      "excluded_windows": 26.882223151529477,
+      "n_test": 68,
+      "n_excluded": 0
+    },
+    {
+      "origin": 0.7,
+      "all_windows": 38.88532915547214,
+      "excluded_windows": 38.88532915547214,
+      "n_test": 68,
+      "n_excluded": 0
+    },
+    {
+      "origin": 0.85,
+      "all_windows": 68.6183948926748,
+      "excluded_windows": 22.79547681977414,
+      "n_test": 68,
+      "n_excluded": 6
+    }
+  ],
+  "excluded_window_rule": "395 in range(start-3,start+3); mean of three origin RMSEs",
+  "relative_reduction": 0.34097998360509374,
+  "graph": {
+    "corrected_commit": "3878e70",
+    "shared_borders": 57,
+    "old_directed_neighbors": 116,
+    "corrected_directed_neighbors": 114,
+    "loader_self_loops": 25,
+    "removed": [
+      [
+        "Kandy",
+        "Ampara"
+      ],
+      [
+        "Kegalle",
+        "Kalutara"
+      ]
+    ],
+    "added": [],
+    "matches_stored_gadm_borders": true
+  },
+  "legacy_sha256": "9711aa448f7cb932a13927d4d2b59f43851afd996a185ffb1e67cde276493f9e"
+}

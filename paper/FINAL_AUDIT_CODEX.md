@@ -1,64 +1,90 @@
-# Final Codex audit ? 5 October 2026
+# Final correction audit ? 5 October 2026
 
-## Outcome
+Current paper: **Data Quality and Evaluation Design in Graph-Based Dengue Forecasting**.
 
-The IEEE development manuscript is compiled and reviewed: **6 pages including references**, with the supplied six authors, University of Moratuwa affiliation and email addresses, for the intended ICITR venue. The optional historical supplement is **2 pages**. This is a defensible historical development draft, not a submission-ready claim of independent confirmation. No model was trained, no new-period case values inspected, and no stored scores overwritten.
+The requested fallback is implemented as an evaluation/data-quality study. No final model-superiority claim is made. The classification was completed in `REVIEW_FIX_PLAN.md` before rewriting. The main IEEE PDF is six pages including references; the optional historical supplement is two pages. Sources remain canonical under `paper/ieee/`, with a tested `paper/main.tex` entrypoint and synchronized root artifacts. The old ACM entrypoint/bibliography are archived rather than overwritten without recovery.
 
-Work is isolated on `paper/codex-final`, based on `paper/ieee-draft` (`ef22ed3`), in `.codex-paper-review`. The original `fix/week-index` checkout, user files and external `dengue-wf` worktree are preserved. No push or submission is performed.
+## BLOCKERS
 
-## Review verdicts
+- **Human scientific approval and scope decision:** all authors must verify and approve the revised audit framing, results, source report evidence and AI disclosure. No approval is claimed in the paper. Confirm that this methodological study fits the intended ICITR track and whether a supplement is permitted.
+- **A final model paper is still blocked:** no completed corrected-graph/embargoed/equally tuned/untouched-period study exists. Those experiments cannot be implied complete by wording. They are not needed to establish the narrow completed audit findings, but they are required if authors restore a claim about final model superiority or isolate a causal SEIR benefit.
+- The current committed rules do not jointly specify the intended final target embargo, constant Census population, irregular-report scoring, fair tuning grid/tie rule and requested 18 confirmation blocks. An invented replacement workflow would violate the instruction to use only the frozen protocol.
 
-| Area | Status | Evidence or remaining limitation |
-|---|---|---|
-| Scientific correctness | Needs attention | Stored arithmetic and code descriptions verified; original fold boundary leakage and missing corrected runs prevent clean held-out conclusions. |
-| Experimental consistency | Needs attention | Legacy, rebuilt development and pending confirmation are distinguished. Corrected calendar/graph/population experiments are incomplete. |
-| Figures | Pass | Four vector assets regenerated, final sizes and fonts checked, color/grayscale and compiled-page inspection completed. Three appear in main; data figure is supplementary. |
-| Tables | Pass for historical reporting | Original statistics preserved; paired effects, descriptive intervals, MAE and separate seed variability added without changing significance testing. Protocols are not pooled. |
-| References | Needs author review | Duplicate/missing keys: zero; all cited entries have DOI or URL. Approved metadata corrections checked against primary sources. Full reading/support verification remains an author responsibility; uncertain unused entries are documented separately. |
-| IEEE formatting | Pass for six-page draft | Main 6 pages, references start on page 6, 207-word abstract, no LaTeX warnings, no Type 3 fonts. Venue-specific submission requirements still require author confirmation. |
-| Writing | Pass for development scope | Unsupported novelty, causal/biological interpretation and explained-variance ceiling claims removed or narrowed. Human authors must approve the final text and AI-use statement. |
+## MAJOR ISSUES
 
-## Critical scientific blockers
+1. Historical forecast targets overlap by two weeks at every training/validation and validation/evaluation boundary across nine origins. Early stopping therefore sees some outcomes in the first evaluation forecasts. Quantifying the impact requires new controlled runs; this paper only establishes the defect.
+2. Historical scores use 116 directed neighbor entries plus 25 loader self-loops. The corrected graph has 57 shared borders, 114 directed entries and 25 self-loops (139 total), and passes the stored GADM border/symmetry test. Scores were not relabeled as corrected-graph results.
+3. Shared fixed training settings do not demonstrate fair tuning. No architecture-inferiority claim survives. Retrospective arm selection and temporal dependence limit all reported inference.
+4. The documented protocol calls for Holm, while historical software uses BH. The new table follows Holm, preserving raw and BH values separately. On the same 30-arm family, neither improvements nor degradations are significant under Holm on validation or evaluation. Earlier BH significance claims are no longer presented as protocol-compliant.
+5. Reporting fraction, fixed progression rates and initial susceptibility are assumptions. The local serosurvey is not national susceptibility evidence. Cumulative initialization omits missing contributions and does not model serotypes/waning; no nine-origin sensitivity analysis establishes robustness.
+6. The official source-report URL returned HTTP 403 during fresh web retrieval. The paper uses stored report-correction and extraction evidence. Authors should retain and visually verify the original source PDF in their research archive.
 
-1. **Fold targets overlap.** `build_folds` divides forecast starts without a horizon embargo. For horizon three, two target weeks are shared at every training/validation and validation/test boundary across all nine origins. Early stopping therefore sees target weeks present in initial test forecasts. `ieee/results/partition_overlap.json` records the enumeration. Decide and freeze an embargoed protocol before rerunning; do not present current intervals or adjusted p-values as curing this design problem.
-2. **Corrected-data evidence is pending.** The manuscript scores retain historical graph/calendar provenance. Corrected graph, climate/season alignment, population timing and current report rules require EXP-062/063 completion. The requested 18 confirmatory blocks, fixed 2012 population, irregular-report scoring rule, QC and frozen configuration are not a completed committed evaluation.
-3. **Independent confirmation is absent.** Files named confirmatory in older runs are not evidence of the newly intended untouched-period experiment. Freeze configuration, preprocessing and evaluation before that experiment; preserve its untouched status.
-4. **Mechanistic attribution is unresolved.** Equal validation-only tuning, matched gated-head controls, meaningful classical baselines and SEIR sensitivity/ablation remain incomplete. Reported failures under shared settings do not establish architecture inferiority or irrelevance of epidemic physics.
+## MINOR ISSUES
 
-## Verified numerical results
+- Main PDF compiles without warnings, overflow, missing citations or Type 3 fonts. The supplement retains one underfull paragraph warning with no clipping or overflow.
+- All figure body labels are Times New Roman at 9 pt; a mathematical subscript in the forest plot is 6.3 pt. Vector diagrams remain editable in draw.io; arrows have visible shafts and filled heads.
+- References begin on page 5 and continue onto page 6. The limit is six pages including references, not a requirement to fill all remaining space.
+- The supplement is historical context, not central evidence. Its submission eligibility requires checking with the venue.
 
-The saved nine-origin source SHA-256 is `9e30a1d4d665bb00a86a441d9b49bb91d4953931db100f5e0fa8b2a3ce632584`. It contains 31 arms including persistence, 819 rows, nine origins and three seeds for neural arms. The unchanged exact sign-flip/BH procedure gives zero test improvements and eight degradations among 30 comparisons; validation gives seven improvements and eight degradations. Persistence test RMSE is 28.5410 and MAE 13.9386. The GCN residual baseline has RMSE 28.1194, paired difference -0.4216, descriptive 95% t interval [-1.5391, 0.6959], adjusted p=0.78125. These are retrospective development summaries with correlated origins and selection limitations.
+## EXPERIMENTS COMPLETED
 
-## Changes delivered
+No new model training was performed during this correction. Completed analyses and verifications are:
 
-- Main manuscript rewritten around development evidence and comparison with persistence; supplied authors added and content reduced to six pages including references.
-- Architecture, evaluation timeline, paired-difference forest and data comparison regenerated as reproducible vector figures. Validation/test scatter omitted; historical material moved to the supplement.
-- Main table regenerated with RMSE, MAE, paired differences, descriptive intervals and unchanged adjusted p-values. Full descriptive statistics and seed variation are available as CSV/JSON and supplementary table.
-- Methods corrected against code: transformed conditional mean, biased graph layer, effective reporting fraction, learned exposed-state initialization, centered spatial term, mass-action dynamics, shuffled training minibatches and target overlap.
-- Citation metadata corrected with documented provenance; evidence ledger extended and earlier plans marked historical.
-- Rebuild entrypoints, source hashes, PDF/citation checks and audit scripts added. Historical generators retained as archives.
+- Reproduced legacy persistence sensitivity directly from the original array and original forecast-window rule. Mean across three origins: 44.7953157332 versus 29.5210097089 after excluding six windows touching row 395, a 34.097998% reduction. Last-fold RMSE: 68.6183948927 versus 22.7954768198. This is an exclusion diagnostic, not corrected-data retraining.
+- Verified the corrected graph at commit `3878e70` against its stored GADM border list and ran `tests/test_adjacency_borders.py` in `fix/week-index`: two tests pass. Removed entries are Kandy to Ampara and Kegalle to Kalutara, with no added borders.
+- Rechecked nine-origin target-set intersections and saved `partition_overlap.json`.
+- Reanalyzed 819 stored rows (30 neural arms plus persistence), retaining original scores and origin-level seed aggregation. Source SHA-256: `9e30a1d4d665bb00a86a441d9b49bb91d4953931db100f5e0fa8b2a3ce632584`.
+- Independently checked the new Holm implementation against `statsmodels.stats.multitest.multipletests(method="holm")` for both validation and evaluation families; all 30 adjusted values agree.
+- Regenerated horizon/overall RMSE, MAE, normalized skill, paired differences, descriptive t intervals and seed variability as CSV/JSON and tables. GCN residual RMSE 28.1194 versus persistence 28.5410; adaptive anchored E0 variant RMSE 27.4451, delta -1.0959, interval [-2.8426, 0.6508], raw p 0.19921875, BH p 0.576171875, Holm p 1.0. Unrounded intervals are authoritative in the JSON.
+- Verified all 15 active references against publisher-deposited metadata and/or primary author/publisher records; see `REFERENCE_AUDIT.md` for the primary-report access limitation.
 
-## Validation performed
+## EXPERIMENTS STILL MISSING
 
-`make_figures.py`, `make_tables.py`, `make_bib.py`, `check_paper.py` and `audit_publication.py` were run during this review. Direct pdflatex/BibTeX builds succeed; latexmk cannot run because this installation lacks Perl. Final main build has no warnings, undefined references/citations, overflow or Type 3 fonts. Supplement has one underfull paragraph warning and no overflow or missing references. Every included figure has zero raster images; body labels are 9 pt, with a mathematical subscript at 6.3 pt. All six main pages, both final supplementary pages, and grayscale figures were visually inspected. `git diff --check` passes. Generated PDF builds are intentionally ignored by the repository; figure PDFs and all sources/audits are committed.
+- Completed EXP-062 calendar-dependent replacement outputs and an accepted rerun summary.
+- Corrected-graph neural comparison with an explicit target embargo.
+- Equal validation-only tuning budgets and all frozen selection/tie-breaking rules.
+- Classical seasonal-naive, autoregressive and NB/count-regression baselines under the corrected final protocol. Archived legacy classical results cannot be inserted into the nine-origin table.
+- Matched adaptive gated non-SEIR, bare SEIR and gated SEIR controls with shared data/training settings; parameter sensitivity on the same final protocol.
+- Final population/report-timing rules, parsed/QC-certified new-period inputs, frozen selection and untouched-period confirmation.
 
-## Exact files for manual review
+Repository-wide branch/output checks found no superseding final evidence. EXP-062 remains pending at `008887d`; `docs/RERUN_SUMMARY.md` and prepared `data/new_weeks` outputs are absent. External untracked COVID week-fix output declares itself exploratory, has unverified vintage and does not certify the corrected final graph/protocol. Older files called `confirm` or `s9_confirmatory` use historical periods. Exact existing commands and missing workflow decisions are recorded in `REVIEW_FIX_PLAN.md`; no new-period cases were inspected.
 
-1. `ieee/main.pdf` and `ieee/main.tex`: final six-page manuscript, especially abstract, protocol limitation, results and conclusion.
-2. `ieee/supplement.pdf` and `ieee/supplement.tex`: internal historical supplement; decide whether the venue permits submission of it.
-3. `CODEX_HANDOVER_AUDIT.md`: pre-edit scientific findings and branch/source inventory.
-4. `FIGURE_AUDIT.md`: figure/table redesign decisions and final layout.
-5. `REFERENCE_AUDIT.md`: primary-source corrections and remaining bibliographic uncertainty.
-6. `EVIDENCE.md`, `ieee/results/development_statistics.csv`, `ieee/results/partition_overlap.json` and `ieee/results/publication_checks.json`: claim provenance and machine-readable checks.
+## CLAIMS REMOVED OR WEAKENED
 
-Before submission, the authors must resolve the fold embargo and final evaluation protocol, complete the corrected and untouched-period experiments, verify the manuscript independently, approve the AI-use statement, and check ICITR instructions. None of these unresolved scientific decisions is silently assumed complete.
+- Replaced model-centered development framing with a completed audit question and three completed contributions.
+- Removed abstract/conclusion promises of core experiments as though the model study were finished.
+- Replaced ambiguous ?without that week? wording with the exact affected-window exclusion rule and estimator.
+- Removed inference that earlier gains were caused by the audit defects; the measured source sensitivity and unmeasured leakage effect are distinguished.
+- Removed BH-based significance language from protocol-compliant conclusions; explicitly documented the correction discrepancy.
+- Removed unarchived force-of-infection diagnostic claims, isolated SEIR-benefit language, universal susceptibility interpretations, and irrelevant legacy augmentation claims from the main narrative.
+- Retained unavailable corrected and confirmatory evidence in a single scope/limitations discussion. No limitation was hidden as a positive result.
+- Replaced the printed ?author approval pending? sentence with a factual disclosure; approval remains an explicit human action here.
 
+## FIGURES CHANGED
 
-## Follow-up diagram redesign
+- Source-series figure moved into the main paper to support the audit contribution (Fig. 1).
+- Architecture separates non-SEIR and SEIR/gated-SEIR branches, persistence anchor, population/state inputs, daily S -> E -> I -> R path, forecast output and training-only loss (Fig. 2). Editable native draw.io source retained.
+- Protocol distinguishes the observed overlapping-target design from a clearly labeled recommendation to freeze settings before untouched confirmation (Fig. 3). It does not portray confirmation as completed.
+- Paired-difference forest plot retained with descriptive uncertainty and explicit zero meaning (Fig. 4).
+- All figures remain vector, serif, readable at final widths and interpretable in grayscale. Final renders and compiled pages were inspected.
 
-At the user's request, the architecture and evaluation chronology were redesigned with editable native draw.io sources (`ieee/diagrams/architecture.drawio` and `ieee/diagrams/evaluation_protocol.drawio`). Rounded boxes, consistent spacing, restrained fill colors and routed arrows improve the hierarchy. The architecture distinguishes forecasting, conditional inputs and training-only loss; the protocol explicitly retains target overlap and pending confirmation. `drawio_diagrams.py` reads the editable XML and exports vector PDFs; the normal figure entrypoint delegates to it and preserves existing source edits. Both diagrams and their grayscale previews were inspected, followed by the compiled pages 3 and 4. Main remains six pages, warning-free, with 9-point diagram labels and no raster images. Stored scientific results are unchanged.
+## TABLES CHANGED
 
+- Main historical table regenerated from saved structured outputs; adjusted values now use Holm across all 30 arms. Caption states provenance, seed/origin averaging, uncertainty and the historical BH archive. No best-score bolding.
+- CSV/JSON retain raw p, historical BH p, Holm p, horizon metrics, MAE, paired differences/intervals, skill and within-origin seed SD.
+- Supplement preserves incompatible three-origin and legacy protocols separately. Root `paper/tables/` mirrors the canonical generated files.
 
-## Typography and arrow correction
+## REFERENCES CORRECTED
 
-All four included figures now use Times New Roman serif labels, with STIX mathematical glyphs in plots, matching the manuscript?s Times-style text. This supersedes the earlier Arial font notes. Both editable draw.io files were updated along with their generator defaults. Diagram arrows now use dark 1.15-point strokes, larger filled heads rendered above box borders, and the protocol has wider inter-box gaps. Color previews of all four figures and the compiled protocol page were visually inspected. Main PDF remains six pages with no LaTeX warnings; vector/text checks pass.
+- Weng: added published eighth author Mahi Pasarkar and page range 4448?4456; documented the seven-author local prepublication version.
+- A3T-GCN: corrected Jiandong Bai, Yujiao Song and Zhixiang Hou; added Haifeng Li and DOI 10.3390/ijgi10070485.
+- DengueGNN: completed issue metadata. Removed unused entries from the active bibliography while preserving original archives.
+- IEEE AI guidance checked; acknowledgment names actual tools, drafting throughout the text, source/statistical checking and figure/table assistance without inventing human approval.
+
+## FINAL VERDICT
+
+**NOT READY FOR SUBMISSION**
+
+The corrected audit manuscript is compiled and ready for the authors to review. Submission still requires their scientific approval, acceptance of the audit framing and venue/disclosure checks. The missing final model experiments are disclosed and excluded from the completed contributions; a model-superiority paper remains scientifically incomplete. This verdict does not imply that new model training is necessary to substantiate the narrow source/split/statistical audit findings already reported.
+
+Validation: `review_analysis.py`, `make_figures.py`, `make_tables.py`, `make_bib.py`, `check_paper.py`, `audit_publication.py`; independent Holm cross-check; two geographic-border tests; direct LaTeX/BibTeX builds. Root and canonical PDFs have identical extracted text and six pages. Original scientific checkout, external worktree and saved model outputs are unchanged. No model training, confirmatory access, remote push or submission was performed.

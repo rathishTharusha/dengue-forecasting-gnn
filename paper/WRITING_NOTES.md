@@ -1,3 +1,5 @@
+> **Final-review update:** The active paper is now an evaluation/data-quality audit. Earlier model-development plans below are historical. See REVIEW_FIX_PLAN.md and FINAL_AUDIT_CODEX.md for the current narrative and evidence.
+
 > **Codex status, 2026-10-05:** Earlier narrative and decisions below are historical. The current IEEE draft reports development evidence only. Corrected-graph/calendar reruns and untouched-period confirmation remain pending; target windows overlap partition boundaries (EV-218). Read `CODEX_HANDOVER_AUDIT.md`, `FIGURE_AUDIT.md` and `FINAL_AUDIT_CODEX.md` for the latest status. No replacement result is invented.
 
 # Writing notes for the IEEE draft (paper/ieee/)

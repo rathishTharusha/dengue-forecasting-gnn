@@ -114,3 +114,12 @@ for i, block in enumerate(blocks):
     blocks[i] = block
 OUT.write_text("\n".join(blocks), encoding="utf-8")
 print("wrote", len(KEYS), "entries")
+
+# Only references cited by the current paper; original source bibliographies are archived.
+main_tex = (OUT.parent / "main.tex").read_text(encoding="utf-8")
+cited = {k.strip() for group in re.findall(r"\\cite\{([^}]+)\}", main_tex) for k in group.split(",")}
+blocks = re.split(r"\n(?=@)", OUT.read_text(encoding="utf-8"))
+selected = [b for b in blocks if (m := re.match(r"@\w+\{([^,]+),", b)) and m.group(1) in cited]
+OUT.write_text("\n\n".join(b.strip() for b in selected) + "\n", encoding="utf-8")
+(REPO / "paper/refs.bib").write_bytes(OUT.read_bytes())
+print("Active bibliography:", len(selected), "cited entries; root copy synchronized")

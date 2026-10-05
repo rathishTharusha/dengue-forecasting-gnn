@@ -14,11 +14,12 @@
 
 @inproceedings{weng2024graph,
   title     = {Graph Representation Learning for Dengue Forecasting},
-  author    = {Weng, Jiaqi and Qiu, David and Cruz, Ethan and Magdon-Ismail, Malik
-               and Munasinghe, Thilanka and Wei, Jennifer C. and Pathirana, Ashan},
+
   booktitle = {IEEE International Conference on Big Data (BigData)},
   year      = {2024},
-  doi = {10.1109/BigData62323.2024.10825335}
+  doi = {10.1109/BigData62323.2024.10825335},
+  author = {Weng, Jiaqi and Qiu, David and Cruz, Ethan and Magdon-Ismail, Malik and Munasinghe, Thilanka and Wei, Jennifer C. and Pathirana, Ashan and Pasarkar, Mahi},
+  pages = {4448--4456}
 }
 
 % Nearest neighbour in the literature. Dynamic adjacency from an ASSUMED
@@ -33,7 +34,8 @@
   volume  = {16},
   pages   = {10584},
   year    = {2026},
-  doi     = {10.1038/s41598-026-43073-y}
+  doi     = {10.1038/s41598-026-43073-y},
+  number = {1}
 }
 
 @article{liu2025seirlstm,
@@ -47,20 +49,6 @@
   doi     = {10.1371/journal.pcbi.1013540}
 }
 
-@article{phaijoo2018sensitivity,
-  author  = {Phaijoo, Ganga Ram and Gurung, Dil Bahadur},
-  title   = {Sensitivity Analysis of {SEIR--SEI} Model of Dengue Disease},
-  journal = {GAMS Journal of Mathematics and Mathematical Biosciences},
-  volume  = {6},
-  number  = {a},
-  pages   = {41--49},
-  year    = {2018},
-}
-
-% The generation-interval result that invalidates ln(R0)/GI for this system:
-% for a fixed R0 the growth rate depends on the shape of the generation-interval
-% distribution, not only its mean.
-
 @inproceedings{guo2019astgcn,
   author    = {Guo, Shengnan and Lin, Youfang and Feng, Ning and Song, Chao and Wan, Huaiyu},
   title     = {Attention Based Spatial-Temporal Graph Convolutional Networks for Traffic Flow Forecasting},
@@ -73,14 +61,16 @@
 }
 
 @article{bai2021a3tgcn,
-  author    = {Bai, Jizhou and Zhu, Jiawei and Song, Yanyan and Zhao, Ling and Huang, Zhixiang and Du, Ronghua},
+
   title     = {A3T-GCN: Attention Temporal Graph Convolutional Network for Traffic Forecasting},
   journal   = {ISPRS International Journal of Geo-Information},
   volume    = {10},
   number    = {7},
   pages     = {485},
   year      = {2021},
-  url = {https://www.mdpi.com/2220-9964/10/7/485}
+  url = {https://www.mdpi.com/2220-9964/10/7/485},
+  author = {Bai, Jiandong and Zhu, Jiawei and Song, Yujiao and Zhao, Ling and Hou, Zhixiang and Du, Ronghua and Li, Haifeng},
+  doi = {10.3390/ijgi10070485}
 }
 
 @inproceedings{shi2019aagcn,
@@ -109,13 +99,6 @@
   year      = {2019},
   doi = {10.24963/ijcai.2019/264},
   pages = {1907--1913}
-}
-
-@inproceedings{kipf2017gcn,
-  title     = {Semi-Supervised Classification with Graph Convolutional Networks},
-  author    = {Kipf, Thomas N. and Welling, Max},
-  booktitle = {International Conference on Learning Representations (ICLR)},
-  year      = {2017}
 }
 
 @inproceedings{rodriguez2023einns,
@@ -151,82 +134,6 @@
   url = {https://arxiv.org/abs/2306.14857}
 }
 
-@inproceedings{deng2020colagnn,
-  title     = {Cola-GNN: Cross-location Attention based Graph Neural Networks
-               for Long-term ILI Prediction},
-  author    = {Deng, Songgaojun and Wang, Shusen and Rangwala, Huzefa
-               and Wang, Lijing and Ning, Yue},
-  booktitle = {CIKM},
-  year      = {2020}
-}
-
-@article{raissi2019pinn,
-
-  author  = {Raissi, Maziar and Perdikaris, Paris and Karniadakis, George Em},
-  journal = {Journal of Computational Physics},
-  volume  = {378},
-  pages   = {686--707},
-  year    = {2019},
-  title = {Physics-informed neural networks: A deep learning framework for solving forward and inverse problems involving nonlinear partial differential equations},
-  doi = {10.1016/j.jcp.2018.10.045}
-}
-
-% Source of the SEIR-SEI compartmental structure and constants.
-% TODO: complete author list before submission.
-
-@inproceedings{krishnapriyan2021failure,
-  author    = {Krishnapriyan, Aditi S. and Gholami, Amir and Zhe, Shandian and
-               Kirby, Robert M. and Mahoney, Michael W.},
-  title     = {Characterizing Possible Failure Modes in Physics-Informed Neural Networks},
-  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
-  year      = {2021},
-  url = {https://arxiv.org/abs/2109.01050}
-}
-
-@inproceedings{yoon2019timegan,
-  title     = {Time-series Generative Adversarial Networks},
-  author    = {Yoon, Jinsung and Jarrett, Daniel and van der Schaar, Mihaela},
-  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
-  year      = {2019}
-}
-
-@inproceedings{kim2022revin,
-  author    = {Kim, Taesung and Kim, Jinhee and Tae, Yunwon and Park, Cheonbok and Choi, Jang-Ho and Choo, Jaegul},
-  title     = {Reversible Instance Normalization for Accurate Time-Series Forecasting against Distribution Shift},
-  booktitle = {International Conference on Learning Representations (ICLR)},
-  year      = {2022}
-}
-
-@inproceedings{shao2022stid,
-  author    = {Shao, Zezhi and Zhang, Zhao and Wang, Fei and Wei, Wei and Xu, Yongjun},
-  title     = {Spatial-Temporal Identity: A Simple yet Effective Baseline for Multivariate Time Series Forecasting},
-  booktitle = {ACM International Conference on Information and Knowledge Management (CIKM)},
-  year      = {2022}
-}
-
-@article{salinas2020deepar,
-  author  = {Salinas, David and Flunkert, Valentin and Gasthaus, Jan},
-  title   = {{DeepAR}: Probabilistic Forecasting with Autoregressive Recurrent Networks},
-  journal = {International Journal of Forecasting},
-  volume  = {36},
-  number  = {3},
-  pages   = {1181--1191},
-  year    = {2020},
-  doi = {10.1016/j.ijforecast.2019.07.001}
-}
-
-@article{bracher2021evaluating,
-  title   = {Evaluating epidemic forecasts in an interval format},
-  author  = {Bracher, Johannes and Ray, Evan L. and Gneiting, Tilmann
-             and Reich, Nicholas G.},
-  journal = {PLOS Computational Biology},
-  volume  = {17},
-  number  = {2},
-  pages   = {e1008618},
-  year    = {2021},
-  doi = {10.1371/journal.pcbi.1008618}
-}
-
 @inproceedings{huang2019stgat,
   title     = {{STGAT}: Modeling Spatial-Temporal Interactions for Human Trajectory Prediction},
   author    = {Huang, Yingfan and Bi, Huikun and Li, Zhaoxin and Mao, Tianlu and Wang, Zhaoqi},
@@ -254,53 +161,4 @@
   pages   = {e0144799},
   year    = {2015},
   doi     = {10.1371/journal.pone.0144799}
-}
-
-@book{dcs2015census,
-  author       = {{Department of Census and Statistics, Sri Lanka}},
-  title        = {Census of Population and Housing 2012, Key Findings},
-  publisher    = {Ministry of Finance and Planning, supported by UNFPA},
-  year         = {2015},
-  note         = {ISBN 978-955-577-906-7}
-}
-
-@misc{dcs2024midyear,
-  author       = {{Department of Census and Statistics, Sri Lanka}},
-  title        = {Mid-year population by district and sex, 2014 to 2024},
-  year         = {2024},
-  howpublished = {\url{https://www.statistics.gov.lk/Resource/en/Population/Vital_Statistics/Mid-year_population_by_district_and_sex_2024.pdf}}
-}
-
-@article{hersbach2020era5,
-  title   = {The {ERA5} global reanalysis},
-  author  = {Hersbach, Hans and Bell, Bill and Berrisford, Paul and others},
-  journal = {Quarterly Journal of the Royal Meteorological Society},
-  volume  = {146},
-  number  = {730},
-  pages   = {1999--2049},
-  year    = {2020},
-  doi     = {10.1002/qj.3803}
-}
-
-@misc{zippenfenig2024openmeteo,
-  author = {Zippenfenig, Patrick},
-  title  = {Open-Meteo.com Weather {API}},
-  year   = {2024},
-  doi    = {10.5281/zenodo.7970649},
-  note   = {Zenodo}
-}
-
-@misc{didan2021mod13q1,
-  author       = {Didan, Kamel},
-  title        = {{MODIS/Terra} Vegetation Indices 16-Day {L3} Global 250m {SIN} Grid {V061}},
-  year         = {2021},
-  publisher    = {NASA Land Processes Distributed Active Archive Center},
-  doi          = {10.5067/MODIS/MOD13Q1.061}
-}
-
-@misc{gadm41,
-  author       = {{GADM}},
-  title        = {{GADM} database of Global Administrative Areas, version 4.1},
-  howpublished = {\url{https://gadm.org}},
-  note         = {Accessed 5 October 2026}
 }

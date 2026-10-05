@@ -22,6 +22,7 @@ import pandas as pd
 from scipy.stats import t
 from common import FIG, RES, REPO, TAB, P9_FILE, LEGACY, REBUILT, load_json, project_stats as ps
 from historical_tables import P9_ROWS
+from review_analysis import holm
 
 plt.rcParams.update({"font.family": "serif", "font.serif": ["Times New Roman", "STIXGeneral"], "mathtext.fontset": "stix",
                      "font.size": 9, "axes.labelsize": 9, "xtick.labelsize": 9,
@@ -76,6 +77,8 @@ def statistics():
     rows=load_json(P9_FILE); by=collections.defaultdict(list)
     for r in rows:by[r["name"]].append(r)
     comp={r["arm"]:r for r in ps.compare(rows,"RMSE","persistence","origin")}
+    hp=holm([v["p"] for v in comp.values()])
+    for v,p in zip(comp.values(),hp): v["p_holm"]=p
     ref=ps.cells(rows,"RMSE")["persistence"]; cells=ps.cells(rows,"RMSE")
     out={}
     for name, rs in by.items():
@@ -85,16 +88,23 @@ def statistics():
                  for o in sorted({r["origin"] for r in rs})] if name!="persistence" else [0.]
         base_by={o:np.mean([r["RMSE"] for r in by["persistence"] if r["origin"]==o]) for o in {r["origin"] for r in rs}}
         out[name]={"rmse":float(np.mean([r["RMSE"] for r in rs])),"mae":float(np.mean([r["MAE"] for r in rs])),
+                   **{f"rmse_h{k}":float(np.mean([r[f"RMSE_h{k}"] for r in rs])) for k in (1,2,3)},
                    "delta":float(d.mean()),"ci":[float(d.mean()-hw),float(d.mean()+hw)],
                    "skill":float(np.mean([1-r["RMSE"]/base_by[r["origin"]] for r in rs])),
                    "mean_seed_sd":float(np.mean(seed_sd)),"origins":len(d),"rows":len(rs),
-                   "p_adj":comp[name]["p_adj"] if name in comp else None}
+                   "p_adj":comp[name]["p_adj"] if name in comp else None,
+                   "p_raw":comp[name]["p"] if name in comp else None,
+                   "p_holm":comp[name]["p_holm"] if name in comp else None}
     counts={}
     for metric in ("RMSE","val_RMSE"):
         c=ps.compare(rows,metric,"persistence","origin")
         counts[metric]={"better":sum(r["delta"]<0 and r["p_adj"]<.05 for r in c),
                         "worse":sum(r["delta"]>0 and r["p_adj"]<.05 for r in c),"family":len(c)}
-    manifest={"source":"seirgnn2/results/frozen9_plus_audit.json","sha256":hashlib.sha256(P9_FILE.read_bytes()).hexdigest(),
+    holm_counts={}
+    for metric in ("RMSE","val_RMSE"):
+        c=ps.compare(rows,metric,"persistence","origin");p=holm([r["p"] for r in c])
+        holm_counts[metric]={"better":sum(r["delta"]<0 and v<.05 for r,v in zip(c,p)),"worse":sum(r["delta"]>0 and v<.05 for r,v in zip(c,p)),"family":len(c)}
+    manifest={"holm_counts":holm_counts,"source":"seirgnn2/results/frozen9_plus_audit.json","sha256":hashlib.sha256(P9_FILE.read_bytes()).hexdigest(),
               "status":"historical development; original graph","counts":counts,"arms":out}
     (RES/"development_statistics.json").write_text(json.dumps(manifest,indent=2)+"\n",encoding="utf-8")
     ev=["\n# Part E. Codex publication audit (historical development only)",
@@ -105,15 +115,22 @@ def statistics():
     ev.append("| EV-216 | Repaired report calendar: start, end, weeks, missing, districts | 2013-06-15, 2024-02-24, 559, 7, 25 | Rebuilt calendar; not rerun scores | ac89792:data/corrected/rebuilt_index.csv | VERIFIED |")
     ev.append("| EV-217 | Effective reporting and spatial import: rho_eff = rho exp(q); u_i = log(max((A I)_i, 1e-9)); lambda = lambda_base exp(0.1 beta (u_i - mean(u))); E multiplier = 2 sigmoid(g) with recovered-mass compensation | As stated | Stored decoder implementation | seirgnn2/models.py:325-373 at ef22ed3 | VERIFIED (code) |")
     ev.append("| EV-218 | Shared target weeks: train/validation and validation/test boundaries | 2, 2 at each of 9 origins | P9 historical | seirgnn2/core.py::build_folds, direct target-set intersection; partition_overlap.json | VERIFIED (derived) |")
+    ev.append("| EV-219 | Recomputed Holm correction on 30 historical arms, origin unit; zero improvements and zero degradations at 0.05 on validation and test; adaptive anchored E0 test p_raw=0.19921875, p_BH=0.576171875, p_Holm=1 | As stated | P9 audit reanalysis, not new experiments | review_analysis.holm; development_statistics.json | VERIFIED |")
+    ev.append("| EV-220 | Legacy source sensitivity: exclusion of six test windows touching row 395 on origin 0.85; mean of three origin RMSEs 44.7953 to 29.5210 (34.1 percent reduction); last-fold 68.62 to 22.80 | As stated | Legacy diagnostic, not retraining | review_audit_results.json; 30_audit.py | VERIFIED |")
+    ev.append("| EV-221 | Corrected graph: 57 undirected shared borders, 114 directed neighbor entries, 25 loader self-loops = 139; historical 116 + 25 = 141 | As stated | GADM 4.1 stored border test | 3878e70; review_audit_results.json | VERIFIED |")
+    ev.append("| EV-222 | Legacy row 395, published source report: row A has 15/24 recurrence matches and 7165 district sum versus national 35; row B plus Kalmunai totals 351 | As stated | WER Vol48 No02, 2020-12-26 to 2021-01-01 | report_corrections.json; primary report | VERIFIED |")
+    ev.append("| EV-223 | Seroprevalence assumption: 68.2 percent in 1689 suburban Colombo participants, not a national susceptibility estimate | As stated | Source-study scope | Jeewandara 2015, doi:10.1371/journal.pone.0144799 | VERIFIED |")
+    ev.append("| EV-224 | Training decimal values: lr 0.003, weight decay 0.0001; early-stop improvement threshold 1e-6, no minimum epochs | As stated | Historical P9 code | train.run_fold; core.EarlyStop | VERIFIED |")
+    ev.append("| EV-225 | Horizon endpoints h1/h3: persistence 23.47/33.26; GCN residual 23.24/32.47 | As stated | Historical P9 | generated main_p9.tex; frozen9_plus_audit.json | VERIFIED |")
     p=REPO/"paper/EVIDENCE.md";txt=p.read_text(encoding="utf-8").split("\n# Part E. Codex publication audit")[0]
     p.write_text(txt.rstrip()+"\n"+"\n".join(ev)+"\n",encoding="utf-8")
     lines=[r"\begin{table*}[t]",r"\centering",
-           r"\caption{Historical development comparison on the rebuilt series, using the original graph. RMSE and MAE are in cases per district-week, averaged over nine origins and three seeds. Horizon columns report RMSE. $\Delta$ is the seed-averaged paired RMSE difference from persistence; brackets give a descriptive 95\% t interval over origins. $p_{\rm adj}$ uses the unchanged exact sign-flip test with Benjamini--Hochberg adjustment over thirty arms. Retrospective selection and temporal dependence limit inference. None of the lower errors is significant.}",
+           r"\caption{Historical development comparison on the rebuilt series, using the original graph. RMSE and MAE are in cases per district-week, averaged over nine origins and three seeds. Horizon columns report RMSE. $\Delta$ is the seed-averaged paired RMSE difference from persistence; brackets give a descriptive 95\% t interval over origins. $p_{\rm adj}$ uses the unchanged exact sign-flip test with Holm adjustment over thirty arms. Retrospective selection and temporal dependence limit inference. No comparison is significant under Holm. Historical BH values are archived separately.}",
            r"\label{tab:main}",r"\small\setlength{\tabcolsep}{3pt}",r"\begin{tabular}{@{}p{2.5in}rrrrrr@{}}",r"\toprule",
            r"Model & $h=1$ & $h=2$ & $h=3$ & RMSE & MAE & $\Delta$ [95\% CI]; $p_{\rm adj}$ \\",r"\midrule"]
     for i,(name,label) in enumerate(P9_ROWS,200):
         s=out[name];h=[np.mean([r[f"RMSE_h{k}"] for r in by[name]]) for k in (1,2,3)]
-        last="--" if name=="persistence" else f"{s['delta']:+.2f} [{s['ci'][0]:+.2f}, {s['ci'][1]:+.2f}]; {s['p_adj']:.3f}"
+        last="--" if name=="persistence" else f"{s['delta']:+.2f} [{s['ci'][0]:+.2f}, {s['ci'][1]:+.2f}]; {s['p_holm']:.3f}"
         lines.append(label+" & "+" & ".join(f"{v:.2f}" for v in h+[s["rmse"],s["mae"]])+" & "+last+f" \\\\ % EV-{i}\n")
     lines += [r"\bottomrule",r"\end{tabular}",r"\end{table*}"]
     (TAB/"main_p9.tex").write_text("\n".join(lines)+"\n",encoding="utf-8")

@@ -10,6 +10,7 @@ from pathlib import Path
 
 import fitz
 import numpy as np
+from review_analysis import holm
 from common import IEEE, RES, REPO, P9_FILE, load_json, project_stats as ps
 
 
@@ -25,13 +26,21 @@ def main():
         actual={'better':sum(r['p_adj']<.05 and r['delta']<0 for r in values),
                 'worse':sum(r['p_adj']<.05 and r['delta']>0 for r in values),'family':len(values)}
         assert actual==stats['counts'][metric]
+        adjusted=holm([r['p'] for r in values])
+        actual_holm={'better':sum(p<.05 and r['delta']<0 for p,r in zip(adjusted,values)),
+                     'worse':sum(p<.05 and r['delta']>0 for p,r in zip(adjusted,values)), 'family':len(values)}
+        assert actual_holm==stats['holm_counts'][metric]
+        if metric=='RMSE':
+            for r,p in zip(values,adjusted):
+                assert np.isclose(stats['arms'][r['arm']]['p_holm'],p)
+                assert np.isclose(stats['arms'][r['arm']]['p_adj'],r['p_adj'])
     for name, s in stats['arms'].items():
         rr=[r for r in rows if r['name']==name]
         assert np.isclose(s['rmse'],np.mean([r['RMSE'] for r in rr]))
         assert np.isclose(s['mae'],np.mean([r['MAE'] for r in rr]))
         assert s['origins']==9
         assert s['rows']==(9 if name=='persistence' else 27)
-    report={'source_sha256':stats['sha256'],'counts':stats['counts'],
+    report={'source_sha256':stats['sha256'],'historical_bh_counts':stats['counts'],'protocol_holm_counts':stats['holm_counts'],
             'duplicate_bib_keys':sorted({k for k in keys if keys.count(k)>1}),
             'missing_citations':sorted(cited-set(keys)), 'unused_bib_keys':sorted(set(keys)-cited)}
     entries={m.group(1):e for e in re.split(r'\n(?=@)',bib) if (m:=re.match(r'@\w+\{([^,]+),',e))}
@@ -60,6 +69,7 @@ def main():
     assert not any('undefined' in l or 'Overfull' in l for l in report['latex_warnings'])
     pdf=fitz.open(IEEE/'main.pdf')
     report['pages']=len(pdf)
+    assert len(pdf)<=6, 'Main exceeds the six-page maximum'
     report['references_start_page']=next((i+1 for i,p in enumerate(pdf) if 'REFERENCES' in p.get_text()),None)
     report['fonts_have_type3']=any('Type3' in f for p in pdf for f in p.get_fonts())
     assert not report['fonts_have_type3']

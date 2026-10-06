@@ -1,0 +1,26 @@
+{
+ "purpose": "EXP-063 step 4: checksums of the parsed prospective dataset, before any model run",
+ "parsed_at_commit": "9125c0f42d3b41ff36c0c8316cd471d74f61917f",
+ "qc": {
+  "expected_reports": 127,
+  "observed": 111,
+  "corrected": 8,
+  "missing": 8,
+  "gap_days_seen": [
+   -356,
+   -24,
+   0,
+   7,
+   14,
+   38,
+   386
+  ],
+  "log_entries": 58
+ },
+ "files": {
+  "data/new_weeks/cases.npy": "5e2e28d746e36c2b5e5c7931f07c9320c2545c532fe0f8caec6203d724bbb116",
+  "data/new_weeks/corrections.json": "565e0149bdc0512e5e810c449bea81e97cd5b08e385df9f0d5c489313ae16bc3",
+  "data/new_weeks/index.csv": "92a6f809a9dc25034bf1e11668fb52924716fcb224442e85e344c15deee7840c",
+  "data/new_weeks/qc_report.json": "a86ef3f408926b3e00e50476f833c0e950ec84618a51c54f47f99ee2f93b34d6"
+ }
+}

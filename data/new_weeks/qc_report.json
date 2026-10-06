@@ -1,0 +1,16 @@
+{
+ "expected_reports": 127,
+ "observed": 111,
+ "corrected": 8,
+ "missing": 8,
+ "gap_days_seen": [
+  -356,
+  -24,
+  0,
+  7,
+  14,
+  38,
+  386
+ ],
+ "log_entries": 58
+}

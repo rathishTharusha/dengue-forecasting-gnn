@@ -10,6 +10,10 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
+import pytest
+
+pytest.importorskip("pandas")  # build_corrected_cases needs it; CI installs only numpy
+
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO / "analysis" / "_build"))
 

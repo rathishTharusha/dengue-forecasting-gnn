@@ -207,6 +207,7 @@ def _fake_new_weeks(tmp_path: Path, n_new: int = 30, missing_row: int = 5) -> Pa
 
 
 def test_loader_maps_report_columns_to_graph_districts(tmp_path):
+    pytest.importorskip("pandas")
     import corrected_data as cd
 
     data, last_dev = cd.load_with_new_weeks(_fake_new_weeks(tmp_path))

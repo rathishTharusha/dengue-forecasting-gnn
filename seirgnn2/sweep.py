@@ -26,14 +26,18 @@ OUT = Path(__file__).resolve().parent / "results"
 SEEDS = (0, 1, 2)
 
 
-def _origins(spec: dict) -> tuple[tuple[float, ...], float]:
-    """Which origin set a config runs on: the frozen three, the confirmatory nine,
-    or ``frozen9`` -- the docs/PROTOCOL.md nine every new result is quoted on."""
+def _origins(spec: dict) -> tuple[tuple[float, ...], float, int]:
+    """Which origin set a config runs on, as ``(origins, test_frac, purge)``: the
+    frozen three, the confirmatory nine, ``frozen9`` -- the docs/PROTOCOL.md nine
+    every new result is quoted on -- or ``frozen9_purged``, the same nine with the
+    ``HORIZON - 1`` purge of docs/PROSPECTIVE_PLAN.md (same test windows)."""
     if spec.get("origins") == "nine":
-        return core.ORIGINS_9, core.TEST_FRAC_9
+        return core.ORIGINS_9, core.TEST_FRAC_9, 0
     if spec.get("origins") == "frozen9":
-        return core.ORIGINS_F9, core.TEST_FRAC_F9
-    return core.ORIGINS, core.TEST_FRAC
+        return core.ORIGINS_F9, core.TEST_FRAC_F9, 0
+    if spec.get("origins") == "frozen9_purged":
+        return core.ORIGINS_F9, core.TEST_FRAC_F9, core.HORIZON - 1
+    return core.ORIGINS, core.TEST_FRAC, 0
 
 
 def _job(spec: dict, keep: bool = False):
@@ -45,9 +49,8 @@ def _job(spec: dict, keep: bool = False):
     data = cd.load()
     cfg = {k: v for k, v in spec.items()
            if k not in ("origin", "seed", "name", "window", "origins")}
-    origins, test_frac = _origins(spec)
     folds = core.build_folds(data.cases, data.missing, spec.get("window", core.WINDOW),
-                             origins, test_frac)
+                             *_origins(spec))
     fold = next(f for f in folds if f.origin == spec["origin"])
     edge, fixed = core.adjacency(data.names)
     t0 = time.time()

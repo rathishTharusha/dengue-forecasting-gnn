@@ -42,7 +42,7 @@ Copy this block for a new entry:
 - **Date:** 2026-10-06 (opened)
 - **Who:** Claude Code, on branch `exp/prospective-2024-2026`, decisions by the project owner
 - **Commit:** plan frozen in this entry's commit; code, tuning and results to be added
-- **Notebook / script:** to be written (step 2 of `docs/PROSPECTIVE_PLAN.md`)
+- **Notebook / script:** `seirgnn2/prospective.py` (`dev`, `select`, `final`, `stats`); baselines and bootstrap in `seirgnn2/classical.py`; tests `tests/test_prospective.py`
 - **Hardware:** local CPU
 - **Config:** `docs/PROSPECTIVE_PLAN.md`, in full. Six arms: Adaptive SEIR-GNN, Adaptive gated non-SEIR (matched control), Adaptive residual, persistence, seasonal naive, AR ridge. Corrected 139-entry graph. Purge of H-1 = 2 forecast starts at every partition boundary. Seeds 0/1/2. Tuning on the purged nine development origins, validation RMSE only, the same 4-setting grid for every neural arm.
 - **Question:** does the development advantage of the Adaptive SEIR-GNN (EXP-061: test 27.45 vs persistence 28.54) survive on later data no one has seen, against a matched non-SEIR control and classical baselines, with no target overlap between partitions?

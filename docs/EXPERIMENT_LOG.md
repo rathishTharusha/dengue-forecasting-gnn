@@ -37,6 +37,19 @@ Copy this block for a new entry:
 > `CEILING_R0_MAX`) survived the cleanup and now lives in `dengue_gnn.seir`, still
 > asserted by `tests/test_seir.py` and reproduced by `scripts/verify_seir_paper.py`.
 
+## EXP-063 — Prospective test on 2024 W11 to 2026 W32 (pending, plan frozen)
+
+- **Date:** 2026-10-06 (opened)
+- **Who:** Claude Code, on branch `exp/prospective-2024-2026`, decisions by the project owner
+- **Commit:** plan frozen in this entry's commit; code, tuning and results to be added
+- **Notebook / script:** to be written (step 2 of `docs/PROSPECTIVE_PLAN.md`)
+- **Hardware:** local CPU
+- **Config:** `docs/PROSPECTIVE_PLAN.md`, in full. Six arms: Adaptive SEIR-GNN, Adaptive gated non-SEIR (matched control), Adaptive residual, persistence, seasonal naive, AR ridge. Corrected 139-entry graph. Purge of H-1 = 2 forecast starts at every partition boundary. Seeds 0/1/2. Tuning on the purged nine development origins, validation RMSE only, the same 4-setting grid for every neural arm.
+- **Question:** does the development advantage of the Adaptive SEIR-GNN (EXP-061: test 27.45 vs persistence 28.54) survive on later data no one has seen, against a matched non-SEIR control and classical baselines, with no target overlap between partitions?
+- **Pre-commitment (written before any new-week count is parsed):** primary comparisons P1 (vs gated non-SEIR) and P2 (vs persistence), block-bootstrap interval, Holm over the two. Every arm is reported whatever it shows. No arm, setting or test is changed after the new weeks are parsed.
+- **Result:** pending.
+- **Verdict:** pending.
+
 ## EXP-062 — Week-index fix: re-run of every result that read a mis-dated week (pending)
 
 - **Date:** 2026-10-05 (opened)

@@ -47,7 +47,19 @@ Copy this block for a new entry:
 - **Config:** `docs/PROSPECTIVE_PLAN.md`, in full. Six arms: Adaptive SEIR-GNN, Adaptive gated non-SEIR (matched control), Adaptive residual, persistence, seasonal naive, AR ridge. Corrected 139-entry graph. Purge of H-1 = 2 forecast starts at every partition boundary. Seeds 0/1/2. Tuning on the purged nine development origins, validation RMSE only, the same 4-setting grid for every neural arm.
 - **Question:** does the development advantage of the Adaptive SEIR-GNN (EXP-061: test 27.45 vs persistence 28.54) survive on later data no one has seen, against a matched non-SEIR control and classical baselines, with no target overlap between partitions?
 - **Pre-commitment (written before any new-week count is parsed):** primary comparisons P1 (vs gated non-SEIR) and P2 (vs persistence), block-bootstrap interval, Holm over the two. Every arm is reported whatever it shows. No arm, setting or test is changed after the new weeks are parsed.
-- **Result:** pending.
+- **Step 3 (development tuning, 2026-10-06, before any new-week count was parsed):** `python seirgnn2/prospective.py dev --workers 6` then `select`, at commit `a00fc05`. 324 neural runs, 0 failed, 1118 s, local CPU. Validation-only choice: **lr 3e-3, hidden 64 for all three neural arms** (the earlier default); AR(3) **alpha 0.01** (grid edge: the penalty barely matters, 27.636 to 27.760 across the grid). Frozen in `seirgnn2/results/prospective_frozen.json`; full rows in `prospective_dev.json` / `prospective_dev_classical.json`. Purged nine origins, chosen settings, mean over origins x seeds (secondary, development data):
+
+  | arm | val RMSE | test RMSE |
+  |---|---|---|
+  | Persistence | 26.7646 | 28.5410 (check value holds) |
+  | Adaptive SEIR-GNN | 24.9168 | 27.3369 |
+  | Adaptive gated non-SEIR | 24.9045 | 27.9026 |
+  | Adaptive residual | 24.8120 | 28.5642 |
+  | AR(3) ridge | 27.6362 | 29.7560 |
+  | Seasonal naive | 105.1490 | 78.8824 |
+
+  On validation the three neural arms are within 0.11 of each other; the SEIR arm is not ahead of its matched control there. Not a result: development evidence only.
+- **Result:** pending (steps 4-6).
 - **Verdict:** pending.
 
 ## EXP-062 — Week-index fix: re-run of every result that read a mis-dated week (pending)

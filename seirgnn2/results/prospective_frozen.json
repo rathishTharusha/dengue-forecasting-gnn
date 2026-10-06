@@ -1,0 +1,37 @@
+{
+ "arms": {
+  "Adaptive SEIR-GNN": {
+   "lr": 0.003,
+   "hidden": 64
+  },
+  "Adaptive gated non-SEIR": {
+   "lr": 0.003,
+   "hidden": 64
+  },
+  "Adaptive residual": {
+   "lr": 0.003,
+   "hidden": 64
+  }
+ },
+ "dev_val_RMSE": {
+  "Adaptive SEIR-GNN | lr=0.001 hidden=32": 25.35445997450087,
+  "Adaptive SEIR-GNN | lr=0.001 hidden=64": 25.363170765064382,
+  "Adaptive SEIR-GNN | lr=0.003 hidden=32": 25.1048357575028,
+  "Adaptive SEIR-GNN | lr=0.003 hidden=64": 24.916826566060383,
+  "Adaptive gated non-SEIR | lr=0.001 hidden=32": 25.38935414067021,
+  "Adaptive gated non-SEIR | lr=0.001 hidden=64": 25.18846716704192,
+  "Adaptive gated non-SEIR | lr=0.003 hidden=32": 25.19221987547698,
+  "Adaptive gated non-SEIR | lr=0.003 hidden=64": 24.90450590628165,
+  "Adaptive residual | lr=0.001 hidden=32": 25.378844685024685,
+  "Adaptive residual | lr=0.001 hidden=64": 25.012957855507178,
+  "Adaptive residual | lr=0.003 hidden=32": 24.978440002158838,
+  "Adaptive residual | lr=0.003 hidden=64": 24.81195976116039,
+  "AR(3) ridge | alpha=0.01": 27.636158291750746,
+  "AR(3) ridge | alpha=0.1": 27.636269835500745,
+  "AR(3) ridge | alpha=1": 27.637385252487505,
+  "AR(3) ridge | alpha=10": 27.648537388591368,
+  "AR(3) ridge | alpha=100": 27.75987085828591
+ },
+ "ar_alpha": 0.01,
+ "selected_at_commit": "a00fc0514b34add2b8e1bc0eb27c5ca73a35edc8"
+}

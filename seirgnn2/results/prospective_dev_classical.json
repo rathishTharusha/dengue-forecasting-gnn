@@ -1,0 +1,425 @@
+[
+ {
+  "name": "Seasonal naive",
+  "origin": 0.5,
+  "seed": -1,
+  "val_RMSE": 302.4033218197496,
+  "RMSE": 47.24521643712172
+ },
+ {
+  "name": "AR(3) ridge | alpha=0.01",
+  "alpha": 0.01,
+  "origin": 0.5,
+  "seed": -1,
+  "val_RMSE": 23.543295409731392,
+  "RMSE": 20.265909583256075
+ },
+ {
+  "name": "AR(3) ridge | alpha=0.1",
+  "alpha": 0.1,
+  "origin": 0.5,
+  "seed": -1,
+  "val_RMSE": 23.543352737111075,
+  "RMSE": 20.265955071436732
+ },
+ {
+  "name": "AR(3) ridge | alpha=1",
+  "alpha": 1.0,
+  "origin": 0.5,
+  "seed": -1,
+  "val_RMSE": 23.54392594329478,
+  "RMSE": 20.266409958659853
+ },
+ {
+  "name": "AR(3) ridge | alpha=10",
+  "alpha": 10.0,
+  "origin": 0.5,
+  "seed": -1,
+  "val_RMSE": 23.549651342801436,
+  "RMSE": 20.27095941959843
+ },
+ {
+  "name": "AR(3) ridge | alpha=100",
+  "alpha": 100.0,
+  "origin": 0.5,
+  "seed": -1,
+  "val_RMSE": 23.60633071311331,
+  "RMSE": 20.316556066365766
+ },
+ {
+  "name": "Seasonal naive",
+  "origin": 0.55,
+  "seed": -1,
+  "val_RMSE": 49.09359380184906,
+  "RMSE": 113.07863100570088
+ },
+ {
+  "name": "AR(3) ridge | alpha=0.01",
+  "alpha": 0.01,
+  "origin": 0.55,
+  "seed": -1,
+  "val_RMSE": 20.004033091763972,
+  "RMSE": 59.48309787000657
+ },
+ {
+  "name": "AR(3) ridge | alpha=0.1",
+  "alpha": 0.1,
+  "origin": 0.55,
+  "seed": -1,
+  "val_RMSE": 20.004079371304552,
+  "RMSE": 59.48359978766976
+ },
+ {
+  "name": "AR(3) ridge | alpha=1",
+  "alpha": 1.0,
+  "origin": 0.55,
+  "seed": -1,
+  "val_RMSE": 20.00454216064842,
+  "RMSE": 59.488618431924685
+ },
+ {
+  "name": "AR(3) ridge | alpha=10",
+  "alpha": 10.0,
+  "origin": 0.55,
+  "seed": -1,
+  "val_RMSE": 20.0091694855232,
+  "RMSE": 59.53875178341219
+ },
+ {
+  "name": "AR(3) ridge | alpha=100",
+  "alpha": 100.0,
+  "origin": 0.55,
+  "seed": -1,
+  "val_RMSE": 20.055420754694968,
+  "RMSE": 60.03491416397644
+ },
+ {
+  "name": "Seasonal naive",
+  "origin": 0.6,
+  "seed": -1,
+  "val_RMSE": 97.2676376465129,
+  "RMSE": 97.9134870811011
+ },
+ {
+  "name": "AR(3) ridge | alpha=0.01",
+  "alpha": 0.01,
+  "origin": 0.6,
+  "seed": -1,
+  "val_RMSE": 52.24644083217897,
+  "RMSE": 50.146221366855215
+ },
+ {
+  "name": "AR(3) ridge | alpha=0.1",
+  "alpha": 0.1,
+  "origin": 0.6,
+  "seed": -1,
+  "val_RMSE": 52.24679707137918,
+  "RMSE": 50.14664738287622
+ },
+ {
+  "name": "AR(3) ridge | alpha=1",
+  "alpha": 1.0,
+  "origin": 0.6,
+  "seed": -1,
+  "val_RMSE": 52.25035915635281,
+  "RMSE": 50.15090782298958
+ },
+ {
+  "name": "AR(3) ridge | alpha=10",
+  "alpha": 10.0,
+  "origin": 0.6,
+  "seed": -1,
+  "val_RMSE": 52.28594937465214,
+  "RMSE": 50.19354012881715
+ },
+ {
+  "name": "AR(3) ridge | alpha=100",
+  "alpha": 100.0,
+  "origin": 0.6,
+  "seed": -1,
+  "val_RMSE": 52.63885575725483,
+  "RMSE": 50.62256311239127
+ },
+ {
+  "name": "Seasonal naive",
+  "origin": 0.65,
+  "seed": -1,
+  "val_RMSE": 111.61899693237919,
+  "RMSE": 167.14689575910396
+ },
+ {
+  "name": "AR(3) ridge | alpha=0.01",
+  "alpha": 0.01,
+  "origin": 0.65,
+  "seed": -1,
+  "val_RMSE": 56.11615970178882,
+  "RMSE": 12.63740520981172
+ },
+ {
+  "name": "AR(3) ridge | alpha=0.1",
+  "alpha": 0.1,
+  "origin": 0.65,
+  "seed": -1,
+  "val_RMSE": 56.11663028285776,
+  "RMSE": 12.637453515595261
+ },
+ {
+  "name": "AR(3) ridge | alpha=1",
+  "alpha": 1.0,
+  "origin": 0.65,
+  "seed": -1,
+  "val_RMSE": 56.12133620066807,
+  "RMSE": 12.637936555241511
+ },
+ {
+  "name": "AR(3) ridge | alpha=10",
+  "alpha": 10.0,
+  "origin": 0.65,
+  "seed": -1,
+  "val_RMSE": 56.16840606817356,
+  "RMSE": 12.642765156514061
+ },
+ {
+  "name": "AR(3) ridge | alpha=100",
+  "alpha": 100.0,
+  "origin": 0.65,
+  "seed": -1,
+  "val_RMSE": 56.640144945978065,
+  "RMSE": 12.690894035414887
+ },
+ {
+  "name": "Seasonal naive",
+  "origin": 0.7,
+  "seed": -1,
+  "val_RMSE": 153.16573034586082,
+  "RMSE": 88.93696755304211
+ },
+ {
+  "name": "AR(3) ridge | alpha=0.01",
+  "alpha": 0.01,
+  "origin": 0.7,
+  "seed": -1,
+  "val_RMSE": 11.367913350040295,
+  "RMSE": 16.17443817856644
+ },
+ {
+  "name": "AR(3) ridge | alpha=0.1",
+  "alpha": 0.1,
+  "origin": 0.7,
+  "seed": -1,
+  "val_RMSE": 11.367940846654617,
+  "RMSE": 16.174517945160105
+ },
+ {
+  "name": "AR(3) ridge | alpha=1",
+  "alpha": 1.0,
+  "origin": 0.7,
+  "seed": -1,
+  "val_RMSE": 11.36821579490944,
+  "RMSE": 16.175315639811757
+ },
+ {
+  "name": "AR(3) ridge | alpha=10",
+  "alpha": 10.0,
+  "origin": 0.7,
+  "seed": -1,
+  "val_RMSE": 11.370963509520005,
+  "RMSE": 16.18329545523506
+ },
+ {
+  "name": "AR(3) ridge | alpha=100",
+  "alpha": 100.0,
+  "origin": 0.7,
+  "seed": -1,
+  "val_RMSE": 11.398283816237678,
+  "RMSE": 16.263377442829608
+ },
+ {
+  "name": "Seasonal naive",
+  "origin": 0.75,
+  "seed": -1,
+  "val_RMSE": 122.64825237044272,
+  "RMSE": 38.83767929901751
+ },
+ {
+  "name": "AR(3) ridge | alpha=0.01",
+  "alpha": 0.01,
+  "origin": 0.75,
+  "seed": -1,
+  "val_RMSE": 16.442021297649738,
+  "RMSE": 25.284915853933832
+ },
+ {
+  "name": "AR(3) ridge | alpha=0.1",
+  "alpha": 0.1,
+  "origin": 0.75,
+  "seed": -1,
+  "val_RMSE": 16.442098694192154,
+  "RMSE": 25.284904980966964
+ },
+ {
+  "name": "AR(3) ridge | alpha=1",
+  "alpha": 1.0,
+  "origin": 0.75,
+  "seed": -1,
+  "val_RMSE": 16.442872667363474,
+  "RMSE": 25.284796291326057
+ },
+ {
+  "name": "AR(3) ridge | alpha=10",
+  "alpha": 10.0,
+  "origin": 0.75,
+  "seed": -1,
+  "val_RMSE": 16.45061317743068,
+  "RMSE": 25.28371336415642
+ },
+ {
+  "name": "AR(3) ridge | alpha=100",
+  "alpha": 100.0,
+  "origin": 0.75,
+  "seed": -1,
+  "val_RMSE": 16.52809919259818,
+  "RMSE": 25.273249893235427
+ },
+ {
+  "name": "Seasonal naive",
+  "origin": 0.8,
+  "seed": -1,
+  "val_RMSE": 36.36344318130504,
+  "RMSE": 40.08883587614839
+ },
+ {
+  "name": "AR(3) ridge | alpha=0.01",
+  "alpha": 0.01,
+  "origin": 0.8,
+  "seed": -1,
+  "val_RMSE": 25.04000734365845,
+  "RMSE": 19.42961399410442
+ },
+ {
+  "name": "AR(3) ridge | alpha=0.1",
+  "alpha": 0.1,
+  "origin": 0.8,
+  "seed": -1,
+  "val_RMSE": 25.039989627577548,
+  "RMSE": 19.42960629044081
+ },
+ {
+  "name": "AR(3) ridge | alpha=1",
+  "alpha": 1.0,
+  "origin": 0.8,
+  "seed": -1,
+  "val_RMSE": 25.039812498049056,
+  "RMSE": 19.429529309988023
+ },
+ {
+  "name": "AR(3) ridge | alpha=10",
+  "alpha": 10.0,
+  "origin": 0.8,
+  "seed": -1,
+  "val_RMSE": 25.038044309020187,
+  "RMSE": 19.428765097434905
+ },
+ {
+  "name": "AR(3) ridge | alpha=100",
+  "alpha": 100.0,
+  "origin": 0.8,
+  "seed": -1,
+  "val_RMSE": 25.020652697013954,
+  "RMSE": 19.421657233375583
+ },
+ {
+  "name": "Seasonal naive",
+  "origin": 0.85,
+  "seed": -1,
+  "val_RMSE": 41.186498018739336,
+  "RMSE": 36.07772913699724
+ },
+ {
+  "name": "AR(3) ridge | alpha=0.01",
+  "alpha": 0.01,
+  "origin": 0.85,
+  "seed": -1,
+  "val_RMSE": 19.717779657313677,
+  "RMSE": 30.70343554985339
+ },
+ {
+  "name": "AR(3) ridge | alpha=0.1",
+  "alpha": 0.1,
+  "origin": 0.85,
+  "seed": -1,
+  "val_RMSE": 19.71777593579719,
+  "RMSE": 30.7034415435517
+ },
+ {
+  "name": "AR(3) ridge | alpha=1",
+  "alpha": 1.0,
+  "origin": 0.85,
+  "seed": -1,
+  "val_RMSE": 19.71773876303715,
+  "RMSE": 30.703501420642926
+ },
+ {
+  "name": "AR(3) ridge | alpha=10",
+  "alpha": 10.0,
+  "origin": 0.85,
+  "seed": -1,
+  "val_RMSE": 19.717371255797094,
+  "RMSE": 30.704094229996596
+ },
+ {
+  "name": "AR(3) ridge | alpha=100",
+  "alpha": 100.0,
+  "origin": 0.85,
+  "seed": -1,
+  "val_RMSE": 19.714099164886427,
+  "RMSE": 30.70945275595903
+ },
+ {
+  "name": "Seasonal naive",
+  "origin": 0.9,
+  "seed": -1,
+  "val_RMSE": 32.593473970329484,
+  "RMSE": 80.6159531653748
+ },
+ {
+  "name": "AR(3) ridge | alpha=0.01",
+  "alpha": 0.01,
+  "origin": 0.9,
+  "seed": -1,
+  "val_RMSE": 24.24777394163138,
+  "RMSE": 33.67922568437031
+ },
+ {
+  "name": "AR(3) ridge | alpha=0.1",
+  "alpha": 0.1,
+  "origin": 0.9,
+  "seed": -1,
+  "val_RMSE": 24.247763952632656,
+  "RMSE": 33.67933364811007
+ },
+ {
+  "name": "AR(3) ridge | alpha=1",
+  "alpha": 1.0,
+  "origin": 0.9,
+  "seed": -1,
+  "val_RMSE": 24.247664088064337,
+  "RMSE": 33.68041327433745
+ },
+ {
+  "name": "AR(3) ridge | alpha=10",
+  "alpha": 10.0,
+  "origin": 0.9,
+  "seed": -1,
+  "val_RMSE": 24.246667974403998,
+  "RMSE": 33.69120842627485
+ },
+ {
+  "name": "AR(3) ridge | alpha=100",
+  "alpha": 100.0,
+  "origin": 0.9,
+  "seed": -1,
+  "val_RMSE": 24.23695068279581,
+  "RMSE": 33.799055268550354
+ }
+]

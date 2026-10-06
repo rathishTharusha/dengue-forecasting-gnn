@@ -91,11 +91,17 @@ def load() -> CorrectedData:
     ndvi = nd.pivot(index="row", columns="district", values="ndvi")[names].to_numpy(dtype=np.float64)
 
     population = np.load(CORRECTED / "rebuilt_population.npy").astype(np.float64)
-    src = pd.read_csv(CORRECTED / "rebuilt_population_sources.csv")
-    for rec in src.itertuples(index=False):
-        ref = 2012 if "Census 2012" in rec.figure else int(str(rec.figure).split()[-1])
-        if ref >= rec.weeks_in_year:
-            raise ValueError(f"population for {rec.weeks_in_year} uses a {ref} figure")
+    # Population rule (analysis/_build/population_vintages.py): a figure is used only
+    # from its document's publication date, and never one for a later reference date.
+    # Weeks before the first verified publication are flagged ``pre_availability``.
+    src = pd.read_csv(CORRECTED / "rebuilt_population_sources.csv",
+                      parse_dates=["week_start", "reference_date"])
+    pub = pd.read_csv(EXTERNAL / "population_vintages.csv", parse_dates=["available_from"])
+    pub = pub.groupby("document")["available_from"].min()
+    late = src["reference_date"] > src["week_start"]
+    unpublished = ~src["pre_availability"] & (src["document"].map(pub) > src["week_start"])
+    if late.any() or unpublished.any() or len(src) != len(index):
+        raise ValueError("a population row uses a figure not yet published or for a later date")
 
     for arr, label in ((climate, "climate"), (ndvi, "ndvi"), (population, "population")):
         if arr.shape[0] != len(index):

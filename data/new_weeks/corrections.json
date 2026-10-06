@@ -6,15 +6,6 @@
   ],
   "action": "warning",
   "reason": "row A differs from the cumulative difference",
-  "columns": [
-   "Galle",
-   "Hambantota",
-   "Mullaitivu",
-   "Ampara",
-   "Puttalam",
-   "Anuradhapura",
-   "Moneragala"
-  ],
   "n": 7
  },
  {
@@ -24,10 +15,15 @@
   ],
   "action": "warning",
   "reason": "row A differs from the cumulative difference",
-  "columns": [
-   "Gampaha"
-  ],
   "n": 1
+ },
+ {
+  "report": [
+   51,
+   14
+  ],
+  "action": "qc",
+  "reason": "cumulative row decreases from the previous week"
  },
  {
   "report": [
@@ -36,10 +32,6 @@
   ],
   "action": "warning",
   "reason": "row A differs from the cumulative difference",
-  "columns": [
-   "Gampaha",
-   "Kegalle"
-  ],
   "n": 2
  },
  {
@@ -49,9 +41,6 @@
   ],
   "action": "warning",
   "reason": "row A differs from the cumulative difference",
-  "columns": [
-   "Kurunegala"
-  ],
   "n": 1
  },
  {
@@ -61,14 +50,6 @@
   ],
   "action": "warning",
   "reason": "row A differs from the cumulative difference",
-  "columns": [
-   "Gampaha",
-   "Kalutara",
-   "Matara",
-   "Kurunegala",
-   "Puttalam",
-   "Kegalle"
-  ],
   "n": 6
  },
  {
@@ -78,9 +59,6 @@
   ],
   "action": "warning",
   "reason": "row A differs from the cumulative difference",
-  "columns": [
-   "Puttalam"
-  ],
   "n": 1
  },
  {
@@ -90,10 +68,6 @@
   ],
   "action": "warning",
   "reason": "row A differs from the cumulative difference",
-  "columns": [
-   "Kurunegala",
-   "Puttalam"
-  ],
   "n": 2
  },
  {
@@ -103,9 +77,6 @@
   ],
   "action": "warning",
   "reason": "row A differs from the cumulative difference",
-  "columns": [
-   "Gampaha"
-  ],
   "n": 1
  },
  {
@@ -123,10 +94,6 @@
   ],
   "action": "warning",
   "reason": "row A differs from the cumulative difference",
-  "columns": [
-   "Gampaha",
-   "Galle"
-  ],
   "n": 2
  },
  {
@@ -144,9 +111,6 @@
   ],
   "action": "warning",
   "reason": "row A differs from the cumulative difference",
-  "columns": [
-   "Galle"
-  ],
   "n": 1
  },
  {
@@ -156,10 +120,6 @@
   ],
   "action": "warning",
   "reason": "row A differs from the cumulative difference",
-  "columns": [
-   "Gampaha",
-   "Hambantota"
-  ],
   "n": 2
  },
  {
@@ -169,11 +129,15 @@
   ],
   "action": "warning",
   "reason": "row A differs from the cumulative difference",
-  "columns": [
-   "Gampaha",
-   "Hambantota"
-  ],
   "n": 2
+ },
+ {
+  "report": [
+   51,
+   35
+  ],
+  "action": "qc",
+  "reason": "cumulative row decreases from the previous week"
  },
  {
   "report": [
@@ -182,15 +146,15 @@
   ],
   "action": "warning",
   "reason": "row A differs from the cumulative difference",
-  "columns": [
-   "Polonnaruwa",
-   "Badulla",
-   "Moneragala",
-   "Ratnapura",
-   "Kegalle",
-   "Kalmunai"
-  ],
   "n": 6
+ },
+ {
+  "report": [
+   51,
+   36
+  ],
+  "action": "qc",
+  "reason": "cumulative row decreases from the previous week"
  },
  {
   "report": [
@@ -199,15 +163,6 @@
   ],
   "action": "warning",
   "reason": "row A differs from the cumulative difference",
-  "columns": [
-   "Batticaloa",
-   "Polonnaruwa",
-   "Badulla",
-   "Moneragala",
-   "Ratnapura",
-   "Kegalle",
-   "Kalmunai"
-  ],
   "n": 7
  },
  {
@@ -231,18 +186,25 @@
    51,
    38
   ],
+  "action": "qc",
+  "reason": "cumulative row decreases from the previous week"
+ },
+ {
+  "report": [
+   51,
+   38
+  ],
   "action": "warning",
   "reason": "row A differs from the cumulative difference",
-  "columns": [
-   "Gampaha",
-   "Polonnaruwa",
-   "Badulla",
-   "Moneragala",
-   "Ratnapura",
-   "Kegalle",
-   "Kalmunai"
-  ],
   "n": 7
+ },
+ {
+  "report": [
+   51,
+   39
+  ],
+  "action": "qc",
+  "reason": "cumulative row decreases from the previous week"
  },
  {
   "report": [
@@ -251,15 +213,15 @@
   ],
   "action": "warning",
   "reason": "row A differs from the cumulative difference",
-  "columns": [
-   "Polonnaruwa",
-   "Badulla",
-   "Moneragala",
-   "Ratnapura",
-   "Kegalle",
-   "Kalmunai"
-  ],
   "n": 6
+ },
+ {
+  "report": [
+   51,
+   46
+  ],
+  "action": "qc",
+  "reason": "cumulative row decreases from the previous week"
  },
  {
   "report": [
@@ -268,9 +230,6 @@
   ],
   "action": "warning",
   "reason": "row A differs from the cumulative difference",
-  "columns": [
-   "Colombo"
-  ],
   "n": 1
  },
  {
@@ -280,31 +239,7 @@
   ],
   "action": "warning",
   "reason": "row A differs from the cumulative difference",
-  "columns": [
-   "Colombo"
-  ],
   "n": 1
- },
- {
-  "report": [
-   52,
-   1
-  ],
-  "action": "warning",
-  "reason": "row A differs from the cumulative difference",
-  "columns": [
-   "Colombo",
-   "Gampaha",
-   "Kalutara",
-   "Kandy",
-   "Matale",
-   "NuwaraEliya",
-   "Galle",
-   "Hambantota",
-   "Matara",
-   "Jaffna"
-  ],
-  "n": 26
  },
  {
   "report": [
@@ -320,14 +255,7 @@
    3
   ],
   "action": "missing",
-  "reason": "row A failed and no valid replacement",
-  "checks": {
-   "sum_ok": false,
-   "district_sum": 1134,
-   "national": 114,
-   "formula_cells": 1,
-   "formula_flag": false
-  }
+  "reason": "row A failed the district sum and no valid replacement"
  },
  {
   "report": [
@@ -344,13 +272,6 @@
   ],
   "action": "corrected",
   "reason": "row A failed the district sum",
-  "checks": {
-   "sum_ok": false,
-   "district_sum": 1080,
-   "national": 110,
-   "formula_cells": 0,
-   "formula_flag": false
-  },
   "replacement": "cumulative difference"
  },
  {
@@ -360,13 +281,6 @@
   ],
   "action": "corrected",
   "reason": "row A failed the district sum",
-  "checks": {
-   "sum_ok": false,
-   "district_sum": 1103,
-   "national": 111,
-   "formula_cells": 2,
-   "formula_flag": false
-  },
   "replacement": "cumulative difference"
  },
  {
@@ -376,13 +290,6 @@
   ],
   "action": "corrected",
   "reason": "row A failed the district sum",
-  "checks": {
-   "sum_ok": false,
-   "district_sum": 1016,
-   "national": 102,
-   "formula_cells": 0,
-   "formula_flag": false
-  },
   "replacement": "cumulative difference"
  },
  {
@@ -392,18 +299,6 @@
   ],
   "action": "warning",
   "reason": "row A differs from the cumulative difference",
-  "columns": [
-   "Colombo",
-   "Gampaha",
-   "Kalutara",
-   "Kandy",
-   "Matale",
-   "NuwaraEliya",
-   "Galle",
-   "Hambantota",
-   "Matara",
-   "Jaffna"
-  ],
   "n": 25
  },
  {
@@ -411,21 +306,24 @@
    52,
    8
   ],
-  "action": "warning",
-  "reason": "row A differs from the cumulative difference",
-  "columns": [
-   "Colombo",
-   "Gampaha",
-   "Kalutara",
-   "Kandy",
-   "Matale",
-   "NuwaraEliya",
-   "Galle",
-   "Hambantota",
-   "Matara",
-   "Jaffna"
+  "action": "qc",
+  "reason": "row A repeats the previous report's row A (R7)"
+ },
+ {
+  "report": [
+   52,
+   8
   ],
-  "n": 26
+  "action": "missing",
+  "reason": "row A repeats the previous report (R7) and no valid replacement"
+ },
+ {
+  "report": [
+   52,
+   11
+  ],
+  "action": "qc",
+  "reason": "cumulative row decreases from the previous week"
  },
  {
   "report": [
@@ -434,15 +332,15 @@
   ],
   "action": "warning",
   "reason": "row A differs from the cumulative difference",
-  "columns": [
-   "Polonnaruwa",
-   "Badulla",
-   "Moneragala",
-   "Ratnapura",
-   "Kegalle",
-   "Kalmunai"
-  ],
   "n": 6
+ },
+ {
+  "report": [
+   52,
+   12
+  ],
+  "action": "qc",
+  "reason": "cumulative row decreases from the previous week"
  },
  {
   "report": [
@@ -451,14 +349,6 @@
   ],
   "action": "warning",
   "reason": "row A differs from the cumulative difference",
-  "columns": [
-   "Polonnaruwa",
-   "Badulla",
-   "Moneragala",
-   "Ratnapura",
-   "Kegalle",
-   "Kalmunai"
-  ],
   "n": 6
  },
  {
@@ -468,9 +358,6 @@
   ],
   "action": "warning",
   "reason": "row A differs from the cumulative difference",
-  "columns": [
-   "Kurunegala"
-  ],
   "n": 1
  },
  {
@@ -480,13 +367,6 @@
   ],
   "action": "corrected",
   "reason": "row A failed the district sum",
-  "checks": {
-   "sum_ok": false,
-   "district_sum": 1278,
-   "national": 129,
-   "formula_cells": 1,
-   "formula_flag": false
-  },
   "replacement": "cumulative difference"
  },
  {
@@ -496,13 +376,6 @@
   ],
   "action": "corrected",
   "reason": "row A failed the district sum",
-  "checks": {
-   "sum_ok": false,
-   "district_sum": 1243,
-   "national": 125,
-   "formula_cells": 1,
-   "formula_flag": false
-  },
   "replacement": "cumulative difference"
  },
  {
@@ -512,13 +385,6 @@
   ],
   "action": "corrected",
   "reason": "row A failed the district sum",
-  "checks": {
-   "sum_ok": false,
-   "district_sum": 1369,
-   "national": 137,
-   "formula_cells": 0,
-   "formula_flag": false
-  },
   "replacement": "cumulative difference"
  },
  {
@@ -528,13 +394,6 @@
   ],
   "action": "corrected",
   "reason": "row A failed the district sum",
-  "checks": {
-   "sum_ok": false,
-   "district_sum": 1323,
-   "national": 133,
-   "formula_cells": 2,
-   "formula_flag": false
-  },
   "replacement": "cumulative difference"
  },
  {
@@ -544,9 +403,6 @@
   ],
   "action": "warning",
   "reason": "row A differs from the cumulative difference",
-  "columns": [
-   "Anuradhapura"
-  ],
   "n": 1
  },
  {
@@ -556,9 +412,6 @@
   ],
   "action": "warning",
   "reason": "row A differs from the cumulative difference",
-  "columns": [
-   "Puttalam"
-  ],
   "n": 1
  },
  {
@@ -568,10 +421,15 @@
   ],
   "action": "warning",
   "reason": "row A differs from the cumulative difference",
-  "columns": [
-   "Puttalam"
-  ],
   "n": 1
+ },
+ {
+  "report": [
+   52,
+   38
+  ],
+  "action": "qc",
+  "reason": "cumulative row decreases from the previous week"
  },
  {
   "report": [
@@ -580,15 +438,15 @@
   ],
   "action": "warning",
   "reason": "row A differs from the cumulative difference",
-  "columns": [
-   "Polonnaruwa",
-   "Badulla",
-   "Moneragala",
-   "Ratnapura",
-   "Kegalle",
-   "Kalmunai"
-  ],
   "n": 6
+ },
+ {
+  "report": [
+   52,
+   39
+  ],
+  "action": "qc",
+  "reason": "cumulative row decreases from the previous week"
  },
  {
   "report": [
@@ -597,14 +455,6 @@
   ],
   "action": "warning",
   "reason": "row A differs from the cumulative difference",
-  "columns": [
-   "Polonnaruwa",
-   "Badulla",
-   "Moneragala",
-   "Ratnapura",
-   "Kegalle",
-   "Kalmunai"
-  ],
   "n": 6
  },
  {
@@ -614,9 +464,6 @@
   ],
   "action": "warning",
   "reason": "row A differs from the cumulative difference",
-  "columns": [
-   "Anuradhapura"
-  ],
   "n": 1
  },
  {
@@ -626,35 +473,7 @@
   ],
   "action": "corrected",
   "reason": "row A failed the district sum",
-  "checks": {
-   "sum_ok": false,
-   "district_sum": 1423,
-   "national": 144,
-   "formula_cells": 0,
-   "formula_flag": false
-  },
   "replacement": "cumulative difference"
- },
- {
-  "report": [
-   53,
-   2
-  ],
-  "action": "warning",
-  "reason": "row A differs from the cumulative difference",
-  "columns": [
-   "Colombo",
-   "Gampaha",
-   "Kalutara",
-   "Kandy",
-   "Matale",
-   "NuwaraEliya",
-   "Galle",
-   "Hambantota",
-   "Matara",
-   "Jaffna"
-  ],
-  "n": 26
  },
  {
   "report": [
@@ -735,6 +554,22 @@
   ],
   "action": "warning",
   "reason": "printed start date 2026-05-04 is 14 days after the previous week"
+ },
+ {
+  "report": [
+   53,
+   27
+  ],
+  "action": "qc",
+  "reason": "row A repeats the previous report's row A (R7)"
+ },
+ {
+  "report": [
+   53,
+   27
+  ],
+  "action": "missing",
+  "reason": "row A repeats the previous report (R7); the cumulative difference equals the repeated row A, not independent evidence (amendment 2b)"
  },
  {
   "report": [

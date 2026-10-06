@@ -1,8 +1,8 @@
 {
  "expected_reports": 127,
- "observed": 111,
+ "observed": 109,
  "corrected": 8,
- "missing": 8,
+ "missing": 10,
  "gap_days_seen": [
   -356,
   -24,
@@ -12,5 +12,9 @@
   38,
   386
  ],
- "log_entries": 58
+ "log_entries": 69,
+ "cross_week_qc": {
+  "cumulative row decreases from the previous week": 10,
+  "row A repeats the previous report's row A (R7)": 2
+ }
 }

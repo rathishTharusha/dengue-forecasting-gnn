@@ -1,0 +1,18 @@
+\begin{table*}[t]
+\centering
+\caption{Prospective results (run 2): 85 forecast starts with all targets between March 2024 and June 2026, settings frozen before the period was parsed. Learned arms are averaged over seeds 0, 1, 2; their seed RMSE ranges are 0.45 (SEIR), 0.36 (gated) and 0.82 (residual). $\Delta$ is the RMSE difference from persistence with a 95\% paired circular block-bootstrap interval over forecast starts (block 8; negative favours the model). MAE, SMAPE and MAPE are descriptive and were not tested. Bold marks the lowest value in each column.}
+\label{tab:prospective}
+\small\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{@{}lrrrrrrrl@{}}
+\toprule
+Model & $h=1$ & $h=2$ & $h=3$ & RMSE & MAE & SMAPE & MAPE & $\Delta$ [95\% CI] \\
+\midrule
+Persistence (last week) & \textbf{15.40} & 35.66 & \textbf{45.98} & \textbf{34.75} & 11.78 & 50.25 & 53.30 & -- \\ % EXP-063 run 2
+Seasonal naive (52 weeks earlier) & 50.72 & 62.46 & 72.24 & 62.43 & 27.53 & 74.63 & 113.35 & +27.68 [+14.08, +48.35] \\ % EXP-063 run 2
+AR(3), recursive ridge & 17.33 & 35.87 & 48.75 & 36.35 & 11.35 & 46.75 & 44.46 & +1.60 [-1.21, +3.09] \\ % EXP-063 run 2
+Adaptive GCN, residual & 16.37 & 36.02 & 47.61 & 35.74 & 11.61 & 46.61 & \textbf{43.01} & +0.99 [-0.44, +2.54] \\ % EXP-063 run 2
+Adaptive GCN, gated non-SEIR (matched control) & 16.01 & 35.66 & 47.31 & 35.43 & 11.35 & \textbf{45.75} & 43.91 & +0.68 [-0.69, +1.85] \\ % EXP-063 run 2
+Adaptive SEIR-GNN & 15.78 & \textbf{35.65} & 47.32 & 35.40 & \textbf{11.29} & 46.08 & 43.47 & +0.65 [-0.99, +1.69] \\ % EXP-063 run 2
+\bottomrule
+\end{tabular}
+\end{table*}

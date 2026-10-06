@@ -1,0 +1,20 @@
+\begin{table}[t]
+\centering
+\caption{Nominal 95\% intervals on the legacy-array folds (three folds, 68 test windows each). Coverage is the share of district-week targets inside the interval; width is the mean upper minus lower bound in cases. The first two rows need no network.}
+\label{tab:interval}
+\footnotesize
+\begin{tabular}{@{}lrr@{}}
+\toprule
+Interval & Coverage (\%) & Width \\
+\midrule
+Persistence, residual quantiles & 96.0 & 99 \\ % EV-142
+Persistence, scaled residual quantiles & 96.3 & 74 \\ % EV-143
+\midrule
+STGAT, Gaussian head & 95.6 & 123 \\ % EV-144
+A3TGCN, Gaussian head & 96.2 & 230 \\ % EV-145
+ASTGCN, Gaussian head & 94.7 & 128 \\ % EV-146
+DCRNN, Gaussian head & 95.2 & 250 \\ % EV-147
+AAGCN, Gaussian head & 95.9 & 145 \\ % EV-148
+\bottomrule
+\end{tabular}
+\end{table}

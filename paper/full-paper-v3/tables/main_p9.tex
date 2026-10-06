@@ -1,0 +1,44 @@
+\begin{table*}[t]
+\centering
+\caption{Development results on the rebuilt series (nine rolling origins, three seeds; benchmark graph, unpurged splits). These are not the prospective results of Table~\ref{tab:prospective}. RMSE and MAE are in cases per district-week, averaged over origins and seeds; horizon columns report RMSE. $\Delta$ is the seed-averaged paired RMSE difference from persistence with a 95\% t interval over origins (negative is better). Bold marks the lowest test RMSE (the proposed Adaptive SEIR-GNN); an interval that includes zero shows no clear difference from persistence.}
+\label{tab:main}
+\small\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}p{2.85in}rrrrrr@{}}
+\toprule
+Model & $h=1$ & $h=2$ & $h=3$ & RMSE & MAE & $\Delta$ [95\% CI] \\
+\midrule
+Persistence (last week) & 23.47 & 27.94 & 33.26 & 28.54 & 13.94 & -- \\ % EV-200
+
+GCN, direct & 23.10 & 27.82 & 32.68 & 28.17 & 13.66 & -0.37 [-1.88, +1.14] \\ % EV-201
+
+GCN, residual (baseline GNN) & 23.24 & 27.79 & 32.47 & 28.12 & 13.62 & -0.42 [-1.54, +0.70] \\ % EV-202
+
+LSTM, direct & 23.65 & 28.22 & 33.38 & 28.73 & 14.00 & +0.19 [-1.99, +2.37] \\ % EV-203
+
+ASTGCN, direct & 23.92 & 28.54 & 33.45 & 28.94 & 14.27 & +0.40 [-2.02, +2.81] \\ % EV-204
+
+AAGCN, direct & 24.11 & 29.10 & 33.66 & 29.26 & 14.06 & +0.72 [-1.57, +3.00] \\ % EV-205
+
+STGAT, direct & 42.60 & 44.55 & 46.75 & 44.71 & 22.17 & +16.17 [+4.24, +28.11] \\ % EV-206
+
+ASTGCN, residual & 23.07 & 28.08 & 33.66 & 28.65 & 13.98 & +0.11 [-1.68, +1.90] \\ % EV-207
+
+Adaptive GCN, residual & 23.07 & 27.78 & 32.15 & 27.94 & 13.61 & -0.60 [-1.81, +0.61] \\ % EV-208
+
+GCN, SEIR, free rate & 27.58 & 40.81 & 50.14 & 40.77 & 17.97 & +12.23 [+2.67, +21.80] \\ % EV-209
+
+GCN, gated SEIR, free rate & 22.86 & 28.04 & 33.29 & 28.43 & 13.51 & -0.11 [-3.23, +3.00] \\ % EV-210
+
+Adaptive GCN, SEIR, anchored & 23.99 & 28.81 & 35.29 & 29.80 & 13.84 & +1.26 [-1.47, +3.98] \\ % EV-211
+
+Adaptive GCN, gated SEIR, mass-action & 22.90 & 28.02 & 33.19 & 28.39 & 13.52 & -0.16 [-3.16, +2.85] \\ % EV-212
+
+GCN, gated SEIR, anchored & 22.49 & 27.38 & 32.04 & 27.62 & 13.39 & -0.92 [-2.60, +0.76] \\ % EV-213
+
+Adaptive GCN, gated SEIR, anchored & 22.51 & 27.09 & 31.85 & 27.45 & 13.31 & -1.09 [-2.81, +0.63] \\ % EV-214
+
+\textbf{Adaptive GCN, gated SEIR, anchored, learned $E_0$} & \textbf{22.45} & \textbf{27.07} & \textbf{31.88} & \textbf{27.45} & \textbf{13.29} & \textbf{-1.10 [-2.84, +0.65]} \\ % EV-215
+
+\bottomrule
+\end{tabular}
+\end{table*}

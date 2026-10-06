@@ -1,0 +1,101 @@
+[
+  {
+    "origin": 0.5,
+    "train_validation": [
+      249,
+      250
+    ],
+    "validation_test": [
+      279,
+      280
+    ]
+  },
+  {
+    "origin": 0.55,
+    "train_validation": [
+      277,
+      278
+    ],
+    "validation_test": [
+      307,
+      308
+    ]
+  },
+  {
+    "origin": 0.6,
+    "train_validation": [
+      304,
+      305
+    ],
+    "validation_test": [
+      334,
+      335
+    ]
+  },
+  {
+    "origin": 0.65,
+    "train_validation": [
+      332,
+      333
+    ],
+    "validation_test": [
+      362,
+      363
+    ]
+  },
+  {
+    "origin": 0.7,
+    "train_validation": [
+      360,
+      361
+    ],
+    "validation_test": [
+      390,
+      391
+    ]
+  },
+  {
+    "origin": 0.75,
+    "train_validation": [
+      387,
+      388
+    ],
+    "validation_test": [
+      417,
+      418
+    ]
+  },
+  {
+    "origin": 0.8,
+    "train_validation": [
+      415,
+      416
+    ],
+    "validation_test": [
+      445,
+      446
+    ]
+  },
+  {
+    "origin": 0.85,
+    "train_validation": [
+      443,
+      444
+    ],
+    "validation_test": [
+      473,
+      474
+    ]
+  },
+  {
+    "origin": 0.9,
+    "train_validation": [
+      470,
+      471
+    ],
+    "validation_test": [
+      500,
+      501
+    ]
+  }
+]

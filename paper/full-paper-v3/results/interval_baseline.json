@@ -1,0 +1,79 @@
+{
+  "folds": [
+    {
+      "origin": 0.55,
+      "n_test_windows": 68,
+      "persistence_rmse": 26.882223151529477,
+      "additive": {
+        "coverage": 0.9725490196078431,
+        "width": 106.16254901960785
+      },
+      "scaled": {
+        "coverage": 0.9809803921568627,
+        "width": 85.77773082677159
+      }
+    },
+    {
+      "origin": 0.7,
+      "n_test_windows": 68,
+      "persistence_rmse": 38.88532915547214,
+      "additive": {
+        "coverage": 0.9456862745098039,
+        "width": 99.10065686274474
+      },
+      "scaled": {
+        "coverage": 0.9627450980392157,
+        "width": 87.14970566770536
+      }
+    },
+    {
+      "origin": 0.85,
+      "n_test_windows": 68,
+      "persistence_rmse": 68.6183948926748,
+      "additive": {
+        "coverage": 0.9621568627450982,
+        "width": 90.64249019607831
+      },
+      "scaled": {
+        "coverage": 0.9449019607843137,
+        "width": 49.497520571353725
+      }
+    }
+  ],
+  "additive": {
+    "coverage": 0.9601307189542484,
+    "width": 98.63523202614363
+  },
+  "scaled": {
+    "coverage": 0.962875816993464,
+    "width": 74.14165235527689
+  },
+  "gaussian_head": {
+    "A3TGCN": {
+      "coverage": 0.9617211328976034,
+      "width": 230.47421179877387,
+      "n": 9
+    },
+    "AAGCN": {
+      "coverage": 0.9588888888888888,
+      "width": 145.35924784342447,
+      "n": 9
+    },
+    "ASTGCN": {
+      "coverage": 0.9470806100217865,
+      "width": 128.43012237548828,
+      "n": 9
+    },
+    "DCRNN": {
+      "coverage": 0.9520697167755992,
+      "width": 249.92455630832248,
+      "n": 9
+    },
+    "STGAT": {
+      "coverage": 0.9564705882352942,
+      "width": 122.84346516927083,
+      "n": 9
+    }
+  },
+  "persistence_check": "persistence RMSE per fold equals improved_sweep.json to 1e-6"
+}

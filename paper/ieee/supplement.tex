@@ -1,0 +1,52 @@
+% Historical material for author review; submit separately only if the venue permits.
+\documentclass[conference]{IEEEtran}
+\usepackage{graphicx,booktabs,amsmath}
+\begin{document}
+\title{Supplementary Material: Historical Dengue Forecasting Analyses}
+\author{\IEEEauthorblockN{University of Moratuwa research team}}
+\maketitle
+
+\section{Scope}
+These materials preserve historical analyses omitted from the six-page manuscript.
+They are development or legacy evidence, not results of a corrected final or untouched-period evaluation.
+The supplementary file is provided for author review; its eligibility for submission requires a venue decision.
+
+\section{Legacy interval comparison}
+The Gaussian-head results exist only on legacy-array folds containing the source-table error.
+The persistence interval uses per-horizon training-residual quantiles; the scaled version divides residuals by the square root of one plus the latest count, then reverses that scaling for prediction.
+Lower bounds are clipped at zero.
+Coverage and width are averaged across folds, and no new model is trained for this comparison.
+These historical intervals are not a calibration contribution of the rebuilt-data architecture.
+\input{tables/intervals.tex}
+
+\section{Stored development protocols}
+\input{tables/protocols.tex}
+\section{Historical three-origin ablations}
+Table~\ref{tab:p3} shows the three-origin ablation, which we read as indicative only.
+With three origins no gap can reach $p$ below 0.25. % EV-181
+The simple graph control, a GCN with a residual head, scores 34.50 against 36.02 for persistence. % EV-116, EV-115
+Removing the graph gives 34.57 and a learned adjacency gives 34.17, so the whole spread across the three graph choices is 0.41 cases, well inside the standard deviation of 10 to 11 over runs. % EV-117, EV-118, EV-116, EV-187
+Under the shared fixed training settings, direct heads have high error on two adapted encoders: STGAT scores 62.00 and DCRNN scores 73.52 against persistence at 36.02. % EV-123, EV-125, EV-115
+Their gated SEIR versions score 35.84 and 35.52. % EV-124, EV-126
+
+\input{tables/ablation_p3.tex}
+
+To separate the anchor from the physics, we ran a gated head without the simulator.
+On validation, the simulator has mixed effects for the three poorly fitted direct-head models: the SEIR head minus the gated head is $+0.66$ (STGAT), $0.00$ (A3T-GCN) and $-0.68$ (DCRNN) in RMSE. % EV-159, EV-160, EV-161
+The anchor and gate account for 1.12, 1.00 and 0.96 of the repair. % EV-159, EV-160, EV-161
+On test, the SEIR head is lower than the gated head by 0.62, 1.66 and 3.50. % EV-159, EV-160, EV-161
+Validation and test disagree.
+These mixed results do not isolate an accuracy gain from the simulator.
+Equal validation-only tuning and matched adaptive-encoder controls are missing.
+
+Among the displayed head controls, the lowest three-origin error is from AAGCN with a gated head, at 33.53 against 36.02 for persistence. % EV-120, EV-115
+This gap is untested.
+The nine-origin protocol contains no gated head without physics, and its ASTGCN arm with a residual head is 0.11 above persistence. % EV-107
+
+
+\section{Seed variation and normalized skill}
+Table~\ref{tab:seed} separates initialization variation from the between-origin variation underlying the paired intervals in the manuscript.
+The CSV summary records all stored arms, including horizon errors, MAE, skill, paired intervals, both BH and Holm corrections, and mean within-origin seed standard deviation.
+The displayed subset follows the main manuscript; no claim of significance is inferred from a positive skill.
+\input{tables/seed_variability.tex}
+\end{document}

@@ -1,0 +1,2145 @@
+{
+  "tissera2020severe": {
+    "title": [
+      "Severe Dengue Epidemic, Sri Lanka, 2017"
+    ],
+    "author": [
+      {
+        "given": "Hasitha A.",
+        "family": "Tissera",
+        "sequence": "first",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Bernard D.W.",
+        "family": "Jayamanne",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Rajendra",
+        "family": "Raut",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Sakunthala M.D.",
+        "family": "Janaki",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Yesim",
+        "family": "Tozan",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Preshila C.",
+        "family": "Samaraweera",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Prasad",
+        "family": "Liyanage",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Azhar",
+        "family": "Ghouse",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Chaturaka",
+        "family": "Rodrigo",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Aravinda M.",
+        "family": "de Silva",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Sumadhya D.",
+        "family": "Fernando",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      }
+    ],
+    "container-title": [
+      "Emerging Infectious Diseases"
+    ],
+    "page": "682-691",
+    "volume": "26",
+    "issue": "4",
+    "published": {
+      "date-parts": [
+        [
+          2020,
+          4
+        ]
+      ]
+    },
+    "DOI": "10.3201/eid2604.190435",
+    "URL": "https://doi.org/10.3201/eid2604.190435"
+  },
+  "weng2024graph": {
+    "title": [
+      "Graph Representation Learning for Dengue Forecasting"
+    ],
+    "author": [
+      {
+        "given": "Jiaqi",
+        "family": "Weng",
+        "sequence": "first",
+        "affiliation": [
+          {
+            "name": "Rensselaer Polytechnic Institute,Computer Science Department,Troy,NY,USA"
+          }
+        ],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      },
+      {
+        "given": "David",
+        "family": "Qiu",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Rensselaer Polytechnic Institute,Computer Science Department,Troy,NY,USA"
+          }
+        ],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      },
+      {
+        "given": "Ethan",
+        "family": "Cruz",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Rensselaer Polytechnic Institute,Computer Science Department,Troy,NY,USA"
+          }
+        ],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      },
+      {
+        "given": "Malik",
+        "family": "Magdon-Ismail",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Rensselaer Polytechnic Institute,Computer Science Department,Troy,NY,USA"
+          }
+        ],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      },
+      {
+        "given": "Thilanka",
+        "family": "Munasinghe",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Rensselaer Polytechnic Institute,Troy,NY,USA"
+          }
+        ],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      },
+      {
+        "given": "Jennifer. C.",
+        "family": "Wei",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "NASA Goddard Space Flight Center,Greenbelt,MD,USA"
+          }
+        ],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      },
+      {
+        "given": "Ashan",
+        "family": "Pathirana",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Ministry of Health,Health Promotion Bureau,Colombo,Sri Lanka"
+          }
+        ],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      },
+      {
+        "given": "Mahi",
+        "family": "Pasarkar",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Rensselaer Polytechnic Institute,School of Science,Troy,NY,USA"
+          }
+        ],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      }
+    ],
+    "container-title": [
+      "2024 IEEE International Conference on Big Data (BigData)"
+    ],
+    "page": "4448-4456",
+    "volume": null,
+    "issue": null,
+    "published": {
+      "date-parts": [
+        [
+          2024,
+          12,
+          15
+        ]
+      ]
+    },
+    "DOI": "10.1109/bigdata62323.2024.10825335"
+  },
+  "gulmohamed2026denguegnn": {
+    "title": [
+      "DengueGNN: Graph-based deep learning for modeling disease spread dynamics and prediction"
+    ],
+    "author": [
+      {
+        "ORCID": "https://orcid.org/0000-0002-0015-6596",
+        "authenticated-orcid": false,
+        "given": "Rasitha Banu",
+        "family": "GulMohamed",
+        "sequence": "first",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0001-8306-8913",
+        "authenticated-orcid": false,
+        "given": "Wafa",
+        "family": "Hetany",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0003-1732-1807",
+        "authenticated-orcid": false,
+        "given": "Hanan Abdullah",
+        "family": "Almaimani",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "ORCID": "https://orcid.org/0009-0009-0769-984X",
+        "authenticated-orcid": false,
+        "given": "Faiza Abdalla Saeed",
+        "family": "Khiery",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      }
+    ],
+    "container-title": [
+      "Scientific Reports"
+    ],
+    "page": null,
+    "volume": "16",
+    "issue": "1",
+    "published": {
+      "date-parts": [
+        [
+          2026,
+          3,
+          30
+        ]
+      ]
+    },
+    "DOI": "10.1038/s41598-026-43073-y",
+    "URL": "https://doi.org/10.1038/s41598-026-43073-y"
+  },
+  "liu2025seirlstm": {
+    "title": [
+      "An explainable covariate compartmental model for predicting the spatio-temporal patterns of dengue in Sri Lanka"
+    ],
+    "author": [
+      {
+        "ORCID": "https://orcid.org/0000-0002-3484-1444",
+        "authenticated-orcid": true,
+        "given": "Yichao",
+        "family": "Liu",
+        "sequence": "first",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Peter",
+        "family": "Fransson",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Julian",
+        "family": "Heidecke",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Prasad",
+        "family": "Liyanage",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Jonas",
+        "family": "Wallin",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Joacim",
+        "family": "Rockl\u00f6v",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      }
+    ],
+    "container-title": [
+      "PLOS Computational Biology"
+    ],
+    "page": "e1013540",
+    "volume": "21",
+    "issue": "9",
+    "published": {
+      "date-parts": [
+        [
+          2025,
+          9,
+          26
+        ]
+      ]
+    },
+    "DOI": "10.1371/journal.pcbi.1013540",
+    "URL": "https://doi.org/10.1371/journal.pcbi.1013540"
+  },
+  "guo2019astgcn": {
+    "title": [
+      "Attention Based Spatial-Temporal Graph Convolutional Networks for Traffic Flow Forecasting"
+    ],
+    "author": [
+      {
+        "given": "Shengnan",
+        "family": "Guo",
+        "sequence": "first",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Youfang",
+        "family": "Lin",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Ning",
+        "family": "Feng",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Chao",
+        "family": "Song",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Huaiyu",
+        "family": "Wan",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      }
+    ],
+    "container-title": [
+      "Proceedings of the AAAI Conference on Artificial Intelligence"
+    ],
+    "page": "922-929",
+    "volume": "33",
+    "issue": "01",
+    "published": {
+      "date-parts": [
+        [
+          2019,
+          7,
+          17
+        ]
+      ]
+    },
+    "DOI": "10.1609/aaai.v33i01.3301922",
+    "URL": "https://doi.org/10.1609/aaai.v33i01.3301922"
+  },
+  "wu2019graphwavenet": {
+    "title": [
+      "Graph WaveNet for Deep Spatial-Temporal Graph Modeling"
+    ],
+    "author": [
+      {
+        "given": "Zonghan",
+        "family": "Wu",
+        "sequence": "first",
+        "affiliation": [
+          {
+            "name": "Centre for Artificial Intelligence, FEIT, University of Technology Sydney, Australia"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Shirui",
+        "family": "Pan",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Faculty of Information Technology, Monash University, Australia"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Guodong",
+        "family": "Long",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Centre for Artificial Intelligence, FEIT, University of Technology Sydney, Australia"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Jing",
+        "family": "Jiang",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Centre for Artificial Intelligence, FEIT, University of Technology Sydney, Australia"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Chengqi",
+        "family": "Zhang",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Centre for Artificial Intelligence, FEIT, University of Technology Sydney, Australia"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      }
+    ],
+    "container-title": [
+      "Proceedings of the Twenty-Eighth International Joint Conference on Artificial Intelligence"
+    ],
+    "page": "1907-1913",
+    "volume": null,
+    "issue": null,
+    "published": {
+      "date-parts": [
+        [
+          2019,
+          8
+        ]
+      ]
+    },
+    "DOI": "10.24963/ijcai.2019/264"
+  },
+  "rodriguez2023einns": {
+    "title": [
+      "EINNs: Epidemiologically-Informed Neural Networks"
+    ],
+    "author": [
+      {
+        "given": "Alexander",
+        "family": "Rodr\u00edguez",
+        "sequence": "first",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Jiaming",
+        "family": "Cui",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Naren",
+        "family": "Ramakrishnan",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Bijaya",
+        "family": "Adhikari",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "B. Aditya",
+        "family": "Prakash",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      }
+    ],
+    "container-title": [
+      "Proceedings of the AAAI Conference on Artificial Intelligence"
+    ],
+    "page": "14453-14460",
+    "volume": "37",
+    "issue": "12",
+    "published": {
+      "date-parts": [
+        [
+          2023,
+          6,
+          26
+        ]
+      ]
+    },
+    "DOI": "10.1609/aaai.v37i12.26690",
+    "URL": "https://doi.org/10.1609/aaai.v37i12.26690"
+  },
+  "wang2022causalgnn": {
+    "title": [
+      "CausalGNN: Causal-Based Graph Neural Networks for Spatio-Temporal Epidemic Forecasting"
+    ],
+    "author": [
+      {
+        "given": "Lijing",
+        "family": "Wang",
+        "sequence": "first",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Aniruddha",
+        "family": "Adiga",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Jiangzhuo",
+        "family": "Chen",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Adam",
+        "family": "Sadilek",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Srinivasan",
+        "family": "Venkatramanan",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Madhav",
+        "family": "Marathe",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      }
+    ],
+    "container-title": [
+      "Proceedings of the AAAI Conference on Artificial Intelligence"
+    ],
+    "page": "12191-12199",
+    "volume": "36",
+    "issue": "11",
+    "published": {
+      "date-parts": [
+        [
+          2022,
+          6,
+          28
+        ]
+      ]
+    },
+    "DOI": "10.1609/aaai.v36i11.21479",
+    "URL": "https://doi.org/10.1609/aaai.v36i11.21479"
+  },
+  "raissi2019pinn": {
+    "title": [
+      "Physics-informed neural networks: A deep learning framework for solving forward and inverse problems involving nonlinear partial differential equations"
+    ],
+    "author": [
+      {
+        "ORCID": "https://orcid.org/0000-0002-8467-4568",
+        "authenticated-orcid": false,
+        "given": "M.",
+        "family": "Raissi",
+        "sequence": "first",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0002-2816-3229",
+        "authenticated-orcid": false,
+        "given": "P.",
+        "family": "Perdikaris",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "G.E.",
+        "family": "Karniadakis",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      }
+    ],
+    "container-title": [
+      "Journal of Computational Physics"
+    ],
+    "page": "686-707",
+    "volume": "378",
+    "issue": null,
+    "published": {
+      "date-parts": [
+        [
+          2019,
+          2
+        ]
+      ]
+    },
+    "DOI": "10.1016/j.jcp.2018.10.045",
+    "URL": "https://doi.org/10.1016/j.jcp.2018.10.045"
+  },
+  "salinas2020deepar": {
+    "error": "HTTP Error 429: Too Many Requests"
+  },
+  "bracher2021evaluating": {
+    "title": [
+      "Evaluating epidemic forecasts in an interval format"
+    ],
+    "author": [
+      {
+        "ORCID": "https://orcid.org/0000-0002-3777-1410",
+        "authenticated-orcid": true,
+        "given": "Johannes",
+        "family": "Bracher",
+        "sequence": "first",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Evan L.",
+        "family": "Ray",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0001-9397-3271",
+        "authenticated-orcid": true,
+        "given": "Tilmann",
+        "family": "Gneiting",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0003-3503-9899",
+        "authenticated-orcid": true,
+        "given": "Nicholas G.",
+        "family": "Reich",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      }
+    ],
+    "container-title": [
+      "PLOS Computational Biology"
+    ],
+    "page": "e1008618",
+    "volume": "17",
+    "issue": "2",
+    "published": {
+      "date-parts": [
+        [
+          2021,
+          2,
+          12
+        ]
+      ]
+    },
+    "DOI": "10.1371/journal.pcbi.1008618",
+    "URL": "https://doi.org/10.1371/journal.pcbi.1008618"
+  },
+  "huang2019stgat": {
+    "title": [
+      "STGAT: Modeling Spatial-Temporal Interactions for Human Trajectory Prediction"
+    ],
+    "author": [
+      {
+        "given": "Yingfan",
+        "family": "Huang",
+        "sequence": "first",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Huikun",
+        "family": "Bi",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Zhaoxin",
+        "family": "Li",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Tianlu",
+        "family": "Mao",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Zhaoqi",
+        "family": "Wang",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      }
+    ],
+    "container-title": [
+      "2019 IEEE/CVF International Conference on Computer Vision (ICCV)"
+    ],
+    "page": "6271-6280",
+    "volume": null,
+    "issue": null,
+    "published": {
+      "date-parts": [
+        [
+          2019,
+          10
+        ]
+      ]
+    },
+    "DOI": "10.1109/iccv.2019.00637"
+  },
+  "jeewandara2015sero": {
+    "title": [
+      "Change in Dengue and Japanese Encephalitis Seroprevalence Rates in Sri Lanka"
+    ],
+    "author": [
+      {
+        "given": "Chandima",
+        "family": "Jeewandara",
+        "sequence": "first",
+        "affiliation": [],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      },
+      {
+        "given": "Laksiri",
+        "family": "Gomes",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      },
+      {
+        "given": "S. A.",
+        "family": "Paranavitane",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      },
+      {
+        "given": "Mihiri",
+        "family": "Tantirimudalige",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      },
+      {
+        "given": "Sumedha Sandaruwan",
+        "family": "Panapitiya",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      },
+      {
+        "given": "Amitha",
+        "family": "Jayewardene",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      },
+      {
+        "given": "Samitha",
+        "family": "Fernando",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      },
+      {
+        "given": "R. H.",
+        "family": "Fernando",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      },
+      {
+        "given": "Shamini",
+        "family": "Prathapan",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      },
+      {
+        "given": "Graham S.",
+        "family": "Ogg",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      },
+      {
+        "given": "Gathsaurie Neelika",
+        "family": "Malavige",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      }
+    ],
+    "container-title": [
+      "PLOS ONE"
+    ],
+    "page": "e0144799",
+    "volume": "10",
+    "issue": "12",
+    "published": {
+      "date-parts": [
+        [
+          2015,
+          12,
+          22
+        ]
+      ]
+    },
+    "DOI": "10.1371/journal.pone.0144799",
+    "URL": "https://doi.org/10.1371/journal.pone.0144799"
+  },
+  "hersbach2020era5": {
+    "title": [
+      "The ERA5 global reanalysis"
+    ],
+    "author": [
+      {
+        "ORCID": "https://orcid.org/0000-0001-5330-7071",
+        "authenticated-orcid": false,
+        "given": "Hans",
+        "family": "Hersbach",
+        "sequence": "first",
+        "affiliation": [
+          {
+            "name": "European Centre for Medium\u2010Range Weather Forecasts  Reading UK"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Bill",
+        "family": "Bell",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "European Centre for Medium\u2010Range Weather Forecasts  Reading UK"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Paul",
+        "family": "Berrisford",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "European Centre for Medium\u2010Range Weather Forecasts  Reading UK"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Shoji",
+        "family": "Hirahara",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Japan Meteorological Agency  Tokyo Japan"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Andr\u00e1s",
+        "family": "Hor\u00e1nyi",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "European Centre for Medium\u2010Range Weather Forecasts  Reading UK"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0002-5997-290X",
+        "authenticated-orcid": false,
+        "given": "Joaqu\u00edn",
+        "family": "Mu\u00f1oz\u2010Sabater",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "European Centre for Medium\u2010Range Weather Forecasts  Reading UK"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0003-0518-100X",
+        "authenticated-orcid": false,
+        "given": "Julien",
+        "family": "Nicolas",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "European Centre for Medium\u2010Range Weather Forecasts  Reading UK"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Carole",
+        "family": "Peubey",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "European Centre for Medium\u2010Range Weather Forecasts  Reading UK"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Raluca",
+        "family": "Radu",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "European Centre for Medium\u2010Range Weather Forecasts  Reading UK"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0002-2611-487X",
+        "authenticated-orcid": false,
+        "given": "Dinand",
+        "family": "Schepers",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "European Centre for Medium\u2010Range Weather Forecasts  Reading UK"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0002-7327-6310",
+        "authenticated-orcid": false,
+        "given": "Adrian",
+        "family": "Simmons",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "European Centre for Medium\u2010Range Weather Forecasts  Reading UK"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Cornel",
+        "family": "Soci",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "European Centre for Medium\u2010Range Weather Forecasts  Reading UK"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0003-4469-7949",
+        "authenticated-orcid": false,
+        "given": "Saleh",
+        "family": "Abdalla",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "European Centre for Medium\u2010Range Weather Forecasts  Reading UK"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0002-1999-1823",
+        "authenticated-orcid": false,
+        "given": "Xavier",
+        "family": "Abellan",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "European Centre for Medium\u2010Range Weather Forecasts  Reading UK"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0002-1745-3634",
+        "authenticated-orcid": false,
+        "given": "Gianpaolo",
+        "family": "Balsamo",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "European Centre for Medium\u2010Range Weather Forecasts  Reading UK"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0002-1967-3382",
+        "authenticated-orcid": false,
+        "given": "Peter",
+        "family": "Bechtold",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "European Centre for Medium\u2010Range Weather Forecasts  Reading UK"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0002-1675-6967",
+        "authenticated-orcid": false,
+        "given": "Gionata",
+        "family": "Biavati",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "European Centre for Medium\u2010Range Weather Forecasts  Reading UK"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0001-7423-5118",
+        "authenticated-orcid": false,
+        "given": "Jean",
+        "family": "Bidlot",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "European Centre for Medium\u2010Range Weather Forecasts  Reading UK"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Massimo",
+        "family": "Bonavita",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "European Centre for Medium\u2010Range Weather Forecasts  Reading UK"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0002-4540-0687",
+        "authenticated-orcid": false,
+        "given": "Giovanna",
+        "family": "De Chiara",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "European Centre for Medium\u2010Range Weather Forecasts  Reading UK"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Per",
+        "family": "Dahlgren",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "The Norwegian Meteorological Institute  Oslo Norway"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0002-8321-9125",
+        "authenticated-orcid": false,
+        "given": "Dick",
+        "family": "Dee",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "European Centre for Medium\u2010Range Weather Forecasts  Reading UK"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0003-2279-9717",
+        "authenticated-orcid": false,
+        "given": "Michail",
+        "family": "Diamantakis",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "European Centre for Medium\u2010Range Weather Forecasts  Reading UK"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Rossana",
+        "family": "Dragani",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "European Centre for Medium\u2010Range Weather Forecasts  Reading UK"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0003-4880-5329",
+        "authenticated-orcid": false,
+        "given": "Johannes",
+        "family": "Flemming",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "European Centre for Medium\u2010Range Weather Forecasts  Reading UK"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0002-3596-8287",
+        "authenticated-orcid": false,
+        "given": "Richard",
+        "family": "Forbes",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "European Centre for Medium\u2010Range Weather Forecasts  Reading UK"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0003-1544-9612",
+        "authenticated-orcid": false,
+        "given": "Manuel",
+        "family": "Fuentes",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "European Centre for Medium\u2010Range Weather Forecasts  Reading UK"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Alan",
+        "family": "Geer",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "European Centre for Medium\u2010Range Weather Forecasts  Reading UK"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0002-0379-6353",
+        "authenticated-orcid": false,
+        "given": "Leo",
+        "family": "Haimberger",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Department of Meteorology and Geophysics Universit\u00e4t Wien  Vienna Austria"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0003-4810-9593",
+        "authenticated-orcid": false,
+        "given": "Sean",
+        "family": "Healy",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "European Centre for Medium\u2010Range Weather Forecasts  Reading UK"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0002-3180-5157",
+        "authenticated-orcid": false,
+        "given": "Robin J.",
+        "family": "Hogan",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "European Centre for Medium\u2010Range Weather Forecasts  Reading UK"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "El\u00edas",
+        "family": "H\u00f3lm",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "European Centre for Medium\u2010Range Weather Forecasts  Reading UK"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0003-2644-8068",
+        "authenticated-orcid": false,
+        "given": "Marta",
+        "family": "Janiskov\u00e1",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "European Centre for Medium\u2010Range Weather Forecasts  Reading UK"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0002-8046-765X",
+        "authenticated-orcid": false,
+        "given": "Sarah",
+        "family": "Keeley",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "European Centre for Medium\u2010Range Weather Forecasts  Reading UK"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0003-2808-0463",
+        "authenticated-orcid": false,
+        "given": "Patrick",
+        "family": "Laloyaux",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "European Centre for Medium\u2010Range Weather Forecasts  Reading UK"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Philippe",
+        "family": "Lopez",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "European Centre for Medium\u2010Range Weather Forecasts  Reading UK"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0003-3530-8104",
+        "authenticated-orcid": false,
+        "given": "Cristina",
+        "family": "Lupu",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "European Centre for Medium\u2010Range Weather Forecasts  Reading UK"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Gabor",
+        "family": "Radnoti",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "European Centre for Medium\u2010Range Weather Forecasts  Reading UK"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0002-7374-3820",
+        "authenticated-orcid": false,
+        "given": "Patricia",
+        "family": "de Rosnay",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "European Centre for Medium\u2010Range Weather Forecasts  Reading UK"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Iryna",
+        "family": "Rozum",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "European Centre for Medium\u2010Range Weather Forecasts  Reading UK"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0003-3092-0775",
+        "authenticated-orcid": false,
+        "given": "Freja",
+        "family": "Vamborg",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "European Centre for Medium\u2010Range Weather Forecasts  Reading UK"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0002-3041-076X",
+        "authenticated-orcid": false,
+        "given": "Sebastien",
+        "family": "Villaume",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "European Centre for Medium\u2010Range Weather Forecasts  Reading UK"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0003-3214-5266",
+        "authenticated-orcid": false,
+        "given": "Jean\u2010No\u00ebl",
+        "family": "Th\u00e9paut",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "European Centre for Medium\u2010Range Weather Forecasts  Reading UK"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      }
+    ],
+    "container-title": [
+      "Quarterly Journal of the Royal Meteorological Society"
+    ],
+    "page": "1999-2049",
+    "volume": "146",
+    "issue": "730",
+    "published": {
+      "date-parts": [
+        [
+          2020,
+          6,
+          15
+        ]
+      ]
+    },
+    "DOI": "10.1002/qj.3803",
+    "URL": "https://doi.org/10.1002/qj.3803"
+  },
+  "zippenfenig2024openmeteo": {
+    "error": "HTTP Error 404: Not Found"
+  },
+  "didan2021mod13q1": {
+    "error": "HTTP Error 404: Not Found"
+  },
+  "bai2021a3tgcn": {
+    "title": [
+      "A3T-GCN: Attention Temporal Graph Convolutional Network for Traffic Forecasting"
+    ],
+    "author": [
+      {
+        "given": "Jiandong",
+        "family": "Bai",
+        "sequence": "first",
+        "affiliation": [
+          {
+            "name": "Beijing Institute of Tracking and Telecommunication Technology, Beijing 100094, China"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Jiawei",
+        "family": "Zhu",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "School of Geosciences and Info-Physics, Central South University, Changsha 410083, China"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Yujiao",
+        "family": "Song",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Huawei Technologies Co., Ltd., Shenzhen 518129, China"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Ling",
+        "family": "Zhao",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "School of Geosciences and Info-Physics, Central South University, Changsha 410083, China"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Zhixiang",
+        "family": "Hou",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "College of Automotive and Mechanical Engineering, Changsha University of Science and Technology, Changsha 410114, China"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Ronghua",
+        "family": "Du",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "College of Automotive and Mechanical Engineering, Changsha University of Science and Technology, Changsha 410114, China"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0003-1173-6593",
+        "authenticated-orcid": false,
+        "given": "Haifeng",
+        "family": "Li",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "School of Geosciences and Info-Physics, Central South University, Changsha 410083, China"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      }
+    ],
+    "container-title": [
+      "ISPRS International Journal of Geo-Information"
+    ],
+    "page": "485",
+    "volume": "10",
+    "issue": "7",
+    "published": {
+      "date-parts": [
+        [
+          2021,
+          7,
+          15
+        ]
+      ]
+    },
+    "DOI": "10.3390/ijgi10070485"
+  }
+}

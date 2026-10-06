@@ -1,0 +1,22 @@
+{
+ "pooled_lag1": 0.8893102643909847,
+ "within_lag1": 0.8570032274310821,
+ "per_district_median": 0.6845151505128718,
+ "per_district_min": 0.44873366804248427,
+ "per_district_max": 0.89903016256938,
+ "oos_lag1": 0.7635517763505375,
+ "climate_pooled": [
+  [
+   "soil_moisture_0_to_7cm_mean",
+   5
+  ],
+  0.029339884116315336
+ ],
+ "climate_within": [
+  [
+   "relative_humidity_2m_mean",
+   6
+  ],
+  0.010074733275324868
+ ]
+}

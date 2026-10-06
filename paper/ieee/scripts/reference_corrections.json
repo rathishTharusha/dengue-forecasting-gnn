@@ -1,0 +1,59 @@
+{
+  "tissera2020severe": {
+    "doi": "10.3201/eid2604.190435"
+  },
+  "weng2024graph": {
+    "doi": "10.1109/BigData62323.2024.10825335",
+    "author": "Weng, Jiaqi and Qiu, David and Cruz, Ethan and Magdon-Ismail, Malik and Munasinghe, Thilanka and Wei, Jennifer C. and Pathirana, Ashan and Pasarkar, Mahi",
+    "pages": "4448--4456"
+  },
+  "guo2019astgcn": {
+    "doi": "10.1609/aaai.v33i01.3301922"
+  },
+  "wu2019graphwavenet": {
+    "doi": "10.24963/ijcai.2019/264",
+    "pages": "1907--1913"
+  },
+  "rodriguez2023einns": {
+    "doi": "10.1609/aaai.v37i12.26690",
+    "volume": "37",
+    "number": "12",
+    "pages": "14453--14460"
+  },
+  "wang2022causalgnn": {
+    "doi": "10.1609/aaai.v36i11.21479",
+    "volume": "36",
+    "number": "11",
+    "pages": "12191--12199"
+  },
+  "raissi2019pinn": {
+    "title": "Physics-informed neural networks: A deep learning framework for solving forward and inverse problems involving nonlinear partial differential equations",
+    "doi": "10.1016/j.jcp.2018.10.045"
+  },
+  "salinas2020deepar": {
+    "doi": "10.1016/j.ijforecast.2019.07.001"
+  },
+  "bracher2021evaluating": {
+    "doi": "10.1371/journal.pcbi.1008618"
+  },
+  "bai2021a3tgcn": {
+    "url": "https://www.mdpi.com/2220-9964/10/7/485",
+    "author": "Bai, Jiandong and Zhu, Jiawei and Song, Yujiao and Zhao, Ling and Hou, Zhixiang and Du, Ronghua and Li, Haifeng",
+    "doi": "10.3390/ijgi10070485"
+  },
+  "cao2023mepognn": {
+    "url": "https://arxiv.org/abs/2306.14857"
+  },
+  "krishnapriyan2021failure": {
+    "url": "https://arxiv.org/abs/2109.01050"
+  },
+  "li2018dcrnn": {
+    "url": "https://arxiv.org/abs/1707.01926"
+  },
+  "shi2019aagcn": {
+    "url": "https://arxiv.org/abs/1805.07694"
+  },
+  "gulmohamed2026denguegnn": {
+    "number": "1"
+  }
+}

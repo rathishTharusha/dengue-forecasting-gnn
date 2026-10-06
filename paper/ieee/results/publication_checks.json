@@ -1,0 +1,75 @@
+{
+  "source_sha256": "9e30a1d4d665bb00a86a441d9b49bb91d4953931db100f5e0fa8b2a3ce632584",
+  "historical_bh_counts": {
+    "RMSE": {
+      "better": 0,
+      "worse": 8,
+      "family": 30
+    },
+    "val_RMSE": {
+      "better": 7,
+      "worse": 8,
+      "family": 30
+    }
+  },
+  "protocol_holm_counts": {
+    "RMSE": {
+      "better": 0,
+      "worse": 0,
+      "family": 30
+    },
+    "val_RMSE": {
+      "better": 0,
+      "worse": 0,
+      "family": 30
+    }
+  },
+  "duplicate_bib_keys": [],
+  "missing_citations": [],
+  "unused_bib_keys": [],
+  "cited_without_doi_or_url": [],
+  "unknown_evidence_ids": [],
+  "figures": [
+    {
+      "path": "figures/fig_data.pdf",
+      "width_inches": 3.5,
+      "height_inches": 3.25,
+      "raster_images": 0,
+      "minimum_font_pt": 9.0,
+      "maximum_font_pt": 9.0
+    },
+    {
+      "path": "figures/fig_arch.pdf",
+      "width_inches": 7.16,
+      "height_inches": 2.55,
+      "raster_images": 0,
+      "minimum_font_pt": 9.0,
+      "maximum_font_pt": 9.0
+    },
+    {
+      "path": "figures/evaluation_protocol.pdf",
+      "width_inches": 3.5,
+      "height_inches": 2.0,
+      "raster_images": 0,
+      "minimum_font_pt": 9.0,
+      "maximum_font_pt": 9.0
+    },
+    {
+      "path": "figures/fig_forest.pdf",
+      "width_inches": 3.5,
+      "height_inches": 2.75,
+      "raster_images": 0,
+      "minimum_font_pt": 6.300000190734863,
+      "maximum_font_pt": 9.0
+    }
+  ],
+  "latex_warnings": [],
+  "pages": 6,
+  "references_start_page": 5,
+  "fonts_have_type3": false,
+  "supplement_pages": 2,
+  "supplement_latex_warnings": [
+    "Underfull \\hbox (badness 3260) in paragraph at lines 48--52"
+  ],
+  "abstract_words": 209
+}

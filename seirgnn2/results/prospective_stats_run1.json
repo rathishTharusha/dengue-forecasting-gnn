@@ -1,0 +1,248 @@
+{
+ "primary": [
+  {
+   "test": "P1",
+   "a": "Adaptive SEIR-GNN",
+   "b": "Adaptive gated non-SEIR",
+   "p_holm": 0.9444,
+   "delta": 0.0014095370989934963,
+   "lo": -0.37179967319712964,
+   "hi": 0.05288386186285976,
+   "p": 0.9444,
+   "block": 8,
+   "reps": 10000,
+   "n_starts": 91
+  },
+  {
+   "test": "P2",
+   "a": "Adaptive SEIR-GNN",
+   "b": "Persistence",
+   "p_holm": 0.3092,
+   "delta": 0.9847446764320011,
+   "lo": -0.7078118724485121,
+   "hi": 1.6950172057904918,
+   "p": 0.1546,
+   "block": 8,
+   "reps": 10000,
+   "n_starts": 91
+  }
+ ],
+ "sensitivity": [
+  {
+   "test": "P1",
+   "a": "Adaptive SEIR-GNN",
+   "b": "Adaptive gated non-SEIR",
+   "delta": 0.0014095370989934963,
+   "lo": -0.33557124433395646,
+   "hi": 0.07760106526931371,
+   "p": 0.9088,
+   "block": 4,
+   "reps": 10000,
+   "n_starts": 91
+  },
+  {
+   "test": "P1",
+   "a": "Adaptive SEIR-GNN",
+   "b": "Adaptive gated non-SEIR",
+   "delta": 0.0014095370989934963,
+   "lo": -0.3758868575648404,
+   "hi": 0.043834760967568734,
+   "p": 0.9652,
+   "block": 12,
+   "reps": 10000,
+   "n_starts": 91
+  },
+  {
+   "test": "P2",
+   "a": "Adaptive SEIR-GNN",
+   "b": "Persistence",
+   "delta": 0.9847446764320011,
+   "lo": -0.3610691490617802,
+   "hi": 1.6521845374812583,
+   "p": 0.0852,
+   "block": 4,
+   "reps": 10000,
+   "n_starts": 91
+  },
+  {
+   "test": "P2",
+   "a": "Adaptive SEIR-GNN",
+   "b": "Persistence",
+   "delta": 0.9847446764320011,
+   "lo": -0.9265856903385152,
+   "hi": 1.702831281329476,
+   "p": 0.1868,
+   "block": 12,
+   "reps": 10000,
+   "n_starts": 91
+  }
+ ],
+ "secondary": [
+  {
+   "a": "Adaptive SEIR-GNN",
+   "b": "Adaptive gated non-SEIR",
+   "delta": 0.0014095370989934963,
+   "lo": -0.37179967319712964,
+   "hi": 0.05288386186285976,
+   "p": 0.9444,
+   "block": 8,
+   "reps": 10000,
+   "n_starts": 91
+  },
+  {
+   "a": "Adaptive SEIR-GNN",
+   "b": "Adaptive residual",
+   "delta": -0.2890162789095143,
+   "lo": -0.8938445835803551,
+   "hi": -0.16159211482680405,
+   "p": 0.0,
+   "block": 8,
+   "reps": 10000,
+   "n_starts": 91
+  },
+  {
+   "a": "Adaptive SEIR-GNN",
+   "b": "Persistence",
+   "delta": 0.9847446764320011,
+   "lo": -0.7078118724485121,
+   "hi": 1.6950172057904918,
+   "p": 0.1546,
+   "block": 8,
+   "reps": 10000,
+   "n_starts": 91
+  },
+  {
+   "a": "Adaptive SEIR-GNN",
+   "b": "Seasonal naive",
+   "delta": -5.499773890146059,
+   "lo": -45.165777115242754,
+   "hi": -2.6532988970944515,
+   "p": 0.0,
+   "block": 8,
+   "reps": 10000,
+   "n_starts": 91
+  },
+  {
+   "a": "Adaptive SEIR-GNN",
+   "b": "AR(3) ridge",
+   "delta": -0.5304990904637634,
+   "lo": -3.3722392559847427,
+   "hi": 0.6642705271748045,
+   "p": 0.2994,
+   "block": 8,
+   "reps": 10000,
+   "n_starts": 91
+  },
+  {
+   "a": "Adaptive gated non-SEIR",
+   "b": "Adaptive residual",
+   "delta": -0.2904258160085078,
+   "lo": -0.6661107692315799,
+   "hi": -0.12338710537049544,
+   "p": 0.001,
+   "block": 8,
+   "reps": 10000,
+   "n_starts": 91
+  },
+  {
+   "a": "Adaptive gated non-SEIR",
+   "b": "Persistence",
+   "delta": 0.9833351393330076,
+   "lo": -0.4181245180643569,
+   "hi": 1.6937253146261624,
+   "p": 0.1082,
+   "block": 8,
+   "reps": 10000,
+   "n_starts": 91
+  },
+  {
+   "a": "Adaptive gated non-SEIR",
+   "b": "Seasonal naive",
+   "delta": -5.501183427245053,
+   "lo": -44.975811829535395,
+   "hi": -2.6667345504526523,
+   "p": 0.0,
+   "block": 8,
+   "reps": 10000,
+   "n_starts": 91
+  },
+  {
+   "a": "Adaptive gated non-SEIR",
+   "b": "AR(3) ridge",
+   "delta": -0.5319086275627569,
+   "lo": -3.3864017030493336,
+   "hi": 0.9856158581291133,
+   "p": 0.3454,
+   "block": 8,
+   "reps": 10000,
+   "n_starts": 91
+  },
+  {
+   "a": "Adaptive residual",
+   "b": "Persistence",
+   "delta": 1.2737609553415155,
+   "lo": -0.0972305830220025,
+   "hi": 2.2213501436979297,
+   "p": 0.0572,
+   "block": 8,
+   "reps": 10000,
+   "n_starts": 91
+  },
+  {
+   "a": "Adaptive residual",
+   "b": "Seasonal naive",
+   "delta": -5.210757611236545,
+   "lo": -44.38243551294438,
+   "hi": -2.2636996963919898,
+   "p": 0.0,
+   "block": 8,
+   "reps": 10000,
+   "n_starts": 91
+  },
+  {
+   "a": "Adaptive residual",
+   "b": "AR(3) ridge",
+   "delta": -0.2414828115542491,
+   "lo": -3.170210626675093,
+   "hi": 1.4762638170907934,
+   "p": 0.7338,
+   "block": 8,
+   "reps": 10000,
+   "n_starts": 91
+  },
+  {
+   "a": "Persistence",
+   "b": "Seasonal naive",
+   "delta": -6.4845185665780605,
+   "lo": -45.57322380830799,
+   "hi": -3.935375793124167,
+   "p": 0.0,
+   "block": 8,
+   "reps": 10000,
+   "n_starts": 91
+  },
+  {
+   "a": "Persistence",
+   "b": "AR(3) ridge",
+   "delta": -1.5152437668957646,
+   "lo": -4.142062951747584,
+   "hi": 1.08114629031312,
+   "p": 0.1846,
+   "block": 8,
+   "reps": 10000,
+   "n_starts": 91
+  },
+  {
+   "a": "Seasonal naive",
+   "b": "AR(3) ridge",
+   "delta": 4.969274799682296,
+   "lo": 2.264380781989959,
+   "hi": 45.45010172194907,
+   "p": 0.0,
+   "block": 8,
+   "reps": 10000,
+   "n_starts": 91
+  }
+ ],
+ "underpowered": false
+}

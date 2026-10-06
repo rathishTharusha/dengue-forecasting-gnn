@@ -59,7 +59,11 @@ Copy this block for a new entry:
   | Seasonal naive | 105.1490 | 78.8824 |
 
   On validation the three neural arms are within 0.11 of each other; the SEIR arm is not ahead of its matched control there. Not a result: development evidence only.
-- **Result:** pending (steps 4-6).
+- **Step 4 (parse, 2026-10-06):** pre-parse record `0972363`; first parse marked all 127 missing (parser defect, NEW_WEEKS_RULES amendment 1, `9125c0f`, fixed before any count was read); re-parse 111 observed, 8 corrected, 8 missing; data and checksums `3aa3741`.
+- **Run 1 (step 5, at `3aa3741`) - DEFECTIVE DATA, kept for the record:** `seirgnn2/results/prospective_final_run1.json`, `prospective_stats_run1.json`. 91 test starts. RMSE: SEIR 283.9311, gated non-SEIR 283.9297, residual 284.2201, persistence 282.9464, AR(3) 284.4616, seasonal naive 289.4309. P1 d=+0.0014 [-0.372, 0.053] p_holm 0.944; P2 d=+0.9847 [-0.708, 1.695] p_holm 0.309. Every arm's RMSE is dominated by two data defects found by inspecting this run (h1 ~34, h2/h3 ~345):
+  1. **R3 week-1 assumption is wrong.** R3 takes row B as the weekly count in report No. 1 of a volume, but here report No. N covers printed week N-1, so No. 1 is week 52 of the previous year and its row B is the whole year: Vol. 53 No. 1 entered as 50,052 cases (typical week ~900-1,500).
+  2. **Reprinted tables.** Vol. 52 No. 8 and Vol. 53 No. 27 repeat the previous report's row A for all 25 districts; they pass R1/R2, and R3 always prefers a passing row A.
+- **Result:** pending a decision on the two defects.
 - **Verdict:** pending.
 
 ## EXP-062 — Week-index fix: re-run of every result that read a mis-dated week (pending)

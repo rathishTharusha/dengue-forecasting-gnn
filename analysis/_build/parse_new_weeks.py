@@ -167,6 +167,12 @@ def weekly_vector(cur: dict, prev: dict | None) -> tuple[list[int] | None, str, 
         return list(a), "observed", log
     why = "repeats the previous report (R7)" if repeat else (
         "failed the district sum" if not c["sum_ok"] else "failed the formula-pattern test")
+    if repeat and b_week is not None and list(b_week[:25]) == list(a[:25]):
+        # Amendment 2b: the publisher's row B was built from the repeated row A, so
+        # the difference reproduces it and is not independent evidence.
+        log.append({"action": "missing", "reason": f"row A {why}; the cumulative difference "
+                    "equals the repeated row A, not independent evidence (amendment 2b)"})
+        return None, "missing", log
     if _valid(b_week):
         log.append({"action": "corrected", "reason": f"row A {why}", "replacement": "cumulative difference"})
         return b_week, "corrected", log

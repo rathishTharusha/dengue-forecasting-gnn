@@ -150,3 +150,11 @@ def test_large_but_consistent_weeks_are_kept():
         _report(30, a, _vec(24, 90000)), _report(29, _vec(25, 2000), _vec(26))
     )
     assert (vec, status) == (a, "observed")
+
+
+def test_a_difference_that_reproduces_the_repeated_row_is_not_evidence():
+    # Amendment 2b: row B advanced by the repeated row A itself (B10 = B9 + A9).
+    a9, b9 = _vec(27), _vec(28, 9000)
+    vec, status, log = weekly_vector(_report(10, a9, _add(b9, a9)), _report(9, a9, b9))
+    assert (vec, status) == (None, "missing")
+    assert any("2b" in e["reason"] for e in log)

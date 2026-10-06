@@ -89,6 +89,12 @@ horizon-1 errors of all arms were close to persistence.
    its own:** a cumulative row that decreases between consecutive printed weeks of one year;
    row B differing from row A in a printed week 1; a repeated row A.
 
+**Amendment 2b (2026-10-06, before run 2, after the re-parse under amendment 2):** if the
+cumulative difference equals the repeated row A, it is not independent evidence and the week is
+missing. Found because Vol. 53 No. 27 repeats week 25's row A and its row B was built by adding
+that repeated row (B27 = B26 + A26), so amendment 2's replacement reproduced the suspected value.
+Only that week changes.
+
 No rule on the size of a weekly count is added: large weeks are kept when the report is
 internally consistent. R1, R2, R4, R5, R6 and amendment 1 are unchanged. Tests:
 `tests/test_parse_new_weeks.py`. All 127 reports are re-parsed from the PDFs.

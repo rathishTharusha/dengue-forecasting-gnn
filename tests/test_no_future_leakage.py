@@ -97,11 +97,23 @@ def test_ndvi_rows_use_only_composites_already_available():
     assert (nd["composite_available_from"] <= nd["week_start"]).all()
 
 
-def test_population_uses_only_earlier_years():
-    src = pd.read_csv(REPO / "data" / "corrected" / "rebuilt_population_sources.csv")
-    for rec in src.itertuples(index=False):
-        ref = 2012 if "Census 2012" in rec.figure else int(str(rec.figure).split()[-1])
-        assert ref < rec.weeks_in_year
+def test_population_uses_only_published_earlier_figures():
+    """Each week's figure has a reference date no later than the week and, outside
+    the flagged pre-availability weeks, a document published before the week."""
+    src = pd.read_csv(
+        REPO / "data" / "corrected" / "rebuilt_population_sources.csv",
+        parse_dates=["week_start", "reference_date"],
+    )
+    pub = (
+        pd.read_csv(
+            REPO / "data" / "external" / "population_vintages.csv", parse_dates=["available_from"]
+        )
+        .groupby("document")["available_from"]
+        .min()
+    )
+    assert (src["reference_date"] <= src["week_start"]).all()
+    known = src[~src["pre_availability"]]
+    assert (known["document"].map(pub) <= known["week_start"]).all()
 
 
 def test_nothing_is_filled(data):

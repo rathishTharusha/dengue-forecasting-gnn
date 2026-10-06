@@ -34,6 +34,9 @@ TABLE_TITLE = re.compile(
     r"(\d{1,2})(?:st|nd|rd|th)\s*[^\w\s]+\s*(\d{1,2})(?:st|nd|rd|th)\s+([A-Za-z]{3,9})\s+(\d{4})\s*\((\d+)", re.S)
 MONTHS = {m: i for i, m in enumerate(
     ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"], 1)}
+# Amendment 1 (docs/NEW_WEEKS_RULES.md): the only label spellings accepted besides the exact
+# column names. Nothing else is normalised.
+LABEL_SPELLINGS = {"Nuwara Eliya": "NuwaraEliya", "Monaragala": "Moneragala"}
 
 
 def expected_reports() -> list[tuple[int, int]]:
@@ -50,6 +53,39 @@ def wer_columns() -> list[str]:
     from build_corrected_cases import WER_COLUMNS
 
     return list(WER_COLUMNS)
+
+
+def _blank(cell) -> bool:
+    return cell is None or not str(cell).strip()
+
+
+def table_columns(header: list, b_row: list, a_row: list, columns: list[str]) -> tuple | str:
+    """Amendment 1: the cells after the two label columns, checked against ``columns``.
+
+    Only *trailing* blank cells are removed (PDF table extraction adds one); nothing
+    inside the row is dropped or shifted. The header must then have exactly
+    ``len(columns)`` labels, each equal to its expected column (allowing only
+    ``LABEL_SPELLINGS``), checked before any count is read. A data row may have
+    nothing but blank cells beyond that width. Returns ``(b_cells, a_cells)`` or an
+    error string, which makes the week missing under R5.
+    """
+    n = len(columns)
+    head = list(header[2:])
+    while head and _blank(head[-1]):
+        head.pop()
+    if len(head) != n:
+        return f"column count {len(head)} after removing trailing blanks"
+    labels = [LABEL_SPELLINGS.get(str(c).strip(), str(c).strip()) for c in head]
+    if labels != list(columns):
+        bad = [(k, lab) for k, (lab, want) in enumerate(zip(labels, columns, strict=True)) if lab != want]
+        return f"column labels differ from the expected schema at {bad[:3]}"
+    rows = []
+    for row in (b_row, a_row):
+        cells = list(row[2:])
+        if len(cells) < n or not all(_blank(c) for c in cells[n:]):
+            return "data row has cells beyond the expected columns"
+        rows.append(cells[:n])
+    return tuple(rows)
 
 
 def parse_pdf(path: Path, columns: list[str]) -> dict:
@@ -69,13 +105,14 @@ def parse_pdf(path: Path, columns: list[str]) -> dict:
         i = next((k for k, r in enumerate(grid) if r and r[0] and str(r[0]).startswith("Dengue")), None)
         if header is None or i is None or str(grid[i][1]) != "B" or str(grid[i + 1][1]) != "A":
             continue
-        if len(header[2:]) != len(columns):
-            return {"error": f"column count {len(header[2:])}"}
+        cols = table_columns(header, grid[i], grid[i + 1], columns)
+        if isinstance(cols, str):
+            return {"error": cols}
         end_day, month, year = int(m.group(2)), MONTHS[m.group(3)[:3].lower()], int(m.group(4))
         end = dt.date(year, month, end_day)
         try:
-            b = [int(str(x).replace(",", "")) for x in grid[i][2:]]
-            a = [int(str(x).replace(",", "")) for x in grid[i + 1][2:]]
+            b = [int(str(x).replace(",", "")) for x in cols[0]]
+            a = [int(str(x).replace(",", "")) for x in cols[1]]
         except ValueError as exc:
             return {"error": f"non-integer cell: {exc}"}
         return {"A": a, "B": b, "end": end, "start": end - dt.timedelta(days=6), "week_label": int(m.group(5))}

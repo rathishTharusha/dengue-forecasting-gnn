@@ -6,6 +6,12 @@ evaluation design does not change because of final-test performance. Any change 
 reason (a bug, a missing input) is logged in `docs/EXPERIMENT_LOG.md` under EXP-063 with its
 reason, everything affected is re-run, and both results are reported.
 
+**Amendment 1 (2026-10-06, before any new-week count was parsed):** the AR baseline is recursive
+AR(3), not one direct model per horizon; the bootstrap sensitivity block lengths are 4 and 12
+(were 4 and 13); the inference unit is stated explicitly (section 8); the district-order mapping
+of the parser output is stated (section 2). Made on external review of the plan, not on any
+result.
+
 The plan answers the four weaknesses an external review found in the current paper
 (`.codex-paper-review/paper/full-paper-v3/FINAL.tex`): validation and test targets that overlap, a
 graph with two wrong edges, no matched gated non-SEIR control, and no seasonal-naive or
@@ -34,6 +40,9 @@ step 3. It does not change the arm list below.
 - **New weeks:** rows 559 onward, one row per Weekly Epidemiological Report, Vol. 51 No. 11 to
   Vol. 53 No. 33 (127 expected reports, `data/external/wer_new_manifest.csv`), parsed and corrected
   only by `docs/NEW_WEEKS_RULES.md` R1-R6. Missing weeks stay `NaN`; nothing is interpolated.
+  The parser writes districts in report-column order; they are mapped by name to the graph's
+  district order. Kalmunai and the national total are not districts and are not used, so Ampara
+  is Ampara RDHS only, as in the development series.
 - **Inputs:** case history only (`cases` lag 1, window 3) plus the population and cumulative-case
   state the SEIR head needs (`population` lag 0, by publication date). No climate, NDVI, season or
   COVID inputs: none of the arms below uses them.
@@ -89,7 +98,7 @@ Fixed now. None is added, dropped or retuned after step 4.
 | Adaptive residual | same encoder, `head="residual"` | the best non-SEIR arm in EXP-061 |
 | Persistence | `ŷ(i+h) = y(i-1)` for `h = 0, 1, 2` | floor |
 | Seasonal naive | `ŷ(j) = y(j-52)` for each target row `j`; if that row is missing, persistence is used for that cell and the count of such cells is reported | classical baseline |
-| AR ridge | one ridge regression per horizon, pooled over districts, on `log1p` of lags 1-3 plus a district intercept, prediction `expm1` clipped at 0 | classical baseline |
+| AR(3) ridge | one-step ridge regression pooled over districts: `log1p y(t)` on `log1p` of lags 1-3 plus a district intercept, fitted on training starts only. Forecasts are **recursive**: the step-1 prediction is fed back as lag 1 for step 2, and so on; prediction `expm1` clipped at 0 | classical baseline |
 
 All neural arms use `loss="mse_z"`, `dist="point"`, `epochs=300`, `patience=40`, `batch_size=32`,
 `layers=2`, `dropout=0.1`, `weight_decay=1e-4`, seeds **0, 1, 2**.
@@ -101,7 +110,8 @@ three seeds.
 
 - Each of the three neural arms: `lr ∈ {1e-3, 3e-3}` x `hidden ∈ {32, 64}` (4 settings, 108 runs
   per arm).
-- AR ridge: `alpha ∈ {0.01, 0.1, 1, 10, 100}`, chosen on the same development validation splits.
+- AR(3) ridge: `alpha ∈ {0.01, 0.1, 1, 10, 100}`, chosen by the validation RMSE of its recursive
+  3-step forecasts on the same development validation splits.
 - Persistence and seasonal naive have nothing to tune.
 
 The chosen settings and the full development table (validation and test, one row per arm, setting,
@@ -123,12 +133,18 @@ Two **primary comparisons**, both on test RMSE of the final split:
 - **P1:** Adaptive SEIR-GNN vs Adaptive gated non-SEIR (does the SEIR part add anything?)
 - **P2:** Adaptive SEIR-GNN vs Persistence
 
-Method: for each test start `i`, `L(i)` is the squared error averaged over districts, horizons and
-(for neural arms) the three seeds. `ΔRMSE = sqrt(mean L_A) - sqrt(mean L_B)`. Its 95% interval
-and two-sided p-value come from a circular moving-block bootstrap over test starts, block length
-**8**, 10,000 resamples, generator seed 0; the p-value is twice the smaller share of resampled
-`ΔRMSE` on either side of 0. Holm correction across P1 and P2. Block lengths 4 and 13 are reported
-as sensitivity only.
+**Inference unit: the paired forecast-start week.** The 25 districts of one week are one epidemic
+state, not 25 independent observations, so they are never resampled separately.
+
+Method: for each test start `i`, `L(i)` is the squared error averaged over the 25 districts, the 3
+horizons and (for neural arms) the three seeds. `ΔRMSE = sqrt(mean L_A) - sqrt(mean L_B)`. Its 95%
+interval and two-sided p-value come from a circular moving-block bootstrap: contiguous blocks of
+**8** forecast starts are drawn with replacement, every district and horizon of a drawn start stays
+with it, and both arms use the same draw. For each of 10,000 replicates (generator seed 0) the full
+`ΔRMSE` is recomputed from the resampled `L` values. The p-value is twice the smaller share of
+replicate `ΔRMSE` on either side of 0, capped at 1. Holm correction across P1 and P2. Block lengths
+**4 and 12** are reported as sensitivity checks only; the primary result is block length 8 whatever
+the other two show.
 
 Every other pairwise difference in the final table gets the same interval, labelled as secondary
 and uncorrected.

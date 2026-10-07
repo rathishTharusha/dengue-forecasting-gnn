@@ -59,9 +59,9 @@ this negative result as it is.
         the anchor and the gate, not the physics.
   \item \textbf{A leakage-free dataset} (\S\ref{sec:data}). We audit the benchmark
         array, which mixes time orders, trains on post-test data and feeds future
-        rainfall as a ``lagged'' feature, and rebuild 559 weeks (2013--2024) from
-        hash-verified source reports, extended with 2024--2026 weeks for a prospective
-        test.
+        rainfall as a ``lagged'' feature, and correct it into a 559-week (2013--2024)
+        leakage-free series, extended with 127 newly parsed 2024--2026 reports for
+        a prospective test.
   \item \textbf{A controlled and prospective evaluation} (\S\ref{sec:experiments}):
         six encoders, matched no-physics and no-graph controls, paired tests,
         pre-registered decision rules and a prospective 2024--2026 test. It shows that

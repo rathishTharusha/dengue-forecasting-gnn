@@ -27,7 +27,7 @@
 %
 % P5 Contributions -- exactly 3, as a numbered list:
 %    (1) PAGE + ablation showing where the gain comes from;
-%    (2) leakage-free dataset rebuilt from source reports, extended to 2026;
+%    (2) corrected, leakage-free dataset, extended to 2026 with newly parsed reports;
 %    (3) controlled + prospective evaluation (six encoders, matched controls,
 %        paired tests, pre-registered rules).
 %
@@ -54,7 +54,7 @@ The main contributions of this work are:
 \begin{enumerate}
     \item We propose \model{}, an encoder-independent persistence-anchored gated forecasting head that adds only one learned gating parameter. Controlled ablations separate the effects of the persistence anchor, the gate, and the SEIR component.
 
-    \item We audit the existing Sri Lankan dengue benchmark and construct a leakage-controlled weekly dataset from original source reports. The development dataset contains 559 weeks from 2013--2024 and is extended with later reports through August 2026 for prospective evaluation.
+    \item We audit the existing Sri Lankan dengue benchmark and construct a corrected, leakage-controlled weekly dataset. The development dataset contains 559 weeks from 2013--2024 and is extended with 127 newly parsed reports through August 2026 for prospective evaluation.
 
     \item We provide a common evaluation framework for six neural encoders together with matched physics and non-physics controls, identical temporal splits, paired experiments, and a later 2024--2026 evaluation. The results show that persistence is a stronger prior for this forecasting problem than the tested SEIR dynamics.
 \end{enumerate}

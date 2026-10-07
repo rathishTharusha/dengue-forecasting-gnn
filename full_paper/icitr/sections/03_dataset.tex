@@ -18,9 +18,12 @@ spreadsheet formula in one printed table (15 of 24 cells equal the sum of the tw
 before). Two of these findings leak future information, so scores on this array are
 optimistic.
 
-\textbf{The corrected dataset.} We rebuild the series from original files, each checked
-against the SHA-256 recorded at first retrieval: the dengue rows of every WER, ERA5
-daily weather, and census population. The result covers $N=25$ districts over 559 weeks
+\textbf{The corrected dataset.} The 2013--2024 case counts come from the benchmark
+authors' table of parsed WER rows; we do not re-parse those reports. We re-date every
+week by its report volume and number, map the reporting divisions to the 25
+districts, and correct the spreadsheet error from the published PDF. We add ERA5
+daily weather and census population ourselves, and record a SHA-256 checksum for
+every input file. The result covers $N=25$ districts over 559 weeks
 (2013-W26 to 2024-W10), with weekly cases, temperature, precipitation, humidity, soil
 moisture and population. Seven weeks with no report stay missing and are never
 interpolated. A forecast for week $t$ reads cases up to $t-1$ and climate up to $t-2$

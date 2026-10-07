@@ -61,11 +61,12 @@ spreadsheet error, and it can be corrected from the same published table.
 
 \subsection{The corrected dataset}
 \label{sec:corrected}
-Every input is an original file, checked against the SHA-256 recorded when it
-was first retrieved: the parsed Table~1 rows of every Weekly Epidemiological
-Report, the one report PDF used for the correction, ERA5 daily responses from
-the Open-Meteo archive, and the Department of Census and Statistics population
-and census PDFs. From these the case series is rebuilt, keyed by report volume
+The 2013--2024 case counts come from the benchmark authors' table of parsed
+Table~1 rows of every Weekly Epidemiological Report; we do not re-parse those
+reports. The other inputs we obtain ourselves: the one report PDF used for the
+correction, ERA5 daily responses from the Open-Meteo archive, and the Department
+of Census and Statistics population and census PDFs. Every input file has a
+recorded SHA-256 checksum. From these the case series is re-dated, keyed by report volume
 and number: 559 weeks from 2013-W26 to 2024-W10. The seven weeks with no report
 stay missing and are never interpolated; districts plus the Kalmunai division
 equal the Epidemiology Unit's own national total in 432 of 552 reports. Weekly

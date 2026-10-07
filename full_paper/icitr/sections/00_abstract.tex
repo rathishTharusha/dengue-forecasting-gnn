@@ -9,7 +9,8 @@ and are evaluated without the persistence forecast, even though last week's coun
 explains $r^2=0.89$ of the next. We propose \model{} (Persistence-Anchored Gated
 Estimation), a forecasting head for any spatio-temporal encoder that predicts a
 gated departure from the last observed week, at the cost of one parameter. We
-rebuild a leakage-free 559-week dataset from source reports, extend it to 2026, and
+correct the benchmark into a leakage-free 559-week dataset, extend it to 2026 by
+parsing 127 new reports, and
 evaluate five published ST-GNNs and an LSTM under one protocol. \model{} repairs
 the three encoders that fail as published by 5.95--16.29 validation RMSE (9/9 paired
 runs each), and with AAGCN it beats persistence on all nine runs on validation and

@@ -57,6 +57,7 @@
 \newlabel{sec:seirbranch}{{4.4}{3}{Optional SEIR branch}{subsection.4.4}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {4.5}Learning objective}{3}{subsection.4.5}\protected@file@percent }
 \newlabel{sec:loss}{{4.5}{3}{Learning objective}{subsection.4.5}{}}
+\citation{jeewandara2015seroprevalence}
 \citation{phaijoo2018sensitivity}
 \citation{liu2025seirlstm}
 \citation{kipf2017gcn}
@@ -64,7 +65,6 @@
 \citation{liu2025seirlstm}
 \citation{cao2023mepognn}
 \citation{wang2022causalgnn}
-\citation{chen2016xgboost}
 \citation{shao2022stid}
 \@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces PAGE{}. An unchanged encoder reads the last $W$ weeks of standardised log cases on the district graph. Its read-out $\mathbf  {u}_i$ is turned into a departure $\boldsymbol  {\delta }_i=\mathbf  {u}_i-p_i\mathbf  {1}$ from the persistence anchor, shrunk by a learned gate, and added back to the anchor. The dashed SEIR branch replaces the read-out with a differentiable simulator; it is the component the ablation removes.}}{4}{figure.caption.5}\protected@file@percent }
 \newlabel{fig:overview}{{1}{4}{\model {}. An unchanged encoder reads the last $W$ weeks of standardised log cases on the district graph. Its read-out $\mathbf {u}_i$ is turned into a departure $\boldsymbol {\delta }_i=\mathbf {u}_i-p_i\mathbf {1}$ from the persistence anchor, shrunk by a learned gate, and added back to the anchor. The dashed SEIR branch replaces the read-out with a differentiable simulator; it is the component the ablation removes}{figure.caption.5}{}}
@@ -94,8 +94,8 @@
 \newlabel{tab:paired}{{6}{6}{\model {} against the published direct head and against persistence, on matched (origin, seed) runs of Table~\ref {tab:encoders}. Mean RMSE difference (negative favours \model {}) and wins out of 9. $^{*}$: $p_{\text {adj}}<0.05$, exact sign-flip test, BH across the table (attainable floor 0.004)}{table.caption.10}{}}
 \@writefile{lot}{\contentsline {table}{\numberline {7}{\ignorespaces Hyperparameter tuning: mean validation RMSE over the nine purged development origins $\times $ 3 seeds (108 runs per arm). Bold: the setting each arm selects. The same grid and budget are given to every learned arm; test data play no part. AR(3) ridge, by $\alpha $: 0.01: 27.64, 0.1: 27.64, 1: 27.64, 10: 27.65, 100: 27.76.}}{6}{table.caption.11}\protected@file@percent }
 \newlabel{tab:tuning}{{7}{6}{Hyperparameter tuning: mean validation RMSE over the nine purged development origins $\times $ 3 seeds (108 runs per arm). Bold: the setting each arm selects. The same grid and budget are given to every learned arm; test data play no part. AR(3) ridge, by $\alpha $: 0.01: 27.64, 0.1: 27.64, 1: 27.64, 10: 27.65, 100: 27.76}{table.caption.11}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {8}{\ignorespaces Computational cost. Parameters of the full model behind the direct head, and the parameters each head adds. Seconds per epoch and seconds per training run (with early stopping) are means over the 9 runs of the Kaggle run, each run single-threaded on a 4-core Kaggle CPU. PAGE{} adds one parameter and no measurable time; the SEIR branch adds five parameters and about $2\times $ the time per epoch on the light encoders.}}{6}{table.caption.12}\protected@file@percent }
-\newlabel{tab:compute}{{8}{6}{Computational cost. Parameters of the full model behind the direct head, and the parameters each head adds. Seconds per epoch and seconds per training run (with early stopping) are means over the 9 runs of the Kaggle run, each run single-threaded on a 4-core Kaggle CPU. \model {} adds one parameter and no measurable time; the SEIR branch adds five parameters and about $2\times $ the time per epoch on the light encoders}{table.caption.12}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {8}{\ignorespaces Computational cost. Parameters of the full model behind the direct head, and the parameters each head adds. Seconds per epoch and seconds per training run (with early stopping) are means over the 9 runs of the Kaggle run, each run single-threaded on a 4-core Kaggle CPU. PAGE{} adds one parameter and no measurable time; the SEIR branch adds five parameters and up to $2.2\times $ the time per epoch (AAGCN).}}{6}{table.caption.12}\protected@file@percent }
+\newlabel{tab:compute}{{8}{6}{Computational cost. Parameters of the full model behind the direct head, and the parameters each head adds. Seconds per epoch and seconds per training run (with early stopping) are means over the 9 runs of the Kaggle run, each run single-threaded on a 4-core Kaggle CPU. \model {} adds one parameter and no measurable time; the SEIR branch adds five parameters and up to $2.2\times $ the time per epoch (AAGCN)}{table.caption.12}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {6.2}Ablation study}{6}{subsection.6.2}\protected@file@percent }
 \newlabel{sec:ablation}{{6.2}{6}{Ablation study}{subsection.6.2}{}}
 \@writefile{lot}{\contentsline {table}{\numberline {9}{\ignorespaces Prospective evaluation on weeks no model or setting had seen: 85 forecast starts, 2024-W11 to 2026-W32. Settings frozen on development data before the new weeks were parsed. Neural arms: mean over 3 seeds, seed range of RMSE in brackets. Bold: best per metric. Pre-registered tests (block bootstrap over forecast starts, Holm over two): P1, SEIR branch vs PAGE{}: $-0.03$ $[-0.41, +0.12]$, $p_{\text  {Holm}}=0.67$; P2, PAGE{}+SEIR vs persistence: $+0.65$ $[-0.99, +1.69]$, $p_{\text  {Holm}}=0.62$.}}{7}{table.caption.13}\protected@file@percent }
@@ -104,9 +104,9 @@
 \newlabel{sec:tuning}{{6.3}{7}{Hyperparameter tuning}{subsection.6.3}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Every lever's validation difference against its own control (Table\nonbreakingspace \ref {tab:levers}); win counts on the right. Green: negative and $\ge $7/9 wins. Grey: negative but inconsistent. Red: worse.}}{7}{figure.caption.14}\protected@file@percent }
 \newlabel{fig:levers}{{2}{7}{Every lever's validation difference against its own control (Table~\ref {tab:levers}); win counts on the right. Green: negative and $\ge $7/9 wins. Grey: negative but inconsistent. Red: worse}{figure.caption.14}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.4}Computational analysis}{7}{subsection.6.4}\protected@file@percent }
+\newlabel{sec:compute}{{6.4}{7}{Computational analysis}{subsection.6.4}{}}
 \citation{wu2019graphwavenet}
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.4}Computational analysis}{8}{subsection.6.4}\protected@file@percent }
-\newlabel{sec:compute}{{6.4}{8}{Computational analysis}{subsection.6.4}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {6.5}Prospective evaluation, 2024--2026}{8}{subsection.6.5}\protected@file@percent }
 \newlabel{sec:prospective}{{6.5}{8}{Prospective evaluation, 2024--2026}{subsection.6.5}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {6.6}SEIR-GNN against SEIR-LSTM, and physics as structure}{8}{subsection.6.6}\protected@file@percent }
@@ -121,11 +121,11 @@
 \bibdata{refs}
 \bibcite{bai2021a3tgcn}{{1}{2021}{{Bai et~al\mbox  {.}}}{{}}}
 \bibcite{cao2023mepognn}{{2}{2023}{{Cao et~al\mbox  {.}}}{{}}}
-\bibcite{chen2016xgboost}{{3}{2016}{{Chen and Guestrin}}{{}}}
-\bibcite{deng2020colagnn}{{4}{2020}{{Deng et~al\mbox  {.}}}{{}}}
-\bibcite{gulmohamed2026denguegnn}{{5}{2026}{{GulMohamed et~al\mbox  {.}}}{{}}}
-\bibcite{guo2019astgcn}{{6}{2019}{{Guo et~al\mbox  {.}}}{{}}}
-\bibcite{hyndman2021forecasting}{{7}{2021}{{Hyndman and Athanasopoulos}}{{}}}
+\bibcite{deng2020colagnn}{{3}{2020}{{Deng et~al\mbox  {.}}}{{}}}
+\bibcite{gulmohamed2026denguegnn}{{4}{2026}{{GulMohamed et~al\mbox  {.}}}{{}}}
+\bibcite{guo2019astgcn}{{5}{2019}{{Guo et~al\mbox  {.}}}{{}}}
+\bibcite{hyndman2021forecasting}{{6}{2021}{{Hyndman and Athanasopoulos}}{{}}}
+\bibcite{jeewandara2015seroprevalence}{{7}{2015}{{Jeewandara et~al\mbox  {.}}}{{}}}
 \bibcite{kim2022revin}{{8}{2022}{{Kim et~al\mbox  {.}}}{{}}}
 \bibcite{kipf2017gcn}{{9}{2017}{{Kipf and Welling}}{{}}}
 \bibcite{li2018dcrnn}{{10}{2018}{{Li et~al\mbox  {.}}}{{}}}

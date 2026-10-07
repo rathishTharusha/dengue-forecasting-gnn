@@ -7,14 +7,15 @@
 
 \textbf{Auditing the benchmark.} The array used by the existing
 benchmark~\cite{weng2024graph} has no date axis. Dating each row by matching its 25
-district counts against the published Weekly Epidemiological Reports (WER) shows that
-rows 0--47 are from 2023 and rows 51 onward run 2013--2022, so 45 rows from 2023 sit in
+district counts against the parsed Weekly Epidemiological Report (WER) table shows
+that rows 0--47 date from December 2022 to November 2023 and rows 51 onward run
+2013--2022, so 45 rows from 2023 sit in
 the training split of every fold that tests on 2018--2022. The weather channels were
 not reordered with the cases: the array's temperature matches ERA5 at $r=0.95$ on its
 own row order but $r=0.45$ on the dates the case rows carry, and its ``lag-12''
 rainfall matches ERA5 rain twelve weeks \emph{later} ($r=0.68$, against $0.19$ twelve
-weeks earlier). Its largest spike, a 19-fold jump in one week, is a dragged
-spreadsheet formula in one printed table (15 of 24 cells equal the sum of the two
+weeks earlier). Its largest spike (7{,}165 cases in a week whose districts truly
+report 349) is a dragged spreadsheet formula in one printed table (15 of 24 cells equal the sum of the two
 before). Two of these findings leak future information, so scores on this array are
 optimistic.
 
@@ -27,7 +28,8 @@ every input file. The result covers $N=25$ districts over 559 weeks
 (2013-W26 to 2024-W10), with weekly cases, temperature, precipitation, humidity, soil
 moisture and population. Seven weeks with no report stay missing and are never
 interpolated. A forecast for week $t$ reads cases up to $t-1$ and climate up to $t-2$
-(ERA5 is released about five days late), and a perturbation test asserts that no later
+(ERA5 is released about five days late). These lags are enforced in code, and for the
+data loader used in the prospective test a perturbation test asserts that no later
 value can change a forecast. The district graph is the benchmark's adjacency list with self-loops (141 directed
 entries); the prospective test uses a corrected version with two non-border entries
 removed (139).

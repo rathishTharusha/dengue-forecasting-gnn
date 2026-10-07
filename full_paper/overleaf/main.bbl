@@ -64,17 +64,6 @@
 \newblock
 
 
-\bibitem[Chen and Guestrin(2016)]%
-        {chen2016xgboost}
-\bibfield{author}{\bibinfo{person}{Tianqi Chen} {and} \bibinfo{person}{Carlos
-  Guestrin}.} \bibinfo{year}{2016}\natexlab{}.
-\newblock \showarticletitle{{XGBoost}: A Scalable Tree Boosting System}. In
-  \bibinfo{booktitle}{\emph{Proceedings of the 22nd ACM SIGKDD International
-  Conference on Knowledge Discovery and Data Mining}}.
-  \bibinfo{pages}{785--794}.
-\newblock
-
-
 \bibitem[Deng et~al\mbox{.}(2020)]%
         {deng2020colagnn}
 \bibfield{author}{\bibinfo{person}{Songgaojun Deng}, \bibinfo{person}{Shusen
@@ -122,6 +111,26 @@
   (\bibinfo{edition}{3rd} ed.)}.
 \newblock \bibinfo{publisher}{OTexts}.
 \newblock
+
+
+\bibitem[Jeewandara et~al\mbox{.}(2015)]%
+        {jeewandara2015seroprevalence}
+\bibfield{author}{\bibinfo{person}{Chandima Jeewandara},
+  \bibinfo{person}{Laksiri Gomes}, \bibinfo{person}{S.~A. Paranavitane},
+  \bibinfo{person}{Mihiri Tantirimudalige}, \bibinfo{person}{Sumedha~Sandaruwan
+  Panapitiya}, \bibinfo{person}{Amitha Jayewardene}, \bibinfo{person}{Samitha
+  Fernando}, \bibinfo{person}{R.~H. Fernando}, \bibinfo{person}{Shamini
+  Prathapan}, \bibinfo{person}{Graham~S. Ogg}, {and}
+  \bibinfo{person}{Gathsaurie~Neelika Malavige}.}
+  \bibinfo{year}{2015}\natexlab{}.
+\newblock \showarticletitle{Change in Dengue and {Japanese} Encephalitis
+  Seroprevalence Rates in {Sri Lanka}}.
+\newblock \bibinfo{journal}{\emph{PLOS ONE}} \bibinfo{volume}{10},
+  \bibinfo{number}{12} (\bibinfo{year}{2015}), \bibinfo{pages}{e0144799}.
+\newblock
+\urldef\tempurl%
+\url{https://doi.org/10.1371/journal.pone.0144799}
+\showDOI{\tempurl}
 
 
 \bibitem[Kim et~al\mbox{.}(2022)]%

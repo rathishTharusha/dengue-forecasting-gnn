@@ -78,10 +78,10 @@ conditional median while RMSE rewards the conditional mean.
 $N=25$, $W=3$, $H=3$, $d=64$, $a_0=-2$ ($g_0=0.12$). SEIR rates are per day:
 $\omega=0.1$, $\gamma=1/7$, $\rho=1/11$, $\lambda_{\max}=1/7$, with stage durations
 from~\cite{phaijoo2018sensitivity} and an initial susceptible fraction of 0.318 from a
-serosurvey. Training uses Adam (learning rate $3\times10^{-3}$, weight decay
-$10^{-4}$), batch size 32, dropout 0.1, at most 300 epochs (400 for NB), early stopping
+2013--14 Colombo serosurvey~\cite{jeewandara2015seroprevalence}. Training uses Adam (learning rate $3\times10^{-3}$ with cosine decay,
+weight decay $10^{-4}$), batch size 32, dropout 0.1, at most 300 epochs (400 for NB), early stopping
 with patience 40, and the best-validation weights restored; seeds 0, 1, 2. All models
 are written in plain PyTorch with dense $N\times N$ graph operations, and each
-published encoder is checked weight-for-weight against its reference implementation.
+published encoder is checked against its reference implementation in unit tests.
 The main study (810 runs) ran in 3.0 hours on a 4-core Kaggle CPU; the prospective study
 ran on a laptop CPU (Intel Core i5-12450H). No GPU is needed.

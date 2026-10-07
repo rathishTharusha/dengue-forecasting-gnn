@@ -120,14 +120,16 @@ G.~R. Phaijoo and D.~B. Gurung, ``Sensitivity analysis of {SEIR--SEI} model of
   dengue disease,'' \emph{GAMS Journal of Mathematics and Mathematical
   Biosciences}, vol.~6, no.~a, pp. 41--49, 2018.
 
+\bibitem{jeewandara2015seroprevalence}
+C.~Jeewandara, L.~Gomes, S.~A. Paranavitane, M.~Tantirimudalige, S.~S.
+  Panapitiya, A.~Jayewardene, S.~Fernando, R.~H. Fernando, S.~Prathapan, G.~S.
+  Ogg, and G.~N. Malavige, ``Change in dengue and {Japanese} encephalitis
+  seroprevalence rates in {Sri Lanka},'' \emph{PLOS ONE}, vol.~10, no.~12, p.
+  e0144799, 2015.
+
 \bibitem{kipf2017gcn}
 T.~N. Kipf and M.~Welling, ``Semi-supervised classification with graph
   convolutional networks,'' in \emph{International Conference on Learning
   Representations (ICLR)}, 2017.
-
-\bibitem{chen2016xgboost}
-T.~Chen and C.~Guestrin, ``{XGBoost}: A scalable tree boosting system,'' in
-  \emph{Proceedings of the 22nd ACM SIGKDD International Conference on
-  Knowledge Discovery and Data Mining}, 2016, pp. 785--794.
 
 \end{thebibliography}

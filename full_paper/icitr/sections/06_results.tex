@@ -18,9 +18,9 @@ Table~\ref{tab:encoders} compares every encoder and baseline on identical window
 \textbf{As published, three of five ST-GNNs fail.} Behind the direct head, AAGCN,
 ASTGCN and the LSTM reach 16.71--16.91 on validation and all beat persistence (17.86),
 but STGAT, A3TGCN and DCRNN reach 22.93, 28.63 and 34.64, worse than repeating last
-week. They underfit rather than lack information: a linear model fitted to their
-training residuals recovers 48\% and 60\% of STGAT's and A3TGCN's validation residual
-variance, against 3--7\% for the working encoders.
+week. They underfit rather than lack information: in their NB, seasonal-feature configuration, a
+linear model fitted to their training residuals recovers 48\% and 60\% of STGAT's and
+A3TGCN's validation residual variance, against 3--7\% for the working encoders.
 
 \textbf{\model{} makes every encoder usable.} With \model{}, all six encoders score
 16.57--18.35 on validation. Paired against the published head, it repairs STGAT,
@@ -31,8 +31,9 @@ validation by at most 0.14, and it lowers AAGCN's test RMSE on 9/9 runs ($-1.62$
 persistence on all nine runs on validation ($-1.29$) and on test ($-2.48$), and ASTGCN
 on 9/9 and 8/9 ($-1.10$, $-1.26$). The repaired encoders reach persistence but do not
 clearly pass it. AAGCN with \model{} has the lowest test RMSE of any configuration
-(33.53), but validation selects $B$ (AAGCN, direct head, NB loss, seasonal features),
-which is worse than persistence on test (37.54), so we report AAGCN with \model{} as
+(33.53), but the configuration selected on validation under the adoption rule, $B$
+(AAGCN, direct head, NB loss, seasonal features), is
+worse than persistence on test (37.54), so we report AAGCN with \model{} as
 observed rather than selected. % EXP-062: B changes after the week-index fix.
 
 The graph adds little: a GCN beats the same network without message passing by only
@@ -93,6 +94,6 @@ prospective test, each learned arm was tuned on the same grid (learning rate
 $\{10^{-3},3\times10^{-3}\}$ $\times$ hidden size $\{32,64\}$, 108 runs per arm) on
 validation only; all arms chose $3\times10^{-3}$ and 64, and the grid moved validation
 RMSE by at most 0.57. Table~\ref{tab:compute} gives the cost. \model{} adds one parameter
-and no measurable time, while the SEIR branch roughly doubles the time per epoch on the
-light encoders because it steps the simulator daily. The smallest encoder, AAGCN
+and no measurable time, while the SEIR branch adds up to $2.2\times$ the time per epoch
+(AAGCN) because it steps the simulator daily. The smallest encoder, AAGCN
 (2{,}873 parameters, 19\,s per run), is also the most accurate.

@@ -150,12 +150,12 @@ self-loops (141 directed entries; 139 in the prospective test, after two
 non-border entries are removed), row-normalised; AAGCN runs with its adaptive
 adjacency off, as published. SEIR rates are per day: incubation $\omega=0.1$, recovery
 $\gamma=1/7$, reporting $\rho=1/11$, $\lambda_{\max}=1/7$, initial susceptible
-fraction $1-0.682$ from a 2013--14 Colombo serosurvey, with stage durations
+fraction $1-0.682$ from a 2013--14 Colombo serosurvey~\cite{jeewandara2015seroprevalence}, with stage durations
 of~\cite{phaijoo2018sensitivity}. Training uses Adam (learning rate
-$3\times10^{-3}$, weight decay $10^{-4}$), batch size 32, dropout 0.1, at most 300
+$3\times10^{-3}$ with cosine decay, weight decay $10^{-4}$), batch size 32, dropout 0.1, at most 300
 epochs (400 for NB) with early stopping on validation RMSE, patience 40, and the
 best-validation weights restored. Seeds are 0, 1, 2. All models are written in plain
 PyTorch with dense $N\times N$ graph operations and no graph library; each published
-encoder is checked weight-for-weight against its reference implementation. The main
+encoder is checked against its reference implementation in unit tests. The main
 study (810 runs) ran in 3.0 hours on a 4-core Kaggle CPU, each run single-threaded;
 the prospective study ran on a laptop CPU (Intel Core i5-12450H). No GPU is needed.

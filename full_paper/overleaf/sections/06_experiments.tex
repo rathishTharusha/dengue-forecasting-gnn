@@ -27,8 +27,9 @@ against the published head and against persistence.
 ASTGCN and the LSTM score 16.71, 16.83 and 16.91 on validation, a spread of 0.20, and
 all beat persistence (17.86). STGAT, A3TGCN and DCRNN score 22.93, 28.63 and 34.64,
 worse than persistence by 5--17. They are underfitting rather than short of
-information: a linear model fitted to their training residuals recovers 48\% and
-60\% of STGAT's and A3TGCN's validation residual variance, against 3--7\% for the
+information: in their NB, seasonal-feature configuration, a linear model fitted to their
+training residuals recovers 48\% and 60\% of STGAT's and A3TGCN's validation residual
+variance, against 3--7\% for the
 working encoders.
 
 \textbf{\model{} makes every encoder usable.} With \model{} all six encoders score
@@ -46,7 +47,8 @@ anchor removes failure; it cannot add information the encoder does not have.
 \textbf{Baselines.} The graph adds little: a GCN beats the same network without
 message passing by 0.06 (3/9, Table~\ref{tab:levers}). $k$-NN analogues, with no
 network, reach 16.52 / 34.34; gradient-boosted trees reach 17.94, or 17.40 with
-climate. The configuration validation selects, $B$ (AAGCN, direct head, NB loss,
+climate. The configuration selected on validation under the adoption rule, $B$ (AAGCN,
+direct head, NB loss,
 seasonal features; 15.51), is worse than persistence on test (37.54). AAGCN with
 \model{} has the lowest test RMSE of every configuration trained on the three origins
 (33.53), but validation
@@ -120,8 +122,7 @@ the models are not short of data.
 \label{sec:compute}
 Table~\ref{tab:compute} gives the cost of each encoder and head. \model{} adds one
 parameter and no measurable time per epoch (AAGCN 0.19 to 0.20 s). The SEIR branch adds
-five parameters but roughly doubles the time per epoch on the light encoders (AAGCN
-0.19 to 0.41 s), because it steps the simulator daily within every forecast week. The
+five parameters but up to $2.2\times$ the time per epoch (AAGCN 0.19 to 0.41 s), because it steps the simulator daily within every forecast week. The
 encoders span three orders of magnitude, from AAGCN (2{,}873 parameters, 19 s per run)
 to DCRNN (827{,}843 parameters, 3.6--4.1 s per epoch), and the smallest is the most
 accurate. Every model trains on a free CPU; the full 810-run study takes 3.0 hours.

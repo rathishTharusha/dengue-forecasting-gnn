@@ -17,15 +17,17 @@ LSTM of SEIR-LSTM~\cite{liu2025seirlstm} and a GCN~\cite{kipf2017gcn} against th
 network without message passing; the five ST-GNNs of the Sri Lankan
 benchmark~\cite{weng2024graph} (STGAT, A3TGCN, ASTGCN, AAGCN, DCRNN) with their
 published direct heads; SEIR-informed heads (pure SEIR decoder, SEIR-LSTM, SEIR-GNN);
-and non-neural learners: gradient-boosted trees~\cite{chen2016xgboost} with and
-without climate, a negative-binomial GLM, $k$-nearest-neighbour analogues, an AR(3)
+and non-neural learners: histogram gradient-boosted trees (scikit-learn) with
+and without climate, a negative-binomial GLM, $k$-nearest-neighbour analogues, an AR(3)
 ridge regression and an STID-style MLP~\cite{shao2022stid}.
 
 \textbf{Protocol.} Rolling origins at 0.55, 0.70 and 0.85 of the series, with three
 seeds each; the 30 windows before each origin are validation and the next 15\% are
 test, with no shuffling across time. Selection uses validation RMSE only, and test
 numbers never choose a configuration. The protocol, and for each experiment its arms,
-control and decision rule, were committed before it ran. Differences are paired on
+control and decision rule, were committed before it ran. Under the adoption rule, an arm
+replaces its control only if it is better on validation on average, in at least 7 of
+9 paired runs, without raising horizon-3 error. Differences are paired on
 matched (origin, seed) units and tested with an exact sign-flip permutation test,
 Benjamini--Hochberg adjusted. The prospective test trains once on all development
 weeks, freezes every setting, and scores 85 forecast starts from 2024-W11, with no

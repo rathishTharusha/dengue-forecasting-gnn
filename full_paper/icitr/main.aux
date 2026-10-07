@@ -31,10 +31,10 @@
 \@writefile{toc}{\contentsline {section}{\numberline {III}Dataset Construction}{2}{section.3}\protected@file@percent }
 \newlabel{sec:data}{{III}{2}{Dataset Construction}{section.3}{}}
 \citation{phaijoo2018sensitivity}
+\citation{jeewandara2015seroprevalence}
 \citation{liu2025seirlstm}
 \citation{kipf2017gcn}
 \citation{weng2024graph}
-\citation{chen2016xgboost}
 \citation{shao2022stid}
 \@writefile{toc}{\contentsline {section}{\numberline {IV}The PAGE{} Framework}{3}{section.4}\protected@file@percent }
 \newlabel{sec:framework}{{IV}{3}{The \model {} Framework}{section.4}{}}
@@ -64,8 +64,8 @@
 \citation{wu2019graphwavenet}
 \@writefile{lot}{\contentsline {table}{\numberline {III}{\ignorespaces Prospective evaluation on weeks no model or setting had seen: 85 forecast starts, 2024-W11 to 2026-W32. Settings frozen on development data before the new weeks were parsed. Neural arms: mean over 3 seeds, seed range of RMSE in brackets. Bold: best per metric. Pre-registered tests (block bootstrap over forecast starts, Holm over two): P1, SEIR branch vs PAGE{}: $-0.03$ $[-0.41, +0.12]$, $p_{\text  {Holm}}=0.67$; P2, PAGE{}+SEIR vs persistence: $+0.65$ $[-0.99, +1.69]$, $p_{\text  {Holm}}=0.62$.}}{5}{table.3}\protected@file@percent }
 \newlabel{tab:prospective}{{III}{5}{Prospective evaluation on weeks no model or setting had seen: 85 forecast starts, 2024-W11 to 2026-W32. Settings frozen on development data before the new weeks were parsed. Neural arms: mean over 3 seeds, seed range of RMSE in brackets. Bold: best per metric. Pre-registered tests (block bootstrap over forecast starts, Holm over two): P1, SEIR branch vs \model {}: $-0.03$ $[-0.41, +0.12]$, $p_{\text {Holm}}=0.67$; P2, \model {}+SEIR vs persistence: $+0.65$ $[-0.99, +1.69]$, $p_{\text {Holm}}=0.62$}{table.3}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {IV}{\ignorespaces Computational cost. Parameters of the full model behind the direct head, and the parameters each head adds. Seconds per epoch and seconds per training run (with early stopping) are means over the 9 runs of the Kaggle run, each run single-threaded on a 4-core Kaggle CPU. PAGE{} adds one parameter and no measurable time; the SEIR branch adds five parameters and about $2\times $ the time per epoch on the light encoders.}}{5}{table.4}\protected@file@percent }
-\newlabel{tab:compute}{{IV}{5}{Computational cost. Parameters of the full model behind the direct head, and the parameters each head adds. Seconds per epoch and seconds per training run (with early stopping) are means over the 9 runs of the Kaggle run, each run single-threaded on a 4-core Kaggle CPU. \model {} adds one parameter and no measurable time; the SEIR branch adds five parameters and about $2\times $ the time per epoch on the light encoders}{table.4}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {IV}{\ignorespaces Computational cost. Parameters of the full model behind the direct head, and the parameters each head adds. Seconds per epoch and seconds per training run (with early stopping) are means over the 9 runs of the Kaggle run, each run single-threaded on a 4-core Kaggle CPU. PAGE{} adds one parameter and no measurable time; the SEIR branch adds five parameters and up to $2.2\times $ the time per epoch (AAGCN).}}{5}{table.4}\protected@file@percent }
+\newlabel{tab:compute}{{IV}{5}{Computational cost. Parameters of the full model behind the direct head, and the parameters each head adds. Seconds per epoch and seconds per training run (with early stopping) are means over the 9 runs of the Kaggle run, each run single-threaded on a 4-core Kaggle CPU. \model {} adds one parameter and no measurable time; the SEIR branch adds five parameters and up to $2.2\times $ the time per epoch (AAGCN)}{table.4}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-C}}Prospective Evaluation, 2024--2026}{5}{subsection.6.3}\protected@file@percent }
 \newlabel{sec:prospective}{{\mbox  {VI-C}}{5}{Prospective Evaluation, 2024--2026}{subsection.6.3}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-D}}Hyperparameter Tuning and Computational Cost}{5}{subsection.6.4}\protected@file@percent }
@@ -93,8 +93,8 @@
 \bibcite{hyndman2021forecasting}{17}
 \bibcite{shao2022stid}{18}
 \bibcite{phaijoo2018sensitivity}{19}
-\bibcite{kipf2017gcn}{20}
-\bibcite{chen2016xgboost}{21}
+\bibcite{jeewandara2015seroprevalence}{20}
+\bibcite{kipf2017gcn}{21}
 \@writefile{toc}{\contentsline {section}{\numberline {VIII}Conclusion}{6}{section.8}\protected@file@percent }
 \@writefile{toc}{\contentsline {section}{References}{6}{section*.1}\protected@file@percent }
 \gdef \@abspage@last{6}

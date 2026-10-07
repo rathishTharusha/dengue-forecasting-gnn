@@ -146,7 +146,7 @@ def compute_table(ns: dict) -> str:
             r" parameters each head adds. Seconds per epoch and seconds per training run (with early"
             r" stopping) are means over the 9 runs of the Kaggle run, each run single-threaded on a 4-core"
             r" Kaggle CPU. \model{} adds one parameter and no measurable time; the SEIR branch adds five"
-            r" parameters and about $2\times$ the time per epoch on the light encoders.}",
+            r" parameters and up to $2.2\times$ the time per epoch (AAGCN).}",
             r"\label{tab:compute}",
             r"\small",
             r"\setlength{\tabcolsep}{2.2pt}",

@@ -36,7 +36,7 @@ from the original files.}
 \toprule
 finding & consequence \\
 \midrule
-Rows 0--47 are 2023; rows 51 onward run 2013--2022 & 45 rows from 2023 sit in
+Rows 0--47 are Dec 2022--Nov 2023; rows 51 onward run 2013--2022 & 45 rows from 2023 sit in
 the training split of every fold, which tests on 2018--2022 \\
 Cases reordered, weather not & the array's temperature matches ERA5 at
 $r = 0.95$ on its own row order and $r = 0.45$ on the dates the case rows carry \\
@@ -44,7 +44,7 @@ $r = 0.95$ on its own row order and $r = 0.45$ on the dates the case rows carry 
 ($r = 0.68$) and not 12 weeks earlier ($r = 0.19$): future information \\
 48 reports dropped, one week stored twice & 454 of 459 rows equal a published
 report exactly \\
-Week-395 ``19$\times$ spike'' & row A of one printed table is a dragged formula
+Week-395 spike & row A of one printed table is a dragged formula
 (15 of 24 cells are the sum of the two before, districts sum to 7,165 against a
 national cell of 35); the same table's cumulative row gives the true count \\
 \bottomrule
@@ -77,8 +77,9 @@ district totals sum exactly to the national total, then mid-year estimates).
 
 Lags are applied in the model, not baked into the data: a forecast for week $t$
 reads cases up to $t-1$ and climate up to $t-2$, since ERA5 is published about
-five days late, and a perturbation test asserts that no value after either limit
-can change a forecast. On this series the persistence test RMSE on the three
+five days late. The lags are enforced in code, and for the data loader used in the
+prospective test a perturbation test asserts that no value after either limit can
+change a forecast. On this series the persistence test RMSE on the three
 development origins (\S\ref{sec:protocol}) is \textbf{36.02}, against 44.80 on the
 array (29.52 with the week-395 windows excluded). The last test fold covers the
 2023 epidemic.

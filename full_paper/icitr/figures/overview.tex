@@ -40,9 +40,13 @@
   \draw[->] (x.south) |- (anc.west);
   \draw[->] (anc) -- (minus);
   \draw[->] (anc.east) -| (plus.south);
-  % highlight the contribution
-  \node[draw=teal!70!black, dotted, rounded corners, inner sep=2.5mm, fit=(minus)(gate)(plus)(anc),
-        label={[font=\scriptsize\bfseries, text=teal!50!black]above:\model{} head (our contribution)}] {};
+  % highlight the contribution: a shaded panel behind the head, label below it so
+  % no arrow crosses the text
+  \begin{scope}[on background layer]
+    \node[fill=teal!7, draw=teal!45, line width=0.6pt, rounded corners=4pt, inner sep=2.5mm,
+          fit=(minus)(gate)(plus)(anc),
+          label={[font=\scriptsize\bfseries, text=teal!50!black, inner sep=1pt]below:\model{} head (our contribution)}] {};
+  \end{scope}
 \end{tikzpicture}}
 \caption{\model{}. An unchanged encoder reads the last $W$ weeks of standardised log cases
 on the district graph. Its read-out $\mathbf{u}_i$ is turned into a departure

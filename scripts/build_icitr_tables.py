@@ -41,8 +41,10 @@ def main() -> None:
     assets = load("build_paper_assets")
     extra = load("build_paper_extra_tables")
     r3, _, _, res, _ = assets.load()
-    for name, build, args in (("encoders", assets.table_encoders, (r3,)),
-                              ("rescue", assets.table_rescue, (r3, res))):
+    for name, build, args in (
+        ("encoders", assets.table_encoders, (r3,)),
+        ("rescue", assets.table_rescue, (r3, res)),
+    ):
         out: list[str] = []
         build(*args, out)
         write(name, "\n".join(out), "build_paper_assets.py")

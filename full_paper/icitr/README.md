@@ -4,36 +4,35 @@ Rules: <https://icitr.uom.lk/forauthors/>. **Deadline 10 Oct 2026, 23:59 Sri Lan
 Microsoft CMT, PDF only. IEEE two-column A4, **6 pages max including references**,
 double-blind. Track: Artificial Intelligence (or Data Analytics & Decision Making).
 
-The ACM version in `../overleaf/` is the long reference draft. This folder is the one we submit.
+This folder is the paper we submit. `../overleaf/` is the long ACM draft (9 pages) that
+keeps the material cut from here: the benchmark audit table, every lever, the nine-origin
+confirmation and the validation-test analysis.
 
-## How to write
+## Layout
 
-Each file in `sections/` starts with a comment block: what the section must say, its
-page budget, and the numbers you may use. Write in your own words where the red
-`\writehere{...}` markers are, then delete the marker. Interpret results yourself;
-use a tool only to polish language (Madam's rule).
+| File | Content |
+|---|---|
+| `main.tex` | IEEE template, title, anonymous author block, section order |
+| `sections/00_abstract.tex` | abstract and index terms |
+| `sections/01_introduction.tex` | introduction, written by the team |
+| `sections/02_related_work.tex` | ST-GNNs, mechanistic hybrids, simple baselines |
+| `sections/03_dataset.tex` | benchmark audit, corrected dataset, 2024-2026 extension |
+| `sections/04_page.tex` | the PAGE framework: formulation, head, SEIR branch, loss, implementation |
+| `sections/05_setup.tex` | dataset overview, baselines, protocol |
+| `sections/06_results.tex` | comparative analysis, ablation, prospective test, tuning and cost |
+| `sections/07_discussion_conclusion.tex` | discussion, limitations, conclusion |
+| `figures/overview.tex` | Fig. 1, TikZ |
+| `tables/*.tex` | generated; never edit by hand |
 
-| Section | File | Budget | Writer |
-|---|---|---|---|
-| Abstract (write last) | `00_abstract.tex` | 200 words | |
-| Introduction | `01_introduction.tex` | 3/4 page | |
-| Related work | `02_related_work.tex` | 1/2 column | |
-| Dataset | `03_dataset.tex` | 1/2 column | |
-| PAGE framework | `04_page.tex` | 1 page with Fig. 1 | |
-| Experimental setup | `05_setup.tex` | 1/2 column | |
-| Results | `06_results.tex` | 1.5 pages with 3 tables | |
-| Discussion + conclusion | `07_discussion_conclusion.tex` | 1/3 page | |
-
-## Tables and figure
-
-Tables in `tables/` are generated; never edit them by hand:
+## Tables
 
 ```bash
-python scripts/build_paper_assets.py        # encoders, rescue, levers, nine
-python scripts/build_paper_extra_tables.py  # paired, tuning, compute, prospective
+python scripts/build_icitr_tables.py   # encoders, rescue, compute, prospective
 ```
 
-Fig. 1 is TikZ in `figures/overview.tex`.
+It calls the same functions as the ACM draft's builders, on the same run outputs
+(EXP-050 Kaggle run, EXP-063 prospective), so the two versions cannot disagree. The other
+files in `tables/` (paired, tuning, levers, nine) are not used by this version.
 
 ## Build
 
@@ -41,13 +40,13 @@ Fig. 1 is TikZ in `figures/overview.tex`.
 cd full_paper/icitr && latexmk -pdf main.tex
 ```
 
-Overleaf: zip this folder, New Project → Upload Project. Compiler pdfLaTeX.
+Overleaf: zip this folder, New Project -> Upload Project. Compiler pdfLaTeX.
 
 ## Before submitting
 
-- [ ] `grep -n writehere sections/*.tex` prints nothing
+- [ ] `\codeurl` in `main.tex` points at a real anonymous mirror (anonymous.4open.science)
+- [ ] EXP-062 checked: the lines marked `% EXP-062` in `sections/06_results.tex`
 - [ ] 6 pages or fewer, including references
-- [ ] no names, no university, no "our previous work"; `\codeurl` is the anonymous mirror
+- [ ] no names, no university, no "our earlier work"; PDF metadata has no author
 - [ ] every number checked against the generated tables
-- [ ] EXP-062 status checked (B, season and climate numbers)
-- [ ] PDF passes IEEE PDF eXpress if the conference asks for it
+- [ ] for grading: colour-highlighted copy with one colour per member (CS3631 brief, section 11)

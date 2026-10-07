@@ -1,56 +1,87 @@
 %=============================================================================
-% THE PAGE FRAMEWORK -- budget: about 1 page including Fig. 1.
-%
-% Madam's rules: symbols only (no "25", "3", "64" here -- those go in the last
-% paragraph, Implementation details); start from the input, show each step to
-% the output, then the loss.
-%
-% (a) Problem: graph G=(V,E,A), N districts; y_{i,t} weekly cases;
-%     z = (log(1+y) - m)/s with m, s from TRAINING weeks only;
-%     input window Z_t in R^{N x W}; optional covariates E_t in R^{N x F};
-%     predict y_{i,t+h}, h = 1..H.
-%
-% (b) Encoder: H = f_theta(Z_t, A) in R^{N x d}, any ST-GNN or LSTM, unchanged.
-%     Read-out u_i = W h_i + b in R^H. Published models stop here: z_hat = u_i.
-%
-% (c) PAGE head (the contribution). Suggested LaTeX for the key equation:
-%       \delta_i = u_i - p_i 1_H,  \hat z_i = p_i 1_H + g \delta_i,  g = \sigma(a)
-%     where p_i = z_{i,t} is the last observed week, a is ONE learned scalar,
-%     initialised a_0 < 0 so training starts near persistence.
-%     Explain in your own words WHY it works (Madam asked for this):
-%       - identity is free: g -> 0 gives exactly persistence (r^2 = 0.89 for free);
-%       - the gate is learned shrinkage: g grows only if the encoder beats persistence;
-%       - cost: one parameter, no extra time.
-%     Residual head (no gate) and direct head (no anchor) are the ablations.
-%
-% (d) Optional SEIR branch (2-3 sentences only): the encoder predicts a force of
-%     infection; a daily SEIR simulator seeded from recent cases turns it into
-%     cases, which replace u_i in the same equation. It is what the ablation removes.
-%
-% (e) Loss: mean squared error on z over batch, districts and horizons; early
-%     stopping on validation RMSE in counts.
-%
-% (f) Implementation details (numbers allowed here): N=25, W=3, H=3, d=64,
-%     a_0=-2 (g_0=0.12), Adam lr 3e-3, weight decay 1e-4, batch 32, dropout 0.1,
-%     max 300 epochs, patience 40, seeds 0/1/2; plain PyTorch, no graph library;
-%     810 runs in 3.0 h on a 4-core Kaggle CPU; no GPU needed.
+% THE PAGE FRAMEWORK -- symbols only; numbers go in Implementation Details.
+% Input -> encoder -> PAGE head -> output -> loss (Madam's rule).
 %=============================================================================
 \section{The \model{} Framework}
 \label{sec:framework}
 
-\input{figures/overview}
+\subsection{Problem Formulation}
+Let $\mathcal{G}=(\mathcal{V},\mathcal{E},\mathbf{A})$ be the district graph with
+$|\mathcal{V}|=N$ and adjacency $\mathbf{A}\in\{0,1\}^{N\times N}$, and let
+$y_{i,t}\ge0$ be the cases reported by district $i$ in week $t$. We model the
+standardised log count $z_{i,t}=(\log(1+y_{i,t})-m)/s$, with $m$ and $s$ computed on
+training weeks only. At forecast origin $t$ the input is the window
+$\mathbf{Z}_t=[z_{i,t-W+1},\dots,z_{i,t}]_{i\in\mathcal{V}}\in\R^{N\times W}$ and,
+optionally, covariates $\mathbf{E}_t\in\R^{N\times F}$ at causal lags. The task is to
+predict $y_{i,t+h}$ for every district and horizon $h=1,\dots,H$.
 
-\writehere{(a) problem formulation, symbols only}
+\subsection{Encoder}
+Any spatio-temporal encoder $f_\theta$ maps the window to one representation per
+district, $\mathbf{H}=f_\theta(\mathbf{Z}_t,\mathbf{A})\in\R^{N\times d}$, and
+covariates are concatenated around it, $\tilde{\mathbf{h}}_i=[\mathbf{h}_i\Vert
+\mathbf{e}_{i,t}]$, so that a published architecture runs exactly as designed. A
+linear read-out gives $\mathbf{u}_i=\mathbf{W}\tilde{\mathbf{h}}_i+\mathbf{b}\in\R^{H}$.
+Published models output $\hat{\mathbf{z}}_i=\mathbf{u}_i$; we call this the
+\emph{direct} head.
 
-\writehere{(b) encoder}
-
-\writehere{(c) the PAGE head: equation and why it works}
+\subsection{Persistence-Anchored Gated Head}
 \label{sec:page}
+\model{} anchors every horizon on the last observed week, $p_i=z_{i,t}$, and lets the
+network supply only a gated departure from it (Fig.~\ref{fig:overview}):
+\begin{equation}
+  \boldsymbol{\delta}_i=\mathbf{u}_i-p_i\mathbf{1}_H,\qquad
+  \hat{\mathbf{z}}_i=p_i\mathbf{1}_H+g\,\boldsymbol{\delta}_i,\qquad g=\sigma(a),
+  \label{eq:page}
+\end{equation}
+where $a$ is one learned scalar initialised at $a_0<0$, so training starts near the
+persistence forecast. Equivalently, $\hat{\mathbf{z}}_i=(1-g)\,p_i\mathbf{1}_H+
+g\,\mathbf{u}_i$ is a learned convex combination of persistence and the encoder's
+forecast. Counts are recovered as
+$\hat y_{i,t+h}=\max\!\big(0,\exp(s\hat z_{i,h}+m)-1\big)$.
 
-\writehere{(d) the optional SEIR branch, 2--3 sentences}
+Three properties follow. (i)~\emph{The identity is free}: at $g\to0$ the model is
+exactly persistence, which a direct head must instead carry through its message
+passing and recurrence. (ii)~\emph{The gate is a learned shrinkage}: $g$ grows only as
+far as $\mathbf{u}_i$ improves on $p_i$, so a weak encoder cannot pull the forecast far
+from a strong baseline. (iii)~\emph{It costs one parameter} and no extra computation.
+Setting $g\equiv1$ with an unconstrained departure gives the \emph{residual} head, and
+removing the anchor gives the direct head; both are ablations.
 
-\writehere{(e) loss}
-\label{sec:loss}
+\subsection{Optional SEIR Branch}
+\label{sec:seir}
+To test whether transmission dynamics help, the read-out can be replaced by a
+differentiable SEIR model. The encoder predicts a force of infection
+$\lambda_{i,h}=\min(\exp(\mathbf{w}^{\top}\tilde{\mathbf{h}}_i+b_\lambda),\lambda_{\max})$,
+and $\dot S=-\lambda S$, $\dot E=\lambda S-\omega E$, $\dot I=\omega E-\gamma I$,
+$\dot R=\gamma I$ are stepped daily from a state $\mathbf{s}_{i,t}$ seeded by the
+observed cases of weeks $t-1$ and $t$ divided by a reporting rate $\rho$. The weekly
+flow $E\to I$, scaled by $\rho$ and the district population, gives counts whose
+standardised log replaces $\mathbf{u}_i$ in Eq.~\eqref{eq:page}. With the anchor and
+gate this is the SEIR-GNN (SEIR-LSTM when $f_\theta$ is an LSTM); without them it is a
+pure SEIR decoder.
 
-\writehere{(f) implementation details, with the numbers}
+\subsection{Learning Objective}
+All parameters $\Theta=\{\theta,\mathbf{W},\mathbf{b},a\}$, plus $\mathbf{w}$,
+$b_\lambda$ and learned scales on the seeded state and $\rho$ when the SEIR branch is
+used, minimise the squared error on the standardised scale over a mini-batch
+$\mathcal{B}$ of origins,
+\begin{equation}
+  \mathcal{L}(\Theta)=\frac{1}{|\mathcal{B}|NH}\sum_{t\in\mathcal{B}}
+  \sum_{i=1}^{N}\sum_{h=1}^{H}\big(\hat z^{(t)}_{i,h}-z_{i,t+h}\big)^2,
+\end{equation}
+with early stopping on validation RMSE in counts. We also test a negative-binomial
+(NB) likelihood, because $\exp$ of a squared-error fit on $\log(1+y)$ estimates a
+conditional median while RMSE rewards the conditional mean.
+
+\subsection{Implementation Details}
 \label{sec:impl}
+$N=25$, $W=3$, $H=3$, $d=64$, $a_0=-2$ ($g_0=0.12$). SEIR rates are per day:
+$\omega=0.1$, $\gamma=1/7$, $\rho=1/11$, $\lambda_{\max}=1/7$, with stage durations
+from~\cite{phaijoo2018sensitivity} and an initial susceptible fraction of 0.318 from a
+serosurvey. Training uses Adam (learning rate $3\times10^{-3}$, weight decay
+$10^{-4}$), batch size 32, dropout 0.1, at most 300 epochs (400 for NB), early stopping
+with patience 40, and the best-validation weights restored; seeds 0, 1, 2. All models
+are written in plain PyTorch with dense $N\times N$ graph operations, and each
+published encoder is checked weight-for-weight against its reference implementation.
+The main study (810 runs) ran in 3.0 hours on a 4-core Kaggle CPU; the prospective study
+ran on a laptop CPU (Intel Core i5-12450H). No GPU is needed.

@@ -146,7 +146,8 @@ rewards the conditional \emph{mean}, which NB's $\mu$ estimates.
 \label{sec:impl}
 $N=25$ districts, window $W=3$, horizon $H=3$, hidden size $d=64$, gate initialisation
 $a_0=-2$ ($g_0=0.12$). The graph is the benchmark's district adjacency with
-self-loops (139 directed entries), row-normalised; AAGCN runs with its adaptive
+self-loops (141 directed entries; 139 in the prospective test, after two
+non-border entries are removed), row-normalised; AAGCN runs with its adaptive
 adjacency off, as published. SEIR rates are per day: incubation $\omega=0.1$, recovery
 $\gamma=1/7$, reporting $\rho=1/11$, $\lambda_{\max}=1/7$, initial susceptible
 fraction $1-0.682$ from a 2013--14 Colombo serosurvey, with stage durations

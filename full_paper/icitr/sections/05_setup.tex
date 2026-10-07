@@ -1,34 +1,33 @@
 %=============================================================================
-% EXPERIMENTAL SETUP -- budget: about 1/2 column.
-%
-% (a) Baselines (one sentence each, or a compact list):
-%     persistence y_hat(t+h) = y(t); seasonal naive; LSTM of SEIR-LSTM
-%     \cite{liu2025seirlstm} and GCN \cite{kipf2017gcn} (the brief's mandatory
-%     sequence and graph baselines); the five published ST-GNNs \cite{weng2024graph}
-%     with their direct head; SEIR-LSTM / SEIR-GNN; boosted trees
-%     \cite{chen2016xgboost}, k-NN analogues, NB-GLM, AR(3) ridge, STID-style MLP.
-%
-% (b) Protocol -- Madam stressed FAIRNESS, so say it explicitly:
-%     every model sees exactly the same windows, folds, seeds and metric;
-%     rolling origins 0.55 / 0.70 / 0.85 of the series x seeds 0, 1, 2;
-%     30 validation windows before each origin, next 15% is test;
-%     normalisation from training weeks only; no shuffling across time;
-%     selection on VALIDATION RMSE only, test never used to choose;
-%     arms, controls and decision rules committed before each run.
-%     Prospective: train once on all development weeks, score the 85 forecast
-%     starts from 2024-W11; no target week shared between partitions.
-%
-% (c) Metrics and tests: RMSE (primary, pooled over window x district x horizon),
-%     MAE, SMAPE, MAPE; paired exact sign-flip test on matched (origin, seed)
-%     units, BH-adjusted; prospective: block bootstrap (block 8, 10,000 reps), Holm.
+% EXPERIMENTAL SETUP -- dataset overview, baselines, protocol. Half a column.
 %=============================================================================
 \section{Experimental Setup}
 \label{sec:setup}
 
-\writehere{(a) baselines}
-\label{sec:baselines}
+\textbf{Dataset.} All development results use the corrected 559-week series
+(Section~\ref{sec:data}); the 2024--2026 weeks are used only for the prospective test.
+Every model, baseline and control is trained and scored on exactly the same windows,
+and windows that touch a missing week are dropped for all of them.
 
-\writehere{(b) protocol, stated as a fair comparison}
-\label{sec:protocol}
+\textbf{Baselines.} Persistence $\hat y_{t+h}=y_t$ and seasonal naive
+$\hat y_{t+h}=y_{t+h-52}$; the mandatory sequence and graph baselines, the two-layer
+LSTM of SEIR-LSTM~\cite{liu2025seirlstm} and a GCN~\cite{kipf2017gcn} against the same
+network without message passing; the five ST-GNNs of the Sri Lankan
+benchmark~\cite{weng2024graph} (STGAT, A3TGCN, ASTGCN, AAGCN, DCRNN) with their
+published direct heads; SEIR-informed heads (pure SEIR decoder, SEIR-LSTM, SEIR-GNN);
+and non-neural learners: gradient-boosted trees~\cite{chen2016xgboost} with and
+without climate, a negative-binomial GLM, $k$-nearest-neighbour analogues, an AR(3)
+ridge regression and an STID-style MLP~\cite{shao2022stid}.
 
-\writehere{(c) metrics and statistical tests}
+\textbf{Protocol.} Rolling origins at 0.55, 0.70 and 0.85 of the series, with three
+seeds each; the 30 windows before each origin are validation and the next 15\% are
+test, with no shuffling across time. Selection uses validation RMSE only, and test
+numbers never choose a configuration. The protocol, and for each experiment its arms,
+control and decision rule, were committed before it ran. Differences are paired on
+matched (origin, seed) units and tested with an exact sign-flip permutation test,
+Benjamini--Hochberg adjusted. The prospective test trains once on all development
+weeks, freezes every setting, and scores 85 forecast starts from 2024-W11, with no
+target week shared between partitions; it uses a block bootstrap over forecast starts
+(block 8, 10{,}000 replicates) with Holm correction over two pre-registered comparisons.
+RMSE in weekly cases, pooled over windows, districts and horizons, is the primary
+metric; MAE, SMAPE and MAPE are secondary.

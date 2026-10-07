@@ -1,26 +1,26 @@
 %=============================================================================
-% ABSTRACT -- about 180-220 words. Write it LAST, after the results are written.
-%
-% Madam's order, one or two sentences each:
-%   1. Background: why dengue forecasting in Sri Lanka matters (lead time ~3 weeks).
-%   2. Gap: ST-GNNs and SEIR-informed models predict the case level directly, are
-%      tested without the persistence forecast, on a benchmark that leaks future data.
-%   3. Why that matters: last week explains r^2 = 0.89 of the next week; the best
-%      climate covariate 0.03.
-%   4. Proposal: name PAGE and say its key idea in one line.
-%   5. Key results (pick 3): repairs 3 failing ST-GNNs by 5.95-16.29 val RMSE (9/9);
-%      with AAGCN beats persistence 9/9 on val and test; SEIR branch adds nothing
-%      (prospective P1 -0.03, p = 0.67); on 2024-2026 weeks persistence still wins
-%      on RMSE (34.75 vs 35.43) but PAGE wins on MAE/SMAPE.
-%   6. One-line conclusion + code link (\codeurl).
-%
-% Honesty rule: never write "outperforms persistence" without saying where.
+% ABSTRACT -- background, gap, proposal, key results, code link (~200 words).
 %=============================================================================
 \begin{abstract}
-\writehere{abstract, 180--220 words, written last}
+District-level dengue forecasts three weeks ahead give Sri Lankan health services
+time to act. Spatio-temporal graph neural networks (ST-GNNs) and SEIR-informed
+models have been proposed for this task, but they predict the case level directly
+and are evaluated without the persistence forecast, even though last week's count
+explains $r^2=0.89$ of the next. We propose \model{} (Persistence-Anchored Gated
+Estimation), a forecasting head for any spatio-temporal encoder that predicts a
+gated departure from the last observed week, at the cost of one parameter. We
+rebuild a leakage-free 559-week dataset from source reports, extend it to 2026, and
+evaluate five published ST-GNNs and an LSTM under one protocol. \model{} repairs
+the three encoders that fail as published by 5.95--16.29 validation RMSE (9/9 paired
+runs each), and with AAGCN it beats persistence on all nine runs on validation and
+test. An ablation attributes the gain to the anchor and the gate; an SEIR simulator
+in the same head adds nothing, and on 85 later forecast starts it ties its no-SEIR
+twin ($p=0.67$). On those 2024--2026 weeks no learned model beats persistence on
+RMSE (34.75 against 35.43 for \model{}), although \model{} has lower MAE and SMAPE.
+For this target, persistence is the prior that matters. Code and data: \codeurl.
 \end{abstract}
 
 \begin{IEEEkeywords}
-dengue forecasting, spatio-temporal graph neural networks, persistence,
-SEIR, data leakage, prospective evaluation
+dengue forecasting, spatio-temporal graph neural networks, persistence baseline,
+physics-informed learning, data leakage, prospective evaluation
 \end{IEEEkeywords}

@@ -6,8 +6,10 @@
 
 \textbf{Dataset.} All development results use the corrected 559-week series
 (Section~\ref{sec:data}); the 2024--2026 weeks are used only for the prospective test.
-Every model, baseline and control is trained and scored on exactly the same windows,
-and windows that touch a missing week are dropped for all of them.
+Every model, baseline and control is scored on exactly the same validation and test
+windows and trained on the same training windows, except that arms with climate lags
+skip the first training weeks, which have no climate history that far back. Windows
+that touch a missing week are dropped for all of them.
 
 \textbf{Baselines.} Persistence $\hat y_{t+h}=y_t$ and seasonal naive
 $\hat y_{t+h}=y_{t+h-52}$; the mandatory sequence and graph baselines, the two-layer

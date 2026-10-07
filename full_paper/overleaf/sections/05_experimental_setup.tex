@@ -9,8 +9,10 @@ The corrected series (\S\ref{sec:corrected}) covers 25 districts over 559 weeks,
 2013-W26 to 2024-W10, with weekly cases, ERA5 temperature, precipitation, humidity
 and soil moisture, population, and the benchmark's district graph. Seven weeks are
 missing and windows that touch them are dropped. The extension (\S\ref{sec:newweeks})
-adds 127 weeks to 2026-W32 for the prospective test only. Every model, baseline and
-control is trained and scored on exactly the same windows.
+adds 127 weeks to 2026-W32 for the prospective test only. 
+Every model, baseline and control is scored on exactly the same validation and test
+windows and trained on the same training windows, except that arms with climate lags
+skip the first training weeks, which have no climate history that far back.
 
 \subsection{Baselines}
 \label{sec:baselines}

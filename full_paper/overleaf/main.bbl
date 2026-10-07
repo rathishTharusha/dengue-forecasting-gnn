@@ -2,7 +2,7 @@
 %%% Do NOT edit. File created by BibTeX with style
 %%% ACM-Reference-Format-Journals [18-Jan-2012].
 
-\begin{thebibliography}{18}
+\begin{thebibliography}{24}
 
 %%% ====================================================================
 %%% NOTE TO THE USER: you can override these defaults by providing
@@ -64,6 +64,28 @@
 \newblock
 
 
+\bibitem[Chen and Guestrin(2016)]%
+        {chen2016xgboost}
+\bibfield{author}{\bibinfo{person}{Tianqi Chen} {and} \bibinfo{person}{Carlos
+  Guestrin}.} \bibinfo{year}{2016}\natexlab{}.
+\newblock \showarticletitle{{XGBoost}: A Scalable Tree Boosting System}. In
+  \bibinfo{booktitle}{\emph{Proceedings of the 22nd ACM SIGKDD International
+  Conference on Knowledge Discovery and Data Mining}}.
+  \bibinfo{pages}{785--794}.
+\newblock
+
+
+\bibitem[Deng et~al\mbox{.}(2020)]%
+        {deng2020colagnn}
+\bibfield{author}{\bibinfo{person}{Songgaojun Deng}, \bibinfo{person}{Shusen
+  Wang}, \bibinfo{person}{Huzefa Rangwala}, \bibinfo{person}{Lijing Wang},
+  {and} \bibinfo{person}{Yue Ning}.} \bibinfo{year}{2020}\natexlab{}.
+\newblock \showarticletitle{Cola-GNN: Cross-location Attention based Graph
+  Neural Networks for Long-term ILI Prediction}. In
+  \bibinfo{booktitle}{\emph{CIKM}}.
+\newblock
+
+
 \bibitem[GulMohamed et~al\mbox{.}(2026)]%
         {gulmohamed2026denguegnn}
 \bibfield{author}{\bibinfo{person}{Rasitha~Banu GulMohamed},
@@ -92,6 +114,16 @@
 \newblock
 
 
+\bibitem[Hyndman and Athanasopoulos(2021)]%
+        {hyndman2021forecasting}
+\bibfield{author}{\bibinfo{person}{Rob~J. Hyndman} {and}
+  \bibinfo{person}{George Athanasopoulos}.} \bibinfo{year}{2021}\natexlab{}.
+\newblock \bibinfo{booktitle}{\emph{Forecasting: Principles and Practice}
+  (\bibinfo{edition}{3rd} ed.)}.
+\newblock \bibinfo{publisher}{OTexts}.
+\newblock
+
+
 \bibitem[Kim et~al\mbox{.}(2022)]%
         {kim2022revin}
 \bibfield{author}{\bibinfo{person}{Taesung Kim}, \bibinfo{person}{Jinhee Kim},
@@ -102,6 +134,16 @@
   Time-Series Forecasting against Distribution Shift}. In
   \bibinfo{booktitle}{\emph{International Conference on Learning
   Representations (ICLR)}}.
+\newblock
+
+
+\bibitem[Kipf and Welling(2017)]%
+        {kipf2017gcn}
+\bibfield{author}{\bibinfo{person}{Thomas~N. Kipf} {and} \bibinfo{person}{Max
+  Welling}.} \bibinfo{year}{2017}\natexlab{}.
+\newblock \showarticletitle{Semi-Supervised Classification with Graph
+  Convolutional Networks}. In \bibinfo{booktitle}{\emph{International
+  Conference on Learning Representations (ICLR)}}.
 \newblock
 
 
@@ -253,6 +295,28 @@
 \newblock \showarticletitle{Graph Representation Learning for Dengue
   Forecasting}. In \bibinfo{booktitle}{\emph{IEEE International Conference on
   Big Data (BigData)}}.
+\newblock
+
+
+\bibitem[Wu et~al\mbox{.}(2019)]%
+        {wu2019graphwavenet}
+\bibfield{author}{\bibinfo{person}{Zonghan Wu}, \bibinfo{person}{Shirui Pan},
+  \bibinfo{person}{Guodong Long}, \bibinfo{person}{Jing Jiang}, {and}
+  \bibinfo{person}{Chengqi Zhang}.} \bibinfo{year}{2019}\natexlab{}.
+\newblock \showarticletitle{Graph WaveNet for Deep Spatial-Temporal Graph
+  Modeling}. In \bibinfo{booktitle}{\emph{International Joint Conference on
+  Artificial Intelligence (IJCAI)}}.
+\newblock
+
+
+\bibitem[Xie et~al\mbox{.}(2022)]%
+        {xie2022epignn}
+\bibfield{author}{\bibinfo{person}{Feng Xie}, \bibinfo{person}{Zhong Zhang},
+  \bibinfo{person}{Liang Li}, \bibinfo{person}{Bin Zhou}, {and}
+  \bibinfo{person}{Yusong Tan}.} \bibinfo{year}{2022}\natexlab{}.
+\newblock \showarticletitle{EpiGNN: Exploring Spatial Transmission with Graph
+  Neural Network for Regional Epidemic Forecasting}. In
+  \bibinfo{booktitle}{\emph{ECML-PKDD}}.
 \newblock
 
 

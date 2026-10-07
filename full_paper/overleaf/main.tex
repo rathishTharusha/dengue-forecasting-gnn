@@ -1,11 +1,17 @@
 %=============================================================================
 %  CS3631 Phase 3 -- Full Paper
-%  Physics-informed spatio-temporal GNNs for district-level dengue forecasting
+%  PAGE: persistence-anchored gated forecasting for district-level dengue
 %  Group 05, Department of Computer Science and Engineering, University of Moratuwa
 %
 %  Rewritten 2026-09-24 on the corrected dataset and the leakage-controlled
-%  harness (seirgnn2/). Every number in tables_generated.tex and the fig_* files
-%  comes from scripts/build_paper_assets.py; numbers in the prose must match it.
+%  harness (seirgnn2/). Restructured 2026-10-07 to the CS3631 brief (section 9)
+%  and the lecturer's paper-writing feedback: a named framework (PAGE), its
+%  formal description, ablation, comparative analysis, tuning, computational
+%  analysis and the prospective 2024-2026 test (EXP-063).
+%  Every number in tables_generated.tex and the fig_* files comes from
+%  scripts/build_paper_assets.py (Kaggle run, EXP-050); tables_extra.tex comes
+%  from scripts/build_paper_extra_tables.py (EXP-063 and the same Kaggle run).
+%  Numbers in the prose must match them.
 %
 %  CONTRIBUTION COLOURS: the rewrite was done in one pass, so the \cA..\cF
 %  wrappers are not applied to the new text. Re-assign them at the team standup
@@ -63,11 +69,18 @@
 \usepackage{graphicx}
 \usepackage{subcaption}
 \usepackage{balance}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,fit,calc}
 
 % Notation shorthands -- keep the maths consistent across sections.
 \newcommand{\R}{\mathbb{R}}
 \newcommand{\Rhat}{\hat{R}}
 \newcommand{\padj}{p_{\text{adj}}}
+% The framework's name. Change it here and everywhere follows.
+\newcommand{\model}{PAGE}
+% Anonymised code link for double-blind venues (anonymous.4open.science mirrors
+% the GitHub repository). TODO: create the mirror and replace before submission.
+\newcommand{\codeurl}{\url{https://anonymous.4open.science/r/TODO}}
 
 % NOTE: do NOT add authorsperrow here. With six authors sharing ONE \affiliation,
 % acmart keeps them in a single box, so authorsperrow only narrows that box --- it
@@ -80,10 +93,11 @@
 %=============================================================================
 \begin{document}
 
-% TITLE. The paper asks where an SEIR prior helps a graph network and answers
-% with a controlled study, not a named architecture.
-\title{Where Does Physics Help a Graph Network?\\A Leakage-Controlled Study of
-SEIR-Informed Spatio-Temporal GNNs for Dengue Forecasting}
+% TITLE. Names the framework and its key idea (the lecturer's rule). The
+% question mark keeps the claim honest: on unseen weeks nothing beats
+% persistence on RMSE (Table tab:prospective).
+\title{Beyond Persistence? \model{}: Persistence-Anchored Gated Forecasting\\
+with Spatio-Temporal Graph Networks for Dengue}
 
 % AUTHORS. Phase 3 requires TAs then Prof.\ Dulani and Dr.\ Sandareka appended
 % as final co-authors -- add them before submission.
@@ -102,20 +116,23 @@ SEIR-Informed Spatio-Temporal GNNs for Dengue Forecasting}
 
 \input{sections/00_abstract}
 
-\keywords{dengue forecasting, spatio-temporal graph neural networks, SEIR,
-physics-informed learning, data leakage, reproducibility, negative results}
+\keywords{dengue forecasting, spatio-temporal graph neural networks,
+persistence, SEIR, physics-informed learning, data leakage, prospective
+evaluation, negative results}
 
 \maketitle
 
 \input{sections/01_introduction}
 \input{sections/02_related_work}
 \input{sections/03_data}
-\input{sections/04_models_protocol}
+\input{sections/04_framework}
+\input{sections/05_experimental_setup}
 % Table floats only move forward, so the generated tables are declared before
 % the results text that cites them.
 \input{tables_generated}
-\input{sections/05_results}
-\input{sections/06_discussion_conclusion}
+\input{tables_extra}
+\input{sections/06_experiments}
+\input{sections/07_discussion_conclusion}
 
 \balance
 \bibliographystyle{ACM-Reference-Format}

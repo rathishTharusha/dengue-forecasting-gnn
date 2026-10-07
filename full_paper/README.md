@@ -1,7 +1,7 @@
 # Full paper and its reproduction package
 
-**Title:** *Where Does Physics Help a Graph Network? A Leakage-Controlled Study of
-SEIR-Informed Spatio-Temporal GNNs for Dengue Forecasting*
+**Title:** *Beyond Persistence? PAGE: Persistence-Anchored Gated Forecasting with
+Spatio-Temporal Graph Networks for Dengue*
 **Authors:** Group 05 (CS3631). The Phase-2 short paper (*Know When the Epidemic Comes*,
 on the benchmark array) is kept unchanged in `paper/`.
 

@@ -1,25 +1,21 @@
 %=============================================================================
-% DATA: REPRODUCTION, AUDIT, CORRECTED DATASET
+% DATASET CONSTRUCTION (a contribution, so it is described as methodology,
+% per the lecturer's feedback; Section 5.1 gives only the overview)
 %=============================================================================
-\section{Data}
+\section{Dataset Construction}
 \label{sec:data}
 
 \subsection{Reproducing the benchmark}
 \label{sec:repro}
-We ran the reference implementation~\cite{weng2024graph} unmodified---their code,
-their array, their protocol---on a pinned software stack. It recovers their
-published numbers to within \textbf{7.3\%} across twenty comparisons, with
-AAGCN and DCRNN matching to four decimal places. The published results are
-real, but three properties of the evaluation account for the reported
-advantage. The column labelled ``cross validated'' is computed on a loader
-spanning the full series, so it includes training data. RMSE is averaged per
-window rather than pooled, which on this target is $\sim$39\% lower. No naive
-baseline is reported, and adding persistence to that same column reverses the
-ranking: it beats \emph{every} model on MAE and RMSE. An independent
-re-implementation that shares no code with either codebase reproduces this. This
-reproduction runs the authors' own code in its pinned environment and is
-packaged separately (\texttt{reproduction/} in the repository); everything from
-\S\ref{sec:audit} on is produced by the reproduction notebook.
+We first ran the reference implementation~\cite{weng2024graph} unmodified (their
+code, array and protocol) on a pinned software stack. It recovers their published
+numbers to within \textbf{7.3\%} across twenty comparisons. Three properties of their
+evaluation, however, account for the reported advantage: the ``cross validated''
+column is computed on a loader that includes training data; RMSE is averaged per
+window rather than pooled, which on this target is $\sim$39\% lower; and no naive
+baseline is reported. Adding persistence to that same column reverses the ranking:
+it beats \emph{every} model on MAE and RMSE. An independent re-implementation that
+shares no code with either codebase reproduces this.
 
 \subsection{Auditing the benchmark array}
 \label{sec:audit}
@@ -80,7 +76,23 @@ district totals sum exactly to the national total, then mid-year estimates).
 
 Lags are applied in the model, not baked into the data: a forecast for week $t$
 reads cases up to $t-1$ and climate up to $t-2$, since ERA5 is published about
-five days late. On this series the persistence test RMSE on the frozen three
-origins (averaged over origins, as for every model) is \textbf{36.02}, against
-44.80 on the array (29.52 with the week-395 windows excluded). The last test
-fold covers the 2023 epidemic.
+five days late, and a perturbation test asserts that no value after either limit
+can change a forecast. On this series the persistence test RMSE on the three
+development origins (\S\ref{sec:protocol}) is \textbf{36.02}, against 44.80 on the
+array (29.52 with the week-395 windows excluded). The last test fold covers the
+2023 epidemic.
+
+\subsection{Extension to 2026 for a prospective test}
+\label{sec:newweeks}
+To test on weeks that no design decision had seen, we extend the series with the 127
+Weekly Epidemiological Reports from 2024-W11 to 2026-W32. The parsing and quality
+rules (district totals must match the national total; a dragged-formula pattern
+or a reprinted table voids a week's row, which is then replaced by the difference of
+the cumulative rows or left missing) were committed before any count was read. The
+result is 109 observed weeks, 8 corrected and 10 missing; nothing is interpolated.
+One deviation is reported in full: a first scoring run exposed two reconstruction
+defects (the first report of a year carries the previous year's total in its
+cumulative row, and two reports reprint the previous week's table). The rules were
+amended on report semantics alone, no model setting changed, and only the
+re-parsed data are scored (\S\ref{sec:prospective}). This is therefore an amended
+prospective evaluation, not an untouched one.

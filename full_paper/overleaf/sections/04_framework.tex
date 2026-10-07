@@ -1,0 +1,160 @@
+%=============================================================================
+% THE PAGE FRAMEWORK
+% Lecturer's feedback: symbols only (numbers go in Implementation Details),
+% start from the input, show every step to the output, then the loss.
+%=============================================================================
+\section{The \model{} Framework}
+\label{sec:framework}
+
+\begin{figure*}[t]
+\centering
+\begin{tikzpicture}[
+  font=\small, >={Stealth[length=2mm]},
+  box/.style={draw, rounded corners=2pt, align=center, minimum height=9mm, inner sep=3pt, fill=white},
+  inp/.style={box, fill=gray!8},
+  key/.style={box, fill=teal!12, draw=teal!70!black, line width=0.8pt},
+  opt/.style={box, dashed, fill=orange!8},
+  op/.style={circle, draw, inner sep=1pt, minimum size=5mm},
+  lbl/.style={font=\scriptsize, inner sep=1pt}]
+  % inputs (left)
+  \node[inp] (x) {case window\\$\mathbf{Z}_t\in\R^{N\times W}$};
+  \node[inp, above=3mm of x] (a) {district graph\\$\mathcal{G}=(\mathcal{V},\mathcal{E},\mathbf{A})$};
+  \node[inp, above=3mm of a] (e) {covariates (opt.)\\$\mathbf{E}_t\in\R^{N\times F}$};
+  % encoder
+  \node[box, right=9mm of x, minimum width=24mm] (enc) {encoder $f_\theta$\\{\scriptsize any ST-GNN or LSTM}};
+  \node[box, right=7mm of enc] (ro) {read-out\\$\mathbf{u}_i=\mathbf{W}\tilde{\mathbf{h}}_i+\mathbf{b}$};
+  \node[opt, above=4mm of ro] (seir) {SEIR branch (ablated)\\$\mathbf{u}_i=\mathrm{SEIR}(\lambda_i;\,\mathbf{s}_{i,t})$};
+  % PAGE head
+  \node[op, right=10mm of ro] (minus) {$-$};
+  \node[key, right=6mm of minus] (gate) {gate\\$g=\sigma(a)$};
+  \node[op, right=6mm of gate] (plus) {$+$};
+  \node[box, right=7mm of plus] (out) {forecast\\$\hat{\mathbf{y}}_i\in\R^{H}$};
+  % anchor path
+  \node[key, below=9mm of minus] (anc) {persistence anchor $p_i=z_{i,t}$};
+  % arrows
+  \draw[->] (x) -- (enc);
+  \draw[->] (a.east) -| ($(enc.north west)!0.3!(enc.north east)$);
+  \draw[->] (e.east) -| ($(enc.north west)!0.7!(enc.north east)$);
+  \draw[->] (enc) -- node[lbl, below, pos=0.3]{$\tilde{\mathbf{h}}_i$} (ro);
+  \coordinate (br) at ($(enc.east)!0.6!(ro.west)$);
+  \draw[->, dashed] (br) -- (br |- seir.south);
+  \draw[->] (ro) -- node[lbl, above]{$\mathbf{u}_i$} (minus);
+  \draw[->, dashed] (seir.east) -| (minus.north);
+  \draw[->] (minus) -- node[lbl, above]{$\boldsymbol{\delta}_i$} (gate);
+  \draw[->] (gate) -- (plus);
+  \draw[->] (plus) -- node[lbl, above]{$\hat{\mathbf{z}}_i$} (out);
+  \draw[->] (x.south) |- (anc.west);
+  \draw[->] (anc) -- (minus);
+  \draw[->] (anc.east) -| (plus.south);
+  % highlight the contribution
+  \node[draw=teal!70!black, dotted, rounded corners, inner sep=2.5mm, fit=(minus)(gate)(plus)(anc),
+        label={[font=\scriptsize\bfseries, text=teal!50!black]above:\model{} head (our contribution)}] {};
+\end{tikzpicture}
+\caption{\model{}. An unchanged encoder reads the last $W$ weeks of standardised log cases
+on the district graph. Its read-out $\mathbf{u}_i$ is turned into a departure
+$\boldsymbol{\delta}_i=\mathbf{u}_i-p_i\mathbf{1}$ from the persistence anchor, shrunk by
+a learned gate, and added back to the anchor. The dashed SEIR branch replaces the
+read-out with a differentiable simulator; it is the component the ablation removes.}
+\label{fig:overview}
+\end{figure*}
+
+\subsection{Problem formulation}
+Let $\mathcal{G}=(\mathcal{V},\mathcal{E},\mathbf{A})$ be the district graph with
+$|\mathcal{V}|=N$ districts and adjacency $\mathbf{A}\in\{0,1\}^{N\times N}$ (with
+self-loops), and let $y_{i,t}\ge 0$ be the dengue cases reported by district $i$ in
+week $t$. Counts are modelled on the scale
+$z_{i,t}=(\log(1+y_{i,t})-m)/s$, where $m$ and $s$ are the mean and standard deviation
+of $\log(1+y)$ over the training weeks only. At forecast origin $t$ the input is the
+window $\mathbf{Z}_t=[z_{i,t-W+1},\dots,z_{i,t}]_{i\in\mathcal{V}}\in\R^{N\times W}$ and,
+optionally, exogenous covariates $\mathbf{E}_t\in\R^{N\times F}$ observed at causal
+lags (\S\ref{sec:corrected}). The task is to predict
+$\mathbf{Y}_t=[y_{i,t+h}]\in\R^{N\times H}$ for horizons $h=1,\dots,H$.
+
+\subsection{Encoder}
+Any spatio-temporal encoder $f_\theta$ maps the window to one representation per
+district,
+\begin{equation}
+  \mathbf{H}=f_\theta(\mathbf{Z}_t,\mathbf{A})\in\R^{N\times d},\qquad
+  \tilde{\mathbf{h}}_i=[\mathbf{h}_i\,\Vert\,\mathbf{e}_{i,t}],
+\end{equation}
+where $\Vert$ concatenates any covariates around the encoder, so that a published
+architecture runs exactly as designed. We use the five published ST-GNNs and the LSTM
+of SEIR-LSTM unchanged (\S\ref{sec:baselines}). A linear read-out gives a level
+forecast $\mathbf{u}_i=\mathbf{W}\tilde{\mathbf{h}}_i+\mathbf{b}\in\R^{H}$; the
+published models stop here and output $\hat{\mathbf{z}}_i=\mathbf{u}_i$ (the
+\emph{direct} head).
+
+\subsection{Persistence-anchored gated head}
+\label{sec:page}
+\model{} anchors every horizon on the last observed week, $p_i=z_{i,t}$, and lets the
+network contribute only a gated departure from it:
+\begin{equation}
+  \boldsymbol{\delta}_i=\mathbf{u}_i-p_i\mathbf{1}_H,\qquad
+  \hat{\mathbf{z}}_i=p_i\mathbf{1}_H+g\,\boldsymbol{\delta}_i,\qquad g=\sigma(a),
+  \label{eq:page}
+\end{equation}
+with one learned scalar $a$, initialised at $a_0<0$ so that training starts close to
+the persistence forecast. Equivalently
+$\hat{\mathbf{z}}_i=(1-g)\,p_i\mathbf{1}_H+g\,\mathbf{u}_i$: a learned convex
+combination of persistence and the encoder's forecast. Counts are recovered as
+$\hat y_{i,t+h}=\max\!\big(0,\exp(s\,\hat z_{i,h}+m)-1\big)$.
+
+\textbf{Design rationale.} Three properties follow from Eq.~\eqref{eq:page}.
+(i)~\emph{The identity is free.} At $g\to0$ the model is exactly persistence, which
+already explains $r^2=0.89$ of the next week; a direct head must instead carry the
+level through the encoder's message passing and recurrence, and the three failing
+encoders do not (\S\ref{sec:comparative}). (ii)~\emph{The gate is a learned
+shrinkage.} The gradient raises $g$ only as far as $\mathbf{u}_i$ improves on $p_i$,
+so a weak encoder cannot pull the forecast far from a strong baseline. (iii)~\emph{It
+costs one parameter} and no extra computation (Table~\ref{tab:compute}). Removing the
+gate ($g\equiv1$, $\hat{\mathbf{z}}_i=p_i\mathbf{1}_H+\boldsymbol{\delta}'_i$ with an
+unconstrained departure) gives the \emph{residual} head, and removing the anchor gives
+the direct head; both are ablations in \S\ref{sec:ablation}.
+
+\subsection{Optional SEIR branch}
+\label{sec:seirbranch}
+To test whether transmission dynamics help, the read-out can be replaced by a
+differentiable SEIR model. The encoder predicts a weekly force of infection
+$\lambda_{i,h}=\min\!\big(\exp(\mathbf{w}^{\top}\tilde{\mathbf{h}}_i+b_\lambda),\,
+\lambda_{\max}\big)$, and the compartments
+$\dot S=-\lambda S$, $\dot E=\lambda S-\omega E$, $\dot I=\omega E-\gamma I$,
+$\dot R=\gamma I$ are stepped daily from a state $\mathbf{s}_{i,t}$ seeded by observed
+cases (exposed and infectious from the counts of weeks $t-1$ and $t$, divided by a
+reporting rate $\rho$; susceptibles from a serosurvey). Weekly incidence $\iota_{i,h}$ (the flow $E\to I$) times $\rho$ times the
+district population $P_i$ gives counts, so
+$u_{i,h}=(\log(1+\rho P_i\iota_{i,h})-m)/s$, which enters Eq.~\eqref{eq:page} in place
+of the read-out; learned scales on the seeded exposed state and on $\rho$ are allowed.
+With the anchor and gate this is the SEIR-GNN (or SEIR-LSTM when $f_\theta$ is the
+LSTM); without them, $\hat{\mathbf{z}}_i=\mathbf{u}_i$, it is a pure SEIR decoder.
+
+\subsection{Learning objective}
+\label{sec:loss}
+All parameters $\Theta=\{\theta,\mathbf{W},\mathbf{b},a\}$ (plus $\mathbf{w},b_\lambda$
+and the SEIR scales when the branch is used) minimise the squared error on the
+standardised scale over a mini-batch $\mathcal{B}$ of forecast origins,
+\begin{equation}
+  \mathcal{L}(\Theta)=\frac{1}{|\mathcal{B}|\,N H}\sum_{t\in\mathcal{B}}\sum_{i=1}^{N}
+  \sum_{h=1}^{H}\big(\hat z_{i,h}^{(t)}-z_{i,t+h}\big)^2 ,
+\end{equation}
+with early stopping on validation RMSE in counts. We also test a negative-binomial
+(NB) objective, which adds a dispersion head and minimises the NB2 negative
+log-likelihood with mean $\mu=\exp(s\hat z+m)-1$. The reason is a bias: under squared
+error on $\log(1+y)$, $\exp$ of the fit is a conditional \emph{median}, while RMSE
+rewards the conditional \emph{mean}, which NB's $\mu$ estimates.
+
+\subsection{Implementation details}
+\label{sec:impl}
+$N=25$ districts, window $W=3$, horizon $H=3$, hidden size $d=64$, gate initialisation
+$a_0=-2$ ($g_0=0.12$). The graph is the benchmark's district adjacency with
+self-loops (139 directed entries), row-normalised; AAGCN runs with its adaptive
+adjacency off, as published. SEIR rates are per day: incubation $\omega=0.1$, recovery
+$\gamma=1/7$, reporting $\rho=1/11$, $\lambda_{\max}=1/7$, initial susceptible
+fraction $1-0.682$ from a 2013--14 Colombo serosurvey, with stage durations
+of~\cite{phaijoo2018sensitivity}. Training uses Adam (learning rate
+$3\times10^{-3}$, weight decay $10^{-4}$), batch size 32, dropout 0.1, at most 300
+epochs (400 for NB) with early stopping on validation RMSE, patience 40, and the
+best-validation weights restored. Seeds are 0, 1, 2. All models are written in plain
+PyTorch with dense $N\times N$ graph operations and no graph library; each published
+encoder is checked weight-for-weight against its reference implementation. The main
+study (810 runs) ran in 3.0 hours on a 4-core Kaggle CPU, each run single-threaded;
+the prospective study ran on a laptop CPU (Intel Core i5-12450H). No GPU is needed.

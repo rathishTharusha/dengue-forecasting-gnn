@@ -1,0 +1,66 @@
+%=============================================================================
+%  ICITR 2026 submission -- IEEE conference template, A4, double-blind
+%  https://icitr.uom.lk/forauthors/
+%
+%  LIMITS: 6 pages max INCLUDING references (extra pages cost USD 250 each).
+%  REVIEW: double-blind -> no names, no "our earlier work", anonymous code link.
+%  DEADLINE: 10 Oct 2026, 23:59 Sri Lanka time, via Microsoft CMT.
+%
+%  The team writes every section in its own words (see each sections/*.tex
+%  header for what it must say and which numbers to use). Tables are generated:
+%      python scripts/build_paper_assets.py
+%      python scripts/build_paper_extra_tables.py
+%  Never type a number into a table by hand.
+%
+%  Build:  latexmk -pdf main.tex
+%=============================================================================
+\documentclass[conference,a4paper]{IEEEtran}
+\IEEEoverridecommandlockouts
+
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,fit,calc}
+\usepackage[hidelinks]{hyperref}
+
+% Notation -- keep the maths consistent across sections.
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\padj}{p_{\text{adj}}}
+% The framework's name. Change it here and everywhere follows.
+\newcommand{\model}{PAGE}
+% Anonymous code link (anonymous.4open.science mirrors the GitHub repo).
+% TODO before submission: create the mirror and paste its URL here.
+\newcommand{\codeurl}{\url{https://anonymous.4open.science/r/TODO}}
+% Red placeholder. Delete every \writehere before submission:
+%   grep -n writehere sections/*.tex   must print nothing.
+\newcommand{\writehere}[1]{\textcolor{red}{[WRITE: #1]}}
+
+\begin{document}
+
+\title{Beyond Persistence? \model{}: Persistence-Anchored Gated Forecasting
+with Spatio-Temporal Graph Networks for Dengue}
+
+% Double-blind: no names, no affiliation. Real names go back in for camera-ready
+% (group members, then TAs, then Prof Dulani and Dr Sandareka last, full names
+% without titles, as the CS3631 brief requires).
+\author{\IEEEauthorblockN{Anonymous Authors}
+\IEEEauthorblockA{Affiliation withheld for double-blind review}}
+
+\maketitle
+
+\input{sections/00_abstract}
+\input{sections/01_introduction}
+\input{sections/02_related_work}
+\input{sections/03_dataset}
+\input{sections/04_page}
+\input{sections/05_setup}
+\input{sections/06_results}
+\input{sections/07_discussion_conclusion}
+
+\bibliographystyle{IEEEtran}
+\bibliography{refs}
+
+\end{document}

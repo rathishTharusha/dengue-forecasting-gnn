@@ -1,0 +1,66 @@
+%=============================================================================
+% RESULTS -- budget: about 1.5 pages INCLUDING the three tables below.
+% Order follows the CS3631 brief. Every number below is in a generated table;
+% read it from the table, do not copy from memory.
+%
+% IMPORTANT (Madam): interpret the results YOURSELF, in simple words. Say what
+% the table shows and WHY. A tool may polish language afterwards, not reasoning.
+%
+% EXP-062 (week-index fix) is still PENDING. The B row and season/climate numbers
+% may change; re-run the table scripts when it lands.
+%
+% (a) Comparative analysis -- Table~\ref{tab:encoders}.
+%     As published, AAGCN/ASTGCN/LSTM 16.71/16.83/16.91 (val) beat persistence
+%     17.86; STGAT/A3TGCN/DCRNN 22.93/28.63/34.64 fail (underfit: a linear model on
+%     their residuals recovers 48-60% of STGAT/A3TGCN's val residual variance).
+%     With PAGE all six reach 16.57-18.35. Repairs: -5.95/-10.95/-16.29 val,
+%     -25.54/-23.24/-34.50 test, 9/9 each. AAGCN+PAGE beats persistence 9/9 on val
+%     (-1.29) and test (-2.48). Graph adds only 0.06 (GCN vs no message passing).
+%     B (val-selected, 15.51) is worse than persistence on test (37.54).
+%
+% (b) Ablation -- Table~\ref{tab:rescue}: direct -> residual (anchor) -> PAGE
+%     (gate) -> +SEIR. Anchor alone fixes the failure (17.47-17.85); anchor+gate
+%     give 96-112% of the full SEIR head's repair; SEIR branch is worse on STGAT
+%     (+0.66, 1/9, p_adj 0.023), ties A3TGCN, 3/9 on DCRNN, costs 0.75-0.86 on the
+%     working encoders. Pure SEIR decoder (no anchor): 24.01-25.75, worse than
+%     persistence on all six; 14-16% of targets unreachable.
+%
+% (c) Hyperparameter tuning (2-3 sentences, no table -- or Table tuning if space):
+%     grid lr {1e-3, 3e-3} x hidden {32, 64}, 108 runs per arm, validation only;
+%     all arms pick lr 3e-3, d = 64; whole grid moves val RMSE by <= 0.57.
+%
+% (d) Computational analysis (2-3 sentences): PAGE adds 1 parameter and no time
+%     per epoch (AAGCN 0.19 -> 0.20 s); SEIR branch adds 5 parameters and ~2x time;
+%     AAGCN is the smallest (2,873 params, 19 s per run) and the most accurate.
+%
+% (e) Prospective 2024-2026 -- Table~\ref{tab:prospective}.
+%     Persistence 34.75 is best RMSE; PAGE 35.43, PAGE+SEIR 35.40 (not significant).
+%     SEIR vs PAGE: -0.03 [-0.41, +0.12], p_Holm 0.67 -> SEIR adds nothing.
+%     PAGE better on MAE (11.35 vs 11.78) and SMAPE (45.7 vs 50.3).
+%     2026 outbreak dominates RMSE (persistence 160.51 in 2026 vs 14.72 in 2024).
+%     State honestly: the pre-registered finalist was the SEIR variant; we present
+%     PAGE because the two tie -- a choice made after the test.
+%=============================================================================
+\section{Results}
+\label{sec:experiments}
+
+\input{tables/encoders}
+\input{tables/rescue}
+\input{tables/prospective}
+
+\subsection{Comparative analysis}
+\label{sec:comparative}
+\writehere{(a) Table encoders: who fails, how PAGE repairs, against persistence}
+
+\subsection{Ablation study}
+\label{sec:ablation}
+\writehere{(b) Table rescue: anchor, gate, SEIR branch; why the pure SEIR decoder fails}
+
+\subsection{Hyperparameter tuning and computational cost}
+\label{sec:tuning}
+\label{sec:compute}
+\writehere{(c) tuning and (d) cost, a few sentences}
+
+\subsection{Prospective evaluation, 2024--2026}
+\label{sec:prospective}
+\writehere{(e) Table prospective, stated honestly}

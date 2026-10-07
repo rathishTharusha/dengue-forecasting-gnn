@@ -1,0 +1,47 @@
+%=============================================================================
+% INTRODUCTION -- budget: about 3/4 page (one column and a half).
+%
+% Five short paragraphs (CS3631 brief, section 9, and Madam's feedback):
+%
+% P1 Background (3-4 sentences). Dengue in Sri Lanka; 2017: >186,000 cases,
+%    440 deaths \cite{tissera2020severe}; ~3 weeks infection -> diagnosis, so a
+%    3-week district forecast gives hospitals and vector control time to act.
+%
+% P2 Existing work (3-4 sentences). Two families: ST-GNNs from traffic
+%    forecasting, benchmarked on Sri Lanka by \cite{weng2024graph}; SEIR-informed
+%    models, SEIR-LSTM \cite{liu2025seirlstm}. The natural hybrid is SEIR-GNN.
+%
+% P3 The technical gap (most important paragraph). Weekly dengue is close to a
+%    random walk: cases at t-1 explain r^2 = 0.89 of cases at t; best climate
+%    covariate 0.03. Both families predict the LEVEL directly, so the network must
+%    relearn "next week = this week" through its layers. Three of five published
+%    ST-GNNs fail to (5-17 RMSE worse than persistence on validation). The
+%    benchmark hides this: no persistence baseline, and its array leaks future data.
+%    No one tests physics against the same model without physics.
+%
+% P4 Proposal + main results (4-5 sentences). PAGE starts from persistence and
+%    learns only a gated departure; one extra parameter; works with any encoder.
+%    Results: repairs STGAT/A3TGCN/DCRNN (9/9); AAGCN+PAGE beats persistence 9/9;
+%    ablation: the anchor and gate do the work, SEIR adds nothing; on 2024-2026
+%    weeks no model beats persistence on RMSE. Say the negative result plainly.
+%
+% P5 Contributions -- exactly 3, as a numbered list:
+%    (1) PAGE + ablation showing where the gain comes from;
+%    (2) leakage-free dataset rebuilt from source reports, extended to 2026;
+%    (3) controlled + prospective evaluation (six encoders, matched controls,
+%        paired tests, pre-registered rules).
+%
+% Double-blind: do not write "in our previous work" or name the university.
+%=============================================================================
+\section{Introduction}
+\label{sec:intro}
+
+\writehere{P1 background}
+
+\writehere{P2 existing work}
+
+\writehere{P3 the technical gap}
+
+\writehere{P4 PAGE and the main results}
+
+\writehere{P5 three contributions, numbered}

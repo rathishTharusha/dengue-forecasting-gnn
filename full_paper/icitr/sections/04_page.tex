@@ -1,0 +1,56 @@
+%=============================================================================
+% THE PAGE FRAMEWORK -- budget: about 1 page including Fig. 1.
+%
+% Madam's rules: symbols only (no "25", "3", "64" here -- those go in the last
+% paragraph, Implementation details); start from the input, show each step to
+% the output, then the loss.
+%
+% (a) Problem: graph G=(V,E,A), N districts; y_{i,t} weekly cases;
+%     z = (log(1+y) - m)/s with m, s from TRAINING weeks only;
+%     input window Z_t in R^{N x W}; optional covariates E_t in R^{N x F};
+%     predict y_{i,t+h}, h = 1..H.
+%
+% (b) Encoder: H = f_theta(Z_t, A) in R^{N x d}, any ST-GNN or LSTM, unchanged.
+%     Read-out u_i = W h_i + b in R^H. Published models stop here: z_hat = u_i.
+%
+% (c) PAGE head (the contribution). Suggested LaTeX for the key equation:
+%       \delta_i = u_i - p_i 1_H,  \hat z_i = p_i 1_H + g \delta_i,  g = \sigma(a)
+%     where p_i = z_{i,t} is the last observed week, a is ONE learned scalar,
+%     initialised a_0 < 0 so training starts near persistence.
+%     Explain in your own words WHY it works (Madam asked for this):
+%       - identity is free: g -> 0 gives exactly persistence (r^2 = 0.89 for free);
+%       - the gate is learned shrinkage: g grows only if the encoder beats persistence;
+%       - cost: one parameter, no extra time.
+%     Residual head (no gate) and direct head (no anchor) are the ablations.
+%
+% (d) Optional SEIR branch (2-3 sentences only): the encoder predicts a force of
+%     infection; a daily SEIR simulator seeded from recent cases turns it into
+%     cases, which replace u_i in the same equation. It is what the ablation removes.
+%
+% (e) Loss: mean squared error on z over batch, districts and horizons; early
+%     stopping on validation RMSE in counts.
+%
+% (f) Implementation details (numbers allowed here): N=25, W=3, H=3, d=64,
+%     a_0=-2 (g_0=0.12), Adam lr 3e-3, weight decay 1e-4, batch 32, dropout 0.1,
+%     max 300 epochs, patience 40, seeds 0/1/2; plain PyTorch, no graph library;
+%     810 runs in 3.0 h on a 4-core Kaggle CPU; no GPU needed.
+%=============================================================================
+\section{The \model{} Framework}
+\label{sec:framework}
+
+\input{figures/overview}
+
+\writehere{(a) problem formulation, symbols only}
+
+\writehere{(b) encoder}
+
+\writehere{(c) the PAGE head: equation and why it works}
+\label{sec:page}
+
+\writehere{(d) the optional SEIR branch, 2--3 sentences}
+
+\writehere{(e) loss}
+\label{sec:loss}
+
+\writehere{(f) implementation details, with the numbers}
+\label{sec:impl}

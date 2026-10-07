@@ -21,6 +21,23 @@
 \providecommand{\BIBdecl}{\relax}
 \BIBdecl
 
+\bibitem{tissera2020severe}
+H.~A. Tissera, B.~D.~W. Jayamanne, R.~Raut, S.~M.~D. Janaki, Y.~Tozan, P.~C.
+  Samaraweera, P.~Liyanage, A.~Ghouse, C.~Rodrigo, A.~M. de~Silva, and S.~D.
+  Fernando, ``Severe dengue epidemic, sri lanka, 2017,'' \emph{Emerging
+  Infectious Diseases}, vol.~26, no.~4, pp. 682--691, 2020.
+
+\bibitem{weng2024graph}
+J.~Weng, D.~Qiu, E.~Cruz, M.~Magdon-Ismail, T.~Munasinghe, J.~C. Wei, and
+  A.~Pathirana, ``Graph representation learning for dengue forecasting,'' in
+  \emph{IEEE International Conference on Big Data (BigData)}, 2024.
+
+\bibitem{liu2025seirlstm}
+Y.~Liu, P.~Fransson, J.~Heidecke, P.~Liyanage, J.~Wallin, and J.~Rockl{\"o}v,
+  ``An explainable covariate compartmental model for predicting the
+  spatio-temporal patterns of dengue in {Sri Lanka},'' \emph{PLoS Computational
+  Biology}, vol.~21, no.~9, p. e1013540, 2025.
+
 \bibitem{shao2022stid}
 Z.~Shao, Z.~Zhang, F.~Wang, W.~Wei, and Y.~Xu, ``Spatial-temporal identity: A
   simple yet effective baseline for multivariate time series forecasting,'' in

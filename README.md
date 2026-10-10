@@ -134,6 +134,20 @@ scratch using only official library documentation.
 
 ## Quick start
 
+### Latest ICITR paper: one local results notebook
+
+Open [full_paper/icitr/reproduce_all_results.ipynb](full_paper/icitr/reproduce_all_results.ipynb)
+in Jupyter or VS Code and choose **Run All**. It explains the data, time splits,
+PAGE model, all four paper tables, paired tests, tuning and runtime calculations.
+The saved outputs are included for reading before you run it.
+
+The default recalculates saved results and independently checks the available
+source table, benchmark arrays, weather alignment and persistence baselines.
+Optional full training uses embedded implementation snapshots and writes fresh
+results under `runs/icitr_notebook/`. Some original PDFs needed for a complete raw
+rebuild are missing locally; the notebook distinguishes this from training on
+the available corrected data and labels the pending date-alignment recheck.
+
 ```bash
 git clone https://github.com/rathishTharusha/dengue-forecasting-gnn.git
 cd dengue-forecasting-gnn

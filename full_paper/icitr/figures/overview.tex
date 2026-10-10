@@ -1,0 +1,57 @@
+% Overview figure (TikZ). Left to right, PAGE head highlighted, as Madam asked.
+\begin{figure*}[t]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[
+  font=\small, >={Stealth[length=2mm]},
+  box/.style={draw, rounded corners=2pt, align=center, minimum height=9mm, inner sep=3pt, fill=white},
+  inp/.style={box, fill=gray!8},
+  key/.style={box, fill=teal!12, draw=teal!70!black, line width=0.8pt},
+  opt/.style={box, dashed, fill=orange!8},
+  op/.style={circle, draw, inner sep=1pt, minimum size=5mm},
+  lbl/.style={font=\scriptsize, inner sep=1pt}]
+  % inputs (left)
+  \node[inp] (x) {case window\\$\mathbf{Z}_t\in\R^{N\times W}$};
+  \node[inp, above=3mm of x] (a) {district graph\\$\mathcal{G}=(\mathcal{V},\mathcal{E},\mathbf{A})$};
+  \node[inp, above=3mm of a] (e) {covariates (opt.)\\$\mathbf{E}_t\in\R^{N\times F}$};
+  % encoder
+  \node[box, right=9mm of x, minimum width=24mm] (enc) {encoder $f_\theta$\\{\scriptsize any ST-GNN or LSTM}};
+  \node[box, right=7mm of enc] (ro) {read-out\\$\mathbf{u}_i=\mathbf{W}\tilde{\mathbf{h}}_i+\mathbf{b}$};
+  \node[opt, above=4mm of ro] (seir) {SEIR branch (ablated)\\$\mathbf{u}_i=\mathrm{SEIR}(\lambda_i;\,\mathbf{s}_{i,t})$};
+  % PAGE head
+  \node[op, right=10mm of ro] (minus) {$-$};
+  \node[key, right=6mm of minus] (gate) {gate\\$g=\sigma(a)$};
+  \node[op, right=6mm of gate] (plus) {$+$};
+  \node[box, right=7mm of plus] (out) {forecast\\$\hat{\mathbf{y}}_i\in\R^{H}$};
+  % anchor path
+  \node[key, below=9mm of minus] (anc) {persistence anchor $p_i=z_{i,t}$};
+  % arrows
+  \draw[->] (x) -- (enc);
+  \draw[->] (a.east) -| ($(enc.north west)!0.3!(enc.north east)$);
+  \draw[->] (e.east) -| ($(enc.north west)!0.7!(enc.north east)$);
+  \draw[->] (enc) -- node[lbl, below, pos=0.3]{$\tilde{\mathbf{h}}_i$} (ro);
+  \coordinate (br) at ($(enc.east)!0.6!(ro.west)$);
+  \draw[->, dashed] (br) -- (br |- seir.south);
+  \draw[->] (ro) -- node[lbl, above]{$\mathbf{u}_i$} (minus);
+  \draw[->, dashed] (seir.east) -| (minus.north);
+  \draw[->] (minus) -- node[lbl, above]{$\boldsymbol{\delta}_i$} (gate);
+  \draw[->] (gate) -- (plus);
+  \draw[->] (plus) -- node[lbl, above]{$\hat{\mathbf{z}}_i$} (out);
+  \draw[->] (x.south) |- (anc.west);
+  \draw[->] (anc) -- (minus);
+  \draw[->] (anc.east) -| (plus.south);
+  % highlight the contribution: a shaded panel behind the head, label below it so
+  % no arrow crosses the text
+  \begin{scope}[on background layer]
+    \node[fill=teal!7, draw=teal!45, line width=0.6pt, rounded corners=4pt, inner sep=2.5mm,
+          fit=(minus)(gate)(plus)(anc),
+          label={[font=\scriptsize\bfseries, text=teal!50!black, inner sep=1pt]below:\model{} head (our contribution)}] {};
+  \end{scope}
+\end{tikzpicture}}
+\caption{\model{}. An unchanged encoder reads the last $W$ weeks of standardised log cases
+on the district graph. Its read-out $\mathbf{u}_i$ is turned into a departure
+$\boldsymbol{\delta}_i=\mathbf{u}_i-p_i\mathbf{1}$ from the persistence anchor, shrunk by
+a learned gate, and added back to the anchor. The dashed SEIR branch replaces the
+read-out with a differentiable simulator; it is the component the ablation removes.}
+\label{fig:overview}
+\end{figure*}

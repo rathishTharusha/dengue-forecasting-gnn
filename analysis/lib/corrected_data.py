@@ -58,7 +58,7 @@ ADJ = REPO / "notebooks" / "baseline" / "sri_lanka_adj_list.json"
 #: each input may read. See the module docstring.
 LAGS = {"cases": 1, "climate": 2, "ndvi": 0, "population": 0}
 
-__all__ = ["LAGS", "CorrectedData", "load", "windows"]
+__all__ = ["LAGS", "CorrectedData", "load", "load_with_new_weeks", "windows"]
 
 
 @dataclass
@@ -108,6 +108,67 @@ def load() -> CorrectedData:
             raise ValueError(f"{label} has {arr.shape[0]} rows, cases have {len(index)}")
     return CorrectedData(names, index["week_start"], cases, missing, climate,
                          list(meta["channels"]), ndvi, population)
+
+
+NEW_WEEKS = REPO / "data" / "new_weeks"
+#: Column order of the weekly reports' Table 1 (and of ``data/new_weeks/cases.npy``):
+#: 25 districts, then Kalmunai and the national total, which are not districts.
+#: Copied from ``analysis/_build/build_corrected_cases.py::WER_COLUMNS``.
+WER_DISTRICTS = ["Colombo", "Gampaha", "Kalutara", "Kandy", "Matale", "NuwaraEliya", "Galle",
+                 "Hambantota", "Matara", "Jaffna", "Kilinochchi", "Mannar", "Vavuniya",
+                 "Mullaitivu", "Batticaloa", "Ampara", "Trincomalee", "Kurunegala", "Puttalam",
+                 "Anuradhapura", "Polonnaruwa", "Badulla", "Moneragala", "Ratnapura", "Kegalle"]
+
+
+def load_with_new_weeks(new_dir: Path = NEW_WEEKS) -> tuple[CorrectedData, int]:
+    """The development series with the parsed 2024 W11+ weeks appended, and the
+    last development row (docs/PROSPECTIVE_PLAN.md).
+
+    ``new_dir`` holds ``parse_new_weeks.py``'s ``cases.npy`` (report-column order)
+    and ``index.csv``. Columns are mapped by name to :func:`load`'s district order.
+    A missing report has no printed date; its date is the previous row's plus 7
+    days -- dates only, used for the population lookup, never a count. Population
+    for the new rows is the latest official figure published before each week
+    (``population_vintages.population_for_dates``, the rule the development rows
+    follow). Climate and NDVI are NaN for the new rows: no prospective arm reads them.
+    """
+    import sys
+    sys.path.insert(0, str(REPO / "analysis" / "_build"))
+    import population_vintages
+
+    dev = load()
+    last_dev = dev.cases.shape[0] - 1
+    raw = np.load(new_dir / "cases.npy")[..., 0].astype(np.float64)
+    if raw.shape[1] != len(WER_DISTRICTS):
+        raise ValueError(f"new weeks have {raw.shape[1]} columns, expected {len(WER_DISTRICTS)}")
+    cases = raw[:, [WER_DISTRICTS.index(n) for n in dev.names]]
+    idx = pd.read_csv(new_dir / "index.csv", dtype={"week_start": str}, keep_default_na=False)
+    if len(idx) != len(cases):
+        raise ValueError(f"index has {len(idx)} rows, cases have {len(cases)}")
+    missing = idx["status"].eq("missing").to_numpy()
+    if not np.array_equal(np.isnan(cases).any(axis=1), missing):
+        raise ValueError("NaN case rows of the new weeks do not match the rows flagged missing")
+
+    dates, prev = [], dev.week_start.iloc[-1]
+    for d in idx["week_start"]:
+        prev = pd.Timestamp(d) if d else prev + pd.Timedelta(days=7)
+        dates.append(prev)
+    week_start = pd.Series(pd.to_datetime(dates))
+    population, _ = population_vintages.population_for_dates(week_start)
+
+    n_new, n = cases.shape
+    nan = lambda *shape: np.full(shape, np.nan)  # noqa: E731
+    out = CorrectedData(
+        dev.names,
+        pd.concat([dev.week_start, week_start], ignore_index=True),
+        np.concatenate([dev.cases, cases]),
+        np.concatenate([dev.missing, missing]),
+        np.concatenate([dev.climate, nan(n_new, n, dev.climate.shape[2])]),
+        dev.climate_channels,
+        np.concatenate([dev.ndvi, nan(n_new, n)]),
+        np.concatenate([dev.population, population]),
+    )
+    return out, last_dev
 
 
 def _block(array: np.ndarray, i: int, window: int, lag: int) -> np.ndarray:

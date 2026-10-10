@@ -59,21 +59,37 @@ def mean(df, name, metric="val_RMSE"):
     return float(df.loc[df.name == name, metric].mean())
 
 
+#: Baselines in the comparative table: (run name, label). All share folds, seeds and metric.
+BASELINES = (("persistence", "Persistence"),
+             ("graph=none", "No message passing (res.)"),
+             ("graph=gcn", "GCN (res.)"),
+             ("R3 STID-style MLP", "STID-style MLP~\\cite{shao2022stid}"),
+             ("R4b k-NN", "$k$-NN analogues"),
+             ("R4a NB-GLM", "NB-GLM"),
+             ("K7 trees", "Boosted trees"),
+             ("K6 trees + climate", "Boosted trees + climate"),
+             ("B", "$B$: AAGCN, NB, season"))
+
+
 def table_encoders(r3, out):
+    def vt(name):
+        return f"{mean(r3, name):.2f} / {mean(r3, name, 'RMSE'):.2f}"
+
     out += ["\\begin{table}[t]", "\\centering",
-            "\\caption{The six encoders on one harness (corrected data, 3 origins $\\times$ 3 seeds,"
-            " squared error, no seasonal features). Mean validation / test RMSE. The pure SEIR"
-            " decoder (\\texttt{foi}) is worse than persistence on every encoder; the gated SEIR head"
-            " (\\texttt{foi\\_res}) brings all six close together, below persistence.}",
-            "\\label{tab:encoders}", "\\small", "\\setlength{\\tabcolsep}{4pt}",
+            "\\caption{Comparative analysis on one harness (corrected data, 3 origins $\\times$ 3 seeds)."
+            " Mean validation / test RMSE in weekly cases. Top: the five published ST-GNNs and the LSTM of"
+            " SEIR-LSTM, as published (direct head), with \\model{}, and with \\model{} plus the SEIR"
+            " branch (the SEIR-GNN, or SEIR-LSTM for the LSTM). Squared error, no seasonal features."
+            " Bottom: baselines; $B$ is the configuration validation selects. Selection uses validation only.}",
+            "\\label{tab:encoders}", "\\small", "\\setlength{\\tabcolsep}{3pt}",
             "\\begin{tabular}{lccc}", "\\toprule",
-            "encoder & direct & SEIR decoder & gated SEIR \\\\", "\\midrule"]
+            "encoder & direct & \\model{} & \\model{}+SEIR \\\\", "\\midrule"]
     for e in ENC:
-        out.append(f"{e} & " + " & ".join(f"{mean(r3, f'{e}+{h}'):.2f} / {mean(r3, f'{e}+{h}', 'RMSE'):.2f}"
-                                          for h in ("direct", "foi", "foi_res")) + " \\\\")
-    out += ["\\midrule", f"persistence & \\multicolumn{{3}}{{c}}{{{mean(r3, 'persistence'):.2f} / "
-                         f"{mean(r3, 'persistence', 'RMSE'):.2f}}} \\\\",
-            "\\bottomrule", "\\end{tabular}", "\\end{table}", ""]
+        out.append(f"{e} & " + " & ".join(vt(f"{e}+{h}") for h in ("direct", "gated", "foi_res")) + " \\\\")
+    out += ["\\midrule", "baseline & \\multicolumn{3}{c}{validation / test} \\\\", "\\midrule"]
+    for name, label in BASELINES:
+        out.append(f"{label} & \\multicolumn{{3}}{{c}}{{{vt(name)}}} \\\\")
+    out += ["\\bottomrule", "\\end{tabular}", "\\end{table}", ""]
 
 
 def table_levers(lev, out):
@@ -115,15 +131,15 @@ def table_nine(cmp, out):
 
 def table_rescue(r3, res, out):
     out += ["\\begin{table}[t]", "\\centering",
-            "\\caption{Anchor, gate or physics? Each encoder behind four heads that add, in turn, the"
-            " persistence anchor, the learned gate and the SEIR simulator (mean validation RMSE;"
-            " configuration of Table~\\ref{tab:encoders}). The last two columns pair the gated SEIR"
-            " head with its no-physics twin (\\texttt{gated}); negative favours the physics, and the"
-            " count is runs where it wins.}",
+            "\\caption{Ablation: from the published direct head to \\model{}. Each encoder behind four"
+            " heads that add, in turn, the persistence anchor (residual), the learned gate (\\model{})"
+            " and the SEIR branch (mean validation RMSE; configuration of Table~\\ref{tab:encoders})."
+            " The last two columns pair \\model{}+SEIR with \\model{}; negative favours the SEIR"
+            " branch, and the count is runs where it wins.}",
             "\\label{tab:rescue}", "\\small", "\\setlength{\\tabcolsep}{2.5pt}",
             "\\begin{tabular}{lrrrrrr}", "\\toprule",
-            " & & & & gated & \\multicolumn{2}{c}{SEIR $-$ gated} \\\\", "\\cmidrule(lr){6-7}",
-            "encoder & direct & resid. & gated & SEIR & val & test \\\\", "\\midrule"]
+            " & & & & \\model{} & \\multicolumn{2}{c}{SEIR branch} \\\\", "\\cmidrule(lr){6-7}",
+            "encoder & direct & resid. & \\model{} & +SEIR & val & test \\\\", "\\midrule"]
     res = res.set_index("encoder")
     for e in ENC:
         vals = " & ".join(f"{mean(r3, f'{e}+{h}'):.2f}" for h in ("direct", "residual", "gated", "foi_res"))

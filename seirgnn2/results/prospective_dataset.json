@@ -1,0 +1,31 @@
+{
+ "purpose": "EXP-063 run 2: checksums of the prospective dataset rebuilt under amendments 1, 2 and 2b, before run 2",
+ "parsed_at_commit": "63d2432619afa2f6e8add6d16f2920256cb72808",
+ "supersedes": "the run-1 dataset of commit 3aa3741 (invalid: amendment 2 defects)",
+ "qc": {
+  "expected_reports": 127,
+  "observed": 109,
+  "corrected": 8,
+  "missing": 10,
+  "gap_days_seen": [
+   -356,
+   -24,
+   0,
+   7,
+   14,
+   38,
+   386
+  ],
+  "log_entries": 69,
+  "cross_week_qc": {
+   "cumulative row decreases from the previous week": 10,
+   "row A repeats the previous report's row A (R7)": 2
+  }
+ },
+ "files": {
+  "data/new_weeks/cases.npy": "7eff1f2e05b3dd6afef7920be15eece8038a18abaff7c5be8836bf74be324e53",
+  "data/new_weeks/corrections.json": "90278faad856c9eaee8de22869c101c37fc266b19cb5b78da9d857a053fd540b",
+  "data/new_weeks/index.csv": "c7b41bd252d2436a436749eb8ca35916ec15569bab3ab720132716ecffb77e62",
+  "data/new_weeks/qc_report.json": "7b94a1055bf3aed76113d640f6361f697558f2fda0d3c044a7564bcf91ef9841"
+ }
+}

@@ -1,34 +1,28 @@
 %=============================================================================
 % ABSTRACT
+% Flow (lecturer's feedback): background -> technical gap in existing work ->
+% proposed framework -> key results -> code link.
 %=============================================================================
 \begin{abstract}
-Spatio-temporal graph neural networks (ST-GNNs) and SEIR-informed neural models
-are both proposed for district-level dengue forecasting, but they are rarely
-compared under one leak-free protocol. We study whether replacing the LSTM of an
-SEIR-informed forecaster with a graph encoder helps, on Sri Lanka's weekly record
-(25 districts, three-week horizon). Before modelling, we audit the benchmark
-array used by prior work: its rows are out of date order, every training split
-contains 2023 data from after the test periods, its case and weather columns are
-on different timelines, its ``lag 12'' rainfall channel holds rain from twelve
-weeks \emph{ahead}, and its largest spike is a spreadsheet error. We rebuild a
-559-week dataset from hash-verified original sources, and one self-contained
-notebook reproduces every result from them. On one harness, six encoders (five
-published ST-GNNs and the SEIR-LSTM's LSTM) are each paired with a direct head, a
-pure SEIR decoder and a gated SEIR head. Architecture matters little: the working
-encoders span 0.20 RMSE and the graph adds 0.06. The pure SEIR decoder is worse
-than persistence on every encoder, and 7.3--7.4 RMSE worse than the direct head
-on each working one, for structural reasons: 14--16\% of targets lie below its
-zero-transmission floor and its force of infection is only $r^2\approx0.25$
-predictable. A gated SEIR head, which lets the simulator supply only the
-departure from persistence, brings all six encoders below persistence and repairs
-the three that fail as published by 5.3--17.0 validation RMSE on 9/9 paired runs.
-A pre-registered control shows that this repair is not physics: the same head
-without the simulator accounts for 96--112\% of it, and adding the simulator is
-significantly worse on one failing encoder, not better on the other two, and
-0.75--0.86 worse on the working ones. A negative-binomial likelihood is the
-largest controlled gain ($-0.76$, 9/9). The graph beats the LSTM inside the gated
-SEIR head on three origins, and that advantage is not robust on nine disjoint
-origins. More than twenty further levers are not adopted, and the working models
-make the same errors (residual correlation 0.91--0.97). On this target the useful
-prior is persistence, not transmission dynamics.
+Dengue causes recurring epidemics in Sri Lanka, and district-level forecasts three
+weeks ahead give health services time to act. Spatio-temporal graph neural networks
+(ST-GNNs) and SEIR-informed neural models have been proposed for this task, but both
+predict the case level directly and are evaluated without the naive persistence
+forecast, on a benchmark array that we show leaks future data. On this target last
+week's count explains $r^2=0.89$ of the next and the best climate covariate $0.03$,
+so a direct head must relearn an identity map through its encoder, and several
+published ST-GNNs fail to. We propose \model{} (Persistence-Anchored Gated
+Estimation), a forecasting head that plugs into any spatio-temporal encoder and
+predicts a gated departure from the last observed week, at the cost of one
+parameter. We correct the benchmark into a leakage-free 559-week dataset,
+extend it to August 2026 by parsing 127 new reports, and evaluate five published ST-GNNs and the LSTM of
+SEIR-LSTM on one pre-registered harness. \model{} repairs the three encoders that
+fail as published by 5.95--16.29 validation RMSE and 23.24--34.50 test RMSE (9/9
+paired runs each), and on AAGCN it beats persistence on all 9 runs on both splits. An
+ablation attributes the gain to the anchor and the gate: an SEIR simulator in the
+same head adds nothing, and on 85 unseen forecast starts it ties its no-SEIR twin
+($\Delta=-0.03$, $p=0.67$). On those unseen weeks no learned model beats persistence
+on RMSE (34.75 against 35.43 for \model{}), although \model{} has lower MAE and
+SMAPE. On this target the useful prior is persistence, not transmission dynamics.
+Code and data: \codeurl.
 \end{abstract}

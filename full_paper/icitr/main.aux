@@ -1,0 +1,100 @@
+\relax 
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
+\citation{tissera2020severe}
+\citation{weng2024graph}
+\citation{liu2025seirlstm}
+\citation{bai2021a3tgcn}
+\citation{guo2019astgcn}
+\citation{shi2019aagcn}
+\citation{li2018dcrnn}
+\citation{wu2019graphwavenet}
+\citation{deng2020colagnn}
+\citation{xie2022epignn}
+\citation{weng2024graph}
+\citation{gulmohamed2026denguegnn}
+\@writefile{toc}{\contentsline {section}{\numberline {I}Introduction}{1}{section.1}\protected@file@percent }
+\newlabel{sec:intro}{{I}{1}{Introduction}{section.1}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {II}Related Work}{1}{section.2}\protected@file@percent }
+\newlabel{sec:related}{{II}{1}{Related Work}{section.2}{}}
+\citation{liu2025seirlstm}
+\citation{rodriguez2023einns}
+\citation{wang2022causalgnn}
+\citation{cao2023mepognn}
+\citation{raissi2019pinn,nguyen2024mppinn}
+\citation{hyndman2021forecasting}
+\citation{shao2022stid}
+\citation{weng2024graph}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces PAGE{}. An unchanged encoder reads the last $W$ weeks of standardised log cases on the district graph. Its read-out $\mathbf  {u}_i$ is turned into a departure $\boldsymbol  {\delta }_i=\mathbf  {u}_i-p_i\mathbf  {1}$ from the persistence anchor, shrunk by a learned gate, and added back to the anchor. The dashed SEIR branch replaces the read-out with a differentiable simulator; it is the component the ablation removes.}}{2}{figure.1}\protected@file@percent }
+\newlabel{fig:overview}{{1}{2}{\model {}. An unchanged encoder reads the last $W$ weeks of standardised log cases on the district graph. Its read-out $\mathbf {u}_i$ is turned into a departure $\boldsymbol {\delta }_i=\mathbf {u}_i-p_i\mathbf {1}$ from the persistence anchor, shrunk by a learned gate, and added back to the anchor. The dashed SEIR branch replaces the read-out with a differentiable simulator; it is the component the ablation removes}{figure.1}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {III}Dataset Construction}{2}{section.3}\protected@file@percent }
+\newlabel{sec:data}{{III}{2}{Dataset Construction}{section.3}{}}
+\citation{phaijoo2018sensitivity}
+\citation{jeewandara2015seroprevalence}
+\citation{liu2025seirlstm}
+\citation{kipf2017gcn}
+\citation{weng2024graph}
+\citation{shao2022stid}
+\@writefile{toc}{\contentsline {section}{\numberline {IV}The PAGE{} Framework}{3}{section.4}\protected@file@percent }
+\newlabel{sec:framework}{{IV}{3}{The \model {} Framework}{section.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-A}}Problem Formulation}{3}{subsection.4.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-B}}Encoder}{3}{subsection.4.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-C}}Persistence-Anchored Gated Head}{3}{subsection.4.3}\protected@file@percent }
+\newlabel{sec:page}{{\mbox  {IV-C}}{3}{Persistence-Anchored Gated Head}{subsection.4.3}{}}
+\newlabel{eq:page}{{1}{3}{Persistence-Anchored Gated Head}{equation.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-D}}Optional SEIR Branch}{3}{subsection.4.4}\protected@file@percent }
+\newlabel{sec:seir}{{\mbox  {IV-D}}{3}{Optional SEIR Branch}{subsection.4.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-E}}Learning Objective}{3}{subsection.4.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-F}}Implementation Details}{3}{subsection.4.6}\protected@file@percent }
+\newlabel{sec:impl}{{\mbox  {IV-F}}{3}{Implementation Details}{subsection.4.6}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {V}Experimental Setup}{3}{section.5}\protected@file@percent }
+\newlabel{sec:setup}{{V}{3}{Experimental Setup}{section.5}{}}
+\citation{shao2022stid}
+\@writefile{lot}{\contentsline {table}{\numberline {I}{\ignorespaces Comparative analysis on one harness (corrected data, 3 origins $\times $ 3 seeds). Mean validation / test RMSE in weekly cases. Top: the five published ST-GNNs and the LSTM of SEIR-LSTM, as published (direct head), with PAGE{}, and with PAGE{} plus the SEIR branch (the SEIR-GNN, or SEIR-LSTM for the LSTM). Squared error, no seasonal features. Bottom: baselines; $B$ is the configuration validation selects. Selection uses validation only.}}{4}{table.1}\protected@file@percent }
+\newlabel{tab:encoders}{{I}{4}{Comparative analysis on one harness (corrected data, 3 origins $\times $ 3 seeds). Mean validation / test RMSE in weekly cases. Top: the five published ST-GNNs and the LSTM of SEIR-LSTM, as published (direct head), with \model {}, and with \model {} plus the SEIR branch (the SEIR-GNN, or SEIR-LSTM for the LSTM). Squared error, no seasonal features. Bottom: baselines; $B$ is the configuration validation selects. Selection uses validation only}{table.1}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {II}{\ignorespaces Ablation: from the published direct head to PAGE{}. Each encoder behind four heads that add, in turn, the persistence anchor (residual), the learned gate (PAGE{}) and the SEIR branch (mean validation RMSE; configuration of Table~\ref {tab:encoders}). The last two columns pair PAGE{}+SEIR with PAGE{}; negative favours the SEIR branch, and the count is runs where it wins.}}{4}{table.2}\protected@file@percent }
+\newlabel{tab:rescue}{{II}{4}{Ablation: from the published direct head to \model {}. Each encoder behind four heads that add, in turn, the persistence anchor (residual), the learned gate (\model {}) and the SEIR branch (mean validation RMSE; configuration of Table~\ref {tab:encoders}). The last two columns pair \model {}+SEIR with \model {}; negative favours the SEIR branch, and the count is runs where it wins}{table.2}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {VI}Results}{4}{section.6}\protected@file@percent }
+\newlabel{sec:results}{{VI}{4}{Results}{section.6}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-A}}Comparative Analysis}{4}{subsection.6.1}\protected@file@percent }
+\newlabel{sec:comparative}{{\mbox  {VI-A}}{4}{Comparative Analysis}{subsection.6.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-B}}Ablation Study}{4}{subsection.6.2}\protected@file@percent }
+\newlabel{sec:ablation}{{\mbox  {VI-B}}{4}{Ablation Study}{subsection.6.2}{}}
+\citation{wu2019graphwavenet}
+\@writefile{lot}{\contentsline {table}{\numberline {III}{\ignorespaces Prospective evaluation on weeks no model or setting had seen: 85 forecast starts, 2024-W11 to 2026-W32. Settings frozen on development data before the new weeks were parsed. Neural arms: mean over 3 seeds, seed range of RMSE in brackets. Bold: best per metric. Pre-registered tests (block bootstrap over forecast starts, Holm over two): P1, SEIR branch vs PAGE{}: $-0.03$ $[-0.41, +0.12]$, $p_{\text  {Holm}}=0.67$; P2, PAGE{}+SEIR vs persistence: $+0.65$ $[-0.99, +1.69]$, $p_{\text  {Holm}}=0.62$.}}{5}{table.3}\protected@file@percent }
+\newlabel{tab:prospective}{{III}{5}{Prospective evaluation on weeks no model or setting had seen: 85 forecast starts, 2024-W11 to 2026-W32. Settings frozen on development data before the new weeks were parsed. Neural arms: mean over 3 seeds, seed range of RMSE in brackets. Bold: best per metric. Pre-registered tests (block bootstrap over forecast starts, Holm over two): P1, SEIR branch vs \model {}: $-0.03$ $[-0.41, +0.12]$, $p_{\text {Holm}}=0.67$; P2, \model {}+SEIR vs persistence: $+0.65$ $[-0.99, +1.69]$, $p_{\text {Holm}}=0.62$}{table.3}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {IV}{\ignorespaces Computational cost. Parameters of the full model behind the direct head, and the parameters each head adds. Seconds per epoch and seconds per training run (with early stopping) are means over the 9 runs of the Kaggle run, each run single-threaded on a 4-core Kaggle CPU. PAGE{} adds one parameter and no measurable time; the SEIR branch adds five parameters and up to $2.2\times $ the time per epoch (AAGCN).}}{5}{table.4}\protected@file@percent }
+\newlabel{tab:compute}{{IV}{5}{Computational cost. Parameters of the full model behind the direct head, and the parameters each head adds. Seconds per epoch and seconds per training run (with early stopping) are means over the 9 runs of the Kaggle run, each run single-threaded on a 4-core Kaggle CPU. \model {} adds one parameter and no measurable time; the SEIR branch adds five parameters and up to $2.2\times $ the time per epoch (AAGCN)}{table.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-C}}Prospective Evaluation, 2024--2026}{5}{subsection.6.3}\protected@file@percent }
+\newlabel{sec:prospective}{{\mbox  {VI-C}}{5}{Prospective Evaluation, 2024--2026}{subsection.6.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {VI-D}}Hyperparameter Tuning and Computational Cost}{5}{subsection.6.4}\protected@file@percent }
+\newlabel{sec:cost}{{\mbox  {VI-D}}{5}{Hyperparameter Tuning and Computational Cost}{subsection.6.4}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {VII}Discussion}{5}{section.7}\protected@file@percent }
+\newlabel{sec:discussion}{{VII}{5}{Discussion}{section.7}{}}
+\bibstyle{IEEEtran}
+\bibdata{refs}
+\bibcite{tissera2020severe}{1}
+\bibcite{weng2024graph}{2}
+\bibcite{liu2025seirlstm}{3}
+\bibcite{bai2021a3tgcn}{4}
+\bibcite{guo2019astgcn}{5}
+\bibcite{shi2019aagcn}{6}
+\bibcite{li2018dcrnn}{7}
+\bibcite{wu2019graphwavenet}{8}
+\bibcite{deng2020colagnn}{9}
+\bibcite{xie2022epignn}{10}
+\bibcite{gulmohamed2026denguegnn}{11}
+\bibcite{rodriguez2023einns}{12}
+\bibcite{wang2022causalgnn}{13}
+\bibcite{cao2023mepognn}{14}
+\bibcite{raissi2019pinn}{15}
+\bibcite{nguyen2024mppinn}{16}
+\bibcite{hyndman2021forecasting}{17}
+\bibcite{shao2022stid}{18}
+\bibcite{phaijoo2018sensitivity}{19}
+\bibcite{jeewandara2015seroprevalence}{20}
+\bibcite{kipf2017gcn}{21}
+\@writefile{toc}{\contentsline {section}{\numberline {VIII}Conclusion}{6}{section.8}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{References}{6}{section*.1}\protected@file@percent }
+\gdef \@abspage@last{6}

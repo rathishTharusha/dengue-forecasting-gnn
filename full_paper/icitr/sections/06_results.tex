@@ -1,0 +1,99 @@
+%=============================================================================
+% RESULTS -- comparative analysis, ablation, prospective test, tuning and cost.
+% Every number below is in tables/*.tex or in the EXP-050 / EXP-063 outputs.
+%
+% EXP-062 (week-index fix) is PENDING. It changes numbers that read a
+% date-joined input: model B, the seasonal-feature and climate levers. Re-check
+% every line marked "EXP-062" before submission.
+%=============================================================================
+\section{Results}
+\label{sec:results}
+
+All numbers are RMSE in weekly cases. Development results are means over three
+origins $\times$ three seeds; validation decides and test is reported beside it.
+
+\subsection{Comparative Analysis}
+\label{sec:comparative}
+Table~\ref{tab:encoders} compares every encoder and baseline on identical windows.
+\textbf{As published, three of five ST-GNNs fail.} Behind the direct head, AAGCN,
+ASTGCN and the LSTM reach 16.71--16.91 on validation and all beat persistence (17.86),
+but STGAT, A3TGCN and DCRNN reach 22.93, 28.63 and 34.64, worse than repeating last
+week. They underfit rather than lack information: in their NB, seasonal-feature configuration, a
+linear model fitted to their training residuals recovers 48\% and 60\% of STGAT's and
+A3TGCN's validation residual variance, against 3--7\% for the working encoders.
+
+\textbf{\model{} makes every encoder usable.} With \model{}, all six encoders score
+16.57--18.35 on validation. Paired against the published head, it repairs STGAT,
+A3TGCN and DCRNN by 5.95, 10.95 and 16.29 on validation and by 25.54, 23.24 and 34.50
+on test, winning 9/9 runs each ($\padj=0.004$). On the working encoders it changes
+validation by at most 0.14, and it lowers AAGCN's test RMSE on 9/9 runs ($-1.62$).
+\textbf{With a strong encoder it beats persistence}: AAGCN with \model{} is better than
+persistence on all nine runs on validation ($-1.29$) and on test ($-2.48$), and ASTGCN
+on 9/9 and 8/9 ($-1.10$, $-1.26$). The repaired encoders reach persistence but do not
+clearly pass it. AAGCN with \model{} has the lowest test RMSE of any configuration
+(33.53), but the configuration selected on validation under the adoption rule, $B$
+(AAGCN, direct head, NB loss, seasonal features), is
+worse than persistence on test (37.54), so we report AAGCN with \model{} as
+observed rather than selected. % EXP-062: B changes after the week-index fix.
+
+The graph adds little: a GCN beats the same network without message passing by only
+0.06 (3/9 runs), and $k$-NN analogues with no network at all reach 16.52 / 34.34.
+
+\subsection{Ablation Study}
+\label{sec:ablation}
+Table~\ref{tab:rescue} builds \model{} from the published head one component at a
+time. \textbf{The anchor removes the failure}: a residual head with no gate already
+brings STGAT, A3TGCN and DCRNN to 17.47--17.85. \textbf{The gate} improves on it for
+STGAT (17.85 to 16.98), AAGCN and ASTGCN, costs A3TGCN and DCRNN 0.21 and 0.83, and on
+the prospective weeks beats the ungated head ($-0.31$, 95\% CI $[-0.77,-0.08]$).
+
+\textbf{The SEIR branch adds nothing.} A pre-registered rule credited physics only if
+the SEIR branch beat \model{} on at least 7/9 runs with $\padj<0.05$ on each failing
+encoder. It does so on none: it is \emph{worse} on STGAT ($+0.66$, 1/9), ties on A3TGCN
+($-0.00$, 6/9), helps DCRNN on only 3/9 runs, and costs the working encoders
+0.75--0.86 (0--1/9). Routing the whole forecast through the simulator is worse still:
+the pure SEIR decoder scores 24.01--25.75, worse than persistence on every encoder.
+Inverting the simulator explains why. With transmission set to zero, the exposed state
+seeded from recent cases already emits more cases than observed for 14--16\% of
+training targets, which no network output can reach, and the required force of
+infection is only $r^2=0.22$--$0.26$ predictable from case history.
+
+\textbf{Loss.} Among more than twenty further levers, each paired against its own
+control, the NB likelihood gives the largest validation gain ($-0.76$, 9/9,
+$\padj=0.014$), larger than any architectural change, but it is 1.61 worse on test, so
+\model{} keeps squared error. No architecture change improves validation by more than
+0.15, and RevIN ($+1.47$), an STID-style MLP ($+0.84$) and TimeGAN augmentation
+($+0.60$) are worse on 0/9 runs. % EXP-062: re-check the NB lever.
+
+\subsection{Prospective Evaluation, 2024--2026}
+\label{sec:prospective}
+The decisive test uses weeks on which no setting was chosen. Six arms were frozen on
+development data before the new weeks were parsed, and each was scored once on 85
+forecast starts (Table~\ref{tab:prospective}). The neural arms share the development
+finalist encoder, a Graph WaveNet-style network with a learned
+adjacency~\cite{wu2019graphwavenet}.
+
+\textbf{No learned model beats persistence on RMSE}: persistence scores 34.75 and
+\model{} 35.43, a difference that is not significant ($p_{\text{Holm}}=0.62$ for the
+SEIR variant). \textbf{The SEIR branch ties \model{}} ($-0.03$, $[-0.41,+0.12]$,
+$p_{\text{Holm}}=0.67$). On the secondary metrics \model{} is better than persistence
+(MAE 11.35 against 11.78, SMAPE 45.7 against 50.3), and every arm beats seasonal naive
+by 26.7--27.7 RMSE. The 2026 outbreak dominates RMSE: persistence scores 14.72, 20.05 and
+160.51 in 2024, 2025 and 2026, and \model{} 14.32, 21.43 and 162.75. \model{} is better
+in the quiet year and worse in the outbreak, whose next large move is not in the inputs.
+The SEIR arm's development advantage over persistence (27.34 against 28.54) does not
+carry over. Because the two variants are equivalent, we present the simpler \model{};
+this choice was made after the test, and the pre-registered finalist was the SEIR
+variant.
+
+\subsection{Hyperparameter Tuning and Computational Cost}
+\label{sec:cost}
+Every encoder and head in the main study uses the same fixed settings
+(Section~\ref{sec:impl}), so no model receives more tuning than another. Before the
+prospective test, each learned arm was tuned on the same grid (learning rate
+$\{10^{-3},3\times10^{-3}\}$ $\times$ hidden size $\{32,64\}$, 108 runs per arm) on
+validation only; all arms chose $3\times10^{-3}$ and 64, and the grid moved validation
+RMSE by at most 0.57. Table~\ref{tab:compute} gives the cost. \model{} adds one parameter
+and no measurable time, while the SEIR branch adds up to $2.2\times$ the time per epoch
+(AAGCN) because it steps the simulator daily. The smallest encoder, AAGCN
+(2{,}873 parameters, 19\,s per run), is also the most accurate.

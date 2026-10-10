@@ -1,24 +1,33 @@
-This is BibTeX, Version 0.99d (TeX Live 2022/Debian)
+This is BibTeX, Version 0.99e
 Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
 The top-level auxiliary file: main.aux
+Reallocating 'name_of_file' (item size: 1) to 21 items.
 The style file: ACM-Reference-Format.bst
-Reallocated singl_function (elt_size=4) to 100 items from 50.
-Reallocated singl_function (elt_size=4) to 100 items from 50.
-Reallocated wiz_functions (elt_size=4) to 6000 items from 3000.
+Reallocating 'name_of_file' (item size: 1) to 5 items.
+Reallocating 'singl_function' (item size: 4) to 100 items.
+Reallocating 'singl_function' (item size: 4) to 100 items.
+Reallocating 'wiz_functions' (item size: 4) to 6000 items.
 Database file #1: refs.bib
-Reallocated singl_function (elt_size=4) to 100 items from 50.
-Reallocated glb_str_ptr (elt_size=4) to 20 items from 10.
-Reallocated global_strs (elt_size=200001) to 20 items from 10.
-Reallocated glb_str_end (elt_size=4) to 20 items from 10.
-Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocating 'singl_function' (item size: 4) to 100 items.
+Reallocating 'glb_str_end' (item size: 4) to 20 items.
+Reallocating 'glb_str_ptr' (item size: 4) to 20 items.
+Reallocating 'global_strs' (item size: 1) to 4000000 items.
+Reallocating 'singl_function' (item size: 4) to 100 items.
 Warning--no number and no volume in cao2023mepognn
 Warning--page numbers missing in both pages and numpages fields in cao2023mepognn
+Warning--empty publisher in deng2020colagnn
+Warning--empty address in deng2020colagnn
+Warning--page numbers missing in both pages and numpages fields in deng2020colagnn
 Warning--can't use both volume and number fields in guo2019astgcn
 Warning--empty publisher in guo2019astgcn
 Warning--empty address in guo2019astgcn
+Warning--empty address in hyndman2021forecasting
 Warning--empty publisher in kim2022revin
 Warning--empty address in kim2022revin
 Warning--page numbers missing in both pages and numpages fields in kim2022revin
+Warning--empty publisher in kipf2017gcn
+Warning--empty address in kipf2017gcn
+Warning--page numbers missing in both pages and numpages fields in kipf2017gcn
 Warning--empty publisher in li2018dcrnn
 Warning--empty address in li2018dcrnn
 Warning--page numbers missing in both pages and numpages fields in li2018dcrnn
@@ -38,48 +47,54 @@ Warning--page numbers missing in both pages and numpages fields in wang2022causa
 Warning--empty publisher in weng2024graph
 Warning--empty address in weng2024graph
 Warning--page numbers missing in both pages and numpages fields in weng2024graph
+Warning--empty publisher in wu2019graphwavenet
+Warning--empty address in wu2019graphwavenet
+Warning--page numbers missing in both pages and numpages fields in wu2019graphwavenet
+Warning--empty publisher in xie2022epignn
+Warning--empty address in xie2022epignn
+Warning--page numbers missing in both pages and numpages fields in xie2022epignn
 Warning--empty publisher in yoon2019timegan
 Warning--empty address in yoon2019timegan
 Warning--page numbers missing in both pages and numpages fields in yoon2019timegan
-You've used 18 entries,
+You've used 24 entries,
             5981 wiz_defined-function locations,
-            1569 strings with 21991 characters,
-and the built_in function-call counts, 21648 in all, are:
-= -- 2676
-> -- 854
+            1598 strings with 23238 characters,
+and the built_in function-call counts, 28309 in all, are:
+= -- 3367
+> -- 1152
 < -- 0
-+ -- 294
-- -- 278
-* -- 1642
-:= -- 2095
-add.period$ -- 83
-call.type$ -- 18
-change.case$ -- 162
-chr.to.int$ -- 18
-cite$ -- 48
-duplicate$ -- 1870
-empty$ -- 1309
-format.name$ -- 350
-if$ -- 5334
++ -- 398
+- -- 384
+* -- 2163
+:= -- 2786
+add.period$ -- 110
+call.type$ -- 24
+change.case$ -- 217
+chr.to.int$ -- 24
+cite$ -- 67
+duplicate$ -- 2470
+empty$ -- 1725
+format.name$ -- 480
+if$ -- 6892
 int.to.chr$ -- 2
 int.to.str$ -- 1
-missing$ -- 81
-newline$ -- 181
-num.names$ -- 126
-pop$ -- 865
+missing$ -- 107
+newline$ -- 228
+num.names$ -- 168
+pop$ -- 1169
 preamble$ -- 1
-purify$ -- 306
+purify$ -- 408
 quote$ -- 0
-skip$ -- 657
+skip$ -- 876
 stack$ -- 0
-substring$ -- 1338
-swap$ -- 166
+substring$ -- 1685
+swap$ -- 212
 text.length$ -- 0
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 414
-warning$ -- 30
-while$ -- 79
+type$ -- 565
+warning$ -- 43
+while$ -- 106
 width$ -- 0
-write$ -- 370
-(There were 30 warnings)
+write$ -- 479
+(There were 43 warnings)

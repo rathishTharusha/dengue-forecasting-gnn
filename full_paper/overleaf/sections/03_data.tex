@@ -1,25 +1,21 @@
 %=============================================================================
-% DATA: REPRODUCTION, AUDIT, CORRECTED DATASET
+% DATASET CONSTRUCTION (a contribution, so it is described as methodology,
+% per the lecturer's feedback; Section 5.1 gives only the overview)
 %=============================================================================
-\section{Data}
+\section{Dataset Construction}
 \label{sec:data}
 
 \subsection{Reproducing the benchmark}
 \label{sec:repro}
-We ran the reference implementation~\cite{weng2024graph} unmodified---their code,
-their array, their protocol---on a pinned software stack. It recovers their
-published numbers to within \textbf{7.3\%} across twenty comparisons, with
-AAGCN and DCRNN matching to four decimal places. The published results are
-real, but three properties of the evaluation account for the reported
-advantage. The column labelled ``cross validated'' is computed on a loader
-spanning the full series, so it includes training data. RMSE is averaged per
-window rather than pooled, which on this target is $\sim$39\% lower. No naive
-baseline is reported, and adding persistence to that same column reverses the
-ranking: it beats \emph{every} model on MAE and RMSE. An independent
-re-implementation that shares no code with either codebase reproduces this. This
-reproduction runs the authors' own code in its pinned environment and is
-packaged separately (\texttt{reproduction/} in the repository); everything from
-\S\ref{sec:audit} on is produced by the reproduction notebook.
+We first ran the reference implementation~\cite{weng2024graph} unmodified (their
+code, array and protocol) on a pinned software stack. It recovers their published
+numbers to within \textbf{7.3\%} across twenty comparisons. Three properties of their
+evaluation, however, account for the reported advantage: the ``cross validated''
+column is computed on a loader that includes training data; RMSE is averaged per
+window rather than pooled, which on this target is $\sim$39\% lower; and no naive
+baseline is reported. Adding persistence to that same column reverses the ranking:
+it beats \emph{every} model on MAE and RMSE. An independent re-implementation that
+shares no code with either codebase reproduces this.
 
 \subsection{Auditing the benchmark array}
 \label{sec:audit}
@@ -40,7 +36,7 @@ from the original files.}
 \toprule
 finding & consequence \\
 \midrule
-Rows 0--47 are 2023; rows 51 onward run 2013--2022 & 45 rows from 2023 sit in
+Rows 0--47 are Dec 2022--Nov 2023; rows 51 onward run 2013--2022 & 45 rows from 2023 sit in
 the training split of every fold, which tests on 2018--2022 \\
 Cases reordered, weather not & the array's temperature matches ERA5 at
 $r = 0.95$ on its own row order and $r = 0.45$ on the dates the case rows carry \\
@@ -48,7 +44,7 @@ $r = 0.95$ on its own row order and $r = 0.45$ on the dates the case rows carry 
 ($r = 0.68$) and not 12 weeks earlier ($r = 0.19$): future information \\
 48 reports dropped, one week stored twice & 454 of 459 rows equal a published
 report exactly \\
-Week-395 ``19$\times$ spike'' & row A of one printed table is a dragged formula
+Week-395 spike & row A of one printed table is a dragged formula
 (15 of 24 cells are the sum of the two before, districts sum to 7,165 against a
 national cell of 35); the same table's cumulative row gives the true count \\
 \bottomrule
@@ -65,11 +61,12 @@ spreadsheet error, and it can be corrected from the same published table.
 
 \subsection{The corrected dataset}
 \label{sec:corrected}
-Every input is an original file, checked against the SHA-256 recorded when it
-was first retrieved: the parsed Table~1 rows of every Weekly Epidemiological
-Report, the one report PDF used for the correction, ERA5 daily responses from
-the Open-Meteo archive, and the Department of Census and Statistics population
-and census PDFs. From these the case series is rebuilt, keyed by report volume
+The 2013--2024 case counts come from the benchmark authors' table of parsed
+Table~1 rows of every Weekly Epidemiological Report; we do not re-parse those
+reports. The other inputs we obtain ourselves: the one report PDF used for the
+correction, ERA5 daily responses from the Open-Meteo archive, and the Department
+of Census and Statistics population and census PDFs. Every input file has a
+recorded SHA-256 checksum. From these the case series is re-dated, keyed by report volume
 and number: 559 weeks from 2013-W26 to 2024-W10. The seven weeks with no report
 stay missing and are never interpolated; districts plus the Kalmunai division
 equal the Epidemiology Unit's own national total in 432 of 552 reports. Weekly
@@ -80,7 +77,24 @@ district totals sum exactly to the national total, then mid-year estimates).
 
 Lags are applied in the model, not baked into the data: a forecast for week $t$
 reads cases up to $t-1$ and climate up to $t-2$, since ERA5 is published about
-five days late. On this series the persistence test RMSE on the frozen three
-origins (averaged over origins, as for every model) is \textbf{36.02}, against
-44.80 on the array (29.52 with the week-395 windows excluded). The last test
-fold covers the 2023 epidemic.
+five days late. The lags are enforced in code, and for the data loader used in the
+prospective test a perturbation test asserts that no value after either limit can
+change a forecast. On this series the persistence test RMSE on the three
+development origins (\S\ref{sec:protocol}) is \textbf{36.02}, against 44.80 on the
+array (29.52 with the week-395 windows excluded). The last test fold covers the
+2023 epidemic.
+
+\subsection{Extension to 2026 for a prospective test}
+\label{sec:newweeks}
+To test on weeks that no design decision had seen, we extend the series with the 127
+Weekly Epidemiological Reports from 2024-W11 to 2026-W32. The parsing and quality
+rules (district totals must match the national total; a dragged-formula pattern
+or a reprinted table voids a week's row, which is then replaced by the difference of
+the cumulative rows or left missing) were committed before any count was read. The
+result is 109 observed weeks, 8 corrected and 10 missing; nothing is interpolated.
+One deviation is reported in full: a first scoring run exposed two reconstruction
+defects (the first report of a year carries the previous year's total in its
+cumulative row, and two reports reprint the previous week's table). The rules were
+amended on report semantics alone, no model setting changed, and only the
+re-parsed data are scored (\S\ref{sec:prospective}). This is therefore an amended
+prospective evaluation, not an untouched one.

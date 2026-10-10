@@ -1,0 +1,58 @@
+%=============================================================================
+% DISCUSSION AND CONCLUSION
+%=============================================================================
+\section{Discussion}
+\label{sec:discussion}
+
+\textbf{Why \model{} works, and what it cannot do.} Weekly dengue counts are close to a
+random walk, so the most informative feature is the last value. A direct head must
+carry that value through the encoder; STGAT, A3TGCN and DCRNN lose it and underfit.
+\model{} hands the level to the output, so the encoder learns only the departure, and
+the gate keeps a weak departure from pulling the forecast away from persistence. This is
+why the same head repairs three different architectures, attention, recurrent and
+diffusion based, by 6--16 RMSE. It also explains its limit: the anchor removes failure,
+but it cannot create information. When the next large move is not in the inputs, as in
+the 2026 outbreak, every model, \model{} included, lags it, and on RMSE no learned model
+beats persistence on later data.
+
+\textbf{Where physics helps a graph network, and where it does not.} On this target the
+SEIR model cannot be the forecaster: a pure SEIR decoder inherits the poor
+predictability of its force of infection, and 14--16\% of targets are out of its reach.
+Inside the gated head it looked useful, because it made every encoder usable, but the
+ablation shows that the anchor and gate do that work, and on later data the simulator
+ties its no-physics twin. Coupling districts inside the dynamics does not help either,
+because transmission changes have almost no local spatial structure at district-week
+resolution. The graph itself adds 0.06 RMSE. The prior that matters is the one the data
+already state: next week looks like this week.
+
+\textbf{What the evaluation taught us.} Each of the following would have produced a
+publishable positive result had it gone unchecked: the benchmark array leaks future data
+through its row order and its climate channels; our own first SEIR-GNN pipeline compared
+one origin against a three-origin baseline; the gated SEIR head's repair looked like
+physics and was the anchor; the validation-selected model $B$ is worse than persistence
+on test; and the SEIR arm's development advantage over persistence disappears on
+2024--2026 data. We therefore recommend that dengue forecasting papers report
+persistence, a matched no-physics control and, where possible, a prospective test.
+
+\textbf{Limitations.} One country and one disease at district-week resolution. Three
+origins cannot support claims at the origin unit, and the nine-origin test spans were
+examined in earlier experiments, so they are not fresh. The prospective test is amended
+(\S\ref{sec:newweeks}) and uses one encoder family; it is a single 2.4-year period
+dominated by one outbreak year. The graph is the benchmark's hand-built adjacency, and
+mobility data might couple districts differently. The SEIR branch uses fixed stage
+durations and one initial susceptible fraction for every district.
+
+\section{Conclusion}
+We proposed \model{}, a persistence-anchored gated head for spatio-temporal dengue
+forecasting that plugs into any encoder at the cost of one parameter, together with a
+corrected, leakage-free dataset extended to 2026 with newly parsed reports. \model{} turns
+three published ST-GNNs that are worse than persistence into usable forecasters, and
+with a strong encoder it beats persistence on every paired run in the development
+study. An ablation shows that the gain comes from the anchor and the gate; an SEIR
+simulator in the same head adds nothing, on development data or on later weeks. On
+weeks from 2024 to 2026 no learned model beats persistence on RMSE, though \model{} is
+better on MAE and SMAPE. For district-level dengue in Sri Lanka, the useful prior is
+persistence, not transmission dynamics, and the next gains must come from inputs that
+anticipate outbreaks rather than from the architecture. The dataset, the notebook that
+produces every development number, the pre-registrations and the experiment log are
+available at \codeurl.

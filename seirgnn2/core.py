@@ -61,7 +61,7 @@ class Fold:
 
 def build_folds(cases: np.ndarray, missing: np.ndarray, window: int = WINDOW,
                 origins: tuple[float, ...] = ORIGINS,
-                test_frac: float = TEST_FRAC) -> list[Fold]:
+                test_frac: float = TEST_FRAC, purge: int = 0) -> list[Fold]:
     """The frozen protocol's split boundaries, computed on the full window list.
 
     Boundaries come from ``len(ids)`` before any missing-week filtering, so a
@@ -75,6 +75,12 @@ def build_folds(cases: np.ndarray, missing: np.ndarray, window: int = WINDOW,
     each window is its own experiment with its own persistence baseline. The same
     applies to ``origins`` / ``test_frac``: the confirmatory nine evaluate
     different weeks than the frozen three, so the two are never pooled or paired.
+
+    ``purge`` (docs/PROSPECTIVE_PLAN.md section 3) drops the last ``purge`` starts
+    of training and of validation, so with ``purge = HORIZON - 1`` no target week
+    belongs to two splits. Test windows and normalisation are left exactly as
+    they are, so test scores still pair with every unpurged run. The default 0 is
+    the protocol every earlier result used.
     """
     bad = {int(m) for m in np.where(missing)[0]}
     ids = list(range(window, cases.shape[0] - HORIZON))
@@ -86,8 +92,8 @@ def build_folds(cases: np.ndarray, missing: np.ndarray, window: int = WINDOW,
     for origin in origins:
         cut = int(origin * len(ids))
         end = int(min(origin + test_frac, 1.0) * len(ids))
-        tr = [i for i in ids[: cut - 30] if clean(i)]
-        va = [i for i in ids[cut - 30 : cut] if clean(i)]
+        tr = [i for i in ids[: cut - 30 - purge] if clean(i)]
+        va = [i for i in ids[cut - 30 : cut - purge] if clean(i)]
         te = [i for i in ids[cut:end] if clean(i)]
         history = np.log1p(cases[: ids[: cut - 30][-1] + 1])
         mean = float(np.nanmean(history))
@@ -95,6 +101,34 @@ def build_folds(cases: np.ndarray, missing: np.ndarray, window: int = WINDOW,
         folds.append(Fold(origin, {"train": np.array(tr), "val": np.array(va),
                                    "test": np.array(te)}, mean, std, window))
     return folds
+
+
+def build_final_fold(cases: np.ndarray, missing: np.ndarray, last_dev: int,
+                     window: int = WINDOW, val_len: int = 30,
+                     purge: int = HORIZON - 1) -> Fold:
+    """The prospective split of docs/PROSPECTIVE_PLAN.md section 4.
+
+    ``last_dev`` is the last development row. Validation is the last ``val_len``
+    starts whose targets all lie at or before it; training is every earlier start
+    except the ``purge`` just before validation; test is every start whose targets
+    all lie after it. Starts that would straddle the two periods are used by
+    nobody, which is the same ``HORIZON - 1`` purge at the validation/test edge.
+    The fold's ``origin`` is 1.0, a label: no origin fraction places it.
+    """
+    bad = {int(m) for m in np.where(missing)[0]}
+
+    def clean(i: int) -> bool:
+        return not any(t in bad for t in range(i - window, i + HORIZON))
+
+    dev = list(range(window, last_dev - HORIZON + 2))           # targets <= last_dev
+    va_ids = dev[-val_len:]
+    tr_ids = dev[: -val_len - purge]
+    te_ids = list(range(last_dev + 1, cases.shape[0] - HORIZON + 1))
+    history = np.log1p(cases[: tr_ids[-1] + 1])
+    return Fold(1.0, {"train": np.array([i for i in tr_ids if clean(i)]),
+                      "val": np.array([i for i in va_ids if clean(i)]),
+                      "test": np.array([i for i in te_ids if clean(i)], dtype=int)},
+                float(np.nanmean(history)), float(np.nanstd(history) + 1e-8), window)
 
 
 def seasonal_features(week_start, idx: np.ndarray) -> np.ndarray:

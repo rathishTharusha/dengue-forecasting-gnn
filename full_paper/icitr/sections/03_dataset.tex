@@ -1,0 +1,45 @@
+%=============================================================================
+% DATASET -- a contribution, so described as method (Madam's rule).
+% Budget: about half a column. Double-blind: no "our earlier work".
+%=============================================================================
+\section{Dataset Construction}
+\label{sec:data}
+
+\textbf{Auditing the benchmark.} The array used by the existing
+benchmark~\cite{weng2024graph} has no date axis. Dating each row by matching its 25
+district counts against the parsed Weekly Epidemiological Report (WER) table shows
+that rows 0--47 date from December 2022 to November 2023 and rows 51 onward run
+2013--2022, so 45 rows from 2023 sit in
+the training split of every fold that tests on 2018--2022. The weather channels were
+not reordered with the cases: the array's temperature matches ERA5 at $r=0.95$ on its
+own row order but $r=0.45$ on the dates the case rows carry, and its ``lag-12''
+rainfall matches ERA5 rain twelve weeks \emph{later} ($r=0.68$, against $0.19$ twelve
+weeks earlier). Its largest spike (7{,}165 cases in a week whose districts truly
+report 349) is a dragged spreadsheet formula in one printed table (15 of 24 cells equal the sum of the two
+before). Two of these findings leak future information, so scores on this array are
+optimistic.
+
+\textbf{The corrected dataset.} The 2013--2024 case counts come from the benchmark
+authors' table of parsed WER rows; we do not re-parse those reports. We re-date every
+week by its report volume and number, map the reporting divisions to the 25
+districts, and correct the spreadsheet error from the published PDF. We add ERA5
+daily weather and census population ourselves, and record a SHA-256 checksum for
+every input file. The result covers $N=25$ districts over 559 weeks
+(2013-W26 to 2024-W10), with weekly cases, temperature, precipitation, humidity, soil
+moisture and population. Seven weeks with no report stay missing and are never
+interpolated. A forecast for week $t$ reads cases up to $t-1$ and climate up to $t-2$
+(ERA5 is released about five days late). These lags are enforced in code, and for the
+data loader used in the prospective test a perturbation test asserts that no later
+value can change a forecast. The district graph is the benchmark's adjacency list with self-loops (141 directed
+entries); the prospective test uses a corrected version with two non-border entries
+removed (139).
+
+\textbf{Extension to 2026.} For a prospective test we parse the 127 WERs from 2024-W11 to
+2026-W32 under quality rules committed before any count was read: district totals must
+equal the national total, and a dragged-formula pattern or a reprinted table voids a
+week, which is replaced by the difference of the cumulative rows or left missing. This
+gives 109 observed, 8 corrected and 10 missing weeks. A first scoring run exposed two
+reconstruction defects (the first report of a year carries the previous year's total,
+and two reports reprint the previous week's table). The rules were amended on report
+semantics alone, with no model setting changed, so we call this an \emph{amended}
+prospective evaluation.

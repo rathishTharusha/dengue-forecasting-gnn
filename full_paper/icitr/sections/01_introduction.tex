@@ -1,0 +1,54 @@
+%=============================================================================
+% INTRODUCTION -- budget: about 3/4 page (one column and a half).
+%
+% Five short paragraphs (CS3631 brief, section 9, and Madam's feedback):
+%
+% P1 Background (3-4 sentences). Dengue in Sri Lanka; 2017: >186,000 cases,
+%    440 deaths \cite{tissera2020severe}; ~3 weeks infection -> diagnosis, so a
+%    3-week district forecast gives hospitals and vector control time to act.
+%
+% P2 Existing work (3-4 sentences). Two families: ST-GNNs from traffic
+%    forecasting, benchmarked on Sri Lanka by \cite{weng2024graph}; SEIR-informed
+%    models, SEIR-LSTM \cite{liu2025seirlstm}. The natural hybrid is SEIR-GNN.
+%
+% P3 The technical gap (most important paragraph). Weekly dengue is close to a
+%    random walk: cases at t-1 explain r^2 = 0.89 of cases at t; best climate
+%    covariate 0.03. Both families predict the LEVEL directly, so the network must
+%    relearn "next week = this week" through its layers. Three of five published
+%    ST-GNNs fail to (5-17 RMSE worse than persistence on validation). The
+%    benchmark hides this: no persistence baseline, and its array leaks future data.
+%    No one tests physics against the same model without physics.
+%
+% P4 Proposal + main results (4-5 sentences). PAGE starts from persistence and
+%    learns only a gated departure; one extra parameter; works with any encoder.
+%    Results: repairs STGAT/A3TGCN/DCRNN (9/9); AAGCN+PAGE beats persistence 9/9;
+%    ablation: the anchor and gate do the work, SEIR adds nothing; on 2024-2026
+%    weeks no model beats persistence on RMSE. Say the negative result plainly.
+%
+% P5 Contributions -- exactly 3, as a numbered list:
+%    (1) PAGE + ablation showing where the gain comes from;
+%    (2) corrected, leakage-free dataset, extended to 2026 with newly parsed reports;
+%    (3) controlled + prospective evaluation (six encoders, matched controls,
+%        paired tests, pre-registered rules).
+%
+% Double-blind: do not write "in our previous work" or name the university.
+%=============================================================================
+\section{Introduction}
+\label{sec:intro}
+
+Dengue remains a major public-health problem in Sri Lanka, with recurrent outbreaks that place pressure on hospitals and vector-control services; the 2017 epidemic alone recorded more than 186{,}000 cases and 440 deaths~\cite{tissera2020severe}. Reliable district-level forecasts can support earlier preparation of clinical resources and targeted control. We consider weekly forecasting for the 25 districts of Sri Lanka with a three-week horizon.
+
+Recent work follows two main directions. Spatio-temporal graph neural networks (ST-GNNs) represent districts as nodes and combine spatial relationships with temporal case patterns; Weng et al.~\cite{weng2024graph} evaluated several such architectures on Sri Lankan dengue data. A second direction introduces epidemic mechanisms: Liu et al.~\cite{liu2025seirlstm} use an LSTM to predict the force of infection of an SEIR model.
+
+However, an important property of weekly dengue incidence is easily overlooked: the recent case count is a very strong predictor. Cases in week $t-1$ explain $r^2=0.89$ of the variation in week $t$, whereas the best climate covariate explains only $r^2=0.03$, so the persistence forecast $\hat{y}_{t+h}=y_t$ is a strong baseline. Existing ST-GNNs nevertheless predict the future case level directly, so they must first learn the identity $\hat{y}_{t+1}\approx y_t$ before learning any useful correction. Three of five published ST-GNNs fail to do this and are 5--17 RMSE worse than persistence on validation. The existing benchmark hides this weakness, because it reports no persistence baseline and its data leak future information (Section~\ref{sec:data}). Mechanistic approaches also do not isolate the contribution of the physics with an otherwise identical model.
+
+To address this problem, we propose \model{} (\textbf{P}ersistence-\textbf{A}nchored \textbf{G}ated \textbf{E}stimation), a lightweight head that can be attached to any spatio-temporal encoder. \model{} begins with the persistence forecast and learns only a departure from it, scaled by a learned gate initialised close to zero, so the model starts from a strong forecast and moves away from persistence only when the data support it. The same head lets an SEIR simulator generate the departure, which gives a matched test of whether epidemic physics adds value.
+
+\model{} reduces the validation RMSE of STGAT, A3TGCN and DCRNN by 5.95--16.29 (9/9 paired runs each), and with AAGCN it beats persistence on all nine runs on validation and test. Ablations show that the gain comes from the anchor and the gate, not the SEIR simulator. On later 2024--2026 weeks the SEIR and non-SEIR variants tie ($p=0.67$), and persistence has the lowest RMSE (34.75 against 35.43), although \model{} has lower MAE and SMAPE.
+
+Our contributions are:
+\begin{enumerate}
+    \item \model{}, an encoder-independent persistence-anchored gated head with one extra parameter, with ablations that separate the anchor, the gate and the SEIR component.
+    \item An audit of the Sri Lankan dengue benchmark and a corrected, leakage-controlled 559-week dataset (2013--2024), extended with 127 newly parsed reports to August 2026.
+    \item A common evaluation of six neural encoders with matched physics and non-physics controls, paired tests and a prospective 2024--2026 test, showing that persistence is a stronger prior for this problem than the tested SEIR dynamics.
+\end{enumerate}

@@ -1,5 +1,7 @@
 %=============================================================================
 % INTRODUCTION
+% Flow (CS3631 brief, section 9): background -> technical issue not addressed
+% by existing work -> proposed solution, briefly -> main results -> 3 contributions.
 %=============================================================================
 \section{Introduction}
 \label{sec:intro}
@@ -7,57 +9,62 @@
 Dengue is the fastest-spreading mosquito-borne viral disease, and Sri Lanka
 faces recurring severe epidemics: the 2017 outbreak alone recorded over 186{,}000
 cases and 440 deaths~\cite{tissera2020severe}. Roughly three weeks separate
-infection from diagnosis. District-level forecasts issued $H=3$ weeks ahead
-therefore carry actionable lead time for clinical capacity and vector control.
+infection from diagnosis, so district-level forecasts issued $H=3$ weeks ahead
+give clinicians and vector-control teams time to prepare beds and target spraying.
 
-Two families of model are proposed for this task. Spatio-temporal graph neural
-networks, transferred from traffic forecasting, treat districts as nodes and
-learn from neighbours; Weng et al.~\cite{weng2024graph} benchmark five of them
-on Sri Lanka's record. SEIR-informed models push the forecast through
-compartmental dynamics; Liu et al.~\cite{liu2025seirlstm} drive an SEIR model
-with an LSTM on the same country. The natural hybrid is an \emph{SEIR-GNN}:
-the SEIR-LSTM with its LSTM replaced by a graph encoder, so that spatial
-coupling and mechanism act together. Whether that hybrid helps, and through
-which component, is the question of this paper.
+Two families of deep model are proposed for this task. Spatio-temporal graph
+neural networks (ST-GNNs), transferred from traffic forecasting, treat districts
+as nodes and learn from neighbours; Weng et al.~\cite{weng2024graph} benchmark five
+of them on Sri Lanka's weekly record. SEIR-informed models push the forecast through
+compartmental dynamics; Liu et al.~\cite{liu2025seirlstm} drive an SEIR model with an
+LSTM on the same country. The natural hybrid, an SEIR-GNN, replaces that LSTM with a
+graph encoder.
 
-One property of the data governs every answer: weekly incidence is strongly
-autocorrelated. On the corrected data, cases at $t-1$ explain $r^2=0.89$ of
-cases at $t$, while the best single climate covariate at a causal lag explains
-$0.03$. Every model competes with the
-naive persistence forecast $\hat{y}_{t+h}=y_t$. A benchmark that omits it
-cannot tell whether a model contributed anything, and the reference benchmark
-omits it.
+\textbf{The technical gap.} Weekly dengue incidence is close to a random walk. On the
+corrected data, cases at $t-1$ explain $r^2=0.89$ of cases at $t$; the best single
+climate covariate at a causal lag explains $0.03$. Both model families nevertheless
+predict the case \emph{level} directly from an encoder representation, so the network
+must relearn the identity map $\hat y_{t+1}\approx y_t$ through its message passing
+and recurrence before it can add anything. We find that three of the five published
+ST-GNNs do not: they underfit, and on validation are 5--17 RMSE worse than simply
+repeating last week. The benchmark that reports them hides this, because it omits the persistence
+forecast $\hat y_{t+h}=y_t$ and its array leaks future data
+(\S\ref{sec:audit}). Neither line of work tests its physics or its graph against a
+matched control that differs in that component alone.
 
-Our first SEIR-GNN pipeline reported a win, and it was wrong. Its headline set
-the test error at one forecast origin (26.1) against persistence averaged over
-three (36.0); at that same origin persistence scored 22.4, and it won at every
-origin. The pipeline also trained for about sixty gradient steps, optimised
-SMAPE while scoring RMSE, held the force of infection constant across the
-horizon, and collapsed every covariate to a scalar before the graph saw it. This paper reports the controlled re-run. Its
-protocol and each experiment's decision rule were committed before the runs,
-and negative results are reported as such.
+\textbf{Proposed solution.} We propose \model{} (Persistence-Anchored Gated
+Estimation), a forecasting head that plugs into any spatio-temporal encoder. It
+starts from the persistence forecast and lets the network supply only a
+\emph{departure} from it, scaled by a learned gate initialised near zero. The
+identity map is therefore free, the network learns only what persistence misses,
+and the gate shrinks that correction until the data support it. \model{} adds one
+parameter. Its departure can come from a linear read-out or from a differentiable
+SEIR simulator, which lets one controlled ablation ask whether physics helps.
+
+\textbf{Main results.} On one leakage-free harness (Figure~\ref{fig:overview},
+Table~\ref{tab:encoders}), \model{} repairs STGAT, A3TGCN and DCRNN by 5.95--16.29
+validation RMSE (9/9 paired runs each), and with AAGCN it beats persistence on all
+9 runs on validation and on test. The ablation (Table~\ref{tab:rescue}) attributes the
+gain to the anchor and the gate; an SEIR departure adds nothing. On 85 forecast starts
+from March 2024 to August 2026, scored with settings frozen before those weeks were
+parsed, the SEIR branch ties \model{} ($p=0.67$) and no learned model beats persistence on
+RMSE, although \model{} has lower MAE and SMAPE (Table~\ref{tab:prospective}). We report
+this negative result as it is.
 
 \noindent\textbf{Contributions.}
-\begin{itemize}\itemsep1pt
-  \item \textbf{A data audit and a corrected dataset} (\S\ref{sec:data}). The
-        benchmark array mixes time orders, puts post-test data in every
-        training split, and feeds future climate as ``lagged'' features. We
-        rebuild 559 weeks from source reports, with causal lags enforced by
-        perturbation tests.
-  \item \textbf{One harness for six encoders and four SEIR-informed heads}
-        (\S\ref{sec:models}), with validation-only selection, paired tests at
-        two units, and a nine-origin confirmation.
-  \item \textbf{Whether physics helps} (\S\ref{sec:results}). A pure SEIR
-        decoder fails on every encoder, for reasons we measure. A gated SEIR head
-        appears to repair the three encoders that fail as published, but a
-        pre-registered control attributes 96--112\% of that repair to the
-        persistence anchor and none of it to the simulator
-        (\S\ref{sec:rescue}).
-  \item \textbf{An informational ceiling, measured} (\S\ref{sec:ceiling}).
-        More than twenty architectural, data and physics levers leave the same
-        errors behind (residual correlation 0.91--0.97 among the working models).
-  \item \textbf{One notebook, from original sources.} Every number in this paper
-        is produced by a single notebook that verifies the source files, rebuilds
-        the data, defines every model in plain PyTorch, trains all 810 runs and
-        analyses only those runs.
-\end{itemize}
+\begin{enumerate}\itemsep1pt
+  \item \textbf{\model{}, a persistence-anchored gated head} (\S\ref{sec:framework}),
+        encoder-agnostic and one parameter in size, that makes every published
+        ST-GNN we test usable and isolates, by ablation, where the gain comes from:
+        the anchor and the gate, not the physics.
+  \item \textbf{A leakage-free dataset} (\S\ref{sec:data}). We audit the benchmark
+        array, which mixes time orders, trains on post-test data and feeds future
+        rainfall as a ``lagged'' feature, and correct it into a 559-week (2013--2024)
+        leakage-free series, extended with 127 newly parsed 2024--2026 reports for
+        a prospective test.
+  \item \textbf{A controlled and prospective evaluation} (\S\ref{sec:experiments}):
+        six encoders, matched no-physics and no-graph controls, paired tests,
+        pre-registered decision rules and a prospective 2024--2026 test. It shows that
+        the graph adds 0.06 RMSE, the SEIR branch adds nothing, and the remaining
+        error is informational rather than architectural.
+\end{enumerate}

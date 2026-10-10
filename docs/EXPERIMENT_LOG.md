@@ -37,6 +37,48 @@ Copy this block for a new entry:
 > `CEILING_R0_MAX`) survived the cleanup and now lives in `dengue_gnn.seir`, still
 > asserted by `tests/test_seir.py` and reproduced by `scripts/verify_seir_paper.py`.
 
+## EXP-063 — Prospective test on 2024 W11 to 2026 W32 (pending, plan frozen)
+
+- **Date:** 2026-10-06 (opened)
+- **Who:** Claude Code, on branch `exp/prospective-2024-2026`, decisions by the project owner
+- **Commit:** plan frozen in this entry's commit; code, tuning and results to be added
+- **Notebook / script:** `seirgnn2/prospective.py` (`dev`, `select`, `final`, `stats`); baselines and bootstrap in `seirgnn2/classical.py`; tests `tests/test_prospective.py`
+- **Hardware:** local CPU
+- **Config:** `docs/PROSPECTIVE_PLAN.md`, in full. Six arms: Adaptive SEIR-GNN, Adaptive gated non-SEIR (matched control), Adaptive residual, persistence, seasonal naive, AR ridge. Corrected 139-entry graph. Purge of H-1 = 2 forecast starts at every partition boundary. Seeds 0/1/2. Tuning on the purged nine development origins, validation RMSE only, the same 4-setting grid for every neural arm.
+- **Question:** does the development advantage of the Adaptive SEIR-GNN (EXP-061: test 27.45 vs persistence 28.54) survive on later data no one has seen, against a matched non-SEIR control and classical baselines, with no target overlap between partitions?
+- **Pre-commitment (written before any new-week count is parsed):** primary comparisons P1 (vs gated non-SEIR) and P2 (vs persistence), block-bootstrap interval, Holm over the two. Every arm is reported whatever it shows. No arm, setting or test is changed after the new weeks are parsed.
+- **Step 3 (development tuning, 2026-10-06, before any new-week count was parsed):** `python seirgnn2/prospective.py dev --workers 6` then `select`, at commit `a00fc05`. 324 neural runs, 0 failed, 1118 s, local CPU. Validation-only choice: **lr 3e-3, hidden 64 for all three neural arms** (the earlier default); AR(3) **alpha 0.01** (grid edge: the penalty barely matters, 27.636 to 27.760 across the grid). Frozen in `seirgnn2/results/prospective_frozen.json`; full rows in `prospective_dev.json` / `prospective_dev_classical.json`. Purged nine origins, chosen settings, mean over origins x seeds (secondary, development data):
+
+  | arm | val RMSE | test RMSE |
+  |---|---|---|
+  | Persistence | 26.7646 | 28.5410 (check value holds) |
+  | Adaptive SEIR-GNN | 24.9168 | 27.3369 |
+  | Adaptive gated non-SEIR | 24.9045 | 27.9026 |
+  | Adaptive residual | 24.8120 | 28.5642 |
+  | AR(3) ridge | 27.6362 | 29.7560 |
+  | Seasonal naive | 105.1490 | 78.8824 |
+
+  On validation the three neural arms are within 0.11 of each other; the SEIR arm is not ahead of its matched control there. Not a result: development evidence only.
+- **Step 4 (parse, 2026-10-06):** pre-parse record `0972363`; first parse marked all 127 missing (parser defect, NEW_WEEKS_RULES amendment 1, `9125c0f`, fixed before any count was read); re-parse 111 observed, 8 corrected, 8 missing; data and checksums `3aa3741`.
+- **Run 1 (step 5, at `3aa3741`) - DEFECTIVE DATA, kept for the record:** `seirgnn2/results/prospective_final_run1.json`, `prospective_stats_run1.json`. 91 test starts. RMSE: SEIR 283.9311, gated non-SEIR 283.9297, residual 284.2201, persistence 282.9464, AR(3) 284.4616, seasonal naive 289.4309. P1 d=+0.0014 [-0.372, 0.053] p_holm 0.944; P2 d=+0.9847 [-0.708, 1.695] p_holm 0.309. Every arm's RMSE is dominated by two data defects found by inspecting this run (h1 ~34, h2/h3 ~345):
+  1. **R3 week-1 assumption is wrong.** R3 takes row B as the weekly count in report No. 1 of a volume, but here report No. N covers printed week N-1, so No. 1 is week 52 of the previous year and its row B is the whole year: Vol. 53 No. 1 entered as 50,052 cases (typical week ~900-1,500).
+  2. **Reprinted tables.** Vol. 52 No. 8 and Vol. 53 No. 27 repeat the previous report's row A for all 25 districts; they pass R1/R2, and R3 always prefers a passing row A.
+- **Amendments before run 2:** NEW_WEEKS_RULES amendment 2 (`bd26f2a` text, `05f95eb` code + cross-week QC tests: R3 by printed week, R7 repeated tables, no negative replacement) and amendment 2b (`63d2432`: a cumulative difference that reproduces a repeated row A is not evidence; Vol. 53 No. 27 now missing). Both were made **after run 1 had been scored**; they follow from report semantics and data integrity, not from any model's score, and no model setting changed. Rebuilt data `fc17870`: 109 observed, 8 corrected, 10 missing, no negative counts, no repeated consecutive weeks, largest week 7,279 (2026, kept: internally consistent).
+- **Result (run 2, at `fc17870`, frozen settings of `b248755`):** an *amended prospective evaluation following a pre-result-analysis data-quality correction*, not an untouched test (run 1 had shown horizon-1 errors of all arms close to persistence). 85 test starts (2024 W11 to 2026 W32), train 486, val 30; seasonal-naive persistence fallback 25 cells. `seirgnn2/results/prospective_final.json`, `prospective_stats.json`. Mean over seeds 0/1/2, seed range in brackets:
+
+  | arm | RMSE | MAE | SMAPE | MAPE | RMSE h1/h2/h3 | RMSE 2024 / 2025 / 2026 |
+  |---|---|---|---|---|---|---|
+  | Persistence | **34.7524** | 11.778 | 50.25 | 53.30 | 15.40 / 35.66 / 45.98 | 14.72 / 20.05 / 160.51 |
+  | Adaptive SEIR-GNN | 35.3982 [35.109-35.557] | **11.291** | 46.08 | 43.47 | 15.78 / 35.65 / 47.32 | 14.07 / 21.12 / 163.40 |
+  | Adaptive gated non-SEIR | 35.4312 [35.242-35.600] | 11.351 | **45.75** | 43.91 | 16.01 / 35.66 / 47.31 | 14.32 / 21.43 / 162.75 |
+  | Adaptive residual | 35.7414 [35.372-36.185] | 11.607 | 46.61 | **43.01** | 16.37 / 36.02 / 47.61 | 14.97 / 21.95 / 162.93 |
+  | AR(3) ridge | 36.3489 | 11.354 | 46.75 | 44.46 | 17.33 / 35.87 / 48.75 | 14.12 / 21.23 / 168.96 |
+  | Seasonal naive | 62.4331 | 27.534 | 74.63 | 113.35 | 50.72 / 62.46 / 72.24 | 67.01 / 36.20 / 176.53 |
+
+  Primary (block 8, 10,000 reps, Holm over two): **P1** SEIR vs gated non-SEIR ΔRMSE −0.0327 [−0.4086, 0.1212], p 0.671, p_holm 0.671. **P2** SEIR vs persistence ΔRMSE +0.6464 [−0.9883, 1.6885], p 0.310, p_holm 0.619. Block 4 / 12 agree (P1 p 0.680 / 0.663; P2 p 0.243 / 0.316). Secondary: SEIR and gated both beat residual (−0.344 [−0.999, −0.078]; −0.312 [−0.774, −0.083]); every arm beats seasonal naive by ~27.
+- **Verdict:** answered, negative, under the claim rules frozen in `docs/PROSPECTIVE_PLAN.md` section 9. The SEIR component is **not** shown to improve forecasts on later data (P1: no difference from its matched non-SEIR control). No model is shown to beat persistence on RMSE; persistence has the lowest RMSE and the learned arms are 0.6-1.0 above it, not significantly. The learned arms do have lower MAE, SMAPE and MAPE than persistence (secondary, not tested). The development advantage (EXP-061, 27.45 vs 28.54) does not carry over. RMSE is dominated by the 2026 outbreak weeks.
+- **Run 1** stays in the record above as an invalid run caused by reconstruction defects; it is reported only as a protocol deviation, never beside run 2.
+
 ## EXP-062 — Week-index fix: re-run of every result that read a mis-dated week (pending)
 
 - **Date:** 2026-10-05 (opened)

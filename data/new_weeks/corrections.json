@@ -1,0 +1,590 @@
+[
+ {
+  "report": [
+   51,
+   12
+  ],
+  "action": "warning",
+  "reason": "row A differs from the cumulative difference",
+  "n": 7
+ },
+ {
+  "report": [
+   51,
+   13
+  ],
+  "action": "warning",
+  "reason": "row A differs from the cumulative difference",
+  "n": 1
+ },
+ {
+  "report": [
+   51,
+   14
+  ],
+  "action": "qc",
+  "reason": "cumulative row decreases from the previous week"
+ },
+ {
+  "report": [
+   51,
+   14
+  ],
+  "action": "warning",
+  "reason": "row A differs from the cumulative difference",
+  "n": 2
+ },
+ {
+  "report": [
+   51,
+   15
+  ],
+  "action": "warning",
+  "reason": "row A differs from the cumulative difference",
+  "n": 1
+ },
+ {
+  "report": [
+   51,
+   16
+  ],
+  "action": "warning",
+  "reason": "row A differs from the cumulative difference",
+  "n": 6
+ },
+ {
+  "report": [
+   51,
+   18
+  ],
+  "action": "warning",
+  "reason": "row A differs from the cumulative difference",
+  "n": 1
+ },
+ {
+  "report": [
+   51,
+   19
+  ],
+  "action": "warning",
+  "reason": "row A differs from the cumulative difference",
+  "n": 2
+ },
+ {
+  "report": [
+   51,
+   24
+  ],
+  "action": "warning",
+  "reason": "row A differs from the cumulative difference",
+  "n": 1
+ },
+ {
+  "report": [
+   51,
+   24
+  ],
+  "action": "warning",
+  "reason": "printed start date 2024-05-01 is -24 days after the previous week"
+ },
+ {
+  "report": [
+   51,
+   25
+  ],
+  "action": "warning",
+  "reason": "row A differs from the cumulative difference",
+  "n": 2
+ },
+ {
+  "report": [
+   51,
+   25
+  ],
+  "action": "warning",
+  "reason": "printed start date 2024-06-08 is 38 days after the previous week"
+ },
+ {
+  "report": [
+   51,
+   26
+  ],
+  "action": "warning",
+  "reason": "row A differs from the cumulative difference",
+  "n": 1
+ },
+ {
+  "report": [
+   51,
+   31
+  ],
+  "action": "warning",
+  "reason": "row A differs from the cumulative difference",
+  "n": 2
+ },
+ {
+  "report": [
+   51,
+   32
+  ],
+  "action": "warning",
+  "reason": "row A differs from the cumulative difference",
+  "n": 2
+ },
+ {
+  "report": [
+   51,
+   35
+  ],
+  "action": "qc",
+  "reason": "cumulative row decreases from the previous week"
+ },
+ {
+  "report": [
+   51,
+   35
+  ],
+  "action": "warning",
+  "reason": "row A differs from the cumulative difference",
+  "n": 6
+ },
+ {
+  "report": [
+   51,
+   36
+  ],
+  "action": "qc",
+  "reason": "cumulative row decreases from the previous week"
+ },
+ {
+  "report": [
+   51,
+   36
+  ],
+  "action": "warning",
+  "reason": "row A differs from the cumulative difference",
+  "n": 7
+ },
+ {
+  "report": [
+   51,
+   36
+  ],
+  "action": "warning",
+  "reason": "printed start date 2024-08-17 is 0 days after the previous week"
+ },
+ {
+  "report": [
+   51,
+   37
+  ],
+  "action": "warning",
+  "reason": "printed start date 2024-08-31 is 14 days after the previous week"
+ },
+ {
+  "report": [
+   51,
+   38
+  ],
+  "action": "qc",
+  "reason": "cumulative row decreases from the previous week"
+ },
+ {
+  "report": [
+   51,
+   38
+  ],
+  "action": "warning",
+  "reason": "row A differs from the cumulative difference",
+  "n": 7
+ },
+ {
+  "report": [
+   51,
+   39
+  ],
+  "action": "qc",
+  "reason": "cumulative row decreases from the previous week"
+ },
+ {
+  "report": [
+   51,
+   39
+  ],
+  "action": "warning",
+  "reason": "row A differs from the cumulative difference",
+  "n": 6
+ },
+ {
+  "report": [
+   51,
+   46
+  ],
+  "action": "qc",
+  "reason": "cumulative row decreases from the previous week"
+ },
+ {
+  "report": [
+   51,
+   46
+  ],
+  "action": "warning",
+  "reason": "row A differs from the cumulative difference",
+  "n": 1
+ },
+ {
+  "report": [
+   51,
+   47
+  ],
+  "action": "warning",
+  "reason": "row A differs from the cumulative difference",
+  "n": 1
+ },
+ {
+  "report": [
+   52,
+   2
+  ],
+  "action": "missing",
+  "reason": "dengue table not found"
+ },
+ {
+  "report": [
+   52,
+   3
+  ],
+  "action": "missing",
+  "reason": "row A failed the district sum and no valid replacement"
+ },
+ {
+  "report": [
+   52,
+   3
+  ],
+  "action": "warning",
+  "reason": "printed start date 2025-01-04 is 14 days after the previous week"
+ },
+ {
+  "report": [
+   52,
+   4
+  ],
+  "action": "corrected",
+  "reason": "row A failed the district sum",
+  "replacement": "cumulative difference"
+ },
+ {
+  "report": [
+   52,
+   5
+  ],
+  "action": "corrected",
+  "reason": "row A failed the district sum",
+  "replacement": "cumulative difference"
+ },
+ {
+  "report": [
+   52,
+   6
+  ],
+  "action": "corrected",
+  "reason": "row A failed the district sum",
+  "replacement": "cumulative difference"
+ },
+ {
+  "report": [
+   52,
+   7
+  ],
+  "action": "warning",
+  "reason": "row A differs from the cumulative difference",
+  "n": 25
+ },
+ {
+  "report": [
+   52,
+   8
+  ],
+  "action": "qc",
+  "reason": "row A repeats the previous report's row A (R7)"
+ },
+ {
+  "report": [
+   52,
+   8
+  ],
+  "action": "missing",
+  "reason": "row A repeats the previous report (R7) and no valid replacement"
+ },
+ {
+  "report": [
+   52,
+   11
+  ],
+  "action": "qc",
+  "reason": "cumulative row decreases from the previous week"
+ },
+ {
+  "report": [
+   52,
+   11
+  ],
+  "action": "warning",
+  "reason": "row A differs from the cumulative difference",
+  "n": 6
+ },
+ {
+  "report": [
+   52,
+   12
+  ],
+  "action": "qc",
+  "reason": "cumulative row decreases from the previous week"
+ },
+ {
+  "report": [
+   52,
+   12
+  ],
+  "action": "warning",
+  "reason": "row A differs from the cumulative difference",
+  "n": 6
+ },
+ {
+  "report": [
+   52,
+   18
+  ],
+  "action": "warning",
+  "reason": "row A differs from the cumulative difference",
+  "n": 1
+ },
+ {
+  "report": [
+   52,
+   19
+  ],
+  "action": "corrected",
+  "reason": "row A failed the district sum",
+  "replacement": "cumulative difference"
+ },
+ {
+  "report": [
+   52,
+   20
+  ],
+  "action": "corrected",
+  "reason": "row A failed the district sum",
+  "replacement": "cumulative difference"
+ },
+ {
+  "report": [
+   52,
+   21
+  ],
+  "action": "corrected",
+  "reason": "row A failed the district sum",
+  "replacement": "cumulative difference"
+ },
+ {
+  "report": [
+   52,
+   24
+  ],
+  "action": "corrected",
+  "reason": "row A failed the district sum",
+  "replacement": "cumulative difference"
+ },
+ {
+  "report": [
+   52,
+   29
+  ],
+  "action": "warning",
+  "reason": "row A differs from the cumulative difference",
+  "n": 1
+ },
+ {
+  "report": [
+   52,
+   31
+  ],
+  "action": "warning",
+  "reason": "row A differs from the cumulative difference",
+  "n": 1
+ },
+ {
+  "report": [
+   52,
+   33
+  ],
+  "action": "warning",
+  "reason": "row A differs from the cumulative difference",
+  "n": 1
+ },
+ {
+  "report": [
+   52,
+   38
+  ],
+  "action": "qc",
+  "reason": "cumulative row decreases from the previous week"
+ },
+ {
+  "report": [
+   52,
+   38
+  ],
+  "action": "warning",
+  "reason": "row A differs from the cumulative difference",
+  "n": 6
+ },
+ {
+  "report": [
+   52,
+   39
+  ],
+  "action": "qc",
+  "reason": "cumulative row decreases from the previous week"
+ },
+ {
+  "report": [
+   52,
+   39
+  ],
+  "action": "warning",
+  "reason": "row A differs from the cumulative difference",
+  "n": 6
+ },
+ {
+  "report": [
+   52,
+   47
+  ],
+  "action": "warning",
+  "reason": "row A differs from the cumulative difference",
+  "n": 1
+ },
+ {
+  "report": [
+   53,
+   1
+  ],
+  "action": "corrected",
+  "reason": "row A failed the district sum",
+  "replacement": "cumulative difference"
+ },
+ {
+  "report": [
+   53,
+   2
+  ],
+  "action": "warning",
+  "reason": "printed start date 2024-12-29 is -356 days after the previous week"
+ },
+ {
+  "report": [
+   53,
+   3
+  ],
+  "action": "missing",
+  "reason": "column labels differ from the expected schema at [(19, 'Anuradhapur')]"
+ },
+ {
+  "report": [
+   53,
+   4
+  ],
+  "action": "missing",
+  "reason": "column labels differ from the expected schema at [(19, 'Anuradhapur')]"
+ },
+ {
+  "report": [
+   53,
+   5
+  ],
+  "action": "warning",
+  "reason": "printed start date 2026-01-19 is 386 days after the previous week"
+ },
+ {
+  "report": [
+   53,
+   8
+  ],
+  "action": "missing",
+  "reason": "column labels differ from the expected schema at [(18, 'Puttlam')]"
+ },
+ {
+  "report": [
+   53,
+   9
+  ],
+  "action": "warning",
+  "reason": "printed start date 2026-02-16 is 14 days after the previous week"
+ },
+ {
+  "report": [
+   53,
+   15
+  ],
+  "action": "missing",
+  "reason": "dengue table not found"
+ },
+ {
+  "report": [
+   53,
+   16
+  ],
+  "action": "warning",
+  "reason": "printed start date 2026-04-06 is 14 days after the previous week"
+ },
+ {
+  "report": [
+   53,
+   19
+  ],
+  "action": "missing",
+  "reason": "dengue table not found"
+ },
+ {
+  "report": [
+   53,
+   20
+  ],
+  "action": "warning",
+  "reason": "printed start date 2026-05-04 is 14 days after the previous week"
+ },
+ {
+  "report": [
+   53,
+   27
+  ],
+  "action": "qc",
+  "reason": "row A repeats the previous report's row A (R7)"
+ },
+ {
+  "report": [
+   53,
+   27
+  ],
+  "action": "missing",
+  "reason": "row A repeats the previous report (R7); the cumulative difference equals the repeated row A, not independent evidence (amendment 2b)"
+ },
+ {
+  "report": [
+   53,
+   28
+  ],
+  "action": "missing",
+  "reason": "dengue table not found"
+ },
+ {
+  "report": [
+   53,
+   29
+  ],
+  "action": "warning",
+  "reason": "printed start date 2026-07-06 is 14 days after the previous week"
+ }
+]

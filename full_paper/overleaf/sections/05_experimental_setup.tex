@@ -1,0 +1,60 @@
+%=============================================================================
+% EXPERIMENTAL SETUP
+%=============================================================================
+\section{Experimental Setup}
+\label{sec:setup}
+
+\subsection{Dataset overview}
+The corrected series (\S\ref{sec:corrected}) covers 25 districts over 559 weeks,
+2013-W26 to 2024-W10, with weekly cases, ERA5 temperature, precipitation, humidity
+and soil moisture, population, and the benchmark's district graph. Seven weeks are
+missing and windows that touch them are dropped. The extension (\S\ref{sec:newweeks})
+adds 127 weeks to 2026-W32 for the prospective test only. 
+Every model, baseline and control is scored on exactly the same validation and test
+windows and trained on the same training windows, except that arms with climate lags
+skip the first training weeks, which have no climate history that far back.
+
+\subsection{Baselines}
+\label{sec:baselines}
+Following the brief's baseline rule (LSTM for time series, GCN for graphs), and the
+literature on this dataset, we compare against:
+\begin{itemize}\itemsep1pt
+\item \textbf{Persistence} $\hat y_{t+h}=y_t$ and \textbf{seasonal naive}
+      $\hat y_{t+h}=y_{t+h-52}$, the classical floors.
+\item \textbf{LSTM}, the two-layer encoder of SEIR-LSTM~\cite{liu2025seirlstm}, and
+      a \textbf{GCN}~\cite{kipf2017gcn} against the same network without message
+      passing, the mandatory sequence and graph baselines.
+\item The \textbf{five published ST-GNNs} of the Sri Lankan benchmark~\cite{weng2024graph}:
+      STGAT, A3TGCN, ASTGCN, AAGCN and DCRNN, each with its direct head as published.
+\item \textbf{SEIR-informed models}: the SEIR-LSTM~\cite{liu2025seirlstm}, its graph
+      version (SEIR-GNN), a pure SEIR decoder, and a metapopulation SEIR head in the
+      style of MepoGNN~\cite{cao2023mepognn} and CausalGNN~\cite{wang2022causalgnn}.
+\item \textbf{Classical and simple learners}: histogram gradient-boosted trees (scikit-learn)
+      with and without climate, a negative-binomial GLM, $k$-nearest-neighbour
+      analogues, an AR(3) ridge regression, and an STID-style MLP~\cite{shao2022stid}.
+\end{itemize}
+
+\subsection{Evaluation protocol}
+\label{sec:protocol}
+\textbf{Splits.} Rolling origins at 0.55, 0.70 and 0.85 of the series, three seeds each.
+The 30 windows before each origin are validation, the following 15\% are test, and
+normalisation uses training weeks only; no window is shuffled across time. A
+confirmation uses nine disjoint origins at $0.40+k/15$ ($k=0,\dots,8$). The
+prospective test trains once on all development weeks and scores the 85 forecast
+starts from 2024-W11 onward, with no target week shared between partitions.
+
+\textbf{Metrics.} RMSE in weekly cases, pooled over every (window, district, horizon)
+cell, is primary; MAE, SMAPE and MAPE (on targets $\ge1$) are secondary, overall and
+per horizon. Tables report the mean over runs.
+
+\textbf{Selection and tests.} Selection uses validation RMSE only; test numbers are
+written to disk and never used to choose. The protocol and, for each experiment, its
+arms, control, decision rule and predicted outcome were committed before it ran. An
+arm is adopted if its mean validation difference to its control is negative, it wins
+at least 7 of 9 (origin, seed) units, and it does not raise horizon-3 error.
+Differences are paired on matched (origin, seed) units and tested with an exact
+two-sided sign-flip permutation test, BH-adjusted within each family. With three
+origins this unit mostly measures run-to-run stability; claims about the series need
+the nine-origin protocol, where the origin-level test can reach $p=0.004$. The
+prospective test uses a block bootstrap over forecast starts (block 8, 10{,}000
+replicates) with Holm correction over its two pre-registered comparisons.

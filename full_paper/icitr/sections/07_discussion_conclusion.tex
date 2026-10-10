@@ -1,0 +1,43 @@
+%=============================================================================
+% DISCUSSION AND CONCLUSION -- about a third of a page.
+%=============================================================================
+\section{Discussion}
+\label{sec:discussion}
+
+\textbf{Why \model{} works.} Weekly dengue counts are close to a random walk, so the
+most informative feature is the last value. A direct head must carry that value through
+the encoder, and three published architectures, attention-based, recurrent and
+diffusion-based, lose it. \model{} hands the level to the output, so the encoder only
+learns the departure, and the gate stops a weak departure from pulling the forecast
+away from persistence. This is why one parameter repairs three different designs.
+
+\textbf{What it cannot do.} The anchor removes failure but cannot create information.
+The working encoders, the SEIR-LSTM and $k$-NN, which has no network at all, leave
+residuals that correlate 0.91--0.97 with one another: the models make the same errors,
+and those errors are lags on large moves. When the next move is not in the inputs, as
+in the 2026 outbreak, every model lags it, and on later weeks no learned model beats
+persistence on RMSE.
+
+\textbf{Physics.} The SEIR simulator cannot be the forecaster, because 14--16\% of
+targets lie below its zero-transmission floor and its force of infection is poorly
+predictable. Inside the gated head it looked useful, but the ablation and the
+prospective test both show that the anchor and gate do the work. For this target, the
+useful prior is persistence, not transmission dynamics. We therefore recommend that
+dengue forecasting studies report persistence, a matched no-physics control and, where
+possible, a prospective test.
+
+\textbf{Limitations.} One country, one disease and district-week resolution; three
+origins measure run-to-run stability more than the series; the prospective test is
+amended, covers one 2.4-year period dominated by one outbreak, and uses one encoder
+family; and the graph is the benchmark's hand-built adjacency rather than mobility.
+
+\section{Conclusion}
+We proposed \model{}, a persistence-anchored gated head that plugs into any
+spatio-temporal encoder at the cost of one parameter, together with a corrected, leakage-free
+Sri Lankan dengue dataset extended to 2026 with newly parsed reports. \model{}
+turns three published ST-GNNs that are worse than persistence into usable forecasters,
+and with a strong encoder it beats persistence on every paired development run. The
+ablation shows that the gain comes from the anchor and the gate, not from the SEIR
+simulator. On 2024--2026 weeks no learned model beats persistence on RMSE, although
+\model{} is better on MAE and SMAPE. Future gains must come from inputs that anticipate
+outbreaks, not from the architecture.
